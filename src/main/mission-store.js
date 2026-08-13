@@ -88,6 +88,13 @@ function createMissionStore(filePath) {
     getArtifact(id) {
       return state.artifacts.find((item) => item.id === id) || null;
     },
+    updateArtifact(id, update) {
+      const artifact = state.artifacts.find((item) => item.id === id);
+      if (!artifact) return null;
+      Object.assign(artifact, update);
+      persist();
+      return artifact;
+    },
     reviewArtifact(id, decision, note = "") {
       const artifact = state.artifacts.find((item) => item.id === id);
       if (!artifact) return null;

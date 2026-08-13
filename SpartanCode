@@ -589,3 +589,9 @@
  - Stage execution is injectable for local model/tool adapters and deterministic verification
  - Failed build or verification stages stop the mission and publish a failed state with activity evidence
  - 24 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 15
+ - Persisted execution-plan artifacts now update their stage statuses during a mission
+ - Plan, build, verify, and failed states remain inspectable from artifact review
+ - Mission store supports safe in-place artifact updates
+ - 24 automated tests passing

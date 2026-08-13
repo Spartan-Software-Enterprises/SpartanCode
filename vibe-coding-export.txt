@@ -525,6 +525,12 @@
  evidence; twenty-four automated tests pass.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 15
+ Execution-plan artifacts now persist live stage status as the mission advances,
+ including failed verification state, so the artifact review surface reflects the
+ actual agent lifecycle.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

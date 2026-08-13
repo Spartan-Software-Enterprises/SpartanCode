@@ -33,6 +33,10 @@ test("mission runner creates a plan and stops when a stage fails", async () => {
   const snapshot = store.snapshot();
   assert.equal(snapshot.missions[0].status, "failed");
   assert.equal(snapshot.artifacts[0].type, "plan");
+  assert.equal(
+    JSON.parse(snapshot.artifacts[0].content).stages[2].status,
+    "running",
+  );
   assert.equal(snapshot.activity[0].agent, "Verify agent");
   assert.equal(
     updates.filter((item) => item.event === "workspace:changed").length,
