@@ -19,6 +19,9 @@ import {
   addConnection,
   clearBridgeToken,
   enqueueOperation,
+  readQueuedOperations,
+  removeQueuedOperation,
+  updateQueuedOperation,
   readSnapshot,
   saveBridgeToken,
   writeSnapshot,
@@ -93,6 +96,21 @@ export default function App() {
       };
       await writeSnapshot(merged);
       await addConnection(profile);
+      for (const operation of await readQueuedOperations()) {
+        try {
+          await bridgeRequest(normalizedEndpoint, operation.path, {
+            method: operation.method,
+            body: JSON.stringify(operation.body),
+            headers: { "Idempotency-Key": operation.idempotencyKey },
+          });
+          await removeQueuedOperation(operation.idempotencyKey);
+        } catch (error) {
+          await updateQueuedOperation(operation.idempotencyKey, {
+            attempts: operation.attempts + 1,
+            lastError: error instanceof Error ? error.message : "Sync failed",
+          });
+        }
+      }
       setToken("");
       setMessage("Connected · synced just now");
     } catch (error) {
