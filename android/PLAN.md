@@ -39,6 +39,11 @@ retains planning missions when a sync response arrives, retries transient
 bridge failures, expires stored tokens, and labels stale snapshots. QR pairing
 and logout-secret deletion remain open work.
 
+The desktop now includes an opt-in MCP Bridge HTTP adapter. Set
+`SPARTANCODE_BRIDGE_PORT` and preferably `SPARTANCODE_BRIDGE_TOKEN` to expose
+validated snapshots and approval-gated mutation routes. It binds to localhost
+by default; remote access requires an explicit secure network boundary.
+
 ## Phase 3 — Device intelligence and extensibility
 
 - Detect chipset, RAM, storage, Vulkan/NPU availability, and thermal limits.

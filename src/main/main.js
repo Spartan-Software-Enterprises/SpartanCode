@@ -5,6 +5,7 @@ const { createMissionStore } = require("./mission-store");
 const { createMissionRunner } = require("./mission-runner");
 const { createModelCache } = require("./model-cache");
 const { createLocalStageExecutor } = require("./stage-executor");
+const { createBridgeServer } = require("./mcp-bridge");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -28,6 +29,17 @@ function createWindow() {
   const store = createMissionStore(
     path.join(app.getPath("userData"), "workspace.json"),
   );
+  if (process.env.SPARTANCODE_BRIDGE_PORT) {
+    const bridge = createBridgeServer({
+      store,
+      token: process.env.SPARTANCODE_BRIDGE_TOKEN || null,
+    });
+    bridge.listen(
+      Number(process.env.SPARTANCODE_BRIDGE_PORT),
+      process.env.SPARTANCODE_BRIDGE_HOST || "127.0.0.1",
+    );
+    app.once("will-quit", () => bridge.close());
+  }
   registerDesktopApi({
     store,
     window: win,
