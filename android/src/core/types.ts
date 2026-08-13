@@ -71,6 +71,17 @@ export type AuditEvent = {
   [key: string]: unknown;
 };
 
+export type QueuedOperation = {
+  idempotencyKey: string;
+  method: "POST";
+  path: string;
+  body: Record<string, unknown>;
+  queuedAt: string;
+  attempts: number;
+  lastError?: string;
+  acknowledgedAt?: string;
+};
+
 const missionStatuses = new Set<Mission["status"]>([
   "planning",
   "awaiting_approval",
@@ -133,6 +144,22 @@ export function isAuditEvent(value: unknown): value is AuditEvent {
   if (!value || typeof value !== "object") return false;
   const item = value as Partial<AuditEvent>;
   return typeof item.action === "string" && typeof item.timestamp === "string";
+}
+
+export function isQueuedOperation(value: unknown): value is QueuedOperation {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<QueuedOperation>;
+  return (
+    typeof item.idempotencyKey === "string" &&
+    item.method === "POST" &&
+    typeof item.path === "string" &&
+    !!item.body &&
+    typeof item.body === "object" &&
+    typeof item.queuedAt === "string" &&
+    typeof item.attempts === "number" &&
+    Number.isInteger(item.attempts) &&
+    item.attempts >= 0
+  );
 }
 
 export function isConnectionProfile(

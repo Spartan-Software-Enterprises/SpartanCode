@@ -1,6 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
-import type { ConnectionProfile, MobileSnapshot } from "./types";
+import type {
+  ConnectionProfile,
+  MobileSnapshot,
+  QueuedOperation,
+} from "./types";
 import {
   isActivity,
   isApproval,
@@ -8,9 +12,11 @@ import {
   isAuditEvent,
   isConnectionProfile,
   isMission,
+  isQueuedOperation,
 } from "./types";
 
 const SNAPSHOT_KEY = "spartancode.mobile.snapshot.v1";
+const QUEUE_KEY = "spartancode.mobile.queue.v1";
 const BRIDGE_TOKEN_KEY = "spartancode.mobile.bridge-token.v1";
 
 function emptySnapshot(): MobileSnapshot {
@@ -66,6 +72,52 @@ export async function readSnapshot(): Promise<MobileSnapshot> {
 
 export async function writeSnapshot(snapshot: MobileSnapshot) {
   await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+}
+
+export async function readQueuedOperations(): Promise<QueuedOperation[]> {
+  try {
+    const raw = await AsyncStorage.getItem(QUEUE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter(isQueuedOperation) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function enqueueOperation(
+  operation: Omit<QueuedOperation, "attempts" | "queuedAt">,
+) {
+  const queue = await readQueuedOperations();
+  if (queue.some((item) => item.idempotencyKey === operation.idempotencyKey))
+    return queue;
+  const next = [
+    ...queue,
+    { ...operation, attempts: 0, queuedAt: new Date().toISOString() },
+  ];
+  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(next));
+  return next;
+}
+
+export async function updateQueuedOperation(
+  idempotencyKey: string,
+  update: Partial<
+    Pick<QueuedOperation, "attempts" | "lastError" | "acknowledgedAt">
+  >,
+) {
+  const next = (await readQueuedOperations()).map((item) =>
+    item.idempotencyKey === idempotencyKey ? { ...item, ...update } : item,
+  );
+  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(next));
+  return next;
+}
+
+export async function removeQueuedOperation(idempotencyKey: string) {
+  const next = (await readQueuedOperations()).filter(
+    (item) => item.idempotencyKey !== idempotencyKey,
+  );
+  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(next));
+  return next;
 }
 
 export async function addConnection(connection: ConnectionProfile) {
