@@ -694,6 +694,14 @@
  MLC/PocketPal execution remains an open release gate.
 --------------------------------------------------------------------------------
 
+ ANDROID IMPLEMENTATION STATUS — MILESTONE 42
+ Android now exposes a typed native-runtime registry for MLC Chat, PocketPal,
+ and llama.cpp. It applies device-compatible licensed-model checks before
+ invocation and reports missing native modules as unavailable in the command
+ center. Native package installation and physical-device inference remain open
+ release gates.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

@@ -72,6 +72,7 @@ import {
 } from "./src/core/collaboration";
 import type { MobileCollaborationSession } from "./src/core/collaboration";
 import { approvalGestureDecision } from "./src/core/gesture";
+import { createMobileRuntimeRegistry } from "./src/core/local-runtime";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -134,6 +135,10 @@ export default function App() {
   );
   const compatibleModels = useMemo(
     () => listCompatibleModels(deviceProfile),
+    [deviceProfile],
+  );
+  const nativeRuntimeStatuses = useMemo(
+    () => createMobileRuntimeRegistry({}, deviceProfile).list(),
     [deviceProfile],
   );
 
@@ -637,6 +642,12 @@ export default function App() {
           {accessibilityMessages.map((diagnostic) => (
             <Text style={styles.message} key={diagnostic}>
               {diagnostic}
+            </Text>
+          ))}
+          {nativeRuntimeStatuses.map((runtime) => (
+            <Text style={styles.message} key={runtime.id}>
+              {runtime.id}: {runtime.status.toUpperCase()}
+              {runtime.reason ? ` · ${runtime.reason}` : ""}
             </Text>
           ))}
         </View>

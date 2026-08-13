@@ -71,6 +71,10 @@ explicit microphone/speech permission handling, transcript insertion into the
 mission field, and a visible unavailable/error state.
 The Expo configuration permits both orientations and a resizable Android
 activity for tablet and landscape layouts.
+The mobile runtime registry now defines typed MLC Chat, PocketPal, and llama.cpp
+native-module boundaries. It enforces the compatible licensed catalog before
+invocation and reports missing native modules as unavailable; installing and
+exercising those platform runtimes remains a release-environment gate.
 System reduced-motion, large-text, and screen-reader preferences are detected
 without overriding them; the shell uses native accessibility labels and
 reports the active preferences in Device readiness.

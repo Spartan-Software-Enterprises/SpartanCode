@@ -22,6 +22,9 @@ behavior and a corresponding automated or documented verification path.
 - Android now has a local collaboration session surface with validated
   persistence and optional bridge publication/remote-session merge; physical
   cross-device acceptance remains open.
+- Android now has a typed MLC Chat/PocketPal/llama.cpp native-module registry
+  that checks device-compatible licensed models before invocation and reports
+  missing modules honestly; native package installation remains open.
 - Android pending approvals support tested horizontal swipe decisions in
   addition to accessible labeled controls; physical gesture/accessibility
   acceptance remains open.

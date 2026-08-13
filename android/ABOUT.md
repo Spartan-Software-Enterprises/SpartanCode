@@ -15,6 +15,8 @@ first surface keeps the highest-value controls reachable on a phone:
   publishes them through the authenticated bridge.
 - **Approval gestures** — supports right-swipe approve and left-swipe deny,
   while keeping labeled buttons available for accessible interaction.
+- **Runtime readiness** — reports MLC Chat, PocketPal, and llama.cpp native
+  module availability and applies the licensed model/device gate before use.
 
 ## Verified behavior
 
