@@ -10,6 +10,7 @@ test("runtime discovery reports unavailable optional runtimes honestly", () => {
     resolver: () => {
       throw new Error("missing");
     },
+    executableResolver: () => null,
   });
   assert.equal(adapters.length, 4);
   assert.ok(adapters.every((adapter) => adapter.status === "unavailable"));
@@ -33,11 +34,50 @@ test("runtime registry returns a typed unavailable result", () => {
     resolver: () => {
       throw new Error("missing");
     },
+    executableResolver: () => null,
   });
   assert.deepEqual(registry.generate("webllm", { prompt: "hello" }), {
     ok: false,
     runtime: "webllm",
     code: "runtime-unavailable",
     message: "webllm is not installed in this environment",
+  });
+});
+
+test("runtime registry invokes a configured llama.cpp CLI without shell interpolation", async () => {
+  const calls = [];
+  const registry = createRuntimeRegistry({
+    resolver: () => {
+      throw new Error("module missing");
+    },
+    executableResolver: () => "/opt/llama-cli",
+    fileExists: () => true,
+    commandRunner: async (file, args) => {
+      calls.push({ file, args });
+      return "generated locally";
+    },
+  });
+  const result = await registry.generate("llama.cpp", {
+    modelPath: "/models/qwen.gguf",
+    prompt: "hello; do not execute this",
+    maxTokens: 32,
+  });
+  assert.deepEqual(result, {
+    ok: true,
+    runtime: "llama.cpp",
+    output: "generated locally",
+  });
+  assert.deepEqual(calls[0], {
+    file: "/opt/llama-cli",
+    args: [
+      "-m",
+      "/models/qwen.gguf",
+      "-p",
+      "hello; do not execute this",
+      "-n",
+      "32",
+      "--temp",
+      "0.2",
+    ],
   });
 });

@@ -68,9 +68,10 @@ behavior and a corresponding automated or documented verification path.
 
 ## Release gates still requiring stronger evidence
 
-- Native MLC/llama.cpp/PocketPal inference packages and real on-device model
-  execution are still required; the current adapter boundary and detection do
-  not claim that an optional runtime is installed.
+- Android MLC/PocketPal inference packages and physical on-device execution are
+  still required. Desktop now has a real llama.cpp CLI adapter when an absolute
+  `SPARTANCODE_LLAMA_CLI` executable and existing GGUF model are supplied; the
+  adapter reports unavailable until those inputs exist.
 - Physical-device accessibility acceptance (TalkBack behavior and visual
   verification of large text/reduced motion),
   low-storage/interrupted-download/process-restart acceptance, and tablet

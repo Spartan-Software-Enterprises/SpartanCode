@@ -62,6 +62,8 @@ portable `ssh2` runtime.
 - Only explicitly licensed local models are exposed by the model catalog.
 - Runtime availability is detected honestly; optional model runtimes are never
   reported as ready until their adapter contract is installed and verified.
+- Desktop can invoke a configured llama.cpp CLI with validated model and prompt
+  arguments; Android-native MLC/PocketPal runtimes remain optional adapters.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
 - Collaboration sessions use versioned, auditable events with conflict

@@ -686,6 +686,14 @@
  deployment integration rather than an unverified built-in claim.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 41
+ The llama.cpp adapter can now execute an explicitly configured absolute
+ llama-cli path with a validated existing GGUF model, bounded token/temperature
+ parameters, and execFile argument isolation. It returns typed unavailable or
+ runtime-failed evidence when the executable/model is absent. Android-native
+ MLC/PocketPal execution remains an open release gate.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
