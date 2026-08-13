@@ -25,6 +25,7 @@ describe("MCP Bridge snapshots", () => {
         ],
         connections: [],
         pendingApprovals: 2,
+        syncedAt: "2026-08-13T00:00:00.000Z",
       }),
     ).toEqual({
       missions: [
@@ -37,8 +38,19 @@ describe("MCP Bridge snapshots", () => {
       ],
       connections: [],
       pendingApprovals: 2,
+      syncedAt: "2026-08-13T00:00:00.000Z",
+      artifacts: [],
+      approvals: [],
+      activity: [],
+      auditLog: [],
       offline: false,
     });
+  });
+
+  it("adds a verified sync timestamp when the bridge omits one", () => {
+    const snapshot = normalizeBridgeSnapshot({ missions: [], connections: [] });
+    expect(snapshot.offline).toBe(false);
+    expect(Date.parse(snapshot.syncedAt ?? "")).not.toBeNaN();
   });
 
   it("rejects malformed bridge responses", () => {

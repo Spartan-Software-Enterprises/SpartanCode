@@ -30,6 +30,8 @@ const initialSnapshot: MobileSnapshot = {
   offline: true,
 };
 
+const staleAfterMs = 5 * 60 * 1000;
+
 export default function App() {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [endpoint, setEndpoint] = useState("");
@@ -125,9 +127,12 @@ export default function App() {
     }
   }, [mission, snapshot]);
 
+  const stale = snapshot.syncedAt
+    ? Date.now() - Date.parse(snapshot.syncedAt) > staleAfterMs
+    : snapshot.offline;
   const statusLabel = useMemo(
-    () => (snapshot.offline ? "LOCAL" : "SYNCED"),
-    [snapshot.offline],
+    () => (snapshot.offline ? "LOCAL" : stale ? "STALE" : "SYNCED"),
+    [snapshot.offline, stale],
   );
 
   if (loading)
@@ -238,6 +243,48 @@ export default function App() {
             </View>
           ))
         )}
+
+        <View style={styles.sectionRow}>
+          <Text style={styles.section}>Approvals</Text>
+          <Text style={styles.count}>
+            {
+              (snapshot.approvals ?? []).filter(
+                (item) => item.status === "pending",
+              ).length
+            }
+          </Text>
+        </View>
+        {(snapshot.approvals ?? []).length === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyCopy}>No approval decisions waiting.</Text>
+          </View>
+        ) : (
+          (snapshot.approvals ?? []).slice(0, 3).map((item) => (
+            <View style={styles.mission} key={item.id}>
+              <View style={styles.missionBody}>
+                <Text style={styles.missionText}>{item.title}</Text>
+                <Text style={styles.missionMeta}>
+                  {item.status.toUpperCase()} · {item.detail}
+                </Text>
+              </View>
+            </View>
+          ))
+        )}
+
+        <View style={styles.sectionRow}>
+          <Text style={styles.section}>Artifacts</Text>
+          <Text style={styles.count}>{(snapshot.artifacts ?? []).length}</Text>
+        </View>
+        {(snapshot.artifacts ?? []).slice(0, 3).map((item) => (
+          <View style={styles.mission} key={item.id}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>{item.name}</Text>
+              <Text style={styles.missionMeta}>
+                {item.type.toUpperCase()} · {item.status.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );

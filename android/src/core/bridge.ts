@@ -1,6 +1,13 @@
 import type { MobileSnapshot } from "./types";
 import { readBridgeToken } from "./storage";
-import { isConnectionProfile, isMission } from "./types";
+import {
+  isActivity,
+  isApproval,
+  isArtifact,
+  isAuditEvent,
+  isConnectionProfile,
+  isMission,
+} from "./types";
 
 export class BridgeError extends Error {
   constructor(
@@ -34,15 +41,26 @@ export async function bridgeRequest<T>(
 ): Promise<T> {
   const normalizedEndpoint = normalizeBridgeEndpoint(endpoint);
   const token = await readBridgeToken(normalizedEndpoint);
-  const response = await fetch(`${normalizedEndpoint}${path}`, {
-    ...init,
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init.headers,
-    },
-  });
+  let response: Response | undefined;
+  for (const delay of [0, 250, 750]) {
+    if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+    try {
+      response = await fetch(`${normalizedEndpoint}${path}`, {
+        ...init,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...init.headers,
+        },
+      });
+      if (response.ok || (response.status >= 400 && response.status < 500))
+        break;
+    } catch (error) {
+      void error;
+    }
+  }
+  if (!response) throw new BridgeError("Bridge unavailable", undefined);
   if (!response.ok) {
     throw new BridgeError(
       `Bridge request failed (${response.status})`,
@@ -74,5 +92,26 @@ export function normalizeBridgeSnapshot(value: unknown): MobileSnapshot {
         ? snapshot.pendingApprovals
         : 0,
     offline: false,
+    syncedAt:
+      typeof snapshot.syncedAt === "string" &&
+      Number.isFinite(Date.parse(snapshot.syncedAt))
+        ? snapshot.syncedAt
+        : new Date().toISOString(),
+    artifacts:
+      Array.isArray(snapshot.artifacts) && snapshot.artifacts.every(isArtifact)
+        ? snapshot.artifacts
+        : [],
+    approvals:
+      Array.isArray(snapshot.approvals) && snapshot.approvals.every(isApproval)
+        ? snapshot.approvals
+        : [],
+    activity:
+      Array.isArray(snapshot.activity) && snapshot.activity.every(isActivity)
+        ? snapshot.activity
+        : [],
+    auditLog:
+      Array.isArray(snapshot.auditLog) && snapshot.auditLog.every(isAuditEvent)
+        ? snapshot.auditLog
+        : [],
   };
 }

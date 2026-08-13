@@ -23,7 +23,8 @@ at a 390×844 viewport with device scale factor 2. The smoke test verified:
 
 The connection foundation also validates HTTPS endpoints (with localhost
 allowed for development), persists a named bridge profile after a successful
-sync, and preserves the offline queue while applying a remote snapshot.
+sync, preserves the offline queue while applying a remote snapshot, retries
+transient bridge failures, and marks snapshots stale after five minutes.
 
 This is an evidence record for the current scaffold, not a claim that the full
 Android roadmap is complete. Native Android builds, QR pairing, artifact and

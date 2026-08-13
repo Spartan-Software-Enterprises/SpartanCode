@@ -1,7 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import type { ConnectionProfile, MobileSnapshot } from "./types";
-import { isConnectionProfile, isMission } from "./types";
+import {
+  isActivity,
+  isApproval,
+  isArtifact,
+  isAuditEvent,
+  isConnectionProfile,
+  isMission,
+} from "./types";
 
 const SNAPSHOT_KEY = "spartancode.mobile.snapshot.v1";
 const BRIDGE_TOKEN_KEY = "spartancode.mobile.bridge-token.v1";
@@ -34,6 +41,23 @@ export async function readSnapshot(): Promise<MobileSnapshot> {
           ? parsed.pendingApprovals
           : 0,
       offline: true,
+      syncedAt:
+        typeof parsed.syncedAt === "string" &&
+        Number.isFinite(Date.parse(parsed.syncedAt))
+          ? parsed.syncedAt
+          : undefined,
+      artifacts: Array.isArray(parsed.artifacts)
+        ? parsed.artifacts.filter(isArtifact)
+        : [],
+      approvals: Array.isArray(parsed.approvals)
+        ? parsed.approvals.filter(isApproval)
+        : [],
+      activity: Array.isArray(parsed.activity)
+        ? parsed.activity.filter(isActivity)
+        : [],
+      auditLog: Array.isArray(parsed.auditLog)
+        ? parsed.auditLog.filter(isAuditEvent)
+        : [],
     };
   } catch {
     return emptySnapshot();
@@ -55,10 +79,14 @@ export async function addConnection(connection: ConnectionProfile) {
   });
 }
 
-export async function saveBridgeToken(endpoint: string, token: string) {
+export async function saveBridgeToken(
+  endpoint: string,
+  token: string,
+  expiresAt?: string,
+) {
   await SecureStore.setItemAsync(
     tokenKey(endpoint),
-    JSON.stringify({ endpoint: new URL(endpoint).origin, token }),
+    JSON.stringify({ endpoint: new URL(endpoint).origin, token, expiresAt }),
     {
       keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
     },
@@ -75,7 +103,19 @@ export async function readBridgeToken(endpoint: string) {
   }
   if (!raw) return null;
   try {
-    const saved = JSON.parse(raw) as { endpoint?: string; token?: string };
+    const saved = JSON.parse(raw) as {
+      endpoint?: string;
+      token?: string;
+      expiresAt?: string;
+    };
+    if (
+      saved.expiresAt &&
+      (!Number.isFinite(Date.parse(saved.expiresAt)) ||
+        Date.parse(saved.expiresAt) <= Date.now())
+    ) {
+      await SecureStore.deleteItemAsync(scopedKey);
+      return null;
+    }
     return saved.endpoint === origin && saved.token ? saved.token : null;
   } catch {
     return null;

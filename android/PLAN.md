@@ -35,8 +35,9 @@ mutations queue until acknowledged; logout removes all secrets.
 
 Current foundation evidence: manual endpoint/token entry now validates secure
 transport, stores tokens by bridge origin, records a bridge connection profile,
-and retains planning missions when a sync response arrives. QR pairing and
-logout-secret deletion remain open work.
+retains planning missions when a sync response arrives, retries transient
+bridge failures, expires stored tokens, and labels stale snapshots. QR pairing
+and logout-secret deletion remain open work.
 
 ## Phase 3 — Device intelligence and extensibility
 
