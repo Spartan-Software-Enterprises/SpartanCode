@@ -12,8 +12,10 @@ test("settings persist across workspace reloads", () => {
   const filePath = path.join(directory, "workspace.json");
   const store = createMissionStore(filePath);
   store.updateSettings({ model: "Phi-4-mini", protocol: "MCP Bridge" });
+  store.updateSettings({ executionMode: "yolo" });
   const settings = createMissionStore(filePath).snapshot().settings;
   assert.equal(settings.model, "Phi-4-mini");
   assert.equal(settings.protocol, "MCP Bridge");
+  assert.equal(settings.executionMode, "yolo");
   fs.rmSync(directory, { recursive: true, force: true });
 });

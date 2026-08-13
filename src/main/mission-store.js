@@ -12,6 +12,7 @@ const emptyState = () => ({
     protocol: "MCP Lite",
     workspacePath: null,
     voiceEnabled: false,
+    executionMode: "guided",
   },
   connections: [],
   auditLog: [],
@@ -38,6 +39,7 @@ function createMissionStore(filePath) {
     "protocol",
     "workspacePath",
     "voiceEnabled",
+    "executionMode",
   ]);
   const createId = (prefix) => `${prefix}-${Date.now()}-${sequence++}`;
 
@@ -183,6 +185,11 @@ function createMissionStore(filePath) {
           allowedSettings.has(key),
         ),
       );
+      if (
+        safeUpdate.executionMode !== undefined &&
+        !["guided", "yolo"].includes(safeUpdate.executionMode)
+      )
+        delete safeUpdate.executionMode;
       state.settings = { ...state.settings, ...safeUpdate };
       persist();
       return state.settings;

@@ -201,8 +201,17 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
       throw new Error("A mission description is required");
     }
     const normalized = description.trim();
-    const dangerous = classifyCommand(normalized).requiresApproval;
+    const dangerous =
+      classifyCommand(normalized).requiresApproval &&
+      store.snapshot().settings.executionMode !== "yolo";
     const mission = store.addMission(normalized);
+    if (!dangerous && store.snapshot().settings.executionMode === "yolo") {
+      store.addActivity({
+        agent: "Policy engine",
+        message:
+          "YOLO mode enabled; mission execution proceeded without an interactive approval prompt",
+      });
+    }
     if (dangerous) {
       const approval = store.requestApproval({
         missionId: mission.id,

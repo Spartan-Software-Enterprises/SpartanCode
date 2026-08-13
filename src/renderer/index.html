@@ -1324,6 +1324,17 @@
             <option>Full MCP</option>
           </select>
         </div>
+        <div class="setting-group">
+          <label for="executionModeSelect">Execution mode</label
+          ><select id="executionModeSelect">
+            <option value="guided">Guided · ask before risky actions</option>
+            <option value="yolo">YOLO · run risky actions automatically</option>
+          </select>
+          <small style="display: block; color: var(--muted)">
+            YOLO mode is intended for trusted, isolated workspaces. It records
+            the policy bypass in the mission activity log.
+          </small>
+        </div>
         <div class="toggle-row">
           <span
             ><strong>Voice command input</strong
@@ -1664,6 +1675,8 @@
               modelSelect.value = settings.model;
               quantizationSelect.value = settings.quantization || "Q4_K_M";
               protocolSelect.value = settings.protocol;
+              document.getElementById("executionModeSelect").value =
+                settings.executionMode || "guided";
               voiceToggle.checked = Boolean(settings.voiceEnabled);
               const connection = connections?.[0];
               document.getElementById("connectionName").value =
@@ -1845,6 +1858,7 @@
             model: modelSelect.value,
             quantization: quantizationSelect.value,
             protocol: protocolSelect.value,
+            executionMode: document.getElementById("executionModeSelect").value,
             voiceEnabled: voiceToggle.checked,
           });
           const connection =
