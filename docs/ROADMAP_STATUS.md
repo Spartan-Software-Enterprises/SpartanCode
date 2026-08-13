@@ -17,6 +17,8 @@ behavior and a corresponding automated or documented verification path.
   state, voice dictation, biometric secret gating, audit activity, tablet and
   landscape layout support. Offline mission creation persists a local plan
   artifact and audit evidence without requiring a desktop or bridge.
+- Android reads system reduced-motion, font-scale, and screen-reader settings
+  without overriding them and surfaces the resulting accessibility state.
 - Explicitly licensed mobile model catalog, compatibility filtering, HTTPS
   resumable downloads, checksum verification, and deletion.
 - Remote provider cost estimates, home-server/router guidance, connection
@@ -43,7 +45,8 @@ behavior and a corresponding automated or documented verification path.
 - Native MLC/llama.cpp/PocketPal inference packages and real on-device model
   execution are still required; the current adapter boundary and detection do
   not claim that an optional runtime is installed.
-- Physical-device accessibility (TalkBack, large text, reduced motion),
+- Physical-device accessibility acceptance (TalkBack behavior and visual
+  verification of large text/reduced motion),
   low-storage/interrupted-download/process-restart acceptance, and tablet
   hardware validation.
 - Signed production AAB/APK, generated license notices, privacy/terms review,

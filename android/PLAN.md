@@ -71,6 +71,9 @@ explicit microphone/speech permission handling, transcript insertion into the
 mission field, and a visible unavailable/error state.
 The Expo configuration permits both orientations and a resizable Android
 activity for tablet and landscape layouts.
+System reduced-motion, large-text, and screen-reader preferences are detected
+without overriding them; the shell uses native accessibility labels and
+reports the active preferences in Device readiness.
 Android also ships offline-safe starter templates, personas, and plugin
 metadata so the extensibility surface does not require a desktop install.
 The command center renders the synced audit activity feed alongside mission,

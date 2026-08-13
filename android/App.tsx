@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
+  AccessibilityInfo,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -16,6 +17,7 @@ import {
   TextInput,
   View,
   Platform,
+  useWindowDimensions,
 } from "react-native";
 import {
   bridgeRequest,
@@ -51,6 +53,10 @@ import { listExtensions } from "./src/core/extensions";
 import { listCompatibleModels } from "./src/core/model-catalog";
 import { createLocalPlanningEvidence } from "./src/core/local-mission";
 import {
+  accessibilityDiagnostics,
+  normalizeAccessibilityProfile,
+} from "./src/core/accessibility";
+import {
   deviceDiagnostics,
   normalizeDeviceProfile,
   platformDeviceProbe,
@@ -80,6 +86,24 @@ export default function App() {
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState<boolean | undefined>();
+  const [screenReaderEnabled, setScreenReaderEnabled] = useState<
+    boolean | undefined
+  >();
+  const { fontScale } = useWindowDimensions();
+  const accessibilityProfile = useMemo(
+    () =>
+      normalizeAccessibilityProfile({
+        reduceMotion,
+        screenReaderEnabled,
+        fontScale,
+      }),
+    [fontScale, reduceMotion, screenReaderEnabled],
+  );
+  const accessibilityMessages = useMemo(
+    () => accessibilityDiagnostics(accessibilityProfile),
+    [accessibilityProfile],
+  );
   const deviceProfile = useMemo(
     () =>
       normalizeDeviceProfile(
@@ -108,6 +132,29 @@ export default function App() {
     setRecognizing(false);
     setMessage(`Voice input unavailable: ${event.message || event.error}`);
   });
+
+  useEffect(() => {
+    let mounted = true;
+    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
+      if (mounted) setReduceMotion(enabled);
+    });
+    void AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
+      if (mounted) setScreenReaderEnabled(enabled);
+    });
+    const motionSubscription = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      setReduceMotion,
+    );
+    const readerSubscription = AccessibilityInfo.addEventListener(
+      "screenReaderChanged",
+      setScreenReaderEnabled,
+    );
+    return () => {
+      mounted = false;
+      motionSubscription.remove();
+      readerSubscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     Promise.all([readSnapshot(), readBiometricSetting()])
@@ -515,6 +562,11 @@ export default function App() {
               : "RAM probe unavailable"}
           </Text>
           {deviceMessages.map((diagnostic) => (
+            <Text style={styles.message} key={diagnostic}>
+              {diagnostic}
+            </Text>
+          ))}
+          {accessibilityMessages.map((diagnostic) => (
             <Text style={styles.message} key={diagnostic}>
               {diagnostic}
             </Text>
