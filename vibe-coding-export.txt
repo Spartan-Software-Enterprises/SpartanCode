@@ -464,3 +464,14 @@
 --------------------------------------------------------------------------------
  END OF EXPORT
 ================================================================================
+
+--------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
+--------------------------------------------------------------------------------
+ The desktop implementation now contains the first agent-first foundation:
+ secure Electron IPC, persisted missions and artifacts, Plan/Build/Verify
+ lifecycle, human approval gates, MCP Lite discovery, local-first model policy,
+ settings, Git workspace operations, remote profiles, capability detection,
+ voice fallback handling, and SQLite-compatible stores. Fourteen automated
+ tests pass. The implementation remains in active build mode.
+--------------------------------------------------------------------------------

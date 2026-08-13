@@ -1,48 +1,58 @@
-const { exec } = require('child_process');
+const { execFile } = require("child_process");
 
-function gitInit() {
+function runGit(args, cwd) {
   return new Promise((resolve, reject) => {
-    exec('git init', (error, stdout, stderr) => {
-      if (error) reject(error);
+    execFile("git", args, { cwd }, (error, stdout, stderr) => {
+      if (error) reject(Object.assign(error, { stdout, stderr }));
       else resolve(stdout || stderr);
     });
   });
+}
+
+function gitInit() {
+  return runGit(["init"]);
 }
 
 function gitConfigure(user) {
-  return new Promise((resolve, reject) => {
-    exec(`git config user.name "${user}"`, (error, stdout, stderr) => {
-      if (error) reject(error);
-      else resolve(stdout || stderr);
-    });
-  });
+  return runGit(["config", "user.name", user]);
 }
 
 function gitAdd() {
-  return new Promise((resolve, reject) => {
-    exec('git add .', (error, stdout, stderr) => {
-      if (error) reject(error);
-      else resolve(stdout || stderr);
-    });
-  });
+  return runGit(["add", "."]);
 }
 
 function gitCommit(message) {
-  return new Promise((resolve, reject) => {
-    exec(`git commit -m "${message}"`, (error, stdout, stderr) => {
-      if (error) reject(error);
-      else resolve(stdout || stderr);
-    });
-  });
+  return runGit(["commit", "-m", message]);
 }
 
 function gitStatus() {
-  return new Promise((resolve, reject) => {
-    exec('git status', (error, stdout, stderr) => {
-      if (error) reject(error);
-      else resolve(stdout || stderr);
-    });
-  });
+  return runGit(["status", "--short", "--branch"]);
 }
 
-module.exports = { gitInit, gitConfigure, gitAdd, gitCommit, gitStatus };
+function gitStatusAt(cwd) {
+  return runGit(["status", "--short", "--branch"], cwd);
+}
+
+function gitInitAt(cwd) {
+  return runGit(["init"], cwd);
+}
+
+function gitAddAt(cwd) {
+  return runGit(["add", "."], cwd);
+}
+
+function gitCommitAt(cwd, message) {
+  return runGit(["commit", "-m", message], cwd);
+}
+
+module.exports = {
+  gitInit,
+  gitConfigure,
+  gitAdd,
+  gitCommit,
+  gitStatus,
+  gitStatusAt,
+  gitInitAt,
+  gitAddAt,
+  gitCommitAt,
+};

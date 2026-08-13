@@ -1,10 +1,25 @@
-const Database = require("better-sqlite3");
+function openDatabase(filename) {
+  try {
+    const BetterSqlite = require("better-sqlite3");
+    return { kind: "better-sqlite3", db: new BetterSqlite(filename) };
+  } catch {
+    try {
+      const { DatabaseSync } = require("node:sqlite");
+      return { kind: "node:sqlite", db: new DatabaseSync(filename) };
+    } catch {
+      return null;
+    }
+  }
+}
 
 function createArtifactStore() {
-  const db = new Database(":memory:", { verbose: console.log });
+  const opened = openDatabase(":memory:");
+  if (!opened) return null;
+  const db = opened.db;
 
   // Enable WAL mode
-  db.pragma("journal_mode = WAL");
+  if (opened.kind === "better-sqlite3") db.pragma("journal_mode = WAL");
+  else db.exec("PRAGMA journal_mode = WAL");
 
   // 14 tables for artifact store
   db.exec(`
@@ -69,30 +84,22 @@ function createArtifactStore() {
       FOREIGN KEY (artifact_id) REFERENCES artifacts(id)
     );
     
-    CREATE TABLE artifact_fts (
+    CREATE TABLE artifact_search (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       content TEXT,
       content_rowid INTEGER,
       FOREIGN KEY (content_rowid) REFERENCES artifacts(id)
     );
-    
-    CREATE TABLE artifact_fts_content(rows UNINDEXED);
-    
-    CREATE TABLE artifact_fts_index(idx UNINDEXED);
-    
-    CREATE TABLE artifact_fts_prefix(idx UNINDEXED);
-    
-    CREATE TABLE artifact_fts_prefixsearch(idx UNINDEXED);
-    
-    CREATE TABLE artifact_fts_phrases(idx UNINDEXED);
-    
-    CREATE TABLE artifact_fts_snippet(idx UNINDEXED);
   `);
 
   // Create FTS5 virtual table
-  db.exec(`
-    CREATE VIRTUAL TABLE artifact_fts USING fts5(content, content_rowid UNINDEXED);
-  `);
+  try {
+    db.exec(
+      "CREATE VIRTUAL TABLE artifact_fts USING fts5(content, content_rowid UNINDEXED);",
+    );
+  } catch {
+    db.exec("CREATE TABLE artifact_fts (content TEXT, content_rowid INTEGER);");
+  }
 
   // Trigger to sync FTS
   db.exec(`

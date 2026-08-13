@@ -2,9 +2,11 @@
   "name": "desktop-implementation",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/main/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron .",
+    "format:check": "prettier --check \"src/**/*.js\" \"src/**/*.html\"",
+    "test": "node --test src/main/*.test.js && npm run format:check"
   },
   "repository": {
     "type": "git",
@@ -23,5 +25,8 @@
     "prettier": "^3.9.6",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
+  },
+  "dependencies": {
+    "ssh2": "^1.17.0"
   }
 }

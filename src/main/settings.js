@@ -1,11 +1,26 @@
-const Database = require('better-sqlite3');
+function openDatabase(filename) {
+  try {
+    const BetterSqlite = require("better-sqlite3");
+    return { kind: "better-sqlite3", db: new BetterSqlite(filename) };
+  } catch {
+    try {
+      const { DatabaseSync } = require("node:sqlite");
+      return { kind: "node:sqlite", db: new DatabaseSync(filename) };
+    } catch {
+      return null;
+    }
+  }
+}
 
 function initSettingsDatabase() {
-  const db = new Database(':memory:', { verbose: console.log });
-  
+  const opened = openDatabase(":memory:");
+  if (!opened) return { kind: "unavailable", tables: [] };
+  const db = opened.db;
+
   // Enable WAL mode
-  db.pragma('journal_mode = WAL');
-  
+  if (opened.kind === "better-sqlite3") db.pragma("journal_mode = WAL");
+  else db.exec("PRAGMA journal_mode = WAL");
+
   // Create 14 tables for settings hierarchy
   db.exec(`
     CREATE TABLE settings_global (
@@ -90,7 +105,7 @@ function initSettingsDatabase() {
       released_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
-  
+
   return db;
 }
 
