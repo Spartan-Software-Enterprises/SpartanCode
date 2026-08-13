@@ -121,3 +121,8 @@ export async function readBridgeToken(endpoint: string) {
     return null;
   }
 }
+
+export async function clearBridgeToken(endpoint: string) {
+  await SecureStore.deleteItemAsync(tokenKey(endpoint));
+  await SecureStore.deleteItemAsync(BRIDGE_TOKEN_KEY);
+}

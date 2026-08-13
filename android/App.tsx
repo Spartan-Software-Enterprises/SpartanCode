@@ -17,6 +17,7 @@ import {
 } from "./src/core/bridge";
 import {
   addConnection,
+  clearBridgeToken,
   readSnapshot,
   saveBridgeToken,
   writeSnapshot,
@@ -186,6 +187,26 @@ export default function App() {
             onPress={createMission}
           >
             <Text style={styles.primaryText}>Queue mission</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Forget bridge token"
+            style={styles.secondary}
+            onPress={async () => {
+              try {
+                if (endpoint.trim()) await clearBridgeToken(endpoint.trim());
+                setToken("");
+                setMessage("Bridge token forgotten");
+              } catch (error) {
+                setMessage(
+                  error instanceof Error
+                    ? error.message
+                    : "Unable to forget token",
+                );
+              }
+            }}
+          >
+            <Text style={styles.secondaryText}>Forget token</Text>
           </Pressable>
         </View>
 
