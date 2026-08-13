@@ -623,6 +623,13 @@
  source of truth.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 33
+ The desktop now exposes an explicit Guided/YOLO execution-mode setting. Guided
+ mode retains approval pauses for risky missions; trusted-workspace YOLO mode
+ removes interactive approval prompts while preserving validation, workspace
+ isolation, credential boundaries, and auditable policy-bypass activity.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

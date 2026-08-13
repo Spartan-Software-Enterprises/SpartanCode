@@ -45,6 +45,8 @@ pairing payloads, and supports deletion of all stored bridge secrets.
 The Android shell bundles Researcher, Implementer, Verifier, and Sync Guardian
 roles. They use the local execution model when no bridge is connected; a bridge
 can optionally provide remote execution without becoming a mobile dependency.
+Desktop YOLO mode is deliberately not a mobile prerequisite: Android remains
+local-first and continues to show operation state and queue evidence directly.
 
 The desktop now includes an opt-in MCP Bridge HTTP adapter. Set
 `SPARTANCODE_BRIDGE_PORT` and preferably `SPARTANCODE_BRIDGE_TOKEN` to expose

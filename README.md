@@ -71,6 +71,14 @@ metadata in mission plans. The repository includes Researcher, Implementer,
 Verifier, and Sync Guardian roles. Invalid or oversized definitions are ignored
 without blocking application startup.
 
+## Execution modes
+
+Desktop settings provide `Guided` and opt-in `YOLO` execution modes. Guided mode
+pauses before policy-classified risky missions. YOLO mode is for trusted,
+isolated workspaces and proceeds without interactive approval prompts while
+recording the mode and policy bypass in the mission activity log. It does not
+remove validation, workspace isolation, credential redaction, or audit history.
+
 ## Android
 
 The Android companion follows the Android-first phases in the authoritative
