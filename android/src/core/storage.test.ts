@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   enqueueOperation,
+  readSnapshot,
   readQueuedOperations,
   removeQueuedOperation,
   updateQueuedOperation,
@@ -37,7 +38,6 @@ describe("storage recovery", () => {
 
   it("quarantines malformed snapshots and returns an offline-safe empty state", async () => {
     await AsyncStorage.setItem("spartancode.mobile.snapshot.v1", "{broken");
-    const { readSnapshot } = await import("./storage");
     expect(await readSnapshot()).toMatchObject({ missions: [], connections: [], offline: true });
     expect(await AsyncStorage.getItem("spartancode.mobile.snapshot.v1")).toBeNull();
     expect(await AsyncStorage.getItem("spartancode.mobile.snapshot.quarantine.v1")).toContain("broken");
