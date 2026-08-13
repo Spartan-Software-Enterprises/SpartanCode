@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "SpartanCode",
+    "slug": "spartancode",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.spartansoftware.spartancode",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b1020"
+      }
+    },
+    "plugins": ["expo-secure-store"],
+    "scheme": "spartancode"
+  }
+}
