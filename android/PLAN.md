@@ -57,6 +57,9 @@ The MCP Bridge now deduplicates retried POST mutations by bounded,
 route-scoped idempotency keys, matching the Android durable queue contract.
 The download core resumes partial HTTPS transfers, verifies an optional SHA-256
 checksum before finalization, and supports deletion through an injected store.
+Device probes are normalized into safe memory, storage, thermal, chipset, and
+Vulkan/NPU fields with actionable diagnostics when native capability data is
+missing or constrained.
 Android also ships offline-safe starter templates, personas, and plugin
 metadata so the extensibility surface does not require a desktop install.
 The command center renders the synced audit activity feed alongside mission,
