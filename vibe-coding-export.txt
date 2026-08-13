@@ -481,6 +481,11 @@
  the Vibe chat service persists user and assistant messages through secure IPC.
  Twenty automated tests pass.
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 7
+ The desktop now includes an agent-first assistant drawer backed by persisted
+ Vibe chat history and secure IPC. Chat responses preserve the local-first and
+ approval-first operating model.
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1

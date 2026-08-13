@@ -543,3 +543,8 @@
  - Persisted Vibe chat history and assistant response service
  - Secure IPC for artifact review, audit inspection, and chat
  - 20 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 7
+ - Agent-first assistant drawer backed by persisted Vibe chat history
+ - Chat IPC bridge for user/assistant messages
+ - Chat remains mission-oriented and preserves approval-first behavior
