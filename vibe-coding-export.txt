@@ -507,6 +507,12 @@
  automated tests pass.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 12
+ The artifact rail now opens persisted artifacts directly, shows review state,
+ and keeps the agent cards and mission status accurate for an empty workspace
+ and for in-progress missions.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

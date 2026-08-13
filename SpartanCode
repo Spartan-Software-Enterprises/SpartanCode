@@ -572,3 +572,9 @@
  - Settings persistence rejects unknown fields before writing workspace state
  - Agent manager navigation no longer registers duplicate click handlers
  - 24 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 12
+ - Artifact rail entries are now interactive and open the selected persisted artifact
+ - Artifact review state is visible in the rail before opening detailed review
+ - Renderer startup wiring now includes the artifact view control and empty-workspace agent state
+ - Mission completion messaging only appears after verification completes

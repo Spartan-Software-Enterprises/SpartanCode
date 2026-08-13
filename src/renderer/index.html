@@ -1181,7 +1181,7 @@
         <section class="rail-section">
           <div class="section-heading">
             <h2>Artifacts</h2>
-            <button class="text-link">View all</button>
+            <button class="text-link" id="viewArtifacts">View all</button>
           </div>
           <div id="artifactList">
             <div class="artifact">
@@ -1479,6 +1479,15 @@
               openArtifact(snapshot.artifacts && snapshot.artifacts[0]),
             );
       });
+      document
+        .getElementById("artifactList")
+        .addEventListener("click", (event) => {
+          const row = event.target.closest("[data-artifact-id]");
+          if (!row || !window.spartanCode) return;
+          window.spartanCode
+            .getArtifact(row.dataset.artifactId)
+            .then(openArtifact);
+        });
       const reviewArtifact = (decision) => {
         if (!activeArtifact || !window.spartanCode) return;
         window.spartanCode
@@ -1655,7 +1664,7 @@
                 .slice(0, 4)
                 .map(
                   (item) =>
-                    `<div class="artifact"><span class="artifact-icon">▤</span><span><span class="artifact-name">${escapeHtml(item.name)}</span><span class="artifact-time">${new Date(item.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></span><span class="artifact-state">✓</span></div>`,
+                    `<button class="artifact" data-artifact-id="${escapeHtml(item.id)}" type="button"><span class="artifact-icon">▤</span><span><span class="artifact-name">${escapeHtml(item.name)}</span><span class="artifact-time">${new Date(item.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></span><span class="artifact-state">${item.review ? "✓" : "○"}</span></button>`,
                 )
                 .join("")
             : '<div class="artifact"><span class="artifact-icon">▤</span><span><span class="artifact-name">No artifacts yet</span><span class="artifact-time">Start a mission to create one</span></span></div>';
@@ -1670,7 +1679,18 @@
                 )
                 .join("")
             : '<div class="activity"><span class="activity-icon">♙</span><span><strong>Workspace</strong><small>Ready for a mission</small></span><time>Now</time></div>';
-        if (!mission) return;
+        if (!mission) {
+          document.querySelectorAll(".agent-card").forEach((card, index) => {
+            card.classList.toggle("running", index === 0);
+            card.classList.remove("done");
+            const statusLabel = card.querySelector(".status");
+            if (statusLabel)
+              statusLabel.textContent = index === 0 ? "● Ready" : "● Pending";
+            const progress = card.querySelector(".progress span");
+            if (progress) progress.style.width = "0%";
+          });
+          return;
+        }
         const stages = { planning: 0, building: 1, verifying: 2, complete: 3 };
         const activeStage = stages[mission.status] || 0;
         document.querySelectorAll(".agent-card").forEach((card, index) => {
@@ -1700,7 +1720,7 @@
                   ? "66%"
                   : "0%";
         });
-        if (snapshot.artifacts && snapshot.artifacts.length)
+        if (mission.status === "complete")
           status.textContent =
             "Mission complete — verification artifact is ready.";
       };
