@@ -27,6 +27,8 @@ sync, preserves the offline queue while applying a remote snapshot, retries
 transient bridge failures, and marks snapshots stale after five minutes.
 
 This is an evidence record for the current scaffold, not a claim that the full
-Android roadmap is complete. Native Android builds, QR pairing, artifact and
-approval workflows, model runtimes, accessibility matrix, and signed release
-artifacts remain roadmap work tracked in [`PLAN.md`](PLAN.md).
+Android roadmap is complete. Native Android builds, full artifact and approval
+workflows, model runtimes, accessibility matrix, and signed release artifacts
+remain roadmap work tracked in [`PLAN.md`](PLAN.md). The app is intentionally
+standalone-first: a desktop checkout or MCP Bridge is never required for local
+mission planning, bundled agent roles, queueing, or review.

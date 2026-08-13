@@ -15,6 +15,7 @@ const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 const { createModelCache } = require("./model-cache");
 const { validateRemoteConfig } = require("./remote-connection");
+const { loadCustomAgents } = require("./custom-agents");
 
 function registerDesktopApi({ store, window, runMission, modelCache }) {
   const voiceService = createVoiceService();
@@ -54,6 +55,11 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     });
     return registry.dispatch(request);
   });
+  ipcMain.handle("agents:list", () =>
+    loadCustomAgents(store.snapshot().settings.workspacePath).map(
+      ({ prompt, ...agent }) => agent,
+    ),
+  );
   ipcMain.handle("models:list", (_event, options) =>
     listLicensedModels(options),
   );
@@ -93,7 +99,9 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
   });
   ipcMain.handle("audit:list", () => store.auditLog());
   ipcMain.handle("mission:plan", (_event, description) =>
-    createExecutionPlan(description),
+    createExecutionPlan(description, {
+      workspacePath: store.snapshot().settings.workspacePath,
+    }),
   );
   ipcMain.handle("settings:get", () => store.snapshot().settings);
   ipcMain.handle("settings:update", (_event, update) =>

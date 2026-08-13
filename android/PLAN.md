@@ -9,6 +9,9 @@ file turns its Android priorities into verifiable delivery gates.
 Android is a mobile-first, offline-capable command center for missions,
 approvals, artifacts, and remote workspaces. It must expose honest sync state,
 keep credentials in secure storage, and never bypass approval policy.
+The desktop application and MCP Bridge are optional enhancements, never
+requirements. Android-only users must retain bundled agent roles, local
+planning, durable queues, artifact review, and policy-visible state offline.
 
 ## Phase 1 — Foundation and parity
 
@@ -36,8 +39,12 @@ mutations queue until acknowledged; logout removes all secrets.
 Current foundation evidence: manual endpoint/token entry now validates secure
 transport, stores tokens by bridge origin, records a bridge connection profile,
 retains planning missions when a sync response arrives, retries transient
-bridge failures, expires stored tokens, and labels stale snapshots. QR pairing
-and logout-secret deletion remain open work.
+bridge failures, expires stored tokens, labels stale snapshots, accepts QR
+pairing payloads, and supports deletion of all stored bridge secrets.
+
+The Android shell bundles Researcher, Implementer, Verifier, and Sync Guardian
+roles. They use the local execution model when no bridge is connected; a bridge
+can optionally provide remote execution without becoming a mobile dependency.
 
 The desktop now includes an opt-in MCP Bridge HTTP adapter. Set
 `SPARTANCODE_BRIDGE_PORT` and preferably `SPARTANCODE_BRIDGE_TOKEN` to expose

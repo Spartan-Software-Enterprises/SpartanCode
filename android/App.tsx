@@ -30,6 +30,7 @@ import {
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
+import { availableAgents } from "./src/core/agents";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -186,6 +187,7 @@ export default function App() {
   const workloadLabelText = workloadLabel(
     chooseWorkloadRoute("planning", !snapshot.offline),
   );
+  const agents = availableAgents(!snapshot.offline);
 
   if (loading)
     return (
@@ -267,6 +269,22 @@ export default function App() {
           >
             <Text style={styles.secondaryText}>Forget all tokens</Text>
           </Pressable>
+        </View>
+
+        <Text style={styles.section}>Available agents</Text>
+        <View style={styles.card}>
+          {agents.map((agent) => (
+            <View key={agent.name} style={styles.agentRow}>
+              <View style={styles.missionBody}>
+                <Text style={styles.missionText}>{agent.name}</Text>
+                <Text style={styles.missionMeta}>{agent.description}</Text>
+              </View>
+              <Text style={styles.agentMode}>{agent.model.toUpperCase()}</Text>
+            </View>
+          ))}
+          <Text style={styles.message}>
+            Android works offline; a bridge only adds optional remote execution.
+          </Text>
         </View>
 
         <Text style={styles.section}>Bridge connection</Text>
@@ -517,5 +535,19 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 1,
     marginTop: 7,
+  },
+  agentRow: {
+    alignItems: "center",
+    borderBottomColor: "#243252",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    paddingVertical: 10,
+  },
+  agentMode: {
+    color: "#72e6c5",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
 });
