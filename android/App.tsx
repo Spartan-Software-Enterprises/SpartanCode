@@ -660,6 +660,21 @@ export default function App() {
             )}
           </View>
         ))}
+
+        <View style={styles.sectionRow}>
+          <Text style={styles.section}>Audit activity</Text>
+          <Text style={styles.count}>{(snapshot.auditLog ?? []).length}</Text>
+        </View>
+        {(snapshot.auditLog ?? []).slice(0, 5).map((event, index) => (
+          <View style={styles.mission} key={`${event.timestamp}-${index}`}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>{event.action}</Text>
+              <Text style={styles.missionMeta}>
+                {new Date(event.timestamp).toLocaleString()}
+              </Text>
+            </View>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );

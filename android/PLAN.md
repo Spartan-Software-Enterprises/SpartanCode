@@ -55,6 +55,8 @@ cancellation during retry backoff, and the licensed mobile catalog filters
 Qwen3-1.7B and Phi-4-mini by explicit permissive license and memory capacity.
 Android also ships offline-safe starter templates, personas, and plugin
 metadata so the extensibility surface does not require a desktop install.
+The command center renders the synced audit activity feed alongside mission,
+approval, and artifact state.
 
 Biometric unlock is opt-in and gates bridge-secret access through the device's
 biometric/passcode prompt. Raw biometric data never enters the app; if hardware
