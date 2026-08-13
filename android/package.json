@@ -6,6 +6,7 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
+    "release:android": "sh scripts/build-release.sh",
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
     "format:check": "prettier --check \"**/*.{ts,tsx,json}\" --ignore-path .prettierignore"

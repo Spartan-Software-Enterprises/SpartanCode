@@ -44,6 +44,9 @@ behavior and a corresponding automated or documented verification path.
 - Reproducible release-evidence generation now records the Git commit,
   SHA-256 hashes for scanned artifacts, and a lockfile-derived third-party
   component inventory for desktop and Android release workflows.
+- A guarded manual/tag Android release workflow now provisions Java/Android
+  tooling, consumes release-owned keystore secrets only in the runner
+  temporary directory, and uploads signed AAB/APK plus release evidence.
 - A clean-checkout GitHub Actions workflow and local Android verification
   matrix now run the repeatable TypeScript/Jest/format/Expo baseline and record
   Android SDK/emulator, signing, and AWS environment gaps as explicit skips.
@@ -90,9 +93,9 @@ behavior and a corresponding automated or documented verification path.
   low-storage/interrupted-download/process-restart acceptance, and tablet
   hardware validation.
 - Signed production AAB/APK and legal/privacy review remain release-environment
-  gates. The generator itself is implemented and verified; its inventory and
-  hashes must still be attached to the signed release and reviewed for the
-  target distribution.
+  gates. The generator and CI handoff are implemented and locally validated;
+  the workflow still requires real release secrets and its signed artifacts
+  must be reviewed for the target distribution.
 - Physical Android collaboration/gesture acceptance, cross-modal expansion,
   provider-specific OIDC account lifecycle/administration, and a mature
   external plugin marketplace.

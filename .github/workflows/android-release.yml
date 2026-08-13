@@ -1,0 +1,59 @@
+name: SpartanCode Android release
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  signed-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: android/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android build toolchain
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - run: npm ci
+      - name: Build signed AAB/APK and release evidence
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.SPARTANCODE_ANDROID_KEYSTORE_BASE64 }}
+          SPARTANCODE_KEYSTORE_PASSWORD: ${{ secrets.SPARTANCODE_KEYSTORE_PASSWORD }}
+          SPARTANCODE_KEY_ALIAS: ${{ secrets.SPARTANCODE_KEY_ALIAS }}
+          SPARTANCODE_KEY_PASSWORD: ${{ secrets.SPARTANCODE_KEY_PASSWORD }}
+        run: |
+          set -eu
+          : "${ANDROID_KEYSTORE_BASE64:?SPARTANCODE_ANDROID_KEYSTORE_BASE64 is required}"
+          : "${SPARTANCODE_KEYSTORE_PASSWORD:?SPARTANCODE_KEYSTORE_PASSWORD is required}"
+          : "${SPARTANCODE_KEY_ALIAS:?SPARTANCODE_KEY_ALIAS is required}"
+          : "${SPARTANCODE_KEY_PASSWORD:?SPARTANCODE_KEY_PASSWORD is required}"
+          keystore_file="${RUNNER_TEMP}/spartancode-upload.jks"
+          cleanup() { rm -f "$keystore_file"; }
+          trap cleanup EXIT INT TERM
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_file"
+          chmod 600 "$keystore_file"
+          SPARTANCODE_KEYSTORE_FILE="$keystore_file" npm run release:android
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spartancode-android-release-${{ github.ref_name }}
+          if-no-files-found: error
+          path: |
+            android/android/app/build/outputs/**/*.aab
+            android/android/app/build/outputs/**/*.apk
+            android/android/app/build/release-evidence/**

@@ -53,7 +53,9 @@ the ordinary unit-test gate:
 3. Confirm jurisdiction-specific consent and opt-out requirements for the
    optional biometric feature.
 4. Produce a signed Android AAB/APK with release-owned credentials kept out of
-   Git and CI logs.
+   Git and CI logs. The guarded tag/manual GitHub Actions workflow consumes
+   only the documented secret names and uploads the resulting artifacts and
+   evidence without storing the keystore.
 5. Run physical-device accessibility, low-storage, interrupted-download,
    offline/reconnect, and process-restart acceptance tests.
 6. Record the release commit, artifact checksums, and verification results.

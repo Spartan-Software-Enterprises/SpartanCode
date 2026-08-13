@@ -29,3 +29,17 @@ npm run release:manifest
 The generated files are ignored build outputs and must be attached to the
 release alongside the signed artifacts. The current repository intentionally
 does not contain a keystore, signing secret, or signed production artifact.
+
+## GitHub Actions release path
+
+`.github/workflows/android-release.yml` runs only for a manual dispatch or a
+`v*` tag. Configure these release-owned secrets before invoking it:
+
+- `SPARTANCODE_ANDROID_KEYSTORE_BASE64`
+- `SPARTANCODE_KEYSTORE_PASSWORD`
+- `SPARTANCODE_KEY_ALIAS`
+- `SPARTANCODE_KEY_PASSWORD`
+
+The workflow decodes the keystore only into the runner temporary directory,
+passes it to the guarded release script, uploads the signed AAB/APK and release
+evidence as workflow artifacts, and removes the temporary keystore on exit.
