@@ -542,6 +542,11 @@
  are persisted as artifacts. Twenty-seven automated tests pass.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 18
+ Agent and Artifact navigation now open their live command-center surfaces, and
+ artifact entries are keyboard-accessible interactive controls.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

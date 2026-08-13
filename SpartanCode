@@ -607,3 +607,8 @@
  - Verify runs the selected workspace's declared test script when available
  - Agent output and verification logs are persisted as inspectable artifacts
  - 27 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 18
+ - Agent and Artifact navigation now opens their actual command-center surfaces
+ - Artifact rail buttons are keyboard-accessible and visually interactive
+ - Renderer remains script-parseable with 27 automated tests passing
