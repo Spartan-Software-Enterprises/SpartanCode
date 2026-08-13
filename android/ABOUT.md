@@ -32,6 +32,10 @@ at a 390×844 viewport with device scale factor 2. The smoke test verified:
 4. The queued mission appears in the missions list.
 5. Screenshots in the root README match those verified states.
 
+The committed PNG evidence is checked for signature and the documented
+780×1688 (390×844 at 2x) dimensions by `scripts/verify-assets.js`; this does
+not replace physical-device, emulator, or TalkBack acceptance.
+
 The connection foundation also validates HTTPS endpoints (with localhost
 allowed for development), persists a named bridge profile after a successful
 sync, preserves the offline queue while applying a remote snapshot, retries

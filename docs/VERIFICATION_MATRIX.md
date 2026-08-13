@@ -1,8 +1,8 @@
 # Verification matrix
 
 `android/scripts/verify-matrix.js` is the repeatable clean-checkout entrypoint
-for the Android baseline. It runs TypeScript, Jest, formatting, and Expo
-configuration checks, then records environment-dependent checks as `pass` or
+for the Android baseline. It runs TypeScript, Jest, formatting, Expo
+configuration, and committed visual-asset integrity checks, then records environment-dependent checks as `pass` or
 `skip` in a JSON report. A missing Android SDK, emulator, release keystore, or
 AWS host is reported explicitly; it cannot silently become a passing device or
 signing claim.

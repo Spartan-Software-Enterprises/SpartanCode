@@ -49,6 +49,12 @@ function buildReport() {
       ["expo", "config", "--type", "public"],
       androidRoot,
     ),
+    run(
+      "Committed visual assets",
+      "node",
+      ["scripts/verify-assets.js"],
+      androidRoot,
+    ),
   ];
   const sdkRoot = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT;
   checks.push(
