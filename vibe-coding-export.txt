@@ -702,6 +702,21 @@
  release gates.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 43
+ The MCP Bridge now supports explicitly configured OIDC/SSO authentication. It
+ verifies RS256 signatures, issuer, audience, expiry, and cached JWKS keys, then
+ derives least-privilege scopes from standard scope/scp claims. Local tokens
+ remain available for local development and invalid OIDC credentials fail closed.
+--------------------------------------------------------------------------------
+
+ ANDROID IMPLEMENTATION STATUS — MILESTONE 44
+ Android now includes the MIT-licensed @pocketpalai/llama.rn native adapter
+ through Expo prebuild. It validates absolute local GGUF paths, bounds native
+ generation parameters, releases native contexts, and reports unavailable
+ status in Expo Go or unsupported environments. Native binary and physical
+ device inference evidence remain release gates.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

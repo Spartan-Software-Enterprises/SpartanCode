@@ -36,10 +36,29 @@ function skip(label, reason) {
 function buildReport() {
   const checks = [
     run("Android TypeScript", "npm", ["run", "typecheck"], androidRoot),
-    run("Android unit tests", "npm", ["test", "--", "--runInBand"], androidRoot),
+    run(
+      "Android unit tests",
+      "npm",
+      ["test", "--", "--runInBand"],
+      androidRoot,
+    ),
     run("Android formatting", "npm", ["run", "format:check"], androidRoot),
-    run("Expo configuration", "npx", ["expo", "config", "--type", "public"], androidRoot),
+    run(
+      "Expo configuration",
+      "npx",
+      ["expo", "config", "--type", "public"],
+      androidRoot,
+    ),
   ];
+  const sdkRoot = process.env.ANDROID_HOME || process.env.ANDROID_SDK_ROOT;
+  checks.push(
+    sdkRoot && fs.existsSync(sdkRoot)
+      ? { label: "Android SDK discovery", status: "pass", output: sdkRoot }
+      : skip(
+          "Android SDK discovery",
+          "ANDROID_HOME or ANDROID_SDK_ROOT is not configured in this environment",
+        ),
+  );
   if (commandExists("adb")) {
     const devices = spawnSync("adb", ["devices"], { encoding: "utf8" });
     const connected = String(devices.stdout || "")
@@ -47,16 +66,33 @@ function buildReport() {
       .some((line) => /\tdevice$/.test(line));
     checks.push(
       connected
-        ? { label: "ADB device discovery", status: "pass", output: devices.stdout }
-        : skip("ADB device discovery", "adb is installed but no device is connected"),
+        ? {
+            label: "ADB device discovery",
+            status: "pass",
+            output: devices.stdout,
+          }
+        : skip(
+            "ADB device discovery",
+            "adb is installed but no device is connected",
+          ),
     );
-  } else checks.push(skip("ADB device discovery", "adb is not installed in this environment"));
+  } else
+    checks.push(
+      skip("ADB device discovery", "adb is not installed in this environment"),
+    );
 
   const keystore = process.env.SPARTANCODE_KEYSTORE_FILE;
   checks.push(
     keystore && path.isAbsolute(keystore) && fs.existsSync(keystore)
-      ? { label: "Release keystore", status: "pass", output: "keystore path exists" }
-      : skip("Release keystore", "release keystore is intentionally supplied only by the release environment"),
+      ? {
+          label: "Release keystore",
+          status: "pass",
+          output: "keystore path exists",
+        }
+      : skip(
+          "Release keystore",
+          "release keystore is intentionally supplied only by the release environment",
+        ),
   );
   checks.push(
     process.env.SPARTANCODE_REMOTE_HOST
@@ -64,7 +100,10 @@ function buildReport() {
           "AWS validation host",
           "remote validation is intentionally run only through the synchronized operational workflow",
         )
-      : skip("AWS validation host", "SPARTANCODE_REMOTE_HOST is not configured"),
+      : skip(
+          "AWS validation host",
+          "SPARTANCODE_REMOTE_HOST is not configured",
+        ),
   );
   return checks;
 }
@@ -82,7 +121,9 @@ const report = {
   generatedAt: new Date().toISOString(),
   commit: (() => {
     try {
-      return execFileSync("git", ["-C", root, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+      return execFileSync("git", ["-C", root, "rev-parse", "HEAD"], {
+        encoding: "utf8",
+      }).trim();
     } catch {
       return "unknown";
     }

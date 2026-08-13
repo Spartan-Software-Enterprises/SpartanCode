@@ -73,8 +73,10 @@ The Expo configuration permits both orientations and a resizable Android
 activity for tablet and landscape layouts.
 The mobile runtime registry now defines typed MLC Chat, PocketPal, and llama.cpp
 native-module boundaries. It enforces the compatible licensed catalog before
-invocation and reports missing native modules as unavailable; installing and
-exercising those platform runtimes remains a release-environment gate.
+invocation and reports missing native modules as unavailable. The MIT-licensed
+`@pocketpalai/llama.rn` adapter is integrated through Expo prebuild; installing
+it in a native binary and exercising it on-device remain release-environment
+gates.
 System reduced-motion, large-text, and screen-reader preferences are detected
 without overriding them; the shell uses native accessibility labels and
 reports the active preferences in Device readiness.
@@ -158,9 +160,9 @@ tablet/landscape; offline cold start; reconnect and token expiry; bridge outage;
 snapshot migration/corruption; TalkBack and large text; reduced motion; low
 storage; interrupted sync/download; and process restart during an operation.
 
-Verified on the AWS KVM server: API 29, API 33, and API 35 emulator install,
-launch, process-liveness, and cold-start smoke checks; TypeScript and Jest pass
-on the standalone Android project; desktop packaging produces
-`dist/linux-unpacked/SpartanCode`. Physical-device, tablet, TalkBack, and
-production-signing checks remain release-environment checks rather than being
-claimed by the emulator matrix.
+The former AWS KVM host was terminated by its auto-termination timer and is no
+longer available. No emulator install, process-liveness, or API-level smoke
+check is claimed until a replacement host or local Android SDK produces those
+artifacts. TypeScript, Jest, formatting, Expo configuration, and desktop
+packaging are verified locally. Physical-device, tablet, TalkBack, emulator,
+and production-signing checks remain release-environment gates.

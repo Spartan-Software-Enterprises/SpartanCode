@@ -46,7 +46,7 @@ behavior and a corresponding automated or documented verification path.
   component inventory for desktop and Android release workflows.
 - A clean-checkout GitHub Actions workflow and local Android verification
   matrix now run the repeatable TypeScript/Jest/format/Expo baseline and record
-  emulator, signing, and AWS environment gaps as explicit skips.
+  Android SDK/emulator, signing, and AWS environment gaps as explicit skips.
 - A bounded plugin registry now discovers workspace metadata, enforces explicit
   MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
   plugins, and exposes metadata through isolated IPC without executing plugin
@@ -70,8 +70,9 @@ behavior and a corresponding automated or documented verification path.
 
 ## Implemented but environment-dependent
 
-- Linux desktop packaging and emulator smoke checks have been exercised in the
-  validation environment.
+- Linux desktop packaging has been exercised in the local validation
+  environment; Android emulator smoke checks remain unverified here because
+  no Android SDK/emulator is currently available.
 - Android Expo configuration and native release automation are present, but a
   signed artifact requires release-owned Android credentials.
 - AWS/KVM validation requires a reachable replacement host; the former host was
