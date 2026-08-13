@@ -1,9 +1,10 @@
 # AWS development host recovery
 
-The SSH key at `/data/data/com.termux/files/home/SpartanDev.pem` authenticates
-to the development host; it is not an AWS control-plane credential. The AWS
-CLI must use a persistent IAM role/profile outside the instance if EC2
-provisioning and recovery are required.
+The SSH key at `/data/data/com.termux/files/home/SpartanDev.pem` was used for
+the retired development host; it is not an AWS control-plane credential. The
+AWS CLI must use a persistent IAM role/profile outside the instance if EC2
+provisioning and recovery are required. Never commit AWS credentials or place
+them in the repository.
 
 The previous development host had an idle `spartancode-auto-terminate.timer`
 that ran every 15 minutes after an eight-hour boot window and called

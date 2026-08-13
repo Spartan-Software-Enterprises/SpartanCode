@@ -20,7 +20,8 @@ are restricted to the selected workspace, including symlink escape protection.
 `origin/main` on GitHub is the canonical SpartanCode source of truth:
 <https://github.com/Spartan-Software-Enterprises/SpartanCode>. The AWS
 development checkout is a validation mirror, not an independent branch. The
-current AWS checkout is `ubuntu@54.152.46.218:/home/ubuntu/workspaces/SpartanCode`.
+active replacement host must be supplied through the documented operational
+environment; the former `54.152.46.218` checkout is retired.
 
 Before starting work, update local `main` from `origin/main`. Before handing
 off work, commit all intended changes, push `main`, fast-forward the AWS
@@ -98,6 +99,11 @@ command-center shell and queued a mission through the visible controls.
 
 The current Android interface description and verification record are in
 [`android/ABOUT.md`](android/ABOUT.md).
+
+The evidence-based implementation and release-gate matrix is in
+[`docs/ROADMAP_STATUS.md`](docs/ROADMAP_STATUS.md). Product privacy,
+biometric, model-license, and release obligations are recorded in
+[`docs/COMPLIANCE.md`](docs/COMPLIANCE.md).
 
 Android bundles the same core roles and remains fully usable without the desktop
 application, an MCP Bridge, or network access. A bridge is an optional route
