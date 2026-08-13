@@ -90,6 +90,43 @@ function createArtifactStore() {
       content_rowid INTEGER,
       FOREIGN KEY (content_rowid) REFERENCES artifacts(id)
     );
+
+    CREATE TABLE artifact_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      artifact_id INTEGER NOT NULL,
+      reviewer TEXT NOT NULL,
+      decision TEXT NOT NULL,
+      note TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (artifact_id) REFERENCES artifacts(id)
+    );
+
+    CREATE TABLE artifact_comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      artifact_id INTEGER NOT NULL,
+      author TEXT NOT NULL,
+      body TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (artifact_id) REFERENCES artifacts(id)
+    );
+
+    CREATE TABLE artifact_links (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      artifact_id INTEGER NOT NULL,
+      target TEXT NOT NULL,
+      relation TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (artifact_id) REFERENCES artifacts(id)
+    );
+
+    CREATE TABLE artifact_embeddings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      artifact_id INTEGER NOT NULL,
+      model TEXT NOT NULL,
+      vector TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (artifact_id) REFERENCES artifacts(id)
+    );
   `);
 
   // Create FTS5 virtual table

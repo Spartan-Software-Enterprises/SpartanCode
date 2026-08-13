@@ -43,3 +43,23 @@ portable `ssh2` runtime.
 - Only explicitly licensed local models are exposed by the model catalog.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
+
+## Android
+
+The Android companion follows the Android-first phases in the authoritative
+[`vibe-coding-export.txt`](vibe-coding-export.txt). The maintained delivery
+contract, acceptance criteria, and test matrix are in
+[`android/PLAN.md`](android/PLAN.md).
+
+### Verified Android interface
+
+These screenshots were captured by Playwright against the exported Android
+companion web surface at a 390×844 device viewport. The smoke test asserted the
+command-center shell and queued a mission through the visible controls.
+
+![Android command center](android/screenshots/command-center.png)
+
+![Android mission queued](android/screenshots/mission-queued.png)
+
+The current Android interface description and verification record are in
+[`android/ABOUT.md`](android/ABOUT.md).
