@@ -553,3 +553,8 @@
  - Artifact review workspace with accept/reject controls
  - Artifact detail content rendered from persisted agent output
  - Review decisions flow through the audit trail
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 9
+ - Live Agent Manager workspace
+ - Agent state cards derived from persisted mission lifecycle
+ - Recent agent activity inspection from the command center

@@ -490,6 +490,10 @@
  The desktop includes an artifact review workspace with persisted detail view,
  accept/reject controls, and audit-trail integration.
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 9
+ The desktop now includes a live Agent Manager workspace showing Plan, Build,
+ and Verify state derived from persisted missions plus recent agent activity.
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
