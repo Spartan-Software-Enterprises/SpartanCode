@@ -100,6 +100,19 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     return readWorkspaceFile(workspacePath, requestedPath);
   });
   ipcMain.handle("workspace:snapshot", () => store.snapshot());
+  ipcMain.handle("collaboration:list", () => store.collaborationList());
+  ipcMain.handle("collaboration:create", (_event, input) =>
+    store.collaborationCreate(input || {}),
+  );
+  ipcMain.handle("collaboration:join", (_event, id, input) =>
+    store.collaborationJoin(id, input || {}),
+  );
+  ipcMain.handle("collaboration:append", (_event, id, event, options) =>
+    store.collaborationAppend(id, event || {}, options || {}),
+  );
+  ipcMain.handle("collaboration:merge", (_event, id, events, options) =>
+    store.collaborationMerge(id, events || [], options || {}),
+  );
   ipcMain.handle("chat:history", () => chatService.history());
   ipcMain.handle("chat:send", (_event, content) => {
     const result = chatService.send(content);

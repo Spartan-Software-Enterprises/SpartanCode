@@ -33,6 +33,10 @@ behavior and a corresponding automated or documented verification path.
 - Reproducible release-evidence generation now records the Git commit,
   SHA-256 hashes for scanned artifacts, and a lockfile-derived third-party
   component inventory for desktop and Android release workflows.
+- Desktop now has a durable, versioned collaboration journal with owner/member/
+  observer roles, optimistic revision conflict detection, idempotent event
+  merge, and audit-log persistence through the workspace store. Transport to
+  other devices remains an explicit bridge/API integration gate.
 
 ## Implemented but environment-dependent
 
@@ -56,8 +60,8 @@ behavior and a corresponding automated or documented verification path.
   gates. The generator itself is implemented and verified; its inventory and
   hashes must still be attached to the signed release and reviewed for the
   target distribution.
-- Long-term collaboration, cross-modal gesture workflows, enterprise
-  governance, and a mature external plugin marketplace.
+- Cross-device collaboration transport, cross-modal gesture workflows,
+  enterprise governance, and a mature external plugin marketplace.
 
 These items remain open until their implementation and release-environment
 evidence exist; passing unit tests alone does not close them.

@@ -2,6 +2,15 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("spartanCode", {
   getSnapshot: () => ipcRenderer.invoke("workspace:snapshot"),
+  listCollaborationSessions: () => ipcRenderer.invoke("collaboration:list"),
+  createCollaborationSession: (input) =>
+    ipcRenderer.invoke("collaboration:create", input),
+  joinCollaborationSession: (id, input) =>
+    ipcRenderer.invoke("collaboration:join", id, input),
+  appendCollaborationEvent: (id, event, options) =>
+    ipcRenderer.invoke("collaboration:append", id, event, options),
+  mergeCollaborationEvents: (id, events, options) =>
+    ipcRenderer.invoke("collaboration:merge", id, events, options),
   getChatHistory: () => ipcRenderer.invoke("chat:history"),
   sendChatMessage: (content) => ipcRenderer.invoke("chat:send", content),
   getArtifact: (id) => ipcRenderer.invoke("artifact:get", id),

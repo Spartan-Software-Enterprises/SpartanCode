@@ -639,6 +639,15 @@
  and verified in the target environment.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 35
+ A durable collaboration journal now stores owner/member/observer participants
+ and versioned mission/artifact events in the workspace snapshot. Optimistic
+ revision conflicts are explicit, duplicate event merges are idempotent, and
+ collaboration mutations enter the audit log. Desktop IPC/preload exposes the
+ journal without exposing Node primitives. Cross-device transport remains an
+ explicit remote integration gate.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

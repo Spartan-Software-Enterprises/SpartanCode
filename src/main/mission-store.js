@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { createCollaborationStore } = require("./collaboration");
 
 const emptyState = () => ({
   missions: [],
@@ -17,6 +18,7 @@ const emptyState = () => ({
   connections: [],
   auditLog: [],
   chat: [],
+  collaborationSessions: [],
 });
 
 function createMissionStore(filePath) {
@@ -42,6 +44,25 @@ function createMissionStore(filePath) {
     "executionMode",
   ]);
   const createId = (prefix) => `${prefix}-${Date.now()}-${sequence++}`;
+  const collaboration = createCollaborationStore({
+    initialSessions: Array.isArray(state.collaborationSessions)
+      ? state.collaborationSessions
+      : [],
+    persist(sessions) {
+      state.collaborationSessions = sessions;
+      persist();
+    },
+  });
+  const recordCollaborationAudit = (action, session, details = {}) => {
+    state.auditLog.unshift({
+      action,
+      sessionId: session.id,
+      timestamp: new Date().toISOString(),
+      ...details,
+    });
+    state.auditLog = state.auditLog.slice(0, 100);
+    persist();
+  };
 
   return {
     snapshot() {
@@ -203,6 +224,36 @@ function createMissionStore(filePath) {
       state.connections.unshift(saved);
       persist();
       return saved;
+    },
+    collaborationList() {
+      return collaboration.list();
+    },
+    collaborationCreate(input) {
+      const session = collaboration.create(input);
+      recordCollaborationAudit("collaboration:created", session);
+      return session;
+    },
+    collaborationJoin(id, input) {
+      const session = collaboration.join(id, input);
+      recordCollaborationAudit("collaboration:participant-joined", session, {
+        participantId: input?.participantId,
+      });
+      return session;
+    },
+    collaborationAppend(id, event, options) {
+      const session = collaboration.append(id, event, options);
+      recordCollaborationAudit("collaboration:event-appended", session, {
+        eventId: event?.eventId,
+        eventType: event?.type,
+      });
+      return session;
+    },
+    collaborationMerge(id, events, options) {
+      const session = collaboration.merge(id, events, options);
+      recordCollaborationAudit("collaboration:events-merged", session, {
+        eventCount: Array.isArray(events) ? events.length : 0,
+      });
+      return session;
     },
   };
 }

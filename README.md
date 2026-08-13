@@ -64,6 +64,8 @@ portable `ssh2` runtime.
   reported as ready until their adapter contract is installed and verified.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
+- Collaboration sessions use versioned, auditable events with conflict
+  detection and idempotent merge; external transport remains optional.
 
 ## Custom agents
 
