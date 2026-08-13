@@ -6,6 +6,7 @@ const { classifyCommand } = require("./policy-engine");
 const { getCapabilities } = require("./capabilities");
 const { getProviderStatus } = require("./provider-status");
 const { createVoiceService } = require("./voice-service");
+const { createChatService } = require("./chat-service");
 const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
@@ -13,6 +14,7 @@ const { createModelCache } = require("./model-cache");
 
 function registerDesktopApi({ store, window, runMission, modelCache }) {
   const voiceService = createVoiceService();
+  const chatService = createChatService(store);
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("capabilities:get", () => getCapabilities());
   ipcMain.handle("providers:get", () => getProviderStatus());
@@ -57,6 +59,12 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     return readWorkspaceFile(workspacePath, requestedPath);
   });
   ipcMain.handle("workspace:snapshot", () => store.snapshot());
+  ipcMain.handle("chat:history", () => chatService.history());
+  ipcMain.handle("chat:send", (_event, content) => {
+    const result = chatService.send(content);
+    window.webContents.send("workspace:changed", store.snapshot());
+    return result;
+  });
   ipcMain.handle("artifact:get", (_event, id) => store.getArtifact(id));
   ipcMain.handle("artifact:review", (_event, { id, decision, note }) => {
     const artifact = store.reviewArtifact(id, decision, note);

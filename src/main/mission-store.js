@@ -15,6 +15,7 @@ const emptyState = () => ({
   },
   connections: [],
   auditLog: [],
+  chat: [],
 });
 
 function createMissionStore(filePath) {
@@ -99,6 +100,21 @@ function createMissionStore(filePath) {
     },
     auditLog() {
       return state.auditLog.slice(0, 100);
+    },
+    addChatMessage(role, content) {
+      const message = {
+        id: `message-${Date.now()}-${state.chat.length}`,
+        role,
+        content,
+        createdAt: new Date().toISOString(),
+      };
+      state.chat.push(message);
+      state.chat = state.chat.slice(-100);
+      persist();
+      return message;
+    },
+    chatMessages() {
+      return state.chat.slice();
     },
     addActivity(activity) {
       state.activity.unshift({
