@@ -1,8 +1,12 @@
 const crypto = require("node:crypto");
+const fs = require("node:fs");
+const path = require("node:path");
 const { validatePlugin } = require("./plugin-registry");
 
 const MAX_INDEX_BYTES = 1024 * 1024;
 const MAX_ENTRIES = 100;
+const MAX_ARTIFACT_BYTES = 50 * 1024 * 1024;
+const FETCH_TIMEOUT_MS = 30_000;
 const SHA256 = /^[a-f0-9]{64}$/i;
 
 function canonicalize(value) {
@@ -116,9 +120,77 @@ async function fetchMarketplaceIndex(
   return verifyMarketplaceIndex(index, publicKey);
 }
 
+async function downloadMarketplaceArtifact(
+  manifest,
+  { destinationDir, fetchImpl = globalThis.fetch } = {},
+) {
+  if (typeof destinationDir !== "string" || !path.isAbsolute(destinationDir))
+    throw new Error("Marketplace artifact destination must be absolute");
+  const validated = validateMarketplaceIndex({
+    schemaVersion: 1,
+    issuer: "artifact-download",
+    plugins: [manifest],
+  }).plugins[0];
+  if (typeof fetchImpl !== "function")
+    throw new Error("Marketplace fetch is unavailable");
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let response;
+  try {
+    response = await fetchImpl(validated.sourceUrl, {
+      headers: { Accept: "application/octet-stream, application/gzip" },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+  if (!response?.ok)
+    throw new Error(
+      `Marketplace artifact request failed (${response?.status || "unknown"})`,
+    );
+  const declaredLength = Number(response.headers?.get?.("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_ARTIFACT_BYTES)
+    throw new Error("Marketplace artifact is too large");
+  if (typeof response.arrayBuffer !== "function")
+    throw new Error("Marketplace artifact response is not readable");
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (bytes.length > MAX_ARTIFACT_BYTES)
+    throw new Error("Marketplace artifact is too large");
+  const digest = crypto.createHash("sha256").update(bytes).digest("hex");
+  if (digest !== validated.artifactSha256)
+    throw new Error("Marketplace artifact SHA-256 verification failed");
+
+  const artifactDir = path.join(
+    destinationDir,
+    validated.id,
+    validated.version,
+  );
+  fs.mkdirSync(artifactDir, { recursive: true, mode: 0o700 });
+  const artifactPath = path.join(artifactDir, "artifact.bin");
+  const metadataPath = path.join(artifactDir, "metadata.json");
+  const temporaryPath = `${artifactPath}.${process.pid}.tmp`;
+  fs.writeFileSync(temporaryPath, bytes, { mode: 0o600 });
+  fs.renameSync(temporaryPath, artifactPath);
+  const metadata = {
+    id: validated.id,
+    version: validated.version,
+    sourceUrl: validated.sourceUrl,
+    artifactSha256: digest,
+    downloadedAt: new Date().toISOString(),
+    installState: "staged",
+  };
+  fs.writeFileSync(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`, {
+    mode: 0o600,
+  });
+  return { ...metadata, artifactPath, metadataPath };
+}
+
 module.exports = {
   MAX_ENTRIES,
+  MAX_ARTIFACT_BYTES,
   canonicalize,
+  downloadMarketplaceArtifact,
   fetchMarketplaceIndex,
   validateMarketplaceIndex,
   verifyMarketplaceIndex,

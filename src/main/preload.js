@@ -23,6 +23,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   listPlugins: () => ipcRenderer.invoke("plugins:list"),
   fetchMarketplacePlugins: (url, publicKey) =>
     ipcRenderer.invoke("plugins:marketplace", url, publicKey),
+  downloadMarketplacePlugin: (manifest) =>
+    ipcRenderer.invoke("plugins:download", manifest),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   updateSettings: (update) => ipcRenderer.invoke("settings:update", update),
   chooseWorkspace: () => ipcRenderer.invoke("workspace:choose"),

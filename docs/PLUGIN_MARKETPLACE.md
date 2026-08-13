@@ -1,9 +1,9 @@
 # Plugin marketplace boundary
 
-SpartanCode currently supports a signed metadata index, not arbitrary plugin
-installation. The desktop isolated API accepts an HTTPS index and an Ed25519
-public key, verifies the detached `signature`, and returns only validated
-metadata.
+SpartanCode supports a signed metadata index and a safe artifact-staging step;
+it does not execute arbitrary plugin code. The desktop isolated API accepts an
+HTTPS index and an Ed25519 public key, verifies the detached `signature`, and
+returns only validated metadata.
 
 The signed payload has this shape:
 
@@ -31,6 +31,8 @@ The signed payload has this shape:
 The signature covers the canonical JSON payload with `signature` omitted.
 Indexes are capped at 100 entries and 1 MiB. Every entry requires an explicit
 MIT or Apache-2.0 license, a safe capability, an HTTPS source URL, and an
-artifact digest. This boundary deliberately does not download, install, load,
-or execute marketplace code; artifact installation and update review remain
-future release work.
+artifact digest. An explicitly selected entry may be downloaded over HTTPS,
+bounded to 50 MiB, SHA-256 verified, and atomically staged in the application
+cache with mode `0600` metadata. Staging does not extract, load, activate,
+replace, update, or execute code; human review and an explicit installer remain
+required before an artifact can become active.

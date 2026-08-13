@@ -116,8 +116,9 @@ network capabilities are not accepted by the registry.
 
 A signed HTTPS marketplace index can also be fetched through the isolated API.
 It verifies an Ed25519 signature, license, capabilities, source URL, and
-artifact SHA-256 metadata; marketplace fetching does not download or execute
-plugin code.
+artifact SHA-256 metadata. Explicitly selected entries may be downloaded into
+a bounded, digest-verified staging cache; staged artifacts are not extracted,
+loaded, installed, or executed.
 
 ## Execution modes
 

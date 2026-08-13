@@ -56,10 +56,11 @@ behavior and a corresponding automated or documented verification path.
   plugins, and exposes metadata through isolated IPC without executing plugin
   code.
 - Desktop can fetch a bounded, HTTPS-only, Ed25519-signed marketplace index
-  through isolated IPC. Entries are metadata-only and require explicit license,
-  safe capabilities, source URL, and artifact SHA-256 fields; downloading or
-  executing marketplace code remains intentionally outside this boundary. The
-  index contract is documented in `docs/PLUGIN_MARKETPLACE.md`.
+  through isolated IPC. Entries require explicit license, safe capabilities,
+  source URL, and artifact SHA-256 fields. A selected entry can be downloaded
+  into a bounded SHA-256-verified staging cache; extraction, activation, update
+  replacement, and execution remain review gates. The index contract is
+  documented in `docs/PLUGIN_MARKETPLACE.md`.
 - Desktop audit export now emits bounded, credential-redacted, SHA-256-verified
   governance bundles through isolated IPC.
 - The authenticated MCP Bridge also exposes the same redacted audit bundle for
@@ -112,7 +113,7 @@ behavior and a corresponding automated or documented verification path.
   must be reviewed for the target distribution.
 - Physical Android collaboration/gesture acceptance, cross-modal expansion,
   provider-specific OIDC account lifecycle/administration, marketplace artifact
-  download/install/updates, and a mature external plugin marketplace.
+  installation/activation/updates, and a mature external plugin marketplace.
 
 These items remain open until their implementation and release-environment
 evidence exist; passing unit tests alone does not close them.

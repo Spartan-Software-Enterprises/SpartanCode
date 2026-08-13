@@ -1,8 +1,12 @@
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const test = require("node:test");
 const {
   canonicalize,
+  downloadMarketplaceArtifact,
   fetchMarketplaceIndex,
   validateMarketplaceIndex,
   verifyMarketplaceIndex,
@@ -96,5 +100,57 @@ test("marketplace rejects tampering, non-HTTPS fetches, and oversized indexes", 
       }),
     }),
     /too large/,
+  );
+});
+
+test("marketplace stages HTTPS artifacts only after bounded digest verification", async () => {
+  const bytes = Buffer.from("signed plugin artifact");
+  const manifest = {
+    id: "review-persona",
+    name: "Review persona",
+    version: "1.0.0",
+    description: "Adds a bounded review persona.",
+    license: "MIT",
+    capabilities: ["persona"],
+    sourceUrl: "https://plugins.example/review-persona.tgz",
+    artifactSha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+  };
+  const destinationDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-marketplace-"),
+  );
+  const result = await downloadMarketplaceArtifact(manifest, {
+    destinationDir,
+    fetchImpl: async (url) => {
+      assert.equal(url, manifest.sourceUrl);
+      return {
+        ok: true,
+        arrayBuffer: async () =>
+          bytes.buffer.slice(
+            bytes.byteOffset,
+            bytes.byteOffset + bytes.byteLength,
+          ),
+      };
+    },
+  });
+  assert.equal(result.installState, "staged");
+  assert.deepEqual(fs.readFileSync(result.artifactPath), bytes);
+  assert.equal(
+    JSON.parse(fs.readFileSync(result.metadataPath)).artifactSha256,
+    manifest.artifactSha256,
+  );
+  fs.rmSync(destinationDir, { recursive: true, force: true });
+
+  await assert.rejects(
+    downloadMarketplaceArtifact(
+      { ...manifest, artifactSha256: "0".repeat(64) },
+      {
+        destinationDir,
+        fetchImpl: async () => ({
+          ok: true,
+          arrayBuffer: async () => bytes,
+        }),
+      },
+    ),
+    /SHA-256 verification failed/,
   );
 });

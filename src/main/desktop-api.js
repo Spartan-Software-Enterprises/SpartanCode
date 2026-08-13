@@ -18,7 +18,10 @@ const { validateRemoteConfig } = require("./remote-connection");
 const { loadCustomAgents } = require("./custom-agents");
 const { createRuntimeRegistry } = require("./runtime-adapters");
 const { listPlugins } = require("./plugin-registry");
-const { fetchMarketplaceIndex } = require("./plugin-marketplace");
+const {
+  downloadMarketplaceArtifact,
+  fetchMarketplaceIndex,
+} = require("./plugin-marketplace");
 const { exportAuditLog } = require("./audit-export");
 const {
   estimateServerCost,
@@ -27,7 +30,13 @@ const {
   listServerTemplates,
 } = require("./remote-guidance");
 
-function registerDesktopApi({ store, window, runMission, modelCache }) {
+function registerDesktopApi({
+  store,
+  window,
+  runMission,
+  modelCache,
+  marketplaceDir,
+}) {
   const voiceService = createVoiceService();
   const chatService = createChatService(store);
   const runtimeRegistry = createRuntimeRegistry();
@@ -95,6 +104,12 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
         "Marketplace verification key is required and must be bounded",
       );
     return fetchMarketplaceIndex(url, { publicKey });
+  });
+  ipcMain.handle("plugins:download", (_event, manifest) => {
+    if (!marketplaceDir) throw new Error("Marketplace staging is unavailable");
+    return downloadMarketplaceArtifact(manifest, {
+      destinationDir: marketplaceDir,
+    });
   });
   ipcMain.handle("models:list", (_event, options) =>
     listLicensedModels(options),

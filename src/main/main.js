@@ -78,6 +78,7 @@ function createWindow() {
     modelCache: createModelCache(
       path.join(app.getPath("userData"), "models.json"),
     ),
+    marketplaceDir: path.join(app.getPath("userData"), "marketplace"),
   });
 }
 
