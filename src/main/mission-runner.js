@@ -3,7 +3,11 @@ const { createExecutionPlan } = require("./agent-plan");
 function createMissionRunner(
   store,
   window,
-  { schedule = queueMicrotask, executeStage = () => ({ ok: true }) } = {},
+  {
+    schedule = queueMicrotask,
+    executeStage = () => ({ ok: true }),
+    events,
+  } = {},
 ) {
   return (mission) => {
     const plan = createExecutionPlan(mission.description);
@@ -109,6 +113,7 @@ function createMissionRunner(
   };
 
   function publish() {
+    if (events) events.publish("workspace.changed", store.snapshot());
     if (window && !window.isDestroyed()) {
       window.webContents.send("workspace:changed", store.snapshot());
     }

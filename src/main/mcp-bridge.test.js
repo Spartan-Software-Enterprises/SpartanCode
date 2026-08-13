@@ -33,3 +33,29 @@ test("MCP Bridge serves authenticated snapshots and mission mutations", async ()
   await new Promise((resolve) => server.close(resolve));
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test("MCP Bridge replays authenticated SSE events from a cursor", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-events-"));
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const server = createBridgeServer({ store, token: "event-token" });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const base = `http://127.0.0.1:${address.port}`;
+  server.events.publish("mission.updated", {
+    missionId: "m1",
+    status: "planning",
+  });
+  const response = await fetch(`${base}/v1/events`, {
+    headers: { Authorization: "Bearer event-token", "Last-Event-ID": "0" },
+  });
+  assert.equal(response.status, 200);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let chunk = "";
+  for (let index = 0; index < 3 && !chunk.includes("mission.updated"); index++)
+    chunk += decoder.decode((await reader.read()).value);
+  assert.match(chunk, /mission\.updated/);
+  await reader.cancel();
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});

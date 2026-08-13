@@ -29,8 +29,9 @@ function createWindow() {
   const store = createMissionStore(
     path.join(app.getPath("userData"), "workspace.json"),
   );
+  let bridge = null;
   if (process.env.SPARTANCODE_BRIDGE_PORT) {
-    const bridge = createBridgeServer({
+    bridge = createBridgeServer({
       store,
       token: process.env.SPARTANCODE_BRIDGE_TOKEN || null,
     });
@@ -44,6 +45,7 @@ function createWindow() {
     store,
     window: win,
     runMission: createMissionRunner(store, win, {
+      events: bridge?.events,
       executeStage: createLocalStageExecutor({
         getWorkspacePath: () => store.snapshot().settings.workspacePath,
       }),

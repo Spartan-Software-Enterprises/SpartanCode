@@ -1,5 +1,41 @@
 const http = require("node:http");
 
+function createBridgeEventHub({ maxEvents = 100 } = {}) {
+  let sequence = 0;
+  const events = [];
+  const clients = new Set();
+  return {
+    publish(type, data) {
+      const event = { id: String(++sequence), type, data };
+      events.push(event);
+      while (events.length > maxEvents) events.shift();
+      for (const client of clients) {
+        client.write(
+          `id: ${event.id}\nevent: ${type}\ndata: ${JSON.stringify(data)}\n\n`,
+        );
+      }
+      return event;
+    },
+    connect(response, lastEventId = "0") {
+      response.writeHead(200, {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-store",
+        Connection: "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+      });
+      response.write(": connected\n\n");
+      for (const event of events) {
+        if (Number(event.id) > Number(lastEventId))
+          response.write(
+            `id: ${event.id}\nevent: ${event.type}\ndata: ${JSON.stringify(event.data)}\n\n`,
+          );
+      }
+      clients.add(response);
+      response.on("close", () => clients.delete(response));
+    },
+  };
+}
+
 const json = (response, status, body) => {
   response.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
@@ -11,7 +47,12 @@ const json = (response, status, body) => {
   response.end(JSON.stringify(body));
 };
 
-function createBridgeRequestHandler({ store, runMission, token = null }) {
+function createBridgeRequestHandler({
+  store,
+  runMission,
+  token = null,
+  events = null,
+}) {
   if (!store || typeof store.snapshot !== "function")
     throw new Error("A mission store is required");
   const authenticate = (request) => {
@@ -31,6 +72,10 @@ function createBridgeRequestHandler({ store, runMission, token = null }) {
     }
     if (request.method === "GET" && url.pathname === "/v1/audit") {
       return json(response, 200, { auditLog: store.auditLog() });
+    }
+    if (request.method === "GET" && url.pathname === "/v1/events") {
+      if (!events) return json(response, 404, { error: "Events unavailable" });
+      return events.connect(response, request.headers["last-event-id"] || "0");
     }
     if (request.method !== "POST")
       return json(response, 404, { error: "Not found" });
@@ -118,8 +163,16 @@ function readJson(request) {
 }
 
 function createBridgeServer(options) {
-  const server = http.createServer(createBridgeRequestHandler(options));
+  const events = options.events || createBridgeEventHub();
+  const server = http.createServer(
+    createBridgeRequestHandler({ ...options, events }),
+  );
+  server.events = events;
   return server;
 }
 
-module.exports = { createBridgeRequestHandler, createBridgeServer };
+module.exports = {
+  createBridgeEventHub,
+  createBridgeRequestHandler,
+  createBridgeServer,
+};
