@@ -572,6 +572,11 @@
  while preserving settings, connections, chat, and audit records.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 24
+ Mission-store identifiers now include a process-local sequence component, avoiding
+ collisions when agent output creates multiple records in the same millisecond.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

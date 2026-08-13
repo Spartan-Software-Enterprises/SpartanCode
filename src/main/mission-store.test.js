@@ -17,10 +17,15 @@ test("mission store persists missions, activities, and artifacts", () => {
     message: "Verification complete",
   });
   store.addArtifact({ name: "Verification report", type: "verification" });
+  const secondArtifact = store.addArtifact({
+    name: "Second report",
+    type: "verification",
+  });
 
   const reloaded = createMissionStore(filePath).snapshot();
   assert.equal(reloaded.missions[0].status, "complete");
-  assert.equal(reloaded.artifacts[0].name, "Verification report");
+  assert.equal(reloaded.artifacts[1].name, "Verification report");
+  assert.notEqual(reloaded.artifacts[1].id, secondArtifact.id);
   assert.equal(reloaded.activity[0].agent, "Verify agent");
 
   const cleared = createMissionStore(filePath);

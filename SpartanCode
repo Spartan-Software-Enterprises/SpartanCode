@@ -637,3 +637,8 @@
  - Clear local history now removes missions, artifacts, activity, and approvals together
  - Settings, connections, chat, and audit records remain preserved
  - Persistent cleanup behavior is covered by the mission-store test suite
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 24
+ - Mission-store identifiers now include an in-process sequence component
+ - Rapidly created missions, artifacts, activities, approvals, and connections cannot collide
+ - 27 automated tests passing

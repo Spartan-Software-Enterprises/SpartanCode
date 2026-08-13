@@ -20,6 +20,7 @@ const emptyState = () => ({
 
 function createMissionStore(filePath) {
   let state = emptyState();
+  let sequence = 0;
 
   try {
     state = JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -38,6 +39,7 @@ function createMissionStore(filePath) {
     "workspacePath",
     "voiceEnabled",
   ]);
+  const createId = (prefix) => `${prefix}-${Date.now()}-${sequence++}`;
 
   return {
     snapshot() {
@@ -45,7 +47,7 @@ function createMissionStore(filePath) {
     },
     addMission(description) {
       const mission = {
-        id: `mission-${Date.now()}`,
+        id: createId("mission"),
         description,
         status: "planning",
         createdAt: new Date().toISOString(),
@@ -53,7 +55,7 @@ function createMissionStore(filePath) {
       };
       state.missions.unshift(mission);
       state.activity.unshift({
-        id: `activity-${Date.now()}`,
+        id: createId("activity"),
         agent: "Plan agent",
         message: "Mission received; preparing an execution plan",
         createdAt: mission.createdAt,
@@ -77,7 +79,7 @@ function createMissionStore(filePath) {
     },
     addArtifact(artifact) {
       const saved = {
-        id: `artifact-${Date.now()}`,
+        id: createId("artifact"),
         createdAt: new Date().toISOString(),
         ...artifact,
       };
@@ -117,7 +119,7 @@ function createMissionStore(filePath) {
     },
     addChatMessage(role, content) {
       const message = {
-        id: `message-${Date.now()}-${state.chat.length}`,
+        id: createId("message"),
         role,
         content,
         createdAt: new Date().toISOString(),
@@ -132,7 +134,7 @@ function createMissionStore(filePath) {
     },
     addActivity(activity) {
       state.activity.unshift({
-        id: `activity-${Date.now()}`,
+        id: createId("activity"),
         createdAt: new Date().toISOString(),
         ...activity,
       });
@@ -141,7 +143,7 @@ function createMissionStore(filePath) {
     },
     requestApproval(approval) {
       const saved = {
-        id: `approval-${Date.now()}`,
+        id: createId("approval"),
         status: "pending",
         createdAt: new Date().toISOString(),
         ...approval,
@@ -177,7 +179,7 @@ function createMissionStore(filePath) {
     },
     addConnection(connection) {
       const saved = {
-        id: `connection-${Date.now()}`,
+        id: createId("connection"),
         createdAt: new Date().toISOString(),
         ...connection,
       };
