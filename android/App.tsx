@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -25,8 +26,10 @@ import {
   removeQueuedOperation,
   updateQueuedOperation,
   readSnapshot,
+  readBiometricSetting,
   saveBridgeToken,
   writeSnapshot,
+  writeBiometricSetting,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
@@ -37,6 +40,7 @@ import {
   routerGuidance,
 } from "./src/core/remote-guidance";
 import type { RemoteProvider } from "./src/core/remote-guidance";
+import { authorizeSecretAccess } from "./src/core/biometric";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -60,16 +64,29 @@ export default function App() {
   const [routerMethod, setRouterMethod] =
     useState<keyof typeof routerGuidance>("tailscale");
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
 
   useEffect(() => {
-    readSnapshot()
-      .then(setSnapshot)
+    Promise.all([readSnapshot(), readBiometricSetting()])
+      .then(([savedSnapshot, savedBiometric]) => {
+        setSnapshot(savedSnapshot);
+        setBiometricEnabled(savedBiometric);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const refresh = useCallback(async () => {
     setMessage("Connecting…");
     try {
+      const access = await authorizeSecretAccess(biometricEnabled);
+      if (!access.allowed) {
+        setMessage(
+          access.reason === "unavailable"
+            ? "Biometric unlock is unavailable on this device"
+            : "Biometric unlock cancelled",
+        );
+        return;
+      }
       const normalizedEndpoint = normalizeBridgeEndpoint(endpoint);
       if (token.trim()) await saveBridgeToken(normalizedEndpoint, token.trim());
       const remote = normalizeBridgeSnapshot(
@@ -132,7 +149,7 @@ export default function App() {
       setSnapshot((current) => ({ ...current, offline: true }));
       setMessage(error instanceof Error ? error.message : "Connection failed");
     }
-  }, [endpoint, token]);
+  }, [biometricEnabled, endpoint, token]);
 
   const createMission = useCallback(async () => {
     const description = mission.trim();
@@ -434,6 +451,26 @@ export default function App() {
             <Text style={styles.secondaryText}>Sync bridge</Text>
           </Pressable>
           <Text style={styles.message}>{message}</Text>
+          <View style={styles.toggleRow}>
+            <Text style={styles.message}>
+              Require biometrics before bridge access
+            </Text>
+            <Switch
+              accessibilityLabel="Require biometrics before bridge access"
+              value={biometricEnabled}
+              onValueChange={async (enabled) => {
+                setBiometricEnabled(enabled);
+                await writeBiometricSetting(enabled);
+                setMessage(
+                  enabled
+                    ? "Biometric unlock enabled"
+                    : "Biometric unlock disabled",
+                );
+              }}
+              trackColor={{ false: "#263657", true: "#2d806f" }}
+              thumbColor="#f2f5ff"
+            />
+          </View>
         </View>
 
         <Text style={styles.section}>Remote planning</Text>
@@ -702,6 +739,12 @@ const styles = StyleSheet.create({
   },
   secondaryText: { color: "#72e6c5", fontSize: 14, fontWeight: "800" },
   message: { color: "#8392ae", fontSize: 12 },
+  toggleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+  },
   empty: {
     borderColor: "#202d4c",
     borderRadius: 18,

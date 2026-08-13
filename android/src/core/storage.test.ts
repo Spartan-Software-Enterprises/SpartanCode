@@ -2,9 +2,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   enqueueOperation,
   readSnapshot,
+  readBiometricSetting,
   readQueuedOperations,
   removeQueuedOperation,
   updateQueuedOperation,
+  writeBiometricSetting,
 } from "./storage";
 
 describe("offline operation queue", () => {
@@ -38,8 +40,29 @@ describe("storage recovery", () => {
 
   it("quarantines malformed snapshots and returns an offline-safe empty state", async () => {
     await AsyncStorage.setItem("spartancode.mobile.snapshot.v1", "{broken");
-    expect(await readSnapshot()).toMatchObject({ missions: [], connections: [], offline: true });
-    expect(await AsyncStorage.getItem("spartancode.mobile.snapshot.v1")).toBeNull();
-    expect(await AsyncStorage.getItem("spartancode.mobile.snapshot.quarantine.v1")).toContain("broken");
+    expect(await readSnapshot()).toMatchObject({
+      missions: [],
+      connections: [],
+      offline: true,
+    });
+    expect(
+      await AsyncStorage.getItem("spartancode.mobile.snapshot.v1"),
+    ).toBeNull();
+    expect(
+      await AsyncStorage.getItem("spartancode.mobile.snapshot.quarantine.v1"),
+    ).toContain("broken");
+  });
+});
+
+describe("biometric preference", () => {
+  beforeEach(async () => AsyncStorage.clear());
+
+  it("persists only the enabled/disabled preference", async () => {
+    expect(await readBiometricSetting()).toBe(false);
+    await writeBiometricSetting(true);
+    expect(await readBiometricSetting()).toBe(true);
+    expect(
+      await AsyncStorage.getItem("spartancode.mobile.biometric-unlock.v1"),
+    ).toBe("enabled");
   });
 });

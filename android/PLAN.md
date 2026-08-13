@@ -49,6 +49,11 @@ Standalone remote guidance also includes provider-neutral cost estimates and
 explicit private/public router traversal recommendations; it performs no
 provisioning or port changes.
 
+Biometric unlock is opt-in and gates bridge-secret access through the device's
+biometric/passcode prompt. Raw biometric data never enters the app; if hardware
+or enrollment is unavailable, access fails closed while offline work remains
+available.
+
 The Android shell bundles Researcher, Implementer, Verifier, and Sync Guardian
 roles. They use the local execution model when no bridge is connected; a bridge
 can optionally provide remote execution without becoming a mobile dependency.

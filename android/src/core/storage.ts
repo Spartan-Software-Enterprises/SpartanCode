@@ -21,6 +21,7 @@ const BRIDGE_TOKEN_KEY = "spartancode.mobile.bridge-token.v1";
 const BRIDGE_TOKEN_INDEX_KEY = "spartancode.mobile.bridge-token-index.v1";
 const SNAPSHOT_QUARANTINE_KEY = "spartancode.mobile.snapshot.quarantine.v1";
 const QUEUE_QUARANTINE_KEY = "spartancode.mobile.queue.quarantine.v1";
+const BIOMETRIC_SETTING_KEY = "spartancode.mobile.biometric-unlock.v1";
 
 function emptySnapshot(): MobileSnapshot {
   return { missions: [], connections: [], pendingApprovals: 0, offline: true };
@@ -35,7 +36,10 @@ async function quarantineCorruptValue(key: string, raw: string | null) {
   try {
     await AsyncStorage.setItem(
       key,
-      JSON.stringify({ quarantinedAt: new Date().toISOString(), raw: raw.slice(0, 1_000_000) }),
+      JSON.stringify({
+        quarantinedAt: new Date().toISOString(),
+        raw: raw.slice(0, 1_000_000),
+      }),
     );
   } catch {
     // Recovery must never prevent the app from starting offline.
@@ -98,6 +102,17 @@ export async function readSnapshot(): Promise<MobileSnapshot> {
 
 export async function writeSnapshot(snapshot: MobileSnapshot) {
   await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+}
+
+export async function readBiometricSetting() {
+  return (await AsyncStorage.getItem(BIOMETRIC_SETTING_KEY)) === "enabled";
+}
+
+export async function writeBiometricSetting(enabled: boolean) {
+  await AsyncStorage.setItem(
+    BIOMETRIC_SETTING_KEY,
+    enabled ? "enabled" : "disabled",
+  );
 }
 
 export async function readQueuedOperations(): Promise<QueuedOperation[]> {

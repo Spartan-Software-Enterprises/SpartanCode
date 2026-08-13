@@ -104,6 +104,11 @@ application, an MCP Bridge, or network access. A bridge is an optional route
 for remote execution and synchronization only; local planning, queueing,
 policy-visible approvals, and review do not depend on it.
 
+Bridge-secret access on Android can optionally require the device biometric or
+passcode prompt. The app receives only the authentication result; it never
+stores or processes raw biometric data, and offline missions remain available
+when biometric hardware is unavailable.
+
 ### Remote planning
 
 Desktop settings provide non-destructive planning tools for DigitalOcean,
