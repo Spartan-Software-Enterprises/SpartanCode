@@ -18,6 +18,7 @@ const { validateRemoteConfig } = require("./remote-connection");
 const { loadCustomAgents } = require("./custom-agents");
 const { createRuntimeRegistry } = require("./runtime-adapters");
 const { listPlugins } = require("./plugin-registry");
+const { fetchMarketplaceIndex } = require("./plugin-marketplace");
 const { exportAuditLog } = require("./audit-export");
 const {
   estimateServerCost,
@@ -86,6 +87,15 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
   ipcMain.handle("plugins:list", () =>
     listPlugins(store.snapshot().settings.workspacePath),
   );
+  ipcMain.handle("plugins:marketplace", (_event, url, publicKey) => {
+    if (typeof url !== "string" || url.length > 2048)
+      throw new Error("Marketplace URL is required and must be bounded");
+    if (typeof publicKey !== "string" || publicKey.length > 16 * 1024)
+      throw new Error(
+        "Marketplace verification key is required and must be bounded",
+      );
+    return fetchMarketplaceIndex(url, { publicKey });
+  });
   ipcMain.handle("models:list", (_event, options) =>
     listLicensedModels(options),
   );

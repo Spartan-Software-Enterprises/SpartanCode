@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   previewPlan: (description) => ipcRenderer.invoke("mission:plan", description),
   listAgents: () => ipcRenderer.invoke("agents:list"),
   listPlugins: () => ipcRenderer.invoke("plugins:list"),
+  fetchMarketplacePlugins: (url, publicKey) =>
+    ipcRenderer.invoke("plugins:marketplace", url, publicKey),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   updateSettings: (update) => ipcRenderer.invoke("settings:update", update),
   chooseWorkspace: () => ipcRenderer.invoke("workspace:choose"),
