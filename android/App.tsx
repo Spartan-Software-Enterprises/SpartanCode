@@ -22,6 +22,7 @@ import {
   writeSnapshot,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
+import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -134,6 +135,9 @@ export default function App() {
     () => (snapshot.offline ? "LOCAL" : stale ? "STALE" : "SYNCED"),
     [snapshot.offline, stale],
   );
+  const workloadLabelText = workloadLabel(
+    chooseWorkloadRoute("planning", !snapshot.offline),
+  );
 
   if (loading)
     return (
@@ -161,6 +165,7 @@ export default function App() {
             Queue missions offline, connect to a bridge when ready, and keep
             every approval visible before an agent changes your workspace.
           </Text>
+          <Text style={styles.message}>{workloadLabelText}</Text>
         </View>
 
         <Text style={styles.section}>New mission</Text>
