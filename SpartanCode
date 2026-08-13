@@ -670,3 +670,9 @@
  - Runtime capability reporting no longer claims llama.cpp is installed when it is not
  - Local runtime status distinguishes available integrations from planned adapters
  - README documents development, verification, packaging, and product boundaries
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 30
+ - MCP Lite now exposes workspace.list and workspace.read handlers
+ - IPC MCP tool discovery matches the implemented filesystem surface
+ - Workspace handlers retain path and symlink isolation
+ - 29 automated tests passing

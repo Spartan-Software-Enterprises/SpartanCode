@@ -49,12 +49,28 @@ function createMcpLiteRegistry() {
   };
 }
 
-function createCoreMcpRegistry({ workspacePath, gitStatus, classifyCommand }) {
+function createCoreMcpRegistry({
+  workspacePath,
+  gitStatus,
+  classifyCommand,
+  listFiles,
+  readFile,
+}) {
   const registry = createMcpLiteRegistry();
   registry.registerTool(
     "workspace.info",
     "Describe the approved workspace",
     () => ({ workspacePath: workspacePath || null }),
+  );
+  registry.registerTool(
+    "workspace.list",
+    "List files inside the approved workspace",
+    ({ path }) => listFiles(workspacePath, path || "."),
+  );
+  registry.registerTool(
+    "workspace.read",
+    "Read a text file inside the approved workspace",
+    ({ path }) => readFile(workspacePath, path),
   );
   registry.registerTool(
     "git.status",

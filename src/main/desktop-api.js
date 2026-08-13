@@ -31,6 +31,14 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
       description: "Run commands through the human-in-the-loop policy",
     },
     { name: "git", description: "Inspect and update project history" },
+    {
+      name: "workspace.list",
+      description: "List files inside the approved workspace",
+    },
+    {
+      name: "workspace.read",
+      description: "Read a text file inside the approved workspace",
+    },
   ]);
   ipcMain.handle("mcp:dispatch", async (_event, request) => {
     const workspacePath = store.snapshot().settings.workspacePath;
@@ -38,6 +46,8 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
       workspacePath,
       gitStatus: gitStatusAt,
       classifyCommand,
+      listFiles: listWorkspaceFiles,
+      readFile: readWorkspaceFile,
     });
     return registry.dispatch(request);
   });

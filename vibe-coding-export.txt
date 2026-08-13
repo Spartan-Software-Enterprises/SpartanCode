@@ -603,6 +603,11 @@
  adapters, and the desktop README documents production operation and boundaries.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 30
+ MCP Lite now exposes workspace listing and text-file reads through the same
+ isolated workspace tools used by the desktop IPC surface.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
