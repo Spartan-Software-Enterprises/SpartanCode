@@ -18,6 +18,7 @@ const { validateRemoteConfig } = require("./remote-connection");
 const { loadCustomAgents } = require("./custom-agents");
 const { createRuntimeRegistry } = require("./runtime-adapters");
 const { listPlugins } = require("./plugin-registry");
+const { exportAuditLog } = require("./audit-export");
 const {
   estimateServerCost,
   getRouterGuidance,
@@ -136,6 +137,7 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     return artifact;
   });
   ipcMain.handle("audit:list", () => store.auditLog());
+  ipcMain.handle("audit:export", () => exportAuditLog(store.auditLog()));
   ipcMain.handle("mission:plan", (_event, description) =>
     createExecutionPlan(description, {
       workspacePath: store.snapshot().settings.workspacePath,

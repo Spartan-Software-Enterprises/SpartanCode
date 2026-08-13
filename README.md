@@ -68,6 +68,8 @@ portable `ssh2` runtime.
   detection and idempotent merge; authenticated MCP Bridge routes can sync
   participants and events without making the bridge mandatory for Android-only
   local planning.
+- Audit exports are bounded, credential-redacted, and SHA-256 verifiable through
+  desktop IPC and the authenticated bridge.
 
 ## Custom agents
 

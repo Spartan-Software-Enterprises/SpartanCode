@@ -1,4 +1,5 @@
 const http = require("node:http");
+const { exportAuditLog } = require("./audit-export");
 
 function createBridgeEventHub({ maxEvents = 100 } = {}) {
   let sequence = 0;
@@ -73,6 +74,9 @@ function createBridgeRequestHandler({
     }
     if (request.method === "GET" && url.pathname === "/v1/audit") {
       return json(response, 200, { auditLog: store.auditLog() });
+    }
+    if (request.method === "GET" && url.pathname === "/v1/audit/export") {
+      return json(response, 200, exportAuditLog(store.auditLog()));
     }
     if (
       request.method === "GET" &&

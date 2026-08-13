@@ -672,6 +672,12 @@
  code; marketplace transport and broader ecosystem governance remain open.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 39
+ Governance consumers can export the bounded audit log through desktop IPC or
+ the authenticated MCP Bridge. Credential-like fields are redacted and the
+ bundle includes a SHA-256 digest that detects tampering after export.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

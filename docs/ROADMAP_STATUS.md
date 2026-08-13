@@ -43,6 +43,10 @@ behavior and a corresponding automated or documented verification path.
   MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
   plugins, and exposes metadata through isolated IPC without executing plugin
   code.
+- Desktop audit export now emits bounded, credential-redacted, SHA-256-verified
+  governance bundles through isolated IPC.
+- The authenticated MCP Bridge also exposes the same redacted audit bundle for
+  remote governance consumers without exposing workspace credentials.
 - Desktop now has a durable, versioned collaboration journal with owner/member/
   observer roles, optimistic revision conflict detection, idempotent event
   merge, and audit-log persistence through the workspace store. Transport to
@@ -74,7 +78,7 @@ behavior and a corresponding automated or documented verification path.
   target distribution.
 - Physical Android collaboration/gesture acceptance,
   cross-modal expansion,
-  enterprise governance, and a mature external plugin marketplace.
+  SSO/enterprise governance, and a mature external plugin marketplace.
 
 These items remain open until their implementation and release-environment
 evidence exist; passing unit tests alone does not close them.

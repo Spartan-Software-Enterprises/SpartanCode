@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld("spartanCode", {
   reviewArtifact: (id, decision, note) =>
     ipcRenderer.invoke("artifact:review", { id, decision, note }),
   getAuditLog: () => ipcRenderer.invoke("audit:list"),
+  exportAuditLog: () => ipcRenderer.invoke("audit:export"),
   previewPlan: (description) => ipcRenderer.invoke("mission:plan", description),
   listAgents: () => ipcRenderer.invoke("agents:list"),
   listPlugins: () => ipcRenderer.invoke("plugins:list"),

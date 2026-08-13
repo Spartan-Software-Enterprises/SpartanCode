@@ -165,3 +165,27 @@ test("MCP Bridge syncs collaboration sessions and returns revision conflicts", a
   await new Promise((resolve) => server.close(resolve));
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test("MCP Bridge exposes redacted integrity-checked audit exports", async () => {
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-audit-export-"),
+  );
+  const store = createMissionStore(path.join(dir, "state.json"));
+  store.addActivity({ action: "test", apiKey: "hidden" });
+  const server = createBridgeServer({ store, token: "audit-token" });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const response = await fetch(
+    `http://127.0.0.1:${address.port}/v1/audit/export`,
+    {
+      headers: { Authorization: "Bearer audit-token" },
+    },
+  );
+  const bundle = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(bundle.schemaVersion, 1);
+  assert.equal(bundle.eventCount, bundle.events.length);
+  assert.ok(bundle.sha256);
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});

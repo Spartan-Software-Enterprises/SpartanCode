@@ -17,6 +17,9 @@ legal advice; a commercial release should be reviewed for its target markets.
 - Mission, approval, artifact, and policy activity is retained in the local
   workspace store so users can review decisions. A production distribution
   must publish a retention and deletion policy appropriate to its jurisdiction.
+- Desktop audit export produces a bounded JSON bundle with credential-key
+  redaction and a SHA-256 integrity digest. The digest proves export integrity;
+  it does not replace retention, access-control, or legal-review obligations.
 
 ## Model and dependency policy
 
