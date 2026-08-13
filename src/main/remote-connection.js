@@ -1,0 +1,29 @@
+const { Client } = require("ssh2");
+
+function createRemoteConnection(config) {
+  const client = new Client();
+
+  client.on("ready", () => {
+    console.log("SSH connection established");
+  });
+
+  client.on("error", (err) => {
+    console.error("SSH connection error:", err);
+  });
+
+  client.on("end", () => {
+    console.log("SSH connection ended");
+  });
+
+  client.connect({
+    host: config.host,
+    port: config.port || 22,
+    username: config.username,
+    password: config.password,
+    privateKey: config.privateKey,
+  });
+
+  return client;
+}
+
+module.exports = { createRemoteConnection };
