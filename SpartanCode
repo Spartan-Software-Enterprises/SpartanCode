@@ -676,3 +676,9 @@
  - IPC MCP tool discovery matches the implemented filesystem surface
  - Workspace handlers retain path and symlink isolation
  - 29 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 31
+ - Local stage execution keeps non-Node workspaces eligible
+ - Node workspaces run their declared test script without injected arguments
+ - Malformed manifests remain explicit verification failures
+ - 30 automated tests passing

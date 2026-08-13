@@ -30,11 +30,15 @@ function createLocalStageExecutor({
 
     if (stage.status === "building") {
       const packagePath = path.join(workspacePath, "package.json");
+      if (!fs.existsSync(packagePath))
+        return {
+          ok: true,
+          message:
+            "No package manifest; workspace is ready for agent implementation",
+        };
       return {
-        ok: fs.existsSync(packagePath),
-        message: fs.existsSync(packagePath)
-          ? "Workspace manifest found; build handoff is ready"
-          : "Workspace package.json was not found",
+        ok: true,
+        message: "Workspace manifest found; build handoff is ready",
       };
     }
 

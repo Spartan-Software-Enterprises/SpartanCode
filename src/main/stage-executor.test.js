@@ -11,6 +11,19 @@ test("local stage executor validates workspace manifests without a workspace", a
   assert.equal(result.ok, true);
 });
 
+test("local stage executor keeps non-Node workspaces eligible", async () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-stage-"),
+  );
+  const executor = createLocalStageExecutor({
+    getWorkspacePath: () => directory,
+  });
+  const result = await executor({ status: "building" });
+  assert.equal(result.ok, true);
+  assert.match(result.message, /No package manifest/);
+  fs.rmSync(directory, { recursive: true, force: true });
+});
+
 test("local stage executor runs the workspace test script", async () => {
   const directory = fs.mkdtempSync(
     path.join(os.tmpdir(), "spartancode-stage-"),

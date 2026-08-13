@@ -608,6 +608,11 @@
  isolated workspace tools used by the desktop IPC surface.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 31
+ Local stage execution now supports non-Node workspaces while retaining explicit
+ diagnostics for malformed Node manifests. Thirty automated tests pass.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
