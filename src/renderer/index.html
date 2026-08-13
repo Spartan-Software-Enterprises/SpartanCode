@@ -839,6 +839,70 @@
         color: #fff;
         font-size: 19px;
       }
+      .artifact-modal {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #18233a35;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s ease;
+      }
+      .artifact-modal.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .artifact-review {
+        width: min(620px, 100%);
+        max-height: 80vh;
+        overflow: auto;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 24px 70px #34456f2b;
+      }
+      .artifact-review h2 {
+        margin: 0 0 5px;
+        font-size: 21px;
+      }
+      .artifact-review p {
+        color: var(--muted);
+      }
+      .artifact-content {
+        max-height: 290px;
+        overflow: auto;
+        padding: 14px;
+        border-radius: 10px;
+        background: #f5f6f8;
+        color: #536078;
+        font:
+          12px/1.55 ui-monospace,
+          SFMono-Regular,
+          monospace;
+        white-space: pre-wrap;
+      }
+      .artifact-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        margin-top: 18px;
+      }
+      .artifact-actions button {
+        padding: 10px 14px;
+        border-radius: 9px;
+        font-weight: 700;
+      }
+      .artifact-reject {
+        background: #f4f5f7;
+        color: #5a667b;
+      }
+      .artifact-accept {
+        background: var(--green);
+        color: #fff;
+      }
       @media (max-width: 1120px) {
         body {
           min-width: 760px;
@@ -1219,6 +1283,27 @@
         </form>
       </section>
     </div>
+    <div
+      class="artifact-modal"
+      id="artifactModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="artifactTitle"
+    >
+      <section class="artifact-review">
+        <h2 id="artifactTitle">Artifact review</h2>
+        <p id="artifactDescription">
+          Review the latest agent output before accepting it.
+        </p>
+        <div class="artifact-content" id="artifactContent"></div>
+        <div class="artifact-actions">
+          <button class="artifact-reject" id="rejectArtifact">Reject</button
+          ><button class="artifact-accept" id="acceptArtifact">
+            Accept artifact
+          </button>
+        </div>
+      </section>
+    </div>
     <script>
       const form = document.getElementById("missionForm");
       const input = document.getElementById("missionInput");
@@ -1233,6 +1318,9 @@
       const chatModal = document.getElementById("chatModal");
       const chatMessages = document.getElementById("chatMessages");
       const chatInput = document.getElementById("chatInput");
+      const artifactModal = document.getElementById("artifactModal");
+      const artifactContent = document.getElementById("artifactContent");
+      let activeArtifact = null;
       let activeApproval = null;
       const showToast = (message) => {
         toast.textContent = message;
@@ -1275,6 +1363,37 @@
             chatInput.value = "";
           });
         });
+      const openArtifact = (artifact) => {
+        if (!artifact) return;
+        activeArtifact = artifact;
+        document.getElementById("artifactTitle").textContent = artifact.name;
+        artifactContent.textContent =
+          artifact.content || "No artifact content available.";
+        artifactModal.classList.add("open");
+      };
+      document.getElementById("viewArtifacts").addEventListener("click", () => {
+        if (window.spartanCode)
+          window.spartanCode
+            .getSnapshot()
+            .then((snapshot) =>
+              openArtifact(snapshot.artifacts && snapshot.artifacts[0]),
+            );
+      });
+      const reviewArtifact = (decision) => {
+        if (!activeArtifact || !window.spartanCode) return;
+        window.spartanCode
+          .reviewArtifact(activeArtifact.id, decision)
+          .then(() => {
+            artifactModal.classList.remove("open");
+            showToast(`Artifact ${decision}`);
+          });
+      };
+      document
+        .getElementById("acceptArtifact")
+        .addEventListener("click", () => reviewArtifact("accepted"));
+      document
+        .getElementById("rejectArtifact")
+        .addEventListener("click", () => reviewArtifact("rejected"));
       document.getElementById("newMission").addEventListener("click", () => {
         input.focus();
         status.textContent = "Ready for a new mission.";
