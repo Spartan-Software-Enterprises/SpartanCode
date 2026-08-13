@@ -1,4 +1,8 @@
 import { StatusBar } from "expo-status-bar";
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -66,6 +70,18 @@ export default function App() {
     useState<keyof typeof routerGuidance>("tailscale");
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [recognizing, setRecognizing] = useState(false);
+
+  useSpeechRecognitionEvent("start", () => setRecognizing(true));
+  useSpeechRecognitionEvent("end", () => setRecognizing(false));
+  useSpeechRecognitionEvent("result", (event) => {
+    const transcript = event.results[0]?.transcript?.trim();
+    if (transcript) setMission((current) => `${current} ${transcript}`.trim());
+  });
+  useSpeechRecognitionEvent("error", (event) => {
+    setRecognizing(false);
+    setMessage(`Voice input unavailable: ${event.message || event.error}`);
+  });
 
   useEffect(() => {
     Promise.all([readSnapshot(), readBiometricSetting()])
@@ -343,6 +359,36 @@ export default function App() {
             onChangeText={setMission}
             multiline
           />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              recognizing ? "Stop voice dictation" : "Start voice dictation"
+            }
+            style={styles.secondary}
+            onPress={async () => {
+              if (recognizing) {
+                ExpoSpeechRecognitionModule.stop();
+                return;
+              }
+              const permission =
+                await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+              if (!permission.granted) {
+                setMessage(
+                  "Microphone and speech permissions are required for dictation",
+                );
+                return;
+              }
+              ExpoSpeechRecognitionModule.start({
+                lang: "en-US",
+                interimResults: true,
+                continuous: false,
+              });
+            }}
+          >
+            <Text style={styles.secondaryText}>
+              {recognizing ? "Stop dictation" : "Dictate mission"}
+            </Text>
+          </Pressable>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Queue mission"

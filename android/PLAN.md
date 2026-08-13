@@ -60,6 +60,9 @@ checksum before finalization, and supports deletion through an injected store.
 Device probes are normalized into safe memory, storage, thermal, chipset, and
 Vulkan/NPU fields with actionable diagnostics when native capability data is
 missing or constrained.
+Voice dictation now uses the Expo speech-recognition native module with
+explicit microphone/speech permission handling, transcript insertion into the
+mission field, and a visible unavailable/error state.
 Android also ships offline-safe starter templates, personas, and plugin
 metadata so the extensibility surface does not require a desktop install.
 The command center renders the synced audit activity feed alongside mission,
