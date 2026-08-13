@@ -41,6 +41,7 @@ import {
 } from "./src/core/remote-guidance";
 import type { RemoteProvider } from "./src/core/remote-guidance";
 import { authorizeSecretAccess } from "./src/core/biometric";
+import { listExtensions } from "./src/core/extensions";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -398,6 +399,21 @@ export default function App() {
           <Text style={styles.message}>
             Android works offline; a bridge only adds optional remote execution.
           </Text>
+        </View>
+
+        <Text style={styles.section}>Offline extensions</Text>
+        <View style={styles.card}>
+          {listExtensions().map((extension) => (
+            <View key={extension.id} style={styles.agentRow}>
+              <View style={styles.missionBody}>
+                <Text style={styles.missionText}>{extension.name}</Text>
+                <Text style={styles.missionMeta}>
+                  {extension.kind.toUpperCase()} · {extension.description}
+                </Text>
+              </View>
+              <Text style={styles.agentMode}>OFFLINE</Text>
+            </View>
+          ))}
         </View>
 
         <Text style={styles.section}>Bridge connection</Text>
