@@ -15,9 +15,11 @@ import {
   normalizeBridgeEndpoint,
   normalizeBridgeSnapshot,
 } from "./src/core/bridge";
+import { decodePairingPayload } from "./src/core/pairing";
 import {
   addConnection,
   clearBridgeToken,
+  clearAllBridgeTokens,
   enqueueOperation,
   readQueuedOperations,
   removeQueuedOperation,
@@ -42,6 +44,7 @@ export default function App() {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [endpoint, setEndpoint] = useState("");
   const [token, setToken] = useState("");
+  const [pairingPayload, setPairingPayload] = useState("");
   const [mission, setMission] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Offline-first workspace");
@@ -157,6 +160,22 @@ export default function App() {
     }
   }, [mission, snapshot]);
 
+  const applyPairing = useCallback(() => {
+    try {
+      const pairing = decodePairingPayload(pairingPayload.trim());
+      setEndpoint(pairing.endpoint);
+      setToken(pairing.token);
+      setPairingPayload("");
+      setMessage(
+        `Pairing accepted · ${pairing.scopes.length} scope${pairing.scopes.length === 1 ? "" : "s"}`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Pairing payload is invalid",
+      );
+    }
+  }, [pairingPayload]);
+
   const stale = snapshot.syncedAt
     ? Date.now() - Date.parse(snapshot.syncedAt) > staleAfterMs
     : snapshot.offline;
@@ -236,10 +255,40 @@ export default function App() {
           >
             <Text style={styles.secondaryText}>Forget token</Text>
           </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Forget all bridge tokens"
+            style={styles.secondary}
+            onPress={async () => {
+              await clearAllBridgeTokens();
+              setToken("");
+              setMessage("All bridge tokens forgotten");
+            }}
+          >
+            <Text style={styles.secondaryText}>Forget all tokens</Text>
+          </Pressable>
         </View>
 
         <Text style={styles.section}>Bridge connection</Text>
         <View style={styles.card}>
+          <TextInput
+            accessibilityLabel="QR pairing payload"
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Paste QR pairing payload"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={pairingPayload}
+            onChangeText={setPairingPayload}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Apply QR pairing"
+            style={styles.secondary}
+            onPress={applyPairing}
+          >
+            <Text style={styles.secondaryText}>Apply QR pairing</Text>
+          </Pressable>
           <TextInput
             accessibilityLabel="MCP Bridge endpoint"
             autoCapitalize="none"

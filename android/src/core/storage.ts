@@ -18,6 +18,7 @@ import {
 const SNAPSHOT_KEY = "spartancode.mobile.snapshot.v1";
 const QUEUE_KEY = "spartancode.mobile.queue.v1";
 const BRIDGE_TOKEN_KEY = "spartancode.mobile.bridge-token.v1";
+const BRIDGE_TOKEN_INDEX_KEY = "spartancode.mobile.bridge-token-index.v1";
 
 function emptySnapshot(): MobileSnapshot {
   return { missions: [], connections: [], pendingApprovals: 0, offline: true };
@@ -143,6 +144,25 @@ export async function saveBridgeToken(
       keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
     },
   );
+  const origins = await readBridgeTokenOrigins();
+  if (!origins.includes(new URL(endpoint).origin)) {
+    await AsyncStorage.setItem(
+      BRIDGE_TOKEN_INDEX_KEY,
+      JSON.stringify([...origins, new URL(endpoint).origin]),
+    );
+  }
+}
+
+async function readBridgeTokenOrigins() {
+  try {
+    const raw = await AsyncStorage.getItem(BRIDGE_TOKEN_INDEX_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function readBridgeToken(endpoint: string) {
@@ -177,4 +197,19 @@ export async function readBridgeToken(endpoint: string) {
 export async function clearBridgeToken(endpoint: string) {
   await SecureStore.deleteItemAsync(tokenKey(endpoint));
   await SecureStore.deleteItemAsync(BRIDGE_TOKEN_KEY);
+  const origin = new URL(endpoint).origin;
+  await AsyncStorage.setItem(
+    BRIDGE_TOKEN_INDEX_KEY,
+    JSON.stringify(
+      (await readBridgeTokenOrigins()).filter((item) => item !== origin),
+    ),
+  );
+}
+
+export async function clearAllBridgeTokens() {
+  for (const origin of await readBridgeTokenOrigins()) {
+    await SecureStore.deleteItemAsync(tokenKey(origin));
+  }
+  await SecureStore.deleteItemAsync(BRIDGE_TOKEN_KEY);
+  await AsyncStorage.removeItem(BRIDGE_TOKEN_INDEX_KEY);
 }
