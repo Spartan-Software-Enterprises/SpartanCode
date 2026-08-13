@@ -79,6 +79,12 @@ metadata so the extensibility surface does not require a desktop install.
 The command center renders the synced audit activity feed alongside mission,
 approval, and artifact state.
 
+Android now includes an offline-first collaboration surface. Users can create
+and persist local sessions without a desktop or bridge; when connected, valid
+remote sessions are merged by revision and new sessions can be published over
+the authenticated collaboration routes. The UI labels the bridge as optional
+and does not claim cross-device acceptance until physical testing is complete.
+
 When an Android-only user queues a mission offline, the app now persists an
 explicit local plan artifact, activity entry, and audit event. The evidence
 records that build and verification are queued; it does not misrepresent local

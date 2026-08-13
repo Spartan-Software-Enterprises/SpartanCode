@@ -20,6 +20,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import {
+  BridgeError,
   bridgeRequest,
   normalizeBridgeEndpoint,
   normalizeBridgeSnapshot,
@@ -35,9 +36,11 @@ import {
   updateQueuedOperation,
   readSnapshot,
   readBiometricSetting,
+  readCollaborationSessions,
   saveBridgeToken,
   writeSnapshot,
   writeBiometricSetting,
+  writeCollaborationSessions,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
@@ -61,6 +64,12 @@ import {
   normalizeDeviceProfile,
   platformDeviceProbe,
 } from "./src/core/device-profile";
+import {
+  createMobileCollaborationSession,
+  mergeCollaborationSessions,
+  normalizeCollaborationSessions,
+} from "./src/core/collaboration";
+import type { MobileCollaborationSession } from "./src/core/collaboration";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -86,6 +95,10 @@ export default function App() {
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
+  const [collaborationName, setCollaborationName] = useState("Android roadmap");
+  const [collaborationSessions, setCollaborationSessions] = useState<
+    MobileCollaborationSession[]
+  >([]);
   const [reduceMotion, setReduceMotion] = useState<boolean | undefined>();
   const [screenReaderEnabled, setScreenReaderEnabled] = useState<
     boolean | undefined
@@ -157,10 +170,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    Promise.all([readSnapshot(), readBiometricSetting()])
-      .then(([savedSnapshot, savedBiometric]) => {
+    Promise.all([
+      readSnapshot(),
+      readBiometricSetting(),
+      readCollaborationSessions(),
+    ])
+      .then(([savedSnapshot, savedBiometric, savedCollaboration]) => {
         setSnapshot(savedSnapshot);
         setBiometricEnabled(savedBiometric);
+        setCollaborationSessions(savedCollaboration);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -182,6 +200,25 @@ export default function App() {
       const remote = normalizeBridgeSnapshot(
         await bridgeRequest<unknown>(normalizedEndpoint, "/v1/snapshot"),
       );
+      let remoteCollaboration: MobileCollaborationSession[] = [];
+      try {
+        const response = await bridgeRequest<unknown>(
+          normalizedEndpoint,
+          "/v1/collaboration/sessions",
+        );
+        const payload = response as { sessions?: unknown };
+        remoteCollaboration = normalizeCollaborationSessions(payload.sessions);
+      } catch (error) {
+        if (!(error instanceof BridgeError && error.status === 404))
+          throw error;
+      }
+      const currentCollaboration = await readCollaborationSessions();
+      const mergedCollaboration = mergeCollaborationSessions(
+        currentCollaboration,
+        remoteCollaboration,
+      );
+      await writeCollaborationSessions(mergedCollaboration);
+      setCollaborationSessions(mergedCollaboration);
       const profile = {
         id: `bridge-${new URL(normalizedEndpoint).origin}`,
         name: new URL(normalizedEndpoint).hostname,
@@ -240,6 +277,35 @@ export default function App() {
       setMessage(error instanceof Error ? error.message : "Connection failed");
     }
   }, [biometricEnabled, endpoint, token]);
+
+  const createCollaboration = useCallback(async () => {
+    try {
+      const session = createMobileCollaborationSession(collaborationName);
+      const next = [session, ...collaborationSessions];
+      await writeCollaborationSessions(next);
+      setCollaborationSessions(next);
+      if (!snapshot.offline && endpoint.trim()) {
+        await bridgeRequest(
+          normalizeBridgeEndpoint(endpoint),
+          "/v1/collaboration/sessions",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              id: session.id,
+              name: session.name,
+              ownerId: "android-local",
+            }),
+            headers: { "Idempotency-Key": `collaboration:${session.id}` },
+          },
+        );
+      }
+      setMessage("Collaboration session ready · bridge remains optional");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Unable to create session",
+      );
+    }
+  }, [collaborationName, collaborationSessions, endpoint, snapshot.offline]);
 
   const createMission = useCallback(async () => {
     const description = mission.trim();
@@ -613,6 +679,47 @@ export default function App() {
               <Text style={styles.agentMode}>OFFLINE</Text>
             </View>
           ))}
+        </View>
+
+        <Text style={styles.section}>Collaboration</Text>
+        <View style={styles.card}>
+          <Text style={styles.message}>
+            Start a local session offline, then optionally sync its versioned
+            journal through an authenticated bridge.
+          </Text>
+          <TextInput
+            accessibilityLabel="Collaboration session name"
+            placeholder="Session name"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={collaborationName}
+            onChangeText={setCollaborationName}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Start collaboration session"
+            style={styles.secondary}
+            onPress={createCollaboration}
+          >
+            <Text style={styles.secondaryText}>Start local session</Text>
+          </Pressable>
+          {collaborationSessions.length === 0 ? (
+            <Text style={styles.message}>No collaboration sessions yet.</Text>
+          ) : (
+            collaborationSessions.map((session) => (
+              <View key={session.id} style={styles.agentRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>{session.name}</Text>
+                  <Text style={styles.missionMeta}>
+                    {session.participants.length} participant
+                    {session.participants.length === 1 ? "" : "s"} · revision{" "}
+                    {session.revision}
+                  </Text>
+                </View>
+                <Text style={styles.agentMode}>LOCAL</Text>
+              </View>
+            ))
+          )}
         </View>
 
         <Text style={styles.section}>Bridge connection</Text>

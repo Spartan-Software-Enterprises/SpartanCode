@@ -11,6 +11,8 @@ first surface keeps the highest-value controls reachable on a phone:
   connection failure explicitly. Optional bridge tokens are stored in
   origin-scoped Expo SecureStore entries and never shown after sync.
 - **Missions** — shows queued mission descriptions and lifecycle status.
+- **Collaboration** — creates local versioned sessions offline and optionally
+  publishes them through the authenticated bridge.
 
 ## Verified behavior
 

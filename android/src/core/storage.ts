@@ -5,6 +5,8 @@ import type {
   MobileSnapshot,
   QueuedOperation,
 } from "./types";
+import type { MobileCollaborationSession } from "./collaboration";
+import { normalizeCollaborationSessions } from "./collaboration";
 import {
   isActivity,
   isApproval,
@@ -22,6 +24,7 @@ const BRIDGE_TOKEN_INDEX_KEY = "spartancode.mobile.bridge-token-index.v1";
 const SNAPSHOT_QUARANTINE_KEY = "spartancode.mobile.snapshot.quarantine.v1";
 const QUEUE_QUARANTINE_KEY = "spartancode.mobile.queue.quarantine.v1";
 const BIOMETRIC_SETTING_KEY = "spartancode.mobile.biometric-unlock.v1";
+const COLLABORATION_KEY = "spartancode.mobile.collaboration.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
 
 function emptySnapshot(): MobileSnapshot {
@@ -110,6 +113,27 @@ export async function readSnapshot(): Promise<MobileSnapshot> {
 
 export async function writeSnapshot(snapshot: MobileSnapshot) {
   await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+}
+
+export async function readCollaborationSessions(): Promise<
+  MobileCollaborationSession[]
+> {
+  try {
+    const raw = await AsyncStorage.getItem(COLLABORATION_KEY);
+    return normalizeCollaborationSessions(raw ? JSON.parse(raw) : []);
+  } catch {
+    await recoverCorruptValue(
+      COLLABORATION_KEY,
+      "spartancode.mobile.collaboration.quarantine.v1",
+    );
+    return [];
+  }
+}
+
+export async function writeCollaborationSessions(
+  sessions: MobileCollaborationSession[],
+) {
+  await AsyncStorage.setItem(COLLABORATION_KEY, JSON.stringify(sessions));
 }
 
 export async function readBiometricSetting() {

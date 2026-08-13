@@ -19,6 +19,9 @@ behavior and a corresponding automated or documented verification path.
   artifact and audit evidence without requiring a desktop or bridge.
 - Android reads system reduced-motion, font-scale, and screen-reader settings
   without overriding them and surfaces the resulting accessibility state.
+- Android now has a local collaboration session surface with validated
+  persistence and optional bridge publication/remote-session merge; physical
+  cross-device acceptance remains open.
 - Explicitly licensed mobile model catalog, compatibility filtering, HTTPS
   resumable downloads, checksum verification, and deletion.
 - Remote provider cost estimates, home-server/router guidance, connection

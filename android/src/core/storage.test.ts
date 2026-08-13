@@ -1,13 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   enqueueOperation,
+  readCollaborationSessions,
   readSnapshot,
   readBiometricSetting,
   readQueuedOperations,
   removeQueuedOperation,
   updateQueuedOperation,
   writeBiometricSetting,
+  writeCollaborationSessions,
 } from "./storage";
+import { createMobileCollaborationSession } from "./collaboration";
 
 describe("offline operation queue", () => {
   beforeEach(async () => AsyncStorage.clear());
@@ -84,5 +87,23 @@ describe("biometric preference", () => {
     expect(
       await AsyncStorage.getItem("spartancode.mobile.biometric-unlock.v1"),
     ).toBe("enabled");
+  });
+});
+
+describe("standalone collaboration storage", () => {
+  beforeEach(async () => AsyncStorage.clear());
+
+  it("persists and validates local sessions without a bridge", async () => {
+    const session = createMobileCollaborationSession(
+      "Offline roadmap",
+      "owner",
+      "2026-08-13T00:00:00.000Z",
+    );
+    await writeCollaborationSessions([session]);
+    await AsyncStorage.setItem(
+      "spartancode.mobile.collaboration.v1",
+      JSON.stringify([session, { malformed: true }]),
+    );
+    expect(await readCollaborationSessions()).toEqual([session]);
   });
 });
