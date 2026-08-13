@@ -58,7 +58,7 @@ function createLocalStageExecutor({
         };
       const result = await commandRunner(
         process.platform === "win32" ? "npm.cmd" : "npm",
-        ["test", "--", "--runInBand"],
+        ["test"],
         workspacePath,
       );
       return result.ok

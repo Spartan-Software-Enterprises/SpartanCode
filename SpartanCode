@@ -647,3 +647,8 @@
  - Local stage execution resolves workspace manifests with platform-safe paths
  - Malformed manifests fail verification with persisted diagnostic evidence
  - 28 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 26
+ - Verification invokes the workspace's declared test script exactly as authored
+ - No runner-specific arguments are injected into user projects
+ - 28 automated tests passing

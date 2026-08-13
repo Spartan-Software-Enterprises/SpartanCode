@@ -30,6 +30,7 @@ test("local stage executor runs the workspace test script", async () => {
   const result = await executor({ status: "verifying" });
   assert.equal(result.ok, true);
   assert.equal(calls[0][1][0], "test");
+  assert.equal(calls[0][1].length, 1);
   fs.rmSync(directory, { recursive: true, force: true });
 });
 

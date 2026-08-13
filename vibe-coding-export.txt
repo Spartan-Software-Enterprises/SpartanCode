@@ -582,6 +582,11 @@
  package manifests as verification failures. Twenty-eight automated tests pass.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 26
+ Verification now invokes the workspace test script without injecting framework-
+ specific arguments, preserving project-owned test behavior.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
