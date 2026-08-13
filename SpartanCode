@@ -627,3 +627,8 @@
  - Settings now exposes Q4_K_M, Q4_0, and Q3_K_S quantization choices
  - Selected quantization is persisted with local workspace settings
  - Model preparation uses the selected quantization instead of a fixed default
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 22
+ - Live status now reflects failed missions and pending approval state
+ - Renderer command-center status is driven by persisted workspace snapshots
+ - Renderer parse and full automated test suite remain passing

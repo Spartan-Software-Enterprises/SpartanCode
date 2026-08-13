@@ -562,6 +562,11 @@
  selection, and prepares local model metadata using that selected quantization.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 22
+ Live status now reflects failed missions and pending approvals from persisted
+ workspace snapshots instead of remaining a static operational message.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

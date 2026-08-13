@@ -1228,7 +1228,7 @@
         </section>
         <section class="rail-section">
           <h2>Live status</h2>
-          <div class="live-status">
+          <div class="live-status" id="liveStatus">
             <span class="live-dot"></span>All systems operational
           </div>
           <div id="activityList">
@@ -1455,6 +1455,7 @@
       const managerModal = document.getElementById("managerModal");
       const managerGrid = document.getElementById("managerGrid");
       const managerActivity = document.getElementById("managerActivity");
+      const liveStatus = document.getElementById("liveStatus");
       let activeApproval = null;
       const showToast = (message) => {
         toast.textContent = message;
@@ -1703,6 +1704,15 @@
           approvalModal.classList.remove("open");
         }
         const mission = snapshot.missions && snapshot.missions[0];
+        const hasPendingApproval = (snapshot.approvals || []).some(
+          (approval) => approval.status === "pending",
+        );
+        liveStatus.innerHTML =
+          mission?.status === "failed"
+            ? '<span class="live-dot" style="background: var(--amber)"></span>Attention needed'
+            : hasPendingApproval
+              ? '<span class="live-dot" style="background: var(--amber)"></span>Waiting for approval'
+              : '<span class="live-dot"></span>All systems operational';
         const history = document.getElementById("missionHistory");
         history.innerHTML =
           snapshot.missions && snapshot.missions.length
