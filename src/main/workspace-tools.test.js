@@ -22,3 +22,25 @@ test("workspace tools stay inside the approved root", () => {
   );
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("workspace tools reject symlink escapes", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-workspace-"),
+  );
+  const outside = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-outside-"),
+  );
+  fs.writeFileSync(path.join(outside, "secret.txt"), "secret");
+  try {
+    fs.symlinkSync(outside, path.join(directory, "linked"), "junction");
+    assert.throws(
+      () => readWorkspaceFile(directory, "linked/secret.txt"),
+      /symlink/,
+    );
+  } catch (error) {
+    if (error.code !== "EPERM") throw error;
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+    fs.rmSync(outside, { recursive: true, force: true });
+  }
+});

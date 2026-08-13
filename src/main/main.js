@@ -20,7 +20,11 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
-  win.loadFile("src/renderer/index.html");
+  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  win.webContents.on("will-navigate", (event, url) => {
+    if (url !== win.webContents.getURL()) event.preventDefault();
+  });
+  win.loadFile(path.join(__dirname, "../renderer/index.html"));
   const store = createMissionStore(
     path.join(app.getPath("userData"), "workspace.json"),
   );

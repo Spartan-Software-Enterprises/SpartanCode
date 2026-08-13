@@ -7,6 +7,13 @@ function resolveInsideWorkspace(workspacePath, requestedPath = ".") {
   const target = path.resolve(root, requestedPath);
   if (target !== root && !target.startsWith(`${root}${path.sep}`))
     throw new Error("Path escapes the approved workspace");
+  const resolvedRoot = fs.realpathSync(root);
+  const resolvedTarget = fs.realpathSync(target);
+  if (
+    resolvedTarget !== resolvedRoot &&
+    !resolvedTarget.startsWith(`${resolvedRoot}${path.sep}`)
+  )
+    throw new Error("Path escapes the approved workspace through a symlink");
   return target;
 }
 

@@ -652,3 +652,16 @@
  - Verification invokes the workspace's declared test script exactly as authored
  - No runner-specific arguments are injected into user projects
  - 28 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 27
+ - Production packaging configuration added for Linux, Windows, and macOS targets
+ - Unpacked production build completes with Electron Builder
+ - Renderer navigation, window-opening, and navigation policies are locked down
+ - Workspace symlink escapes are rejected
+ - 29 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 28
+ - Production executable is named SpartanCode
+ - Approval decisions are validated and written to the audit trail
+ - Artifact review decisions are constrained to accepted or rejected
+ - 29 automated tests passing

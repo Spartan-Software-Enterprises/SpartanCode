@@ -100,6 +100,8 @@ function createMissionStore(filePath) {
     reviewArtifact(id, decision, note = "") {
       const artifact = state.artifacts.find((item) => item.id === id);
       if (!artifact) return null;
+      if (!["accepted", "rejected"].includes(decision))
+        throw new Error("Artifact decision must be accepted or rejected");
       artifact.review = {
         decision,
         note,
@@ -155,8 +157,16 @@ function createMissionStore(filePath) {
     resolveApproval(id, decision) {
       const approval = state.approvals.find((item) => item.id === id);
       if (!approval) return null;
+      if (!["approved", "denied"].includes(decision))
+        throw new Error("Approval decision must be approved or denied");
       approval.status = decision === "approved" ? "approved" : "denied";
       approval.resolvedAt = new Date().toISOString();
+      state.auditLog.unshift({
+        action: `approval:${decision}`,
+        approvalId: id,
+        missionId: approval.missionId,
+        timestamp: approval.resolvedAt,
+      });
       persist();
       return approval;
     },

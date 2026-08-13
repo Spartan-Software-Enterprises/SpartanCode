@@ -587,6 +587,17 @@
  specific arguments, preserving project-owned test behavior.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 27
+ Production packaging is configured for Linux, Windows, and macOS targets. The
+ unpacked build completes, renderer navigation is restricted, and workspace
+ symlink escapes are rejected. Twenty-nine automated tests pass.
+--------------------------------------------------------------------------------
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 28
+ The production executable is named SpartanCode, approval decisions are audited,
+ and artifact review decisions are validated before persistence.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

@@ -21,5 +21,6 @@ test("approval requests can be resolved", () => {
     store.resolveApproval(approval.id, "approved").status,
     "approved",
   );
+  assert.equal(store.auditLog()[0].action, "approval:approved");
   fs.rmSync(directory, { recursive: true, force: true });
 });
