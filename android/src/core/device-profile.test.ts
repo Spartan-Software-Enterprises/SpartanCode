@@ -48,5 +48,8 @@ describe("device capability normalization", () => {
       hasVulkan: undefined,
       hasNpu: undefined,
     });
+    expect(normalizeDeviceProfile()).toMatchObject({
+      hasAccelerator: undefined,
+    });
   });
 });

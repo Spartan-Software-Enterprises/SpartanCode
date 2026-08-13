@@ -57,6 +57,12 @@ export function normalizeDeviceProfile(probe: DeviceProbe = {}): DeviceProfile {
   const hasVulkan =
     typeof probe.hasVulkan === "boolean" ? probe.hasVulkan : undefined;
   const hasNpu = typeof probe.hasNpu === "boolean" ? probe.hasNpu : undefined;
+  const hasAccelerator =
+    hasVulkan === true || hasNpu === true
+      ? true
+      : hasVulkan !== undefined || hasNpu !== undefined
+        ? false
+        : undefined;
   return {
     chipset: typeof probe.chipset === "string" ? probe.chipset : undefined,
     totalMemoryMb: numberOrUndefined(probe.totalMemoryMb),
@@ -64,7 +70,7 @@ export function normalizeDeviceProfile(probe: DeviceProbe = {}): DeviceProfile {
     thermalState,
     hasVulkan,
     hasNpu,
-    hasAccelerator: hasVulkan === true || hasNpu === true,
+    hasAccelerator,
   };
 }
 
