@@ -486,6 +486,10 @@
  Vibe chat history and secure IPC. Chat responses preserve the local-first and
  approval-first operating model.
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 8
+ The desktop includes an artifact review workspace with persisted detail view,
+ accept/reject controls, and audit-trail integration.
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1

@@ -548,3 +548,8 @@
  - Agent-first assistant drawer backed by persisted Vibe chat history
  - Chat IPC bridge for user/assistant messages
  - Chat remains mission-oriented and preserves approval-first behavior
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 8
+ - Artifact review workspace with accept/reject controls
+ - Artifact detail content rendered from persisted agent output
+ - Review decisions flow through the audit trail
