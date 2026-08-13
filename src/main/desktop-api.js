@@ -9,8 +9,9 @@ const { createVoiceService } = require("./voice-service");
 const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
+const { createModelCache } = require("./model-cache");
 
-function registerDesktopApi({ store, window, runMission }) {
+function registerDesktopApi({ store, window, runMission, modelCache }) {
   const voiceService = createVoiceService();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("capabilities:get", () => getCapabilities());
@@ -39,6 +40,10 @@ function registerDesktopApi({ store, window, runMission }) {
   });
   ipcMain.handle("models:list", (_event, options) =>
     listLicensedModels(options),
+  );
+  ipcMain.handle("models:cache", () => modelCache.list());
+  ipcMain.handle("models:prepare", (_event, modelId, quantization) =>
+    modelCache.prepare(modelId, quantization),
   );
   ipcMain.handle("policy:classify", (_event, command) =>
     classifyCommand(command),

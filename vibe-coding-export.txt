@@ -471,6 +471,11 @@
  with path traversal protection. Agent plans are persisted as artifacts, and
  seventeen automated tests pass.
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 4
+ Local-first licensed GGUF model cache metadata is now persisted, with
+ commercial-license enforcement for model preparation. Eighteen automated
+ tests pass.
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1

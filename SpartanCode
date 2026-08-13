@@ -531,3 +531,9 @@
  - Secure MCP Lite workspace listing and file-read handlers
  - Agent plan artifacts and plan preview API
  - 17 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 4
+ - Local-first licensed GGUF model cache metadata
+ - Qwen3-1.7B and Phi-4-mini preparation flow
+ - Commercial license enforcement before model preparation
+ - 18 automated tests passing

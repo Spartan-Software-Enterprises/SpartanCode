@@ -3,6 +3,7 @@ const { app, BrowserWindow } = require("electron");
 const { registerDesktopApi } = require("./desktop-api");
 const { createMissionStore } = require("./mission-store");
 const { createExecutionPlan } = require("./agent-plan");
+const { createModelCache } = require("./model-cache");
 
 function createMissionRunner(store, window) {
   return (mission) => {
@@ -80,6 +81,9 @@ function createWindow() {
     store,
     window: win,
     runMission: createMissionRunner(store, win),
+    modelCache: createModelCache(
+      path.join(app.getPath("userData"), "models.json"),
+    ),
   });
 }
 

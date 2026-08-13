@@ -23,6 +23,9 @@ contextBridge.exposeInMainWorld("spartanCode", {
   getMcpTools: () => ipcRenderer.invoke("mcp:tools"),
   dispatchMcp: (request) => ipcRenderer.invoke("mcp:dispatch", request),
   listModels: (options) => ipcRenderer.invoke("models:list", options),
+  listCachedModels: () => ipcRenderer.invoke("models:cache"),
+  prepareModel: (modelId, quantization) =>
+    ipcRenderer.invoke("models:prepare", modelId, quantization),
   classifyCommand: (command) => ipcRenderer.invoke("policy:classify", command),
   listWorkspace: (requestedPath) =>
     ipcRenderer.invoke("workspace:list", requestedPath),
