@@ -595,3 +595,8 @@
  - Plan, build, verify, and failed states remain inspectable from artifact review
  - Mission store supports safe in-place artifact updates
  - 24 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 16
+ - Mission adapter exceptions are converted into persisted failed-state evidence
+ - Agent activity records the adapter error without crashing the desktop process
+ - 25 automated tests passing

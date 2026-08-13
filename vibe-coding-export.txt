@@ -531,6 +531,11 @@
  actual agent lifecycle.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 16
+ Adapter exceptions now become visible failed mission evidence and agent activity
+ instead of escaping as unhandled desktop errors. Twenty-five automated tests pass.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

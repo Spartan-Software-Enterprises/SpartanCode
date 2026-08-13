@@ -45,3 +45,26 @@ test("mission runner creates a plan and stops when a stage fails", async () => {
 
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("mission runner converts adapter exceptions into failed mission evidence", async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-"));
+  const store = createMissionStore(path.join(directory, "workspace.json"));
+  const callbacks = [];
+  const run = createMissionRunner(
+    store,
+    { isDestroyed: () => true },
+    {
+      schedule: (callback) => callbacks.push(callback),
+      executeStage: () => {
+        throw new Error("local verifier unavailable");
+      },
+    },
+  );
+  const mission = store.addMission("Verify a local workspace");
+  run(mission);
+  await callbacks[0]();
+  const snapshot = store.snapshot();
+  assert.equal(snapshot.missions[0].status, "failed");
+  assert.equal(snapshot.activity[0].message, "local verifier unavailable");
+  fs.rmSync(directory, { recursive: true, force: true });
+});

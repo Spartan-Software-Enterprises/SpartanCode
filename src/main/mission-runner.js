@@ -59,7 +59,15 @@ function createMissionRunner(
         }
         store.updateMission(mission.id, { status: stage.status });
         store.addActivity({ agent: stage.agent, message: stage.message });
-        const result = await executeStage(stage, mission, plan);
+        let result;
+        try {
+          result = await executeStage(stage, mission, plan);
+        } catch (error) {
+          result = {
+            ok: false,
+            message: error instanceof Error ? error.message : String(error),
+          };
+        }
         if (result && result.ok === false) {
           store.updateMission(mission.id, { status: "failed" });
           store.addActivity({
