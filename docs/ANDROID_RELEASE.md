@@ -27,4 +27,5 @@ npm run release:manifest
 ```
 
 The generated files are ignored build outputs and must be attached to the
-release alongside the signed artifacts.
+release alongside the signed artifacts. The current repository intentionally
+does not contain a keystore, signing secret, or signed production artifact.

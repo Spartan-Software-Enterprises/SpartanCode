@@ -52,8 +52,10 @@ behavior and a corresponding automated or documented verification path.
   verification of large text/reduced motion),
   low-storage/interrupted-download/process-restart acceptance, and tablet
   hardware validation.
-- Signed production AAB/APK, legal/privacy review, and release-environment
-  publication of the generated license inventory and artifact checksums.
+- Signed production AAB/APK and legal/privacy review remain release-environment
+  gates. The generator itself is implemented and verified; its inventory and
+  hashes must still be attached to the signed release and reviewed for the
+  target distribution.
 - Long-term collaboration, cross-modal gesture workflows, enterprise
   governance, and a mature external plugin marketplace.
 
