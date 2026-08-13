@@ -17,6 +17,7 @@ const { createModelCache } = require("./model-cache");
 const { validateRemoteConfig } = require("./remote-connection");
 const { loadCustomAgents } = require("./custom-agents");
 const { createRuntimeRegistry } = require("./runtime-adapters");
+const { listPlugins } = require("./plugin-registry");
 const {
   estimateServerCost,
   getRouterGuidance,
@@ -80,6 +81,9 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     loadCustomAgents(store.snapshot().settings.workspacePath).map(
       ({ prompt, ...agent }) => agent,
     ),
+  );
+  ipcMain.handle("plugins:list", () =>
+    listPlugins(store.snapshot().settings.workspacePath),
   );
   ipcMain.handle("models:list", (_event, options) =>
     listLicensedModels(options),

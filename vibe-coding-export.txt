@@ -665,6 +665,13 @@
  gesture, and TalkBack acceptance remain release-environment checks.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 38
+ A bounded plugin registry now discovers workspace plugin.json metadata, requires
+ explicit MIT or Apache-2.0 licensing, accepts only safe declared capabilities,
+ and exposes metadata through isolated IPC. Discovery never executes plugin
+ code; marketplace transport and broader ecosystem governance remain open.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

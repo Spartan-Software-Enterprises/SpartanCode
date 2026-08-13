@@ -78,6 +78,15 @@ metadata in mission plans. The repository includes Researcher, Implementer,
 Verifier, and Sync Guardian roles. Invalid or oversized definitions are ignored
 without blocking application startup.
 
+## Plugins
+
+Workspace plugin metadata may be placed under
+`.spartancode/plugins/*.json` or `.spartancode/plugins/<id>/plugin.json`.
+SpartanCode validates the ID, semantic version, explicit MIT/Apache-2.0
+license, and bounded capability list before exposing metadata through the
+isolated API. Discovery never executes plugin code; shell and arbitrary
+network capabilities are not accepted by the registry.
+
 ## Execution modes
 
 Desktop settings provide `Guided` and opt-in `YOLO` execution modes. Guided mode

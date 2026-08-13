@@ -39,12 +39,16 @@ behavior and a corresponding automated or documented verification path.
 - Reproducible release-evidence generation now records the Git commit,
   SHA-256 hashes for scanned artifacts, and a lockfile-derived third-party
   component inventory for desktop and Android release workflows.
+- A bounded plugin registry now discovers workspace metadata, enforces explicit
+  MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
+  plugins, and exposes metadata through isolated IPC without executing plugin
+  code.
 - Desktop now has a durable, versioned collaboration journal with owner/member/
   observer roles, optimistic revision conflict detection, idempotent event
   merge, and audit-log persistence through the workspace store. Transport to
   other devices is now available through authenticated MCP Bridge session,
-  participant, event, and merge routes; the Android UI still needs a dedicated
-  collaboration surface and physical cross-device acceptance testing.
+  participant, event, and merge routes; physical cross-device acceptance
+  testing remains open.
 
 ## Implemented but environment-dependent
 
@@ -69,6 +73,7 @@ behavior and a corresponding automated or documented verification path.
   hashes must still be attached to the signed release and reviewed for the
   target distribution.
 - Physical Android collaboration/gesture acceptance,
+  cross-modal expansion,
   enterprise governance, and a mature external plugin marketplace.
 
 These items remain open until their implementation and release-environment
