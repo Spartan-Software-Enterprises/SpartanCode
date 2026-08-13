@@ -32,3 +32,17 @@ test("local stage executor runs the workspace test script", async () => {
   assert.equal(calls[0][1][0], "test");
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("local stage executor reports malformed workspace manifests", async () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-stage-"),
+  );
+  fs.writeFileSync(path.join(directory, "package.json"), "{broken");
+  const executor = createLocalStageExecutor({
+    getWorkspacePath: () => directory,
+  });
+  const result = await executor({ status: "verifying" });
+  assert.equal(result.ok, false);
+  assert.match(result.message, /Invalid package\.json/);
+  fs.rmSync(directory, { recursive: true, force: true });
+});

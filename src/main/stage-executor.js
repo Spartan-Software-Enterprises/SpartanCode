@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 const { execFile } = require("child_process");
 
 function runCommand(command, args, cwd, timeout = 120000) {
@@ -28,7 +29,7 @@ function createLocalStageExecutor({
     }
 
     if (stage.status === "building") {
-      const packagePath = `${workspacePath}/package.json`;
+      const packagePath = path.join(workspacePath, "package.json");
       return {
         ok: fs.existsSync(packagePath),
         message: fs.existsSync(packagePath)
@@ -38,7 +39,7 @@ function createLocalStageExecutor({
     }
 
     if (stage.status === "verifying") {
-      const packagePath = `${workspacePath}/package.json`;
+      const packagePath = path.join(workspacePath, "package.json");
       if (!fs.existsSync(packagePath))
         return {
           ok: true,

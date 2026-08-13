@@ -642,3 +642,8 @@
  - Mission-store identifiers now include an in-process sequence component
  - Rapidly created missions, artifacts, activities, approvals, and connections cannot collide
  - 27 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 25
+ - Local stage execution resolves workspace manifests with platform-safe paths
+ - Malformed manifests fail verification with persisted diagnostic evidence
+ - 28 automated tests passing

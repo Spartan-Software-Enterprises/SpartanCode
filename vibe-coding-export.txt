@@ -577,6 +577,11 @@
  collisions when agent output creates multiple records in the same millisecond.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 25
+ Local stage execution now uses platform-safe manifest paths and reports malformed
+ package manifests as verification failures. Twenty-eight automated tests pass.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
