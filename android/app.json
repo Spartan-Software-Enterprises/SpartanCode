@@ -3,10 +3,11 @@
     "name": "SpartanCode",
     "slug": "spartancode",
     "version": "0.1.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "userInterfaceStyle": "dark",
     "android": {
       "package": "com.spartansoftware.spartancode",
+      "resizeableActivity": true,
       "adaptiveIcon": {
         "backgroundColor": "#0b1020"
       }
