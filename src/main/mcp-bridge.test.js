@@ -51,12 +51,18 @@ test("MCP Bridge serves authenticated snapshots and mission mutations", async ()
 });
 
 test("MCP Bridge fails closed without authentication and preserves mission approvals", async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-bridge-auth-"));
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-bridge-auth-"),
+  );
   const store = createMissionStore(path.join(dir, "state.json"));
   const unauthenticated = createBridgeServer({ store });
-  await new Promise((resolve) => unauthenticated.listen(0, "127.0.0.1", resolve));
+  await new Promise((resolve) =>
+    unauthenticated.listen(0, "127.0.0.1", resolve),
+  );
   const unauthAddress = unauthenticated.address();
-  const denied = await fetch(`http://127.0.0.1:${unauthAddress.port}/v1/snapshot`);
+  const denied = await fetch(
+    `http://127.0.0.1:${unauthAddress.port}/v1/snapshot`,
+  );
   assert.equal(denied.status, 401);
   await new Promise((resolve) => unauthenticated.close(resolve));
 

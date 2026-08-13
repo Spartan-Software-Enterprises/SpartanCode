@@ -36,7 +36,7 @@ function createWindow() {
     const hasToken = Boolean(process.env.SPARTANCODE_BRIDGE_TOKEN);
     const hasOidc = Boolean(
       process.env.SPARTANCODE_BRIDGE_OIDC_ISSUER &&
-        process.env.SPARTANCODE_BRIDGE_OIDC_AUDIENCE,
+      process.env.SPARTANCODE_BRIDGE_OIDC_AUDIENCE,
     );
     const isLoopback = ["127.0.0.1", "::1", "localhost"].includes(bridgeHost);
     if (!hasToken && !hasOidc && !isLoopback) {
@@ -63,10 +63,7 @@ function createWindow() {
           store.snapshot().settings.executionMode,
         ),
     });
-    bridge.listen(
-      Number(process.env.SPARTANCODE_BRIDGE_PORT),
-      bridgeHost,
-    );
+    bridge.listen(Number(process.env.SPARTANCODE_BRIDGE_PORT), bridgeHost);
     app.once("will-quit", () => bridge.close());
   }
   registerDesktopApi({

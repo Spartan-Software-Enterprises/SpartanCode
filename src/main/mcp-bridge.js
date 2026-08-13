@@ -178,13 +178,18 @@ function createBridgeRequestHandler({
           approvalId: approval.id,
         });
         return mutationResponse(202, {
-          mission: store.snapshot().missions.find((item) => item.id === mission.id),
+          mission: store
+            .snapshot()
+            .missions.find((item) => item.id === mission.id),
           approval,
           operationId: `mission:${mission.id}`,
         });
       }
       if (typeof runMission === "function") runMission(mission);
-      return mutationResponse(201, { mission, operationId: `mission:${mission.id}` });
+      return mutationResponse(201, {
+        mission,
+        operationId: `mission:${mission.id}`,
+      });
     }
     if (url.pathname === "/v1/collaboration/sessions") {
       if (typeof store.collaborationCreate !== "function")
