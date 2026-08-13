@@ -83,6 +83,11 @@ can optionally provide remote execution without becoming a mobile dependency.
 Desktop YOLO mode is deliberately not a mobile prerequisite: Android remains
 local-first and continues to show operation state and queue evidence directly.
 
+The command center now applies the normalized device profile to workload routing
+and presents only compatible, explicitly licensed local models. Model download
+policy is visible in the UI: HTTPS is required, only MIT/Apache-2.0 catalog
+entries are eligible, and supplied checksums are verified before finalization.
+
 The desktop now includes an opt-in MCP Bridge HTTP adapter. Set
 `SPARTANCODE_BRIDGE_PORT` and preferably `SPARTANCODE_BRIDGE_TOKEN` to expose
 validated snapshots and approval-gated mutation routes. It binds to localhost

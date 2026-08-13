@@ -47,6 +47,7 @@ import {
 import type { RemoteProvider } from "./src/core/remote-guidance";
 import { authorizeSecretAccess } from "./src/core/biometric";
 import { listExtensions } from "./src/core/extensions";
+import { listCompatibleModels } from "./src/core/model-catalog";
 import {
   deviceDiagnostics,
   normalizeDeviceProfile,
@@ -88,6 +89,10 @@ export default function App() {
   );
   const deviceMessages = useMemo(
     () => deviceDiagnostics(deviceProfile),
+    [deviceProfile],
+  );
+  const compatibleModels = useMemo(
+    () => listCompatibleModels(deviceProfile),
     [deviceProfile],
   );
 
@@ -334,7 +339,7 @@ export default function App() {
     [snapshot.offline, stale],
   );
   const workloadLabelText = workloadLabel(
-    chooseWorkloadRoute("planning", !snapshot.offline),
+    chooseWorkloadRoute("planning", !snapshot.offline, deviceProfile),
   );
   const agents = availableAgents(!snapshot.offline);
 
@@ -479,6 +484,33 @@ export default function App() {
               {diagnostic}
             </Text>
           ))}
+        </View>
+
+        <Text style={styles.section}>Licensed local models</Text>
+        <View style={styles.card}>
+          {compatibleModels.length ? (
+            compatibleModels.map((model) => (
+              <View key={model.id} style={styles.agentRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>{model.id}</Text>
+                  <Text style={styles.missionMeta}>
+                    {model.provider} · {model.license} · {model.minimumMemoryMb}{" "}
+                    MB minimum
+                  </Text>
+                </View>
+                <Text style={styles.agentMode}>LICENSED</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.message}>
+              No local model meets the reported device requirements. Work stays
+              offline and queues until a capable runtime is available.
+            </Text>
+          )}
+          <Text style={styles.message}>
+            Downloads require HTTPS, an explicit MIT or Apache-2.0 license, and
+            checksum verification when a checksum is supplied.
+          </Text>
         </View>
 
         <Text style={styles.section}>Offline extensions</Text>
