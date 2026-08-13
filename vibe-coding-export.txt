@@ -598,6 +598,11 @@
  and artifact review decisions are validated before persistence.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 29
+ Runtime status now reports local runtime availability from actual installed
+ adapters, and the desktop README documents production operation and boundaries.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

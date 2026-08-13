@@ -665,3 +665,8 @@
  - Approval decisions are validated and written to the audit trail
  - Artifact review decisions are constrained to accepted or rejected
  - 29 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 29
+ - Runtime capability reporting no longer claims llama.cpp is installed when it is not
+ - Local runtime status distinguishes available integrations from planned adapters
+ - README documents development, verification, packaging, and product boundaries

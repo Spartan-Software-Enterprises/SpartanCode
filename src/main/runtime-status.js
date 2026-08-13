@@ -7,7 +7,11 @@ function getRuntimeStatus(environment = process.env) {
       ? "local-first with cloud fallback"
       : "local-first offline",
     runtimes: [
-      { id: "llama.cpp", status: "available", role: "primary local runtime" },
+      {
+        id: "llama.cpp",
+        status: detectRuntime("node-llama-cpp") ? "available" : "planned",
+        role: "primary local runtime",
+      },
       { id: "mlc-chat", status: "planned", role: "accelerated mobile runtime" },
       { id: "webllm", status: "planned", role: "browser fallback" },
     ],
@@ -26,6 +30,15 @@ function getRuntimeStatus(environment = process.env) {
       },
     ],
   };
+}
+
+function detectRuntime(moduleName) {
+  try {
+    require.resolve(moduleName);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 module.exports = { getRuntimeStatus };
