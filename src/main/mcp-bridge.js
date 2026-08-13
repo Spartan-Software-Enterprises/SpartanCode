@@ -56,6 +56,8 @@ function createBridgeRequestHandler({
   tokenScopes = null,
   oidc = null,
   events = null,
+  allowUnauthenticated = false,
+  requiresMissionApproval = () => false,
   idempotencyCache = new Map(),
 }) {
   if (!store || typeof store.snapshot !== "function")
@@ -73,7 +75,8 @@ function createBridgeRequestHandler({
     }
     if (oidcAuthenticator)
       return oidcAuthenticator.authenticate(request.headers.authorization);
-    if (!token) return { authenticated: true, scopes: ["*"] };
+    if (!token && allowUnauthenticated)
+      return { authenticated: true, scopes: ["*"] };
     return { authenticated: false, scopes: [] };
   };
   return async (request, response) => {
@@ -163,11 +166,25 @@ function createBridgeRequestHandler({
           error: "A mission description is required",
         });
       const mission = store.addMission(body.description.trim());
+      if (requiresMissionApproval(mission.description)) {
+        const approval = store.requestApproval({
+          missionId: mission.id,
+          title: "Permission needed before execution",
+          detail:
+            "This mission may change your system or publish data. Review and approve before the agents continue.",
+        });
+        store.updateMission(mission.id, {
+          status: "awaiting_approval",
+          approvalId: approval.id,
+        });
+        return mutationResponse(202, {
+          mission: store.snapshot().missions.find((item) => item.id === mission.id),
+          approval,
+          operationId: `mission:${mission.id}`,
+        });
+      }
       if (typeof runMission === "function") runMission(mission);
-      return mutationResponse(201, {
-        mission,
-        operationId: `mission:${mission.id}`,
-      });
+      return mutationResponse(201, { mission, operationId: `mission:${mission.id}` });
     }
     if (url.pathname === "/v1/collaboration/sessions") {
       if (typeof store.collaborationCreate !== "function")

@@ -134,6 +134,24 @@ export default function App() {
     () => deviceDiagnostics(deviceProfile),
     [deviceProfile],
   );
+  const authorizedBridgeRequest = useCallback(
+    async <T,>(
+      bridgeEndpoint: string,
+      path: string,
+      init: RequestInit = {},
+    ) => {
+      const access = await authorizeSecretAccess(biometricEnabled);
+      if (!access.allowed) {
+        throw new BridgeError(
+          access.reason === "unavailable"
+            ? "Biometric unlock is unavailable on this device"
+            : "Biometric unlock cancelled",
+        );
+      }
+      return bridgeRequest<T>(bridgeEndpoint, path, init);
+    },
+    [biometricEnabled],
+  );
   const compatibleModels = useMemo(
     () => listCompatibleModels(deviceProfile),
     [deviceProfile],
@@ -198,23 +216,17 @@ export default function App() {
   const refresh = useCallback(async () => {
     setMessage("Connecting…");
     try {
-      const access = await authorizeSecretAccess(biometricEnabled);
-      if (!access.allowed) {
-        setMessage(
-          access.reason === "unavailable"
-            ? "Biometric unlock is unavailable on this device"
-            : "Biometric unlock cancelled",
-        );
-        return;
-      }
       const normalizedEndpoint = normalizeBridgeEndpoint(endpoint);
       if (token.trim()) await saveBridgeToken(normalizedEndpoint, token.trim());
       const remote = normalizeBridgeSnapshot(
-        await bridgeRequest<unknown>(normalizedEndpoint, "/v1/snapshot"),
+        await authorizedBridgeRequest<unknown>(
+          normalizedEndpoint,
+          "/v1/snapshot",
+        ),
       );
       let remoteCollaboration: MobileCollaborationSession[] = [];
       try {
-        const response = await bridgeRequest<unknown>(
+        const response = await authorizedBridgeRequest<unknown>(
           normalizedEndpoint,
           "/v1/collaboration/sessions",
         );
@@ -269,7 +281,7 @@ export default function App() {
       await addConnection(profile);
       for (const operation of await readQueuedOperations()) {
         try {
-          await bridgeRequest(normalizedEndpoint, operation.path, {
+          await authorizedBridgeRequest(normalizedEndpoint, operation.path, {
             method: operation.method,
             body: JSON.stringify(operation.body),
             headers: { "Idempotency-Key": operation.idempotencyKey },
@@ -288,7 +300,7 @@ export default function App() {
       setSnapshot((current) => ({ ...current, offline: true }));
       setMessage(error instanceof Error ? error.message : "Connection failed");
     }
-  }, [biometricEnabled, endpoint, token]);
+  }, [authorizedBridgeRequest, endpoint, token]);
 
   const createCollaboration = useCallback(async () => {
     try {
@@ -297,7 +309,7 @@ export default function App() {
       await writeCollaborationSessions(next);
       setCollaborationSessions(next);
       if (!snapshot.offline && endpoint.trim()) {
-        await bridgeRequest(
+        await authorizedBridgeRequest(
           normalizeBridgeEndpoint(endpoint),
           "/v1/collaboration/sessions",
           {
@@ -317,7 +329,13 @@ export default function App() {
         error instanceof Error ? error.message : "Unable to create session",
       );
     }
-  }, [collaborationName, collaborationSessions, endpoint, snapshot.offline]);
+  }, [
+    authorizedBridgeRequest,
+    collaborationName,
+    collaborationSessions,
+    endpoint,
+    snapshot.offline,
+  ]);
 
   const createMission = useCallback(async () => {
     const description = mission.trim();
@@ -359,11 +377,15 @@ export default function App() {
           body: { description },
         });
       } else {
-        await bridgeRequest(normalizeBridgeEndpoint(endpoint), "/v1/missions", {
-          method: "POST",
-          body: JSON.stringify({ description }),
-          headers: { "Idempotency-Key": `mission:${queuedMission.id}` },
-        });
+        await authorizedBridgeRequest(
+          normalizeBridgeEndpoint(endpoint),
+          "/v1/missions",
+          {
+            method: "POST",
+            body: JSON.stringify({ description }),
+            headers: { "Idempotency-Key": `mission:${queuedMission.id}` },
+          },
+        );
       }
       setSnapshot(next);
       setMission("");
@@ -375,7 +397,7 @@ export default function App() {
           : "Unable to save mission; retry",
       );
     }
-  }, [endpoint, mission, snapshot]);
+  }, [authorizedBridgeRequest, endpoint, mission, snapshot]);
 
   useEffect(() => {
     if (!endpoint.trim()) return;
@@ -413,7 +435,7 @@ export default function App() {
           body: { decision },
         });
       } else {
-        await bridgeRequest(
+        await authorizedBridgeRequest(
           normalizeBridgeEndpoint(endpoint),
           `/v1/approvals/${encodeURIComponent(id)}/decision`,
           {
@@ -428,7 +450,7 @@ export default function App() {
       setSnapshot(next);
       setMessage(`Approval ${decision}`);
     },
-    [endpoint, snapshot],
+    [authorizedBridgeRequest, endpoint, snapshot],
   );
 
   const reviewArtifact = useCallback(
@@ -457,7 +479,7 @@ export default function App() {
           body: { decision, note: "Reviewed on Android" },
         });
       } else {
-        await bridgeRequest(
+        await authorizedBridgeRequest(
           normalizeBridgeEndpoint(endpoint),
           `/v1/artifacts/${encodeURIComponent(id)}/review`,
           {
@@ -472,7 +494,7 @@ export default function App() {
       setSnapshot(next);
       setMessage(`Artifact ${decision}`);
     },
-    [endpoint, snapshot],
+    [authorizedBridgeRequest, endpoint, snapshot],
   );
 
   const applyPairing = useCallback(() => {

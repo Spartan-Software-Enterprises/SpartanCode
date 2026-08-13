@@ -50,6 +50,44 @@ test("MCP Bridge serves authenticated snapshots and mission mutations", async ()
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test("MCP Bridge fails closed without authentication and preserves mission approvals", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-bridge-auth-"));
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const unauthenticated = createBridgeServer({ store });
+  await new Promise((resolve) => unauthenticated.listen(0, "127.0.0.1", resolve));
+  const unauthAddress = unauthenticated.address();
+  const denied = await fetch(`http://127.0.0.1:${unauthAddress.port}/v1/snapshot`);
+  assert.equal(denied.status, 401);
+  await new Promise((resolve) => unauthenticated.close(resolve));
+
+  let executions = 0;
+  const server = createBridgeServer({
+    store,
+    token: "approval-token",
+    requiresMissionApproval: () => true,
+    runMission: () => {
+      executions += 1;
+    },
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const response = await fetch(`http://127.0.0.1:${address.port}/v1/missions`, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer approval-token",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ description: "publish the release" }),
+  });
+  const payload = await response.json();
+  assert.equal(response.status, 202);
+  assert.equal(payload.mission.status, "awaiting_approval");
+  assert.ok(payload.approval.id);
+  assert.equal(executions, 0);
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test("MCP Bridge replays authenticated SSE events from a cursor", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-events-"));
   const store = createMissionStore(path.join(dir, "state.json"));
@@ -84,6 +122,7 @@ test("MCP Bridge deduplicates retried mutations by idempotency key", async () =>
   let executions = 0;
   const server = createBridgeServer({
     store,
+    token: "idempotency-token",
     runMission: () => {
       executions += 1;
     },
@@ -94,6 +133,7 @@ test("MCP Bridge deduplicates retried mutations by idempotency key", async () =>
   const init = {
     method: "POST",
     headers: {
+      Authorization: "Bearer idempotency-token",
       "Content-Type": "application/json",
       "Idempotency-Key": "mission:retry-1",
     },

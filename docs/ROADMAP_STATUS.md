@@ -76,6 +76,14 @@ behavior and a corresponding automated or documented verification path.
   other devices is now available through authenticated MCP Bridge session,
   participant, event, and merge routes; physical cross-device acceptance
   testing remains open.
+- Security review hardened the bridge boundary: non-loopback listeners require
+  a token or complete OIDC configuration, unauthenticated handler instances
+  fail closed, bridge mission requests reuse the desktop approval policy, and
+  Android bridge mutations/queued synchronization honor the biometric gate.
+  The review also identified release-hardening follow-ups for immutable GitHub
+  Action pins, optional runtime provenance, sandboxed workspace verification,
+  and encrypted Android offline content; these remain tracked as release
+  hardening rather than being represented as complete.
 
 ## Implemented but environment-dependent
 
