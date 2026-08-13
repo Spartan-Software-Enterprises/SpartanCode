@@ -61,8 +61,10 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     searchHuggingFaceModels(typeof query === "string" ? query : ""),
   );
   ipcMain.handle("models:cache", () => modelCache.list());
-  ipcMain.handle("models:prepare", (_event, modelId, quantization) =>
-    modelCache.prepare(modelId, quantization),
+  ipcMain.handle(
+    "models:prepare",
+    (_event, modelId, quantization, selectedModel) =>
+      modelCache.prepare(modelId, quantization, selectedModel),
   );
   ipcMain.handle("policy:classify", (_event, command) =>
     classifyCommand(command),

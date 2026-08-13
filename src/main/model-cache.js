@@ -17,26 +17,41 @@ function createModelCache(filePath) {
     list() {
       return state.models.map((model) => ({ ...model }));
     },
-    prepare(modelId, quantization = "Q4_K_M") {
+    prepare(modelId, quantization = "Q4_K_M", selectedModel = null) {
       const model = listLicensedModels({ commercialOnly: true }).find(
         (item) => item.id === modelId,
       );
-      if (!model)
+      const external =
+        selectedModel && selectedModel.source === "huggingface"
+          ? selectedModel
+          : null;
+      if (!model && !external)
         throw new Error(
-          "Model is not available under the commercial license policy",
+          "Model is unavailable under the commercial license policy; provide a Hugging Face selection",
         );
-      if (!model.quantizations.includes(quantization))
+      if (external && external.id !== modelId)
+        throw new Error(
+          "Hugging Face selection does not match the requested model",
+        );
+      if (external && external.licenseStatus === "unknown")
+        throw new Error(
+          "Acknowledge the Hugging Face model license before preparing it",
+        );
+      if (model && !model.quantizations.includes(quantization))
         throw new Error("Unsupported quantization for model");
+      const selected = model || external;
       const cached = {
-        id: model.id,
+        id: selected.id,
         quantization,
         format: "GGUF",
         status: "ready",
+        source: selected.source,
+        license: selected.license,
         preparedAt: new Date().toISOString(),
       };
       state.models = [
         cached,
-        ...state.models.filter((item) => item.id !== model.id),
+        ...state.models.filter((item) => item.id !== selected.id),
       ];
       persist();
       return cached;
