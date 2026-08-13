@@ -189,3 +189,32 @@ test("MCP Bridge exposes redacted integrity-checked audit exports", async () => 
   await new Promise((resolve) => server.close(resolve));
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test("MCP Bridge enforces opt-in least-privilege token scopes", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-scopes-"));
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const server = createBridgeServer({
+    store,
+    token: "read-token",
+    tokenScopes: { "read-token": ["snapshot"] },
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const base = `http://127.0.0.1:${address.port}`;
+  const read = await fetch(`${base}/v1/snapshot`, {
+    headers: { Authorization: "Bearer read-token" },
+  });
+  assert.equal(read.status, 200);
+  const write = await fetch(`${base}/v1/missions`, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer read-token",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ description: "Must be denied" }),
+  });
+  assert.equal(write.status, 403);
+  assert.match((await write.json()).error, /missions:write/);
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});

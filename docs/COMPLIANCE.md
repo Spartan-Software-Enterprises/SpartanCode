@@ -14,6 +14,10 @@ legal advice; a commercial release should be reviewed for its target markets.
 - Bridge tokens are stored in origin-scoped Expo SecureStore entries on
   Android. Desktop connection profiles exclude passwords, private keys, and
   tokens from the persisted workspace snapshot.
+- Bridge deployments may provide a token-to-scope map to enforce least
+  privilege for read, audit, event, collaboration, mission, approval, and
+  artifact operations. Integrating an OIDC/SSO issuer and key rotation is a
+  deployment responsibility, not silently assumed by the local bridge.
 - Mission, approval, artifact, and policy activity is retained in the local
   workspace store so users can review decisions. A production distribution
   must publish a retention and deletion policy appropriate to its jurisdiction.

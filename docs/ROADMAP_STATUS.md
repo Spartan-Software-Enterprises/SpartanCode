@@ -47,6 +47,9 @@ behavior and a corresponding automated or documented verification path.
   governance bundles through isolated IPC.
 - The authenticated MCP Bridge also exposes the same redacted audit bundle for
   remote governance consumers without exposing workspace credentials.
+- The MCP Bridge supports opt-in least-privilege token scopes for snapshot,
+  audit, event, collaboration, mission, approval, and artifact operations;
+  plain local-development tokens retain backward-compatible trusted behavior.
 - Desktop now has a durable, versioned collaboration journal with owner/member/
   observer roles, optimistic revision conflict detection, idempotent event
   merge, and audit-log persistence through the workspace store. Transport to
@@ -76,9 +79,8 @@ behavior and a corresponding automated or documented verification path.
   gates. The generator itself is implemented and verified; its inventory and
   hashes must still be attached to the signed release and reviewed for the
   target distribution.
-- Physical Android collaboration/gesture acceptance,
-  cross-modal expansion,
-  SSO/enterprise governance, and a mature external plugin marketplace.
+- Physical Android collaboration/gesture acceptance, cross-modal expansion,
+  OIDC/SSO provider integration, and a mature external plugin marketplace.
 
 These items remain open until their implementation and release-environment
 evidence exist; passing unit tests alone does not close them.

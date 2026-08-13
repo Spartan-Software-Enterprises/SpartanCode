@@ -678,6 +678,14 @@
  bundle includes a SHA-256 digest that detects tampering after export.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 40
+ The MCP Bridge now supports opt-in token-to-scope authorization for snapshot,
+ audit, event, collaboration, mission, approval, and artifact operations. A
+ plain local-development token remains backward-compatible; deployments can
+ supply scoped credentials while an external OIDC/SSO issuer remains a
+ deployment integration rather than an unverified built-in claim.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

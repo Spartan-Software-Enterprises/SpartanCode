@@ -52,36 +52,55 @@ function createBridgeRequestHandler({
   store,
   runMission,
   token = null,
+  tokenScopes = null,
   events = null,
   idempotencyCache = new Map(),
 }) {
   if (!store || typeof store.snapshot !== "function")
     throw new Error("A mission store is required");
   const authenticate = (request) => {
-    if (!token) return true;
-    return request.headers.authorization === `Bearer ${token}`;
+    if (!token) return { authenticated: true, scopes: ["*"] };
+    if (request.headers.authorization !== `Bearer ${token}`)
+      return { authenticated: false, scopes: [] };
+    const scopes = tokenScopes?.[token];
+    return {
+      authenticated: true,
+      // A plain token remains a trusted local-development credential. Scoped
+      // credentials opt into least-privilege enforcement.
+      scopes: Array.isArray(scopes) ? scopes : ["*"],
+    };
   };
   return async (request, response) => {
     if (request.method === "OPTIONS") return json(response, 204, {});
-    if (!authenticate(request))
+    const identity = authenticate(request);
+    if (!identity.authenticated)
       return json(response, 401, { error: "Unauthorized" });
+    const requireScope = (scope) =>
+      identity.scopes.includes("*") || identity.scopes.includes(scope);
+    const forbidden = (scope) =>
+      json(response, 403, { error: `Scope required: ${scope}` });
     const url = new URL(request.url || "/", "http://bridge.local");
     if (request.method === "GET" && url.pathname === "/v1/snapshot") {
+      if (!requireScope("snapshot")) return forbidden("snapshot");
       return json(response, 200, {
         ...store.snapshot(),
         syncedAt: new Date().toISOString(),
       });
     }
     if (request.method === "GET" && url.pathname === "/v1/audit") {
+      if (!requireScope("audit")) return forbidden("audit");
       return json(response, 200, { auditLog: store.auditLog() });
     }
     if (request.method === "GET" && url.pathname === "/v1/audit/export") {
+      if (!requireScope("audit")) return forbidden("audit");
       return json(response, 200, exportAuditLog(store.auditLog()));
     }
     if (
       request.method === "GET" &&
       url.pathname === "/v1/collaboration/sessions"
     ) {
+      if (!requireScope("collaboration:read"))
+        return forbidden("collaboration:read");
       if (typeof store.collaborationList !== "function")
         return json(response, 404, { error: "Collaboration unavailable" });
       return json(response, 200, {
@@ -89,11 +108,24 @@ function createBridgeRequestHandler({
       });
     }
     if (request.method === "GET" && url.pathname === "/v1/events") {
+      if (!requireScope("events:read")) return forbidden("events:read");
       if (!events) return json(response, 404, { error: "Events unavailable" });
       return events.connect(response, request.headers["last-event-id"] || "0");
     }
     if (request.method !== "POST")
       return json(response, 404, { error: "Not found" });
+    const mutationScope =
+      url.pathname === "/v1/missions"
+        ? "missions:write"
+        : url.pathname.startsWith("/v1/approvals/")
+          ? "approvals:write"
+          : url.pathname.startsWith("/v1/artifacts/")
+            ? "artifacts:write"
+            : url.pathname.startsWith("/v1/collaboration/")
+              ? "collaboration:write"
+              : null;
+    if (mutationScope && !requireScope(mutationScope))
+      return forbidden(mutationScope);
     const idempotencyKey = request.headers["idempotency-key"];
     const cacheKey =
       typeof idempotencyKey === "string" && idempotencyKey.length <= 256
