@@ -5,6 +5,8 @@ first surface keeps the highest-value controls reachable on a phone:
 
 - **Command center** — local/synced status and mission-control context.
 - **New mission** — queues a mission locally while offline.
+- **Voice dictation** — requests explicit speech permissions and inserts a
+  transcript into the mission field when the native recognizer is available.
 - **Bridge connection** — accepts an MCP Bridge endpoint and reports sync or
   connection failure explicitly. Optional bridge tokens are stored in
   origin-scoped Expo SecureStore entries and never shown after sync.
