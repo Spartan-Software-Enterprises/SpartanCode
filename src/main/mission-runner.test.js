@@ -6,36 +6,37 @@ const test = require("node:test");
 const { createMissionStore } = require("./mission-store");
 const { createMissionRunner } = require("./mission-runner");
 
-test("mission runner creates a plan and advances through verification", () => {
+test("mission runner creates a plan and stops when a stage fails", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-"));
   const store = createMissionStore(path.join(directory, "workspace.json"));
-  const timers = [];
+  const stages = [];
+  const updates = [];
   const window = {
     isDestroyed: () => false,
     webContents: {
-      send: (event, snapshot) => timers.push({ event, snapshot }),
+      send: (event, snapshot) => updates.push({ event, snapshot }),
     },
   };
   const run = createMissionRunner(store, window, {
-    schedule: (callback) => timers.push(callback),
+    schedule: (callback) => stages.push(callback),
+    executeStage: (stage) => ({ ok: stage.status !== "verifying" }),
   });
   const mission = store.addMission("Build an offline model picker");
 
   run(mission);
   assert.equal(store.snapshot().missions[0].plan.goal, mission.description);
   assert.equal(store.snapshot().artifacts[0].type, "plan");
-  assert.equal(timers.filter((item) => typeof item === "function").length, 3);
+  assert.equal(stages.length, 1);
 
-  timers
-    .filter((item) => typeof item === "function")
-    .forEach((callback) => callback());
+  await stages[0]();
+  await new Promise((resolve) => setImmediate(resolve));
   const snapshot = store.snapshot();
-  assert.equal(snapshot.missions[0].status, "complete");
-  assert.equal(snapshot.artifacts[0].type, "verification");
+  assert.equal(snapshot.missions[0].status, "failed");
+  assert.equal(snapshot.artifacts[0].type, "plan");
   assert.equal(snapshot.activity[0].agent, "Verify agent");
   assert.equal(
-    timers.filter((item) => item.event === "workspace:changed").length,
-    4,
+    updates.filter((item) => item.event === "workspace:changed").length,
+    3,
   );
 
   fs.rmSync(directory, { recursive: true, force: true });

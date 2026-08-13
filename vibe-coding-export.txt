@@ -519,6 +519,12 @@
  before they can be saved.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 14
+ Mission stages now run sequentially through an injectable execution adapter.
+ Failures stop the lifecycle and publish a failed mission state with activity
+ evidence; twenty-four automated tests pass.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

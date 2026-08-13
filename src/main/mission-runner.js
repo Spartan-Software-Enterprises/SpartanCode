@@ -1,6 +1,10 @@
 const { createExecutionPlan } = require("./agent-plan");
 
-function createMissionRunner(store, window, { schedule = setTimeout } = {}) {
+function createMissionRunner(
+  store,
+  window,
+  { schedule = queueMicrotask, executeStage = () => ({ ok: true }) } = {},
+) {
   return (mission) => {
     const plan = createExecutionPlan(mission.description);
     store.addMissionPlan(mission.id, plan);
@@ -31,24 +35,29 @@ function createMissionRunner(store, window, { schedule = setTimeout } = {}) {
       },
     ];
 
-    stages.forEach((stage, index) => {
-      schedule(
-        () => {
-          store.updateMission(mission.id, { status: stage.status });
-          store.addActivity({ agent: stage.agent, message: stage.message });
-          if (stage.status === "complete") {
-            store.addArtifact({
-              missionId: mission.id,
-              name: "Mission verification report",
-              type: "verification",
-              status: "ready",
-              content: `Verified mission: ${mission.description}`,
-            });
-          }
-          publish();
-        },
-        900 * (index + 1),
-      );
+    schedule(async () => {
+      for (const stage of stages) {
+        store.updateMission(mission.id, { status: stage.status });
+        store.addActivity({ agent: stage.agent, message: stage.message });
+        const result = await executeStage(stage, mission, plan);
+        if (result && result.ok === false) {
+          store.updateMission(mission.id, { status: "failed" });
+          store.addActivity({
+            agent: stage.agent,
+            message: result.message || "Stage failed; mission stopped",
+          });
+        } else if (stage.status === "complete") {
+          store.addArtifact({
+            missionId: mission.id,
+            name: "Mission verification report",
+            type: "verification",
+            status: "ready",
+            content: `Verified mission: ${mission.description}`,
+          });
+        }
+        publish();
+        if (result && result.ok === false) break;
+      }
     });
   };
 

@@ -583,3 +583,9 @@
  - Remote connection settings now collect a username without persisting secrets
  - SSH, MOSH, and MCP Bridge profiles share the remote transport validator
  - Invalid remote profiles remain local-only and show missing fields before save
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 14
+ - Mission stages now execute through one sequential runner instead of independent simulated timers
+ - Stage execution is injectable for local model/tool adapters and deterministic verification
+ - Failed build or verification stages stop the mission and publish a failed state with activity evidence
+ - 24 automated tests passing
