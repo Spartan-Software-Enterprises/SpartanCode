@@ -144,7 +144,15 @@ function parseArguments(argv) {
     scanDirectories:
       scanIndex >= 0 && argv[scanIndex + 1]
         ? [path.resolve(argv[scanIndex + 1])]
-        : [],
+        : fs.existsSync(path.resolve("dist"))
+          ? fs
+              .readdirSync(path.resolve("dist"), { withFileTypes: true })
+              .filter(
+                (entry) =>
+                  entry.isDirectory() && entry.name.endsWith("-unpacked"),
+              )
+              .map((entry) => path.resolve("dist", entry.name))
+          : [],
   };
 }
 

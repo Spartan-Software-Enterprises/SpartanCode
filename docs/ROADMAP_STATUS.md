@@ -42,6 +42,9 @@ behavior and a corresponding automated or documented verification path.
 - Reproducible release-evidence generation now records the Git commit,
   SHA-256 hashes for scanned artifacts, and a lockfile-derived third-party
   component inventory for desktop and Android release workflows.
+- A clean-checkout GitHub Actions workflow and local Android verification
+  matrix now run the repeatable TypeScript/Jest/format/Expo baseline and record
+  emulator, signing, and AWS environment gaps as explicit skips.
 - A bounded plugin registry now discovers workspace metadata, enforces explicit
   MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
   plugins, and exposes metadata through isolated IPC without executing plugin

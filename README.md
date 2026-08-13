@@ -44,6 +44,17 @@ The suite validates the IPC-facing services, mission lifecycle, policy gates,
 model licensing rules, workspace isolation, persistence, renderer parsing, and
 formatting.
 
+The repeatable Android baseline and environment-gap report can be generated
+with:
+
+```bash
+node android/scripts/verify-matrix.js --output dist/android-verification.json
+```
+
+The same baseline runs in `.github/workflows/verify.yml`. Device, signing, and
+remote-host checks are recorded as explicit skips until their release
+environment is supplied.
+
 ## Production build
 
 ```bash
