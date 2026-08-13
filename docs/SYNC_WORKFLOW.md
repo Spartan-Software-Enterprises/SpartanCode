@@ -15,6 +15,11 @@ comes before making the three locations identical.
 The AWS host is for development validation. It must not be treated as a second
 source of truth, and it must not receive force pushes or destructive resets.
 
+The previous host also contained an idle `spartancode-auto-terminate.timer`
+that could terminate the EC2 instance. Replacement hosts must not install that
+timer. Use `docs/AWS_RECOVERY.md` and the bootstrap script when recovering or
+replacing the host.
+
 ## Start-of-session procedure
 
 From the local SpartanCode checkout:
