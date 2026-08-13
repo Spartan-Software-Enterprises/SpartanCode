@@ -10,8 +10,17 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { bridgeRequest, normalizeBridgeSnapshot } from "./src/core/bridge";
-import { readSnapshot, writeSnapshot } from "./src/core/storage";
+import {
+  bridgeRequest,
+  normalizeBridgeEndpoint,
+  normalizeBridgeSnapshot,
+} from "./src/core/bridge";
+import {
+  addConnection,
+  readSnapshot,
+  saveBridgeToken,
+  writeSnapshot,
+} from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
 
 const initialSnapshot: MobileSnapshot = {
@@ -24,6 +33,7 @@ const initialSnapshot: MobileSnapshot = {
 export default function App() {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [endpoint, setEndpoint] = useState("");
+  const [token, setToken] = useState("");
   const [mission, setMission] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Offline-first workspace");
@@ -35,15 +45,20 @@ export default function App() {
   }, []);
 
   const refresh = useCallback(async () => {
-    if (!endpoint.trim()) {
-      setMessage("Add an MCP Bridge endpoint to connect");
-      return;
-    }
     setMessage("Connecting…");
     try {
+      const normalizedEndpoint = normalizeBridgeEndpoint(endpoint);
+      if (token.trim()) await saveBridgeToken(normalizedEndpoint, token.trim());
       const remote = normalizeBridgeSnapshot(
-        await bridgeRequest<unknown>(endpoint.trim(), "/v1/snapshot"),
+        await bridgeRequest<unknown>(normalizedEndpoint, "/v1/snapshot"),
       );
+      const profile = {
+        id: `bridge-${new URL(normalizedEndpoint).origin}`,
+        name: new URL(normalizedEndpoint).hostname,
+        endpoint: normalizedEndpoint,
+        transport: "mcp-bridge" as const,
+        createdAt: new Date().toISOString(),
+      };
       setSnapshot((current) => {
         const remoteIds = new Set(remote.missions.map((item) => item.id));
         const pendingLocal = current.missions.filter(
@@ -51,6 +66,10 @@ export default function App() {
         );
         return {
           ...remote,
+          connections: [
+            ...remote.connections.filter((item) => item.id !== profile.id),
+            profile,
+          ],
           missions: [...pendingLocal, ...remote.missions],
         };
       });
@@ -59,16 +78,23 @@ export default function App() {
       const pendingLocal = current.missions.filter(
         (item) => item.status === "planning" && !remoteIds.has(item.id),
       );
-      await writeSnapshot({
+      const merged = {
         ...remote,
+        connections: [
+          ...remote.connections.filter((item) => item.id !== profile.id),
+          profile,
+        ],
         missions: [...pendingLocal, ...remote.missions],
-      });
+      };
+      await writeSnapshot(merged);
+      await addConnection(profile);
+      setToken("");
       setMessage("Connected · synced just now");
     } catch (error) {
       setSnapshot((current) => ({ ...current, offline: true }));
       setMessage(error instanceof Error ? error.message : "Connection failed");
     }
-  }, [endpoint]);
+  }, [endpoint, token]);
 
   const createMission = useCallback(async () => {
     const description = mission.trim();
@@ -165,6 +191,17 @@ export default function App() {
             style={styles.input}
             value={endpoint}
             onChangeText={setEndpoint}
+          />
+          <TextInput
+            accessibilityLabel="MCP Bridge token"
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="Optional bridge token"
+            placeholderTextColor="#70809b"
+            secureTextEntry
+            style={styles.input}
+            value={token}
+            onChangeText={setToken}
           />
           <Pressable
             accessibilityRole="button"

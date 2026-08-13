@@ -33,6 +33,11 @@ fields do not delete queued missions; TalkBack labels exist on core actions.
 Gate: every remote mutation has pending/approved/denied evidence; offline
 mutations queue until acknowledged; logout removes all secrets.
 
+Current foundation evidence: manual endpoint/token entry now validates secure
+transport, stores tokens by bridge origin, records a bridge connection profile,
+and retains planning missions when a sync response arrives. QR pairing and
+logout-secret deletion remain open work.
+
 ## Phase 3 — Device intelligence and extensibility
 
 - Detect chipset, RAM, storage, Vulkan/NPU availability, and thermal limits.

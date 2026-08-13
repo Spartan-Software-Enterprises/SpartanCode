@@ -12,13 +12,10 @@ export class BridgeError extends Error {
   }
 }
 
-export async function bridgeRequest<T>(
-  endpoint: string,
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
-  const normalizedEndpoint = endpoint.replace(/\/$/, "");
-  const url = new URL(normalizedEndpoint);
+export function normalizeBridgeEndpoint(endpoint: string): string {
+  const normalized = endpoint.trim().replace(/\/$/, "");
+  if (!normalized) throw new BridgeError("Enter an MCP Bridge endpoint");
+  const url = new URL(normalized);
   if (
     url.protocol !== "https:" &&
     !["localhost", "127.0.0.1"].includes(url.hostname)
@@ -27,6 +24,15 @@ export async function bridgeRequest<T>(
       "Bridge endpoints must use HTTPS outside local development",
     );
   }
+  return normalized;
+}
+
+export async function bridgeRequest<T>(
+  endpoint: string,
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const normalizedEndpoint = normalizeBridgeEndpoint(endpoint);
   const token = await readBridgeToken(normalizedEndpoint);
   const response = await fetch(`${normalizedEndpoint}${path}`, {
     ...init,

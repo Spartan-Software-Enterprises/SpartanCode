@@ -1,6 +1,17 @@
-import { normalizeBridgeSnapshot } from "./bridge";
+import { normalizeBridgeEndpoint, normalizeBridgeSnapshot } from "./bridge";
 
 describe("MCP Bridge snapshots", () => {
+  it("normalizes secure endpoints and allows local development", () => {
+    expect(normalizeBridgeEndpoint("https://bridge.example/")).toBe(
+      "https://bridge.example",
+    );
+    expect(normalizeBridgeEndpoint("http://localhost:8787/")).toBe(
+      "http://localhost:8787",
+    );
+    expect(() => normalizeBridgeEndpoint("http://bridge.example")).toThrow(
+      "HTTPS",
+    );
+  });
   it("normalizes a valid remote snapshot as online", () => {
     expect(
       normalizeBridgeSnapshot({
