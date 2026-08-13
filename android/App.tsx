@@ -6,6 +6,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  AppState,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -251,6 +252,19 @@ export default function App() {
     }
   }, [endpoint, mission, snapshot]);
 
+  useEffect(() => {
+    if (!endpoint.trim()) return;
+    const syncWhenActive = (state: string) => {
+      if (state === "active") void refresh();
+    };
+    const subscription = AppState.addEventListener("change", syncWhenActive);
+    const interval = setInterval(() => void refresh(), 60_000);
+    return () => {
+      subscription.remove();
+      clearInterval(interval);
+    };
+  }, [endpoint, refresh]);
+
   const resolveApproval = useCallback(
     async (id: string, decision: "approved" | "denied") => {
       const next = {
@@ -280,6 +294,9 @@ export default function App() {
           {
             method: "POST",
             body: JSON.stringify({ decision }),
+            headers: {
+              "Idempotency-Key": `approval:${id}:${decision}`,
+            },
           },
         );
       }
@@ -321,6 +338,9 @@ export default function App() {
           {
             method: "POST",
             body: JSON.stringify({ decision, note: "Reviewed on Android" }),
+            headers: {
+              "Idempotency-Key": `artifact:${id}:${decision}`,
+            },
           },
         );
       }

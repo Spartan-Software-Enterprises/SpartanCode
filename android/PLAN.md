@@ -42,6 +42,10 @@ retains planning missions when a sync response arrives, retries transient
 bridge failures, expires stored tokens, labels stale snapshots, accepts QR
 pairing payloads, and supports deletion of all stored bridge secrets.
 
+When a bridge endpoint is configured, foreground resume and a bounded
+one-minute interval retry synchronization. Approval and artifact mutations use
+stable idempotency keys in both immediate and queued paths.
+
 Snapshot recovery now quarantines malformed serialized data before clearing it,
 so a cold start can recover without silently reusing corrupt state. The Android
 test suite covers this recovery path alongside the durable idempotent queue.
