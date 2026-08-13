@@ -1,7 +1,10 @@
 const { ipcMain, dialog } = require("electron");
 const { getRuntimeStatus } = require("./runtime-status");
 const { gitStatusAt, gitInitAt, gitAddAt, gitCommitAt } = require("./git");
-const { listLicensedModels } = require("./model-catalog");
+const {
+  listLicensedModels,
+  searchHuggingFaceModels,
+} = require("./model-catalog");
 const { classifyCommand } = require("./policy-engine");
 const { getCapabilities } = require("./capabilities");
 const { getProviderStatus } = require("./provider-status");
@@ -53,6 +56,9 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
   });
   ipcMain.handle("models:list", (_event, options) =>
     listLicensedModels(options),
+  );
+  ipcMain.handle("models:search", (_event, query) =>
+    searchHuggingFaceModels(typeof query === "string" ? query : ""),
   );
   ipcMain.handle("models:cache", () => modelCache.list());
   ipcMain.handle("models:prepare", (_event, modelId, quantization) =>
