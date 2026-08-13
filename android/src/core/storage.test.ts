@@ -36,6 +36,31 @@ describe("offline operation queue", () => {
     await removeQueuedOperation("mission-1");
     expect(await readQueuedOperations()).toEqual([]);
   });
+
+  it("restores an in-flight mutation from a persisted queue record", async () => {
+    await AsyncStorage.setItem(
+      "spartancode.mobile.queue.v1",
+      JSON.stringify([
+        {
+          idempotencyKey: "restart-1",
+          method: "POST",
+          path: "/v1/missions",
+          body: { description: "Recover after restart" },
+          queuedAt: "2026-08-13T00:00:00.000Z",
+          attempts: 2,
+          lastError: "bridge unavailable",
+        },
+      ]),
+    );
+    const recovered = await readQueuedOperations();
+    expect(recovered).toEqual([
+      expect.objectContaining({
+        idempotencyKey: "restart-1",
+        attempts: 2,
+        lastError: "bridge unavailable",
+      }),
+    ]);
+  });
 });
 
 describe("storage recovery", () => {

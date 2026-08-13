@@ -717,6 +717,14 @@
  device inference evidence remain release gates.
 --------------------------------------------------------------------------------
 
+ ANDROID IMPLEMENTATION STATUS — MILESTONE 45
+ Mobile model downloads now reject low-storage requests before transport,
+ recover safely when a server ignores a resume Range header, and clear partial
+ data after checksum failure. The Android suite covers these paths plus
+ recovery from a persisted queue record; physical process-restart, storage,
+ and device acceptance remain release-environment checks.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
