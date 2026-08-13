@@ -600,3 +600,10 @@
  - Mission adapter exceptions are converted into persisted failed-state evidence
  - Agent activity records the adapter error without crashing the desktop process
  - 25 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 17
+ - Mission execution now uses a local workspace stage adapter in the desktop process
+ - Build validates the selected workspace manifest
+ - Verify runs the selected workspace's declared test script when available
+ - Agent output and verification logs are persisted as inspectable artifacts
+ - 27 automated tests passing

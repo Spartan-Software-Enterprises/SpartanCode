@@ -4,6 +4,7 @@ const { registerDesktopApi } = require("./desktop-api");
 const { createMissionStore } = require("./mission-store");
 const { createMissionRunner } = require("./mission-runner");
 const { createModelCache } = require("./model-cache");
+const { createLocalStageExecutor } = require("./stage-executor");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -26,7 +27,11 @@ function createWindow() {
   registerDesktopApi({
     store,
     window: win,
-    runMission: createMissionRunner(store, win),
+    runMission: createMissionRunner(store, win, {
+      executeStage: createLocalStageExecutor({
+        getWorkspacePath: () => store.snapshot().settings.workspacePath,
+      }),
+    }),
     modelCache: createModelCache(
       path.join(app.getPath("userData"), "models.json"),
     ),

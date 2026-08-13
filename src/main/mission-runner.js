@@ -90,6 +90,18 @@ function createMissionRunner(
             content: `Verified mission: ${mission.description}`,
           });
         }
+        if (result && result.message) {
+          store.addArtifact({
+            missionId: mission.id,
+            name: `${stage.agent} output`,
+            type:
+              stage.status === "verifying"
+                ? "verification-log"
+                : "agent-output",
+            status: result.ok === false ? "failed" : "ready",
+            content: result.message,
+          });
+        }
         publish();
         if (result && result.ok === false) break;
       }

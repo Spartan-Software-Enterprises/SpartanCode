@@ -536,6 +536,12 @@
  instead of escaping as unhandled desktop errors. Twenty-five automated tests pass.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 17
+ The desktop mission lifecycle now has a local workspace adapter: build validates
+ the selected manifest, verify runs its declared test script, and agent outputs
+ are persisted as artifacts. Twenty-seven automated tests pass.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
