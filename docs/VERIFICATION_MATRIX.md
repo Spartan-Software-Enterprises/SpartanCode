@@ -13,7 +13,9 @@ Run it from the repository root:
 node android/scripts/verify-matrix.js --output dist/android-verification.json
 ```
 
-GitHub Actions runs the same baseline on every push and pull request. Native
-Android builds, physical TalkBack/gesture checks, API-level emulator smoke
-tests, and signed artifacts remain separate release-environment evidence and
-must be attached when available.
+GitHub Actions runs the same baseline and an API 35 Android emulator smoke job
+on every push and pull request. The smoke job builds the debug native binary,
+installs it, launches the application, and verifies the package is registered.
+Physical TalkBack/gesture checks, additional API-level coverage, and signed
+artifacts remain separate release-environment evidence and must be attached
+when available.

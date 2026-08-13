@@ -51,6 +51,9 @@ behavior and a corresponding automated or documented verification path.
 - A clean-checkout GitHub Actions workflow and local Android verification
   matrix now run the repeatable TypeScript/Jest/format/Expo baseline and record
   Android SDK/emulator, signing, and AWS environment gaps as explicit skips.
+- GitHub verification now also includes a pinned Android emulator job that
+  builds the debug native binary, installs it on API 35, launches the package,
+  and verifies package registration on every push and pull request.
 - A bounded plugin registry now discovers workspace metadata, enforces explicit
   MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
   plugins, and exposes metadata through isolated IPC without executing plugin
@@ -90,8 +93,9 @@ behavior and a corresponding automated or documented verification path.
 ## Implemented but environment-dependent
 
 - Linux desktop packaging has been exercised in the local validation
-  environment; Android emulator smoke checks remain unverified here because
-  no Android SDK/emulator is currently available.
+  environment; Android emulator smoke checks are delegated to the pinned
+  GitHub Actions API 35 job because no Android SDK/emulator is currently
+  available locally.
 - Android Expo configuration and native release automation are present, but a
   signed artifact requires release-owned Android credentials.
 - AWS/KVM validation requires a reachable replacement host; the former host was
