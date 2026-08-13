@@ -28,6 +28,9 @@ contextBridge.exposeInMainWorld("spartanCode", {
   validateConnection: (profile) =>
     ipcRenderer.invoke("connections:validate", profile),
   getRuntimeStatus: () => ipcRenderer.invoke("runtime:status"),
+  listRuntimeAdapters: () => ipcRenderer.invoke("runtime:adapters"),
+  generateWithRuntime: (runtimeId, request) =>
+    ipcRenderer.invoke("runtime:generate", runtimeId, request),
   getCapabilities: () => ipcRenderer.invoke("capabilities:get"),
   getProviderStatus: () => ipcRenderer.invoke("providers:get"),
   getVoiceStatus: () => ipcRenderer.invoke("voice:status"),

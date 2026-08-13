@@ -16,6 +16,7 @@ const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 const { createModelCache } = require("./model-cache");
 const { validateRemoteConfig } = require("./remote-connection");
 const { loadCustomAgents } = require("./custom-agents");
+const { createRuntimeRegistry } = require("./runtime-adapters");
 const {
   estimateServerCost,
   getRouterGuidance,
@@ -26,7 +27,16 @@ const {
 function registerDesktopApi({ store, window, runMission, modelCache }) {
   const voiceService = createVoiceService();
   const chatService = createChatService(store);
+  const runtimeRegistry = createRuntimeRegistry();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
+  ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
+  ipcMain.handle("runtime:generate", (_event, runtimeId, request) => {
+    if (typeof runtimeId !== "string" || !runtimeId.trim())
+      throw new Error("Runtime id is required");
+    if (!request || typeof request !== "object")
+      throw new Error("Runtime request must be an object");
+    return runtimeRegistry.generate(runtimeId, request);
+  });
   ipcMain.handle("capabilities:get", () => getCapabilities());
   ipcMain.handle("providers:get", () => getProviderStatus());
   ipcMain.handle("voice:status", () => voiceService.status());

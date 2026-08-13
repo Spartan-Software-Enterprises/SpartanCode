@@ -1,3 +1,5 @@
+const { listRuntimeAdapters } = require("./runtime-adapters");
+
 function getRuntimeStatus(environment = process.env) {
   const configuredCloud = Boolean(
     environment.OPENAI_API_KEY || environment.ANTHROPIC_API_KEY,
@@ -6,15 +8,7 @@ function getRuntimeStatus(environment = process.env) {
     mode: configuredCloud
       ? "local-first with cloud fallback"
       : "local-first offline",
-    runtimes: [
-      {
-        id: "llama.cpp",
-        status: detectRuntime("node-llama-cpp") ? "available" : "planned",
-        role: "primary local runtime",
-      },
-      { id: "mlc-chat", status: "planned", role: "accelerated mobile runtime" },
-      { id: "webllm", status: "planned", role: "browser fallback" },
-    ],
+    runtimes: listRuntimeAdapters(),
     models: [
       {
         id: "Qwen3-1.7B",
@@ -30,15 +24,6 @@ function getRuntimeStatus(environment = process.env) {
       },
     ],
   };
-}
-
-function detectRuntime(moduleName) {
-  try {
-    require.resolve(moduleName);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 module.exports = { getRuntimeStatus };

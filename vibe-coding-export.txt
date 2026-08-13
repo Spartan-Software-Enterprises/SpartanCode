@@ -630,6 +630,15 @@
  isolation, credential boundaries, and auditable policy-bypass activity.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 34
+ Runtime availability now flows through one tested adapter contract for
+ llama.cpp, MLC Chat, PocketPal, and WebLLM. Desktop IPC can invoke an installed
+ adapter only when it exposes the explicit generate contract; missing runtimes
+ return typed unavailable evidence instead of being presented as ready. Native
+ runtime packages and on-device inference remain release gates until installed
+ and verified in the target environment.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

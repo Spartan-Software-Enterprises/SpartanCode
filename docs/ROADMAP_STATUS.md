@@ -24,6 +24,10 @@ behavior and a corresponding automated or documented verification path.
   procedures.
 - Antigravity-compatible workspace custom-agent discovery for Researcher,
   Implementer, Verifier, and Sync Guardian roles.
+- A tested runtime adapter contract and desktop IPC boundary for llama.cpp,
+  MLC Chat, PocketPal, and WebLLM. Installed runtimes are invoked only when
+  they expose the explicit `generate` contract; unavailable runtimes report a
+  typed result instead of being presented as ready.
 
 ## Implemented but environment-dependent
 
@@ -36,8 +40,9 @@ behavior and a corresponding automated or documented verification path.
 
 ## Release gates still requiring stronger evidence
 
-- Native MLC/llama.cpp/PocketPal inference adapters and real on-device model
-  execution, rather than catalog/download policy alone.
+- Native MLC/llama.cpp/PocketPal inference packages and real on-device model
+  execution are still required; the current adapter boundary and detection do
+  not claim that an optional runtime is installed.
 - Physical-device accessibility (TalkBack, large text, reduced motion),
   low-storage/interrupted-download/process-restart acceptance, and tablet
   hardware validation.

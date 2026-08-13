@@ -60,6 +60,8 @@ portable `ssh2` runtime.
 - Local-first operation remains available without cloud credentials.
 - External mutations and dangerous commands require an explicit approval.
 - Only explicitly licensed local models are exposed by the model catalog.
+- Runtime availability is detected honestly; optional model runtimes are never
+  reported as ready until their adapter contract is installed and verified.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
 
