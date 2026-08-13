@@ -1589,9 +1589,7 @@
         );
       document
         .getElementById("viewAgents")
-        .addEventListener("click", () =>
-          showToast("Agent manager view is coming next"),
-        );
+        .addEventListener("click", openManager);
       document.querySelectorAll(".nav-item").forEach((item) =>
         item.addEventListener("click", () => {
           document

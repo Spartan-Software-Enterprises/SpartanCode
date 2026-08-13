@@ -26,4 +26,18 @@ function createRemoteConnection(config) {
   return client;
 }
 
-module.exports = { createRemoteConnection };
+function validateRemoteConfig(config = {}) {
+  const transport = config.transport || "ssh";
+  const validTransports = ["ssh", "mosh", "mcp-bridge"];
+  return {
+    valid: Boolean(
+      config.host && config.username && validTransports.includes(transport),
+    ),
+    transport,
+    missing: [!config.host && "host", !config.username && "username"].filter(
+      Boolean,
+    ),
+  };
+}
+
+module.exports = { createRemoteConnection, validateRemoteConfig };

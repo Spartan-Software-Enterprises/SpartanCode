@@ -1,4 +1,5 @@
 const { exec } = require("child_process");
+const { classifyCommand } = require("./policy-engine");
 
 function executePlan(steps) {
   return new Promise((resolve, reject) => {
@@ -12,6 +13,17 @@ function executePlan(steps) {
       }
 
       const step = steps[index];
+      const classification = classifyCommand(step.command);
+      if (classification.requiresApproval) {
+        results.push({
+          step: step.name,
+          blocked: true,
+          reason: classification.reason,
+        });
+        index++;
+        executeStep();
+        return;
+      }
       exec(step.command, (error, stdout, stderr) => {
         results.push({ step: step.name, error, stdout, stderr });
         index++;
@@ -38,6 +50,14 @@ function approveCommand(command) {
   });
 }
 
+function validatePlan(steps) {
+  if (!Array.isArray(steps)) throw new TypeError("Plan steps must be an array");
+  return steps.map((step) => ({
+    ...step,
+    policy: classifyCommand(step.command),
+  }));
+}
+
 async function orchestrate(steps) {
   const results = await executePlan(steps);
 
@@ -57,3 +77,4 @@ async function orchestrate(steps) {
 }
 
 module.exports = { orchestrate, approveCommand };
+module.exports.validatePlan = validatePlan;

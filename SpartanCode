@@ -558,3 +558,10 @@
  - Live Agent Manager workspace
  - Agent state cards derived from persisted mission lifecycle
  - Recent agent activity inspection from the command center
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 10
+ - Agent orchestrator plan policy annotations
+ - Dangerous command blocking before child-process execution
+ - Remote SSH/MOSH/MCP Bridge configuration validation
+ - Renderer now opens the live Agent Manager directly
+ - 22 automated tests passing

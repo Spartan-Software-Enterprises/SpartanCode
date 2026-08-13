@@ -494,6 +494,11 @@
  The desktop now includes a live Agent Manager workspace showing Plan, Build,
  and Verify state derived from persisted missions plus recent agent activity.
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 10
+ Agent plans now receive centralized policy annotations, dangerous commands are
+ blocked before child-process execution, and remote transport configuration is
+ validated for SSH, MOSH, and MCP Bridge. Twenty-two automated tests pass.
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
