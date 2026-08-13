@@ -31,6 +31,12 @@ import {
 import type { MobileSnapshot } from "./src/core/types";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
 import { availableAgents } from "./src/core/agents";
+import {
+  estimateRemoteCost,
+  remoteProviders,
+  routerGuidance,
+} from "./src/core/remote-guidance";
+import type { RemoteProvider } from "./src/core/remote-guidance";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -49,6 +55,11 @@ export default function App() {
   const [mission, setMission] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Offline-first workspace");
+  const [remoteProvider, setRemoteProvider] =
+    useState<RemoteProvider["id"]>("digitalocean");
+  const [routerMethod, setRouterMethod] =
+    useState<keyof typeof routerGuidance>("tailscale");
+  const [remotePlanMessage, setRemotePlanMessage] = useState("");
 
   useEffect(() => {
     readSnapshot()
@@ -425,6 +436,71 @@ export default function App() {
           <Text style={styles.message}>{message}</Text>
         </View>
 
+        <Text style={styles.section}>Remote planning</Text>
+        <View style={styles.card}>
+          <Text style={styles.message}>
+            Plan a self-hosted or VPS workspace without provisioning accounts,
+            opening ports, or requiring a bridge.
+          </Text>
+          <View style={styles.actionRow}>
+            {remoteProviders.map((provider) => (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Select ${provider.label}`}
+                key={provider.id}
+                style={[
+                  styles.smallAction,
+                  remoteProvider === provider.id && styles.selectedAction,
+                ]}
+                onPress={() => setRemoteProvider(provider.id)}
+              >
+                <Text style={styles.smallActionText}>
+                  {provider.id.toUpperCase()}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Estimate remote server cost"
+            style={styles.secondary}
+            onPress={() => {
+              const estimate = estimateRemoteCost(remoteProvider);
+              setRemotePlanMessage(
+                `${estimate.label}: about $${estimate.estimatedMonthly.toFixed(2)}/month for ${estimate.hours} hours.`,
+              );
+            }}
+          >
+            <Text style={styles.secondaryText}>Estimate cost</Text>
+          </Pressable>
+          <View style={styles.actionRow}>
+            {(
+              Object.keys(routerGuidance) as Array<keyof typeof routerGuidance>
+            ).map((method) => (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Use ${routerGuidance[method].label} guidance`}
+                key={method}
+                style={[
+                  styles.smallAction,
+                  routerMethod === method && styles.selectedAction,
+                ]}
+                onPress={() => setRouterMethod(method)}
+              >
+                <Text style={styles.smallActionText}>{method}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <Text style={styles.message}>
+            {routerGuidance[routerMethod].label} ·{" "}
+            {routerGuidance[routerMethod].exposure.toUpperCase()} ·{" "}
+            {routerGuidance[routerMethod].steps}
+          </Text>
+          {remotePlanMessage ? (
+            <Text style={styles.message}>{remotePlanMessage}</Text>
+          ) : null}
+        </View>
+
         <View style={styles.sectionRow}>
           <Text style={styles.section}>Missions</Text>
           <Text style={styles.count}>{snapshot.missions.length}</Text>
@@ -683,5 +759,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
+  selectedAction: { borderColor: "#72e6c5", backgroundColor: "#183b3a" },
   smallActionText: { color: "#72e6c5", fontSize: 11, fontWeight: "800" },
 });
