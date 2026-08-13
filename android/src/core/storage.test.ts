@@ -31,3 +31,15 @@ describe("offline operation queue", () => {
     expect(await readQueuedOperations()).toEqual([]);
   });
 });
+
+describe("storage recovery", () => {
+  beforeEach(async () => AsyncStorage.clear());
+
+  it("quarantines malformed snapshots and returns an offline-safe empty state", async () => {
+    await AsyncStorage.setItem("spartancode.mobile.snapshot.v1", "{broken");
+    const { readSnapshot } = await import("./storage");
+    expect(await readSnapshot()).toMatchObject({ missions: [], connections: [], offline: true });
+    expect(await AsyncStorage.getItem("spartancode.mobile.snapshot.v1")).toBeNull();
+    expect(await AsyncStorage.getItem("spartancode.mobile.snapshot.quarantine.v1")).toContain("broken");
+  });
+});

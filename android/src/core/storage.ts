@@ -19,6 +19,8 @@ const SNAPSHOT_KEY = "spartancode.mobile.snapshot.v1";
 const QUEUE_KEY = "spartancode.mobile.queue.v1";
 const BRIDGE_TOKEN_KEY = "spartancode.mobile.bridge-token.v1";
 const BRIDGE_TOKEN_INDEX_KEY = "spartancode.mobile.bridge-token-index.v1";
+const SNAPSHOT_QUARANTINE_KEY = "spartancode.mobile.snapshot.quarantine.v1";
+const QUEUE_QUARANTINE_KEY = "spartancode.mobile.queue.quarantine.v1";
 
 function emptySnapshot(): MobileSnapshot {
   return { missions: [], connections: [], pendingApprovals: 0, offline: true };
@@ -26,6 +28,28 @@ function emptySnapshot(): MobileSnapshot {
 
 function tokenKey(endpoint: string) {
   return `${BRIDGE_TOKEN_KEY}.${new URL(endpoint).origin.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+}
+
+async function quarantineCorruptValue(key: string, raw: string | null) {
+  if (!raw) return;
+  try {
+    await AsyncStorage.setItem(
+      key,
+      JSON.stringify({ quarantinedAt: new Date().toISOString(), raw: raw.slice(0, 1_000_000) }),
+    );
+  } catch {
+    // Recovery must never prevent the app from starting offline.
+  }
+}
+
+async function recoverCorruptValue(sourceKey: string, quarantineKey: string) {
+  try {
+    const raw = await AsyncStorage.getItem(sourceKey);
+    await quarantineCorruptValue(quarantineKey, raw);
+    await AsyncStorage.removeItem(sourceKey);
+  } catch {
+    // Recovery must never prevent the app from starting offline.
+  }
 }
 
 export async function readSnapshot(): Promise<MobileSnapshot> {
@@ -67,6 +91,7 @@ export async function readSnapshot(): Promise<MobileSnapshot> {
         : [],
     };
   } catch {
+    await recoverCorruptValue(SNAPSHOT_KEY, SNAPSHOT_QUARANTINE_KEY);
     return emptySnapshot();
   }
 }
@@ -82,6 +107,7 @@ export async function readQueuedOperations(): Promise<QueuedOperation[]> {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.filter(isQueuedOperation) : [];
   } catch {
+    await recoverCorruptValue(QUEUE_KEY, QUEUE_QUARANTINE_KEY);
     return [];
   }
 }
