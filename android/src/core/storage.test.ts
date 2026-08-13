@@ -52,6 +52,26 @@ describe("storage recovery", () => {
       await AsyncStorage.getItem("spartancode.mobile.snapshot.quarantine.v1"),
     ).toContain("broken");
   });
+
+  it("migrates older snapshots while preserving valid missions", async () => {
+    await AsyncStorage.setItem(
+      "spartancode.mobile.snapshot.v1",
+      JSON.stringify({
+        missions: [
+          {
+            id: "m1",
+            description: "Keep me",
+            status: "planning",
+            updatedAt: "2026-08-13T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+    expect(await readSnapshot()).toMatchObject({
+      schemaVersion: 1,
+      missions: [{ id: "m1" }],
+    });
+  });
 });
 
 describe("biometric preference", () => {

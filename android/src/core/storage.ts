@@ -22,9 +22,16 @@ const BRIDGE_TOKEN_INDEX_KEY = "spartancode.mobile.bridge-token-index.v1";
 const SNAPSHOT_QUARANTINE_KEY = "spartancode.mobile.snapshot.quarantine.v1";
 const QUEUE_QUARANTINE_KEY = "spartancode.mobile.queue.quarantine.v1";
 const BIOMETRIC_SETTING_KEY = "spartancode.mobile.biometric-unlock.v1";
+const CURRENT_SNAPSHOT_VERSION = 1;
 
 function emptySnapshot(): MobileSnapshot {
-  return { missions: [], connections: [], pendingApprovals: 0, offline: true };
+  return {
+    schemaVersion: CURRENT_SNAPSHOT_VERSION,
+    missions: [],
+    connections: [],
+    pendingApprovals: 0,
+    offline: true,
+  };
 }
 
 function tokenKey(endpoint: string) {
@@ -63,6 +70,7 @@ export async function readSnapshot(): Promise<MobileSnapshot> {
     const parsed = JSON.parse(raw) as Partial<MobileSnapshot>;
     return {
       ...emptySnapshot(),
+      schemaVersion: CURRENT_SNAPSHOT_VERSION,
       missions: Array.isArray(parsed.missions)
         ? parsed.missions.filter(isMission)
         : [],

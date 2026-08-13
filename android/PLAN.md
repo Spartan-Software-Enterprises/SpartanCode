@@ -49,6 +49,11 @@ Standalone remote guidance also includes provider-neutral cost estimates and
 explicit private/public router traversal recommendations; it performs no
 provisioning or port changes.
 
+Snapshot reads apply the current schema version while retaining valid legacy
+missions and ignoring malformed optional records. Bridge requests support
+cancellation during retry backoff, and the licensed mobile catalog filters
+Qwen3-1.7B and Phi-4-mini by explicit permissive license and memory capacity.
+
 Biometric unlock is opt-in and gates bridge-secret access through the device's
 biometric/passcode prompt. Raw biometric data never enters the app; if hardware
 or enrollment is unavailable, access fails closed while offline work remains
@@ -102,3 +107,10 @@ Test API 29, API 33, and current stable Android; small and large phones;
 tablet/landscape; offline cold start; reconnect and token expiry; bridge outage;
 snapshot migration/corruption; TalkBack and large text; reduced motion; low
 storage; interrupted sync/download; and process restart during an operation.
+
+Verified on the AWS KVM server: API 29, API 33, and API 35 emulator install,
+launch, process-liveness, and cold-start smoke checks; TypeScript and Jest pass
+on the standalone Android project; desktop packaging produces
+`dist/linux-unpacked/SpartanCode`. Physical-device, tablet, TalkBack, and
+production-signing checks remain release-environment checks rather than being
+claimed by the emulator matrix.

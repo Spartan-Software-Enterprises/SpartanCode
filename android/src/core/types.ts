@@ -23,6 +23,7 @@ export type Mission = {
 };
 
 export type MobileSnapshot = {
+  schemaVersion?: number;
   missions: Mission[];
   connections: ConnectionProfile[];
   pendingApprovals: number;
