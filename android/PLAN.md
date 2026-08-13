@@ -45,6 +45,9 @@ pairing payloads, and supports deletion of all stored bridge secrets.
 Snapshot recovery now quarantines malformed serialized data before clearing it,
 so a cold start can recover without silently reusing corrupt state. The Android
 test suite covers this recovery path alongside the durable idempotent queue.
+Standalone remote guidance also includes provider-neutral cost estimates and
+explicit private/public router traversal recommendations; it performs no
+provisioning or port changes.
 
 The Android shell bundles Researcher, Implementer, Verifier, and Sync Guardian
 roles. They use the local execution model when no bridge is connected; a bridge
