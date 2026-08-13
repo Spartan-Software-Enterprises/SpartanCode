@@ -1,6 +1,9 @@
 export type DeviceProfile = {
+  chipset?: string;
   totalMemoryMb?: number;
   availableStorageMb?: number;
+  hasVulkan?: boolean;
+  hasNpu?: boolean;
   thermalState?: "nominal" | "fair" | "serious" | "critical";
   hasAccelerator?: boolean;
 };
