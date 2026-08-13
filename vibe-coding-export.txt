@@ -476,6 +476,11 @@
  commercial-license enforcement for model preparation. Eighteen automated
  tests pass.
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONES 5–6
+ Artifacts can now be accepted or rejected with an auditable review record, and
+ the Vibe chat service persists user and assistant messages through secure IPC.
+ Twenty automated tests pass.
+--------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
