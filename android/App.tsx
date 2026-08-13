@@ -18,6 +18,7 @@ import {
 import {
   addConnection,
   clearBridgeToken,
+  enqueueOperation,
   readSnapshot,
   saveBridgeToken,
   writeSnapshot,
@@ -117,6 +118,15 @@ export default function App() {
     };
     try {
       await writeSnapshot(next);
+      if (snapshot.offline) {
+        const queuedMission = next.missions[0]!;
+        await enqueueOperation({
+          idempotencyKey: `mission:${queuedMission.id}`,
+          method: "POST",
+          path: "/v1/missions",
+          body: { description },
+        });
+      }
       setSnapshot(next);
       setMission("");
       setMessage("Mission queued locally");
