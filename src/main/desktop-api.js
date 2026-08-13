@@ -6,6 +6,8 @@ const { classifyCommand } = require("./policy-engine");
 const { getCapabilities } = require("./capabilities");
 const { getProviderStatus } = require("./provider-status");
 const { createVoiceService } = require("./voice-service");
+const { createExecutionPlan } = require("./agent-plan");
+const { createCoreMcpRegistry } = require("./mcp-lite");
 
 function registerDesktopApi({ store, window, runMission }) {
   const voiceService = createVoiceService();
@@ -25,6 +27,15 @@ function registerDesktopApi({ store, window, runMission }) {
     },
     { name: "git", description: "Inspect and update project history" },
   ]);
+  ipcMain.handle("mcp:dispatch", async (_event, request) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    const registry = createCoreMcpRegistry({
+      workspacePath,
+      gitStatus: gitStatusAt,
+      classifyCommand,
+    });
+    return registry.dispatch(request);
+  });
   ipcMain.handle("models:list", (_event, options) =>
     listLicensedModels(options),
   );
@@ -32,6 +43,10 @@ function registerDesktopApi({ store, window, runMission }) {
     classifyCommand(command),
   );
   ipcMain.handle("workspace:snapshot", () => store.snapshot());
+  ipcMain.handle("artifact:get", (_event, id) => store.getArtifact(id));
+  ipcMain.handle("mission:plan", (_event, description) =>
+    createExecutionPlan(description),
+  );
   ipcMain.handle("settings:get", () => store.snapshot().settings);
   ipcMain.handle("settings:update", (_event, update) =>
     store.updateSettings(update),

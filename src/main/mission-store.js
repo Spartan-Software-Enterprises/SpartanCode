@@ -40,6 +40,7 @@ function createMissionStore(filePath) {
         description,
         status: "planning",
         createdAt: new Date().toISOString(),
+        plan: null,
       };
       state.missions.unshift(mission);
       state.activity.unshift({
@@ -48,6 +49,13 @@ function createMissionStore(filePath) {
         message: "Mission received; preparing an execution plan",
         createdAt: mission.createdAt,
       });
+      persist();
+      return mission;
+    },
+    addMissionPlan(id, plan) {
+      const mission = state.missions.find((item) => item.id === id);
+      if (!mission) return null;
+      mission.plan = plan;
       persist();
       return mission;
     },
@@ -67,6 +75,9 @@ function createMissionStore(filePath) {
       state.artifacts.unshift(saved);
       persist();
       return saved;
+    },
+    getArtifact(id) {
+      return state.artifacts.find((item) => item.id === id) || null;
     },
     addActivity(activity) {
       state.activity.unshift({

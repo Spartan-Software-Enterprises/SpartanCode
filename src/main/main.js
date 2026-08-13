@@ -2,6 +2,7 @@ const path = require("path");
 const { app, BrowserWindow } = require("electron");
 const { registerDesktopApi } = require("./desktop-api");
 const { createMissionStore } = require("./mission-store");
+const { createExecutionPlan } = require("./agent-plan");
 
 function createMissionRunner(store, window) {
   return (mission) => {
@@ -22,6 +23,17 @@ function createMissionRunner(store, window) {
         message: "Verification complete; artifact is ready",
       },
     ];
+    const plan = createExecutionPlan(mission.description);
+    store.addMissionPlan(mission.id, plan);
+    store.addArtifact({
+      missionId: mission.id,
+      name: "Execution plan",
+      type: "plan",
+      status: "ready",
+      content: JSON.stringify(plan),
+    });
+    if (!window.isDestroyed())
+      window.webContents.send("workspace:changed", store.snapshot());
 
     stages.forEach((stage, index) => {
       setTimeout(

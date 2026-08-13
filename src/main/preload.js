@@ -2,6 +2,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("spartanCode", {
   getSnapshot: () => ipcRenderer.invoke("workspace:snapshot"),
+  getArtifact: (id) => ipcRenderer.invoke("artifact:get", id),
+  previewPlan: (description) => ipcRenderer.invoke("mission:plan", description),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   updateSettings: (update) => ipcRenderer.invoke("settings:update", update),
   chooseWorkspace: () => ipcRenderer.invoke("workspace:choose"),
@@ -19,6 +21,7 @@ contextBridge.exposeInMainWorld("spartanCode", {
   getVoiceStatus: () => ipcRenderer.invoke("voice:status"),
   startVoice: () => ipcRenderer.invoke("voice:start"),
   getMcpTools: () => ipcRenderer.invoke("mcp:tools"),
+  dispatchMcp: (request) => ipcRenderer.invoke("mcp:dispatch", request),
   listModels: (options) => ipcRenderer.invoke("models:list", options),
   classifyCommand: (command) => ipcRenderer.invoke("policy:classify", command),
   startMission: (description) =>

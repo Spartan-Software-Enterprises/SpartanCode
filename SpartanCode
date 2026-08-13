@@ -516,3 +516,12 @@
 --------------------------------------------------------------------------------
  END DESKTOP IMPLEMENTATION STATUS
 --------------------------------------------------------------------------------
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 2
+ - Executable three-stage agent execution plan generation
+ - Persisted plan artifact created when a mission starts
+ - Core MCP Lite handlers for workspace info, Git status, and terminal preview
+ - Centralized policy classification reused by mission and MCP paths
+ - SQLite-compatible fallback validated when better-sqlite3 native bindings are unavailable
+ - Application lifecycle and optional integration capability hardening
+ - 16 automated tests passing

@@ -468,6 +468,13 @@
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 2
+ The desktop agent loop now creates and persists an execution plan artifact,
+ exposes core MCP Lite handlers for workspace information, Git status, and
+ terminal safety previews, and reuses one policy engine across mission and MCP
+ execution paths. SQLite-compatible stores use node:sqlite when the native
+ better-sqlite3 addon is unavailable. Sixteen automated tests pass.
+--------------------------------------------------------------------------------
  The desktop implementation now contains the first agent-first foundation:
  secure Electron IPC, persisted missions and artifacts, Plan/Build/Verify
  lifecycle, human approval gates, MCP Lite discovery, local-first model policy,

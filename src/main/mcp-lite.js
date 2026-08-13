@@ -49,4 +49,28 @@ function createMcpLiteRegistry() {
   };
 }
 
-module.exports = { MCP_VERSION, createMcpLiteRegistry };
+function createCoreMcpRegistry({ workspacePath, gitStatus, classifyCommand }) {
+  const registry = createMcpLiteRegistry();
+  registry.registerTool(
+    "workspace.info",
+    "Describe the approved workspace",
+    () => ({ workspacePath: workspacePath || null }),
+  );
+  registry.registerTool(
+    "git.status",
+    "Inspect workspace Git status",
+    async () => ({
+      output: workspacePath
+        ? await gitStatus(workspacePath)
+        : "No workspace selected",
+    }),
+  );
+  registry.registerTool(
+    "terminal.preview",
+    "Classify a command before approval",
+    ({ command }) => classifyCommand(command),
+  );
+  return registry;
+}
+
+module.exports = { MCP_VERSION, createMcpLiteRegistry, createCoreMcpRegistry };
