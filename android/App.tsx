@@ -48,6 +48,7 @@ import type { RemoteProvider } from "./src/core/remote-guidance";
 import { authorizeSecretAccess } from "./src/core/biometric";
 import { listExtensions } from "./src/core/extensions";
 import { listCompatibleModels } from "./src/core/model-catalog";
+import { createLocalPlanningEvidence } from "./src/core/local-mission";
 import {
   deviceDiagnostics,
   normalizeDeviceProfile,
@@ -207,9 +208,23 @@ export default function App() {
         ...snapshot.missions,
       ],
     };
+    const queuedMission = next.missions[0]!;
+    if (snapshot.offline) {
+      const evidence = createLocalPlanningEvidence(
+        queuedMission.id,
+        description,
+      );
+      next.artifacts = [
+        evidence.artifact,
+        ...(next.artifacts ?? []).filter(
+          (item) => item.id !== evidence.artifact.id,
+        ),
+      ];
+      next.activity = [evidence.activity, ...(next.activity ?? [])];
+      next.auditLog = [evidence.audit, ...(next.auditLog ?? [])];
+    }
     try {
       await writeSnapshot(next);
-      const queuedMission = next.missions[0]!;
       if (snapshot.offline) {
         await enqueueOperation({
           idempotencyKey: `mission:${queuedMission.id}`,

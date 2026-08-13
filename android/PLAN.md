@@ -72,6 +72,11 @@ metadata so the extensibility surface does not require a desktop install.
 The command center renders the synced audit activity feed alongside mission,
 approval, and artifact state.
 
+When an Android-only user queues a mission offline, the app now persists an
+explicit local plan artifact, activity entry, and audit event. The evidence
+records that build and verification are queued; it does not misrepresent local
+planning as completed code execution.
+
 Biometric unlock is opt-in and gates bridge-secret access through the device's
 biometric/passcode prompt. Raw biometric data never enters the app; if hardware
 or enrollment is unavailable, access fails closed while offline work remains

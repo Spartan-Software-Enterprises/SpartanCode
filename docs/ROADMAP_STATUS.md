@@ -15,7 +15,8 @@ behavior and a corresponding automated or documented verification path.
   retry cancellation, QR pairing, token expiry, and idempotent bridge writes.
 - Android standalone mission planning, bundled agent roles, artifact/approval
   state, voice dictation, biometric secret gating, audit activity, tablet and
-  landscape layout support.
+  landscape layout support. Offline mission creation persists a local plan
+  artifact and audit evidence without requiring a desktop or bridge.
 - Explicitly licensed mobile model catalog, compatibility filtering, HTTPS
   resumable downloads, checksum verification, and deletion.
 - Remote provider cost estimates, home-server/router guidance, connection
