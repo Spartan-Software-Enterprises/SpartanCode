@@ -622,3 +622,8 @@
  - Settings now exposes licensed local model preparation
  - Cached model metadata is reflected in model choices and readiness status
  - Model preparation stays behind the explicit local runtime action
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 21
+ - Settings now exposes Q4_K_M, Q4_0, and Q3_K_S quantization choices
+ - Selected quantization is persisted with local workspace settings
+ - Model preparation uses the selected quantization instead of a fixed default

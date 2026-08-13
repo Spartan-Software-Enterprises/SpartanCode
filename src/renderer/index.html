@@ -1305,6 +1305,14 @@
           ></small>
         </div>
         <div class="setting-group">
+          <label for="quantizationSelect">Quantization</label
+          ><select id="quantizationSelect">
+            <option>Q4_K_M</option>
+            <option>Q4_0</option>
+            <option>Q3_K_S</option>
+          </select>
+        </div>
+        <div class="setting-group">
           <label for="protocolSelect">Agent protocol</label
           ><select id="protocolSelect">
             <option>MCP Lite</option>
@@ -1433,6 +1441,7 @@
       const approvalDetail = document.getElementById("approvalDetail");
       const settingsModal = document.getElementById("settingsModal");
       const modelSelect = document.getElementById("modelSelect");
+      const quantizationSelect = document.getElementById("quantizationSelect");
       const protocolSelect = document.getElementById("protocolSelect");
       const voiceToggle = document.getElementById("voiceToggle");
       const prepareModelButton = document.getElementById("prepareModel");
@@ -1648,6 +1657,7 @@
                 )
                 .join("");
               modelSelect.value = settings.model;
+              quantizationSelect.value = settings.quantization || "Q4_K_M";
               protocolSelect.value = settings.protocol;
               voiceToggle.checked = Boolean(settings.voiceEnabled);
               const connection = connections?.[0];
@@ -1819,6 +1829,7 @@
           };
           const save = window.spartanCode.updateSettings({
             model: modelSelect.value,
+            quantization: quantizationSelect.value,
             protocol: protocolSelect.value,
             voiceEnabled: voiceToggle.checked,
           });
@@ -1843,7 +1854,7 @@
         prepareModelButton.disabled = true;
         modelStatus.textContent = "Preparing licensed model metadata…";
         window.spartanCode
-          .prepareModel(modelSelect.value, "Q4_K_M")
+          .prepareModel(modelSelect.value, quantizationSelect.value)
           .then((result) => {
             modelStatus.textContent = result.message || "Model metadata ready.";
             showToast("Local model prepared");

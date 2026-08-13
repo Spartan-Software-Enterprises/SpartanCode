@@ -557,6 +557,11 @@
  reflects cached readiness in the model selector.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 21
+ Settings now exposes the planned Q4_K_M, Q4_0, and Q3_K_S choices, persists the
+ selection, and prepares local model metadata using that selected quantization.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
