@@ -567,6 +567,11 @@
  workspace snapshots instead of remaining a static operational message.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 23
+ Clear local history now removes the mission workspace feed and pending approvals
+ while preserving settings, connections, chat, and audit records.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

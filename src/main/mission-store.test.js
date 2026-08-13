@@ -23,5 +23,12 @@ test("mission store persists missions, activities, and artifacts", () => {
   assert.equal(reloaded.artifacts[0].name, "Verification report");
   assert.equal(reloaded.activity[0].agent, "Verify agent");
 
+  const cleared = createMissionStore(filePath);
+  cleared.clearMissions();
+  const empty = createMissionStore(filePath).snapshot();
+  assert.equal(empty.missions.length, 0);
+  assert.equal(empty.artifacts.length, 0);
+  assert.equal(empty.activity.length, 0);
+
   fs.rmSync(directory, { recursive: true, force: true });
 });

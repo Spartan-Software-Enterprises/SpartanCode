@@ -632,3 +632,8 @@
  - Live status now reflects failed missions and pending approval state
  - Renderer command-center status is driven by persisted workspace snapshots
  - Renderer parse and full automated test suite remain passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 23
+ - Clear local history now removes missions, artifacts, activity, and approvals together
+ - Settings, connections, chat, and audit records remain preserved
+ - Persistent cleanup behavior is covered by the mission-store test suite

@@ -160,6 +160,9 @@ function createMissionStore(filePath) {
     },
     clearMissions() {
       state.missions = [];
+      state.artifacts = [];
+      state.activity = [];
+      state.approvals = [];
       persist();
     },
     updateSettings(update) {
