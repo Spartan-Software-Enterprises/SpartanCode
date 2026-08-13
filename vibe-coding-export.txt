@@ -717,16 +717,32 @@
  device inference evidence remain release gates.
 --------------------------------------------------------------------------------
 
- ANDROID IMPLEMENTATION STATUS — MILESTONE 45
- Mobile model downloads now reject low-storage requests before transport,
- recover safely when a server ignores a resume Range header, and clear partial
- data after checksum failure. The Android suite covers these paths plus
- recovery from a persisted queue record; physical process-restart, storage,
- and device acceptance remain release-environment checks.
+ANDROID IMPLEMENTATION STATUS — MILESTONE 45
+Mobile model downloads now reject low-storage requests before transport,
+recover safely when a server ignores a resume Range header, and clear partial
+data after checksum failure. The Android suite covers these paths plus
+recovery from a persisted queue record; physical process-restart, storage,
+and device acceptance remain release-environment checks.
+--------------------------------------------------------------------------------
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 46
+ Marketplace entries can now be explicitly selected for bounded HTTPS artifact
+ staging. The desktop verifies the declared SHA-256 before atomically writing
+ restrictive-permission cache files and marks them staged without extracting,
+ loading, activating, replacing, or executing plugin code. Artifact activation,
+ update replacement, and external marketplace governance remain release gates.
+--------------------------------------------------------------------------------
+
+ SECURITY IMPLEMENTATION STATUS — MILESTONE 47
+ Release and verification workflows pin every GitHub Action to an immutable
+ reviewed commit SHA. Bridge authentication and approval boundaries, Android
+ biometric mutation gating, and marketplace artifact digest checks are covered
+ by source tests; physical, credentialed, and legal release evidence remains
+ environment-dependent.
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
- DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
+DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 2
  The desktop agent loop now creates and persists an execution plan artifact,
