@@ -24,6 +24,10 @@ contextBridge.exposeInMainWorld("spartanCode", {
   dispatchMcp: (request) => ipcRenderer.invoke("mcp:dispatch", request),
   listModels: (options) => ipcRenderer.invoke("models:list", options),
   classifyCommand: (command) => ipcRenderer.invoke("policy:classify", command),
+  listWorkspace: (requestedPath) =>
+    ipcRenderer.invoke("workspace:list", requestedPath),
+  readWorkspaceFile: (requestedPath) =>
+    ipcRenderer.invoke("workspace:read", requestedPath),
   startMission: (description) =>
     ipcRenderer.invoke("mission:start", description),
   resolveApproval: (approvalId, decision) =>

@@ -525,3 +525,9 @@
  - SQLite-compatible fallback validated when better-sqlite3 native bindings are unavailable
  - Application lifecycle and optional integration capability hardening
  - 16 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 3
+ - Workspace filesystem tools with path traversal protection
+ - Secure MCP Lite workspace listing and file-read handlers
+ - Agent plan artifacts and plan preview API
+ - 17 automated tests passing

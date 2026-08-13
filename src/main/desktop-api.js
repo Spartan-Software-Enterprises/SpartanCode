@@ -8,6 +8,7 @@ const { getProviderStatus } = require("./provider-status");
 const { createVoiceService } = require("./voice-service");
 const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
+const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 
 function registerDesktopApi({ store, window, runMission }) {
   const voiceService = createVoiceService();
@@ -42,6 +43,14 @@ function registerDesktopApi({ store, window, runMission }) {
   ipcMain.handle("policy:classify", (_event, command) =>
     classifyCommand(command),
   );
+  ipcMain.handle("workspace:list", (_event, requestedPath) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    return listWorkspaceFiles(workspacePath, requestedPath);
+  });
+  ipcMain.handle("workspace:read", (_event, requestedPath) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    return readWorkspaceFile(workspacePath, requestedPath);
+  });
   ipcMain.handle("workspace:snapshot", () => store.snapshot());
   ipcMain.handle("artifact:get", (_event, id) => store.getArtifact(id));
   ipcMain.handle("mission:plan", (_event, description) =>

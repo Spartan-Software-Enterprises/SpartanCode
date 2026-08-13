@@ -466,6 +466,13 @@
 ================================================================================
 
 --------------------------------------------------------------------------------
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 3
+ Workspace listing and read tools are available through secure IPC and MCP Lite,
+ with path traversal protection. Agent plans are persisted as artifacts, and
+ seventeen automated tests pass.
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 2
