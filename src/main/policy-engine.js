@@ -20,4 +20,8 @@ function classifyCommand(command) {
   };
 }
 
-module.exports = { classifyCommand };
+function requiresMissionApproval(command, executionMode = "guided") {
+  return executionMode !== "yolo" && classifyCommand(command).requiresApproval;
+}
+
+module.exports = { classifyCommand, requiresMissionApproval };

@@ -5,7 +5,7 @@ const {
   listLicensedModels,
   searchHuggingFaceModels,
 } = require("./model-catalog");
-const { classifyCommand } = require("./policy-engine");
+const { classifyCommand, requiresMissionApproval } = require("./policy-engine");
 const { getCapabilities } = require("./capabilities");
 const { getProviderStatus } = require("./provider-status");
 const { createVoiceService } = require("./voice-service");
@@ -201,9 +201,8 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
       throw new Error("A mission description is required");
     }
     const normalized = description.trim();
-    const dangerous =
-      classifyCommand(normalized).requiresApproval &&
-      store.snapshot().settings.executionMode !== "yolo";
+    const executionMode = store.snapshot().settings.executionMode;
+    const dangerous = requiresMissionApproval(normalized, executionMode);
     const mission = store.addMission(normalized);
     if (!dangerous && store.snapshot().settings.executionMode === "yolo") {
       store.addActivity({
