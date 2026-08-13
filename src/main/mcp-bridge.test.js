@@ -95,3 +95,73 @@ test("MCP Bridge deduplicates retried mutations by idempotency key", async () =>
   await new Promise((resolve) => server.close(resolve));
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test("MCP Bridge syncs collaboration sessions and returns revision conflicts", async () => {
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-collab-bridge-"),
+  );
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const server = createBridgeServer({ store, token: "collab-token" });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const base = `http://127.0.0.1:${address.port}`;
+  const headers = {
+    Authorization: "Bearer collab-token",
+    "Content-Type": "application/json",
+  };
+  const created = await fetch(`${base}/v1/collaboration/sessions`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      id: "session-1",
+      name: "Roadmap",
+      ownerId: "owner",
+    }),
+  });
+  assert.equal(created.status, 201);
+  const joined = await fetch(
+    `${base}/v1/collaboration/sessions/session-1/participants`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ participantId: "builder" }),
+    },
+  );
+  assert.equal(joined.status, 200);
+  const appended = await fetch(
+    `${base}/v1/collaboration/sessions/session-1/events`,
+    {
+      method: "POST",
+      headers: { ...headers, "Idempotency-Key": "collab:event-1" },
+      body: JSON.stringify({
+        eventId: "event-1",
+        authorId: "builder",
+        type: "mission.created",
+        payload: { missionId: "mission-1" },
+        baseRevision: 0,
+      }),
+    },
+  );
+  assert.equal(appended.status, 200);
+  const conflict = await fetch(
+    `${base}/v1/collaboration/sessions/session-1/events`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        eventId: "event-2",
+        authorId: "owner",
+        type: "mission.updated",
+        payload: { status: "building" },
+        baseRevision: 0,
+      }),
+    },
+  );
+  assert.equal(conflict.status, 409);
+  const sessions = await fetch(`${base}/v1/collaboration/sessions`, {
+    headers: { Authorization: "Bearer collab-token" },
+  });
+  assert.equal((await sessions.json()).sessions[0].revision, 1);
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});

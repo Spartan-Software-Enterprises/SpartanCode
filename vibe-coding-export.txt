@@ -648,6 +648,15 @@
  explicit remote integration gate.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 36
+ Authenticated MCP Bridge routes now expose collaboration session listing and
+ creation, participant joins, versioned event append, and deterministic merge.
+ Revision conflicts return the current session for reconciliation; mutation
+ responses use the same bounded idempotency cache as mission operations. The
+ Android collaboration surface and physical cross-device acceptance remain
+ open gates.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

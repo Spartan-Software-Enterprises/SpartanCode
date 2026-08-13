@@ -74,6 +74,16 @@ function createBridgeRequestHandler({
     if (request.method === "GET" && url.pathname === "/v1/audit") {
       return json(response, 200, { auditLog: store.auditLog() });
     }
+    if (
+      request.method === "GET" &&
+      url.pathname === "/v1/collaboration/sessions"
+    ) {
+      if (typeof store.collaborationList !== "function")
+        return json(response, 404, { error: "Collaboration unavailable" });
+      return json(response, 200, {
+        sessions: store.collaborationList(),
+      });
+    }
     if (request.method === "GET" && url.pathname === "/v1/events") {
       if (!events) return json(response, 404, { error: "Events unavailable" });
       return events.connect(response, request.headers["last-event-id"] || "0");
@@ -116,6 +126,63 @@ function createBridgeRequestHandler({
         mission,
         operationId: `mission:${mission.id}`,
       });
+    }
+    if (url.pathname === "/v1/collaboration/sessions") {
+      if (typeof store.collaborationCreate !== "function")
+        return json(response, 404, { error: "Collaboration unavailable" });
+      try {
+        const session = store.collaborationCreate(body || {});
+        events?.publish("collaboration.session-created", { session });
+        return mutationResponse(201, {
+          session,
+          operationId: `collaboration-session:${session.id}`,
+        });
+      } catch (error) {
+        return json(response, 400, { error: error.message });
+      }
+    }
+    const collaborationMatch = url.pathname.match(
+      /^\/v1\/collaboration\/sessions\/([^/]+)\/(participants|events|merge)$/,
+    );
+    if (collaborationMatch) {
+      if (
+        typeof store.collaborationJoin !== "function" ||
+        typeof store.collaborationAppend !== "function" ||
+        typeof store.collaborationMerge !== "function"
+      )
+        return json(response, 404, { error: "Collaboration unavailable" });
+      const [, sessionId, action] = collaborationMatch;
+      try {
+        let session;
+        if (action === "participants")
+          session = store.collaborationJoin(sessionId, body || {});
+        else if (action === "events")
+          session = store.collaborationAppend(
+            sessionId,
+            body?.event || body || {},
+            body?.options || {},
+          );
+        else
+          session = store.collaborationMerge(
+            sessionId,
+            Array.isArray(body?.events) ? body.events : body,
+            body?.options || {},
+          );
+        events?.publish(`collaboration.${action}`, { session });
+        return mutationResponse(200, {
+          session,
+          operationId: `collaboration:${session.id}:${session.revision}`,
+        });
+      } catch (error) {
+        if (error.name === "CollaborationConflictError")
+          return json(response, 409, {
+            error: error.message,
+            session: error.session,
+          });
+        if (/not found/i.test(error.message))
+          return json(response, 404, { error: error.message });
+        return json(response, 400, { error: error.message });
+      }
     }
     const approvalMatch = url.pathname.match(
       /^\/v1\/approvals\/([^/]+)\/decision$/,

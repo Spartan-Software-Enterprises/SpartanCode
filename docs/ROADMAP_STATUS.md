@@ -36,7 +36,9 @@ behavior and a corresponding automated or documented verification path.
 - Desktop now has a durable, versioned collaboration journal with owner/member/
   observer roles, optimistic revision conflict detection, idempotent event
   merge, and audit-log persistence through the workspace store. Transport to
-  other devices remains an explicit bridge/API integration gate.
+  other devices is now available through authenticated MCP Bridge session,
+  participant, event, and merge routes; the Android UI still needs a dedicated
+  collaboration surface and physical cross-device acceptance testing.
 
 ## Implemented but environment-dependent
 
@@ -60,7 +62,8 @@ behavior and a corresponding automated or documented verification path.
   gates. The generator itself is implemented and verified; its inventory and
   hashes must still be attached to the signed release and reviewed for the
   target distribution.
-- Cross-device collaboration transport, cross-modal gesture workflows,
+- Android collaboration UI and physical cross-device acceptance, cross-modal
+  gesture workflows,
   enterprise governance, and a mature external plugin marketplace.
 
 These items remain open until their implementation and release-environment

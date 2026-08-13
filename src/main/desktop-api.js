@@ -59,6 +59,11 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
       name: "workspace.read",
       description: "Read a text file inside the approved workspace",
     },
+    {
+      name: "collaboration.journal",
+      description:
+        "Synchronize versioned collaboration sessions with conflict evidence",
+    },
   ]);
   ipcMain.handle("mcp:dispatch", async (_event, request) => {
     const workspacePath = store.snapshot().settings.workspacePath;

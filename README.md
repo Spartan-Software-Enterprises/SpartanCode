@@ -65,7 +65,9 @@ portable `ssh2` runtime.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
 - Collaboration sessions use versioned, auditable events with conflict
-  detection and idempotent merge; external transport remains optional.
+  detection and idempotent merge; authenticated MCP Bridge routes can sync
+  participants and events without making the bridge mandatory for Android-only
+  local planning.
 
 ## Custom agents
 
