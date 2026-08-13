@@ -140,13 +140,19 @@ export default function App() {
     };
     try {
       await writeSnapshot(next);
+      const queuedMission = next.missions[0]!;
       if (snapshot.offline) {
-        const queuedMission = next.missions[0]!;
         await enqueueOperation({
           idempotencyKey: `mission:${queuedMission.id}`,
           method: "POST",
           path: "/v1/missions",
           body: { description },
+        });
+      } else {
+        await bridgeRequest(normalizeBridgeEndpoint(endpoint), "/v1/missions", {
+          method: "POST",
+          body: JSON.stringify({ description }),
+          headers: { "Idempotency-Key": `mission:${queuedMission.id}` },
         });
       }
       setSnapshot(next);
@@ -159,7 +165,86 @@ export default function App() {
           : "Unable to save mission; retry",
       );
     }
-  }, [mission, snapshot]);
+  }, [endpoint, mission, snapshot]);
+
+  const resolveApproval = useCallback(
+    async (id: string, decision: "approved" | "denied") => {
+      const next = {
+        ...snapshot,
+        approvals: (snapshot.approvals ?? []).map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status: decision,
+                resolvedAt: new Date().toISOString(),
+              }
+            : item,
+        ),
+      };
+      await writeSnapshot(next);
+      if (snapshot.offline) {
+        await enqueueOperation({
+          idempotencyKey: `approval:${id}:${decision}`,
+          method: "POST",
+          path: `/v1/approvals/${encodeURIComponent(id)}/decision`,
+          body: { decision },
+        });
+      } else {
+        await bridgeRequest(
+          normalizeBridgeEndpoint(endpoint),
+          `/v1/approvals/${encodeURIComponent(id)}/decision`,
+          {
+            method: "POST",
+            body: JSON.stringify({ decision }),
+          },
+        );
+      }
+      setSnapshot(next);
+      setMessage(`Approval ${decision}`);
+    },
+    [endpoint, snapshot],
+  );
+
+  const reviewArtifact = useCallback(
+    async (id: string, decision: "accepted" | "rejected") => {
+      const next = {
+        ...snapshot,
+        artifacts: (snapshot.artifacts ?? []).map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                review: {
+                  decision,
+                  note: "Reviewed on Android",
+                  reviewedAt: new Date().toISOString(),
+                },
+              }
+            : item,
+        ),
+      };
+      await writeSnapshot(next);
+      if (snapshot.offline) {
+        await enqueueOperation({
+          idempotencyKey: `artifact:${id}:${decision}`,
+          method: "POST",
+          path: `/v1/artifacts/${encodeURIComponent(id)}/review`,
+          body: { decision, note: "Reviewed on Android" },
+        });
+      } else {
+        await bridgeRequest(
+          normalizeBridgeEndpoint(endpoint),
+          `/v1/artifacts/${encodeURIComponent(id)}/review`,
+          {
+            method: "POST",
+            body: JSON.stringify({ decision, note: "Reviewed on Android" }),
+          },
+        );
+      }
+      setSnapshot(next);
+      setMessage(`Artifact ${decision}`);
+    },
+    [endpoint, snapshot],
+  );
 
   const applyPairing = useCallback(() => {
     try {
@@ -387,6 +472,26 @@ export default function App() {
                 <Text style={styles.missionMeta}>
                   {item.status.toUpperCase()} · {item.detail}
                 </Text>
+                {item.status === "pending" && (
+                  <View style={styles.actionRow}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Approve ${item.title}`}
+                      style={styles.smallAction}
+                      onPress={() => resolveApproval(item.id, "approved")}
+                    >
+                      <Text style={styles.smallActionText}>Approve</Text>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Deny ${item.title}`}
+                      style={styles.smallAction}
+                      onPress={() => resolveApproval(item.id, "denied")}
+                    >
+                      <Text style={styles.smallActionText}>Deny</Text>
+                    </Pressable>
+                  </View>
+                )}
               </View>
             </View>
           ))
@@ -404,6 +509,26 @@ export default function App() {
                 {item.type.toUpperCase()} · {item.status.toUpperCase()}
               </Text>
             </View>
+            {!item.review && (
+              <View style={styles.actionRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Accept ${item.name}`}
+                  style={styles.smallAction}
+                  onPress={() => reviewArtifact(item.id, "accepted")}
+                >
+                  <Text style={styles.smallActionText}>Accept</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Reject ${item.name}`}
+                  style={styles.smallAction}
+                  onPress={() => reviewArtifact(item.id, "rejected")}
+                >
+                  <Text style={styles.smallActionText}>Reject</Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         ))}
       </ScrollView>
@@ -550,4 +675,13 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 1,
   },
+  actionRow: { flexDirection: "row", gap: 8, marginTop: 10 },
+  smallAction: {
+    borderColor: "#72e6c5",
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  smallActionText: { color: "#72e6c5", fontSize: 11, fontWeight: "800" },
 });
