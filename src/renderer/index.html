@@ -1313,6 +1313,10 @@
           />
         </div>
         <div class="setting-group">
+          <label for="connectionUsername">Username</label
+          ><input id="connectionUsername" placeholder="developer" />
+        </div>
+        <div class="setting-group">
           <label for="connectionTransport">Transport</label
           ><select id="connectionTransport">
             <option value="ssh">SSH</option>
@@ -1765,6 +1769,9 @@
           const profile = {
             name: document.getElementById("connectionName").value.trim(),
             host: document.getElementById("connectionHost").value.trim(),
+            username: document
+              .getElementById("connectionUsername")
+              .value.trim(),
             transport: document.getElementById("connectionTransport").value,
           };
           const save = window.spartanCode.updateSettings({
@@ -1774,12 +1781,19 @@
           });
           const connection =
             profile.name && profile.host
-              ? window.spartanCode.addConnection(profile)
+              ? window.spartanCode
+                  .validateConnection(profile)
+                  .then((result) => {
+                    if (!result.valid) throw new Error(result.message);
+                    return window.spartanCode.addConnection(profile);
+                  })
               : Promise.resolve(null);
-          Promise.all([save, connection]).then(() => {
-            settingsModal.classList.remove("open");
-            showToast("Workspace settings saved locally");
-          });
+          Promise.all([save, connection])
+            .then(() => {
+              settingsModal.classList.remove("open");
+              showToast("Workspace settings saved locally");
+            })
+            .catch((error) => showToast(error.message));
         });
       document.getElementById("clearHistory").addEventListener("click", () => {
         if (window.spartanCode)

@@ -11,6 +11,7 @@ const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 const { createModelCache } = require("./model-cache");
+const { validateRemoteConfig } = require("./remote-connection");
 
 function registerDesktopApi({ store, window, runMission, modelCache }) {
   const voiceService = createVoiceService();
@@ -91,21 +92,21 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     return store.addConnection({
       name: profile.name.trim(),
       host: profile.host.trim(),
+      username:
+        typeof profile.username === "string" ? profile.username.trim() : "",
       transport: profile.transport || "ssh",
       status: "saved",
     });
   });
   ipcMain.handle("connections:validate", (_event, profile) => {
-    const transport = profile && profile.transport ? profile.transport : "ssh";
-    const valid = Boolean(
-      profile && typeof profile.host === "string" && profile.host.trim(),
-    );
+    const validation = validateRemoteConfig(profile || {});
+    const transport = validation.transport;
     return {
-      valid,
+      valid: validation.valid,
       transport,
-      message: valid
+      message: validation.valid
         ? `${transport.toUpperCase()} profile is ready for an approval-gated connection`
-        : "A host is required",
+        : `Missing connection fields: ${validation.missing.join(", ")}`,
     };
   });
   ipcMain.handle("workspace:choose", async () => {

@@ -578,3 +578,8 @@
  - Artifact review state is visible in the rail before opening detailed review
  - Renderer startup wiring now includes the artifact view control and empty-workspace agent state
  - Mission completion messaging only appears after verification completes
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 13
+ - Remote connection settings now collect a username without persisting secrets
+ - SSH, MOSH, and MCP Bridge profiles share the remote transport validator
+ - Invalid remote profiles remain local-only and show missing fields before save

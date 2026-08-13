@@ -513,6 +513,12 @@
  and for in-progress missions.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 13
+ Remote connection settings now collect a username without storing credentials,
+ and SSH, MOSH, and MCP Bridge profiles use the same required-field validator
+ before they can be saved.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
