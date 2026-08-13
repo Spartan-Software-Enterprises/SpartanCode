@@ -903,6 +903,78 @@
         background: var(--green);
         color: #fff;
       }
+      .manager-modal {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #18233a35;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s ease;
+      }
+      .manager-modal.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .manager-card {
+        width: min(760px, 100%);
+        max-height: 82vh;
+        overflow: auto;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 24px 70px #34456f2b;
+      }
+      .manager-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 19px;
+      }
+      .manager-header h2 {
+        margin: 0;
+        font-size: 21px;
+      }
+      .manager-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .manager-agent {
+        padding: 15px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fbfcff;
+      }
+      .manager-agent strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+      .manager-agent small {
+        color: var(--muted);
+      }
+      .manager-agent .manager-state {
+        display: inline-block;
+        margin-top: 13px;
+        padding: 4px 7px;
+        border-radius: 6px;
+        background: var(--blue-soft);
+        color: var(--blue);
+        font-size: 11px;
+        font-weight: 750;
+      }
+      .manager-activity {
+        margin-top: 20px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+      }
+      .manager-activity h3 {
+        margin: 0 0 10px;
+        font-size: 14px;
+      }
       @media (max-width: 1120px) {
         body {
           min-width: 760px;
@@ -1304,6 +1376,31 @@
         </div>
       </section>
     </div>
+    <div
+      class="manager-modal"
+      id="managerModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="managerTitle"
+    >
+      <section class="manager-card">
+        <header class="manager-header">
+          <h2 id="managerTitle">Agent manager</h2>
+          <button
+            class="chat-close"
+            id="closeManager"
+            aria-label="Close agent manager"
+          >
+            ×
+          </button>
+        </header>
+        <div class="manager-grid" id="managerGrid"></div>
+        <div class="manager-activity">
+          <h3>Recent agent activity</h3>
+          <div id="managerActivity"></div>
+        </div>
+      </section>
+    </div>
     <script>
       const form = document.getElementById("missionForm");
       const input = document.getElementById("missionInput");
@@ -1321,6 +1418,9 @@
       const artifactModal = document.getElementById("artifactModal");
       const artifactContent = document.getElementById("artifactContent");
       let activeArtifact = null;
+      const managerModal = document.getElementById("managerModal");
+      const managerGrid = document.getElementById("managerGrid");
+      const managerActivity = document.getElementById("managerActivity");
       let activeApproval = null;
       const showToast = (message) => {
         toast.textContent = message;
@@ -1394,6 +1494,59 @@
       document
         .getElementById("rejectArtifact")
         .addEventListener("click", () => reviewArtifact("rejected"));
+      const openManager = () => {
+        managerModal.classList.add("open");
+        if (window.spartanCode)
+          window.spartanCode.getSnapshot().then((snapshot) => {
+            const mission = snapshot.missions && snapshot.missions[0];
+            const status = mission ? mission.status : "idle";
+            managerGrid.innerHTML = [
+              [
+                "Plan",
+                "Architect",
+                status === "planning" ? "In progress" : "Ready",
+              ],
+              [
+                "Build",
+                "Engineer",
+                status === "building"
+                  ? "In progress"
+                  : status === "complete"
+                    ? "Complete"
+                    : "Queued",
+              ],
+              [
+                "Verify",
+                "QA Specialist",
+                status === "verifying"
+                  ? "In progress"
+                  : status === "complete"
+                    ? "Complete"
+                    : "Queued",
+              ],
+            ]
+              .map(
+                ([name, role, state]) =>
+                  `<div class="manager-agent"><strong>${name}</strong><small>${role}</small><span class="manager-state">${state}</span></div>`,
+              )
+              .join("");
+            managerActivity.innerHTML =
+              (snapshot.activity || [])
+                .slice(0, 6)
+                .map(
+                  (item) =>
+                    `<div class="activity"><span class="activity-icon">♙</span><span><strong>${escapeHtml(item.agent)}</strong><small>${escapeHtml(item.message)}</small></span></div>`,
+                )
+                .join("") ||
+              '<span class="empty-state">No activity yet.</span>';
+          });
+      };
+      document
+        .getElementById("viewAgents")
+        .addEventListener("click", openManager);
+      document
+        .getElementById("closeManager")
+        .addEventListener("click", () => managerModal.classList.remove("open"));
       document.getElementById("newMission").addEventListener("click", () => {
         input.focus();
         status.textContent = "Ready for a new mission.";
