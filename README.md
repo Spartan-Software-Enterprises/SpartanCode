@@ -28,8 +28,8 @@ formatting.
 ## Production build
 
 ```bash
-npm run build   # unpacked application directory
-npm run dist    # platform installer/artifact for the host platform
+npm run build   # unpacked Linux application directory
+npm run dist    # Linux installer/artifact
 ```
 
 Electron Builder writes output to `dist/`. Native optional SSH acceleration is
