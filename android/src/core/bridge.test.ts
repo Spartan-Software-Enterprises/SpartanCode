@@ -1,4 +1,8 @@
-import { normalizeBridgeEndpoint, normalizeBridgeSnapshot } from "./bridge";
+import {
+  bridgeRequest,
+  normalizeBridgeEndpoint,
+  normalizeBridgeSnapshot,
+} from "./bridge";
 
 describe("MCP Bridge snapshots", () => {
   it("normalizes secure endpoints and allows local development", () => {
@@ -64,5 +68,15 @@ describe("MCP Bridge snapshots", () => {
     expect(() =>
       normalizeBridgeSnapshot({ missions: [], connections: [{ id: "bad" }] }),
     ).toThrow("malformed snapshot items");
+  });
+
+  it("cancels before retrying an unavailable bridge", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      bridgeRequest("http://localhost:8787", "/v1/snapshot", {
+        signal: controller.signal,
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
   });
 });

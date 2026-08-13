@@ -19,6 +19,31 @@ export class BridgeError extends Error {
   }
 }
 
+function throwIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) {
+    const error = new BridgeError("Bridge request cancelled");
+    error.name = "AbortError";
+    throw error;
+  }
+}
+
+function wait(delay: number, signal?: AbortSignal) {
+  if (!delay) return Promise.resolve();
+  return new Promise<void>((resolve, reject) => {
+    const timer = setTimeout(resolve, delay);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        const error = new BridgeError("Bridge request cancelled");
+        error.name = "AbortError";
+        reject(error);
+      },
+      { once: true },
+    );
+  });
+}
+
 export function normalizeBridgeEndpoint(endpoint: string): string {
   const normalized = endpoint.trim().replace(/\/$/, "");
   if (!normalized) throw new BridgeError("Enter an MCP Bridge endpoint");
@@ -43,7 +68,8 @@ export async function bridgeRequest<T>(
   const token = await readBridgeToken(normalizedEndpoint);
   let response: Response | undefined;
   for (const delay of [0, 250, 750]) {
-    if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+    throwIfAborted(init.signal ?? undefined);
+    if (delay) await wait(delay, init.signal ?? undefined);
     try {
       response = await fetch(`${normalizedEndpoint}${path}`, {
         ...init,
@@ -57,6 +83,7 @@ export async function bridgeRequest<T>(
       if (response.ok || (response.status >= 400 && response.status < 500))
         break;
     } catch (error) {
+      if (init.signal?.aborted) throwIfAborted(init.signal);
       void error;
     }
   }
