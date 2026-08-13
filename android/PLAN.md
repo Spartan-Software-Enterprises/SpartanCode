@@ -53,6 +53,8 @@ Snapshot reads apply the current schema version while retaining valid legacy
 missions and ignoring malformed optional records. Bridge requests support
 cancellation during retry backoff, and the licensed mobile catalog filters
 Qwen3-1.7B and Phi-4-mini by explicit permissive license and memory capacity.
+The MCP Bridge now deduplicates retried POST mutations by bounded,
+route-scoped idempotency keys, matching the Android durable queue contract.
 Android also ships offline-safe starter templates, personas, and plugin
 metadata so the extensibility surface does not require a desktop install.
 The command center renders the synced audit activity feed alongside mission,

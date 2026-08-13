@@ -24,11 +24,14 @@ at a 390×844 viewport with device scale factor 2. The smoke test verified:
 The connection foundation also validates HTTPS endpoints (with localhost
 allowed for development), persists a named bridge profile after a successful
 sync, preserves the offline queue while applying a remote snapshot, retries
-transient bridge failures, and marks snapshots stale after five minutes.
+transient bridge failures, cancels in-flight retry loops, uses route-scoped
+idempotency keys for remote mutations, and marks snapshots stale after five
+minutes.
 
-This is an evidence record for the current scaffold, not a claim that the full
-Android roadmap is complete. Native Android builds, full artifact and approval
-workflows, model runtimes, accessibility matrix, and signed release artifacts
-remain roadmap work tracked in [`PLAN.md`](PLAN.md). The app is intentionally
+Native Android builds, artifact and approval workflows, licensed model
+selection, storage recovery, biometric unlock, offline extension metadata,
+audit rendering, and a guarded signed-release workflow are now implemented;
+physical-device accessibility and production signing still require the release
+environment described in [`PLAN.md`](PLAN.md). The app remains
 standalone-first: a desktop checkout or MCP Bridge is never required for local
 mission planning, bundled agent roles, queueing, or review.

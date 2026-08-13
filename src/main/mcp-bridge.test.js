@@ -59,3 +59,39 @@ test("MCP Bridge replays authenticated SSE events from a cursor", async () => {
   await new Promise((resolve) => server.close(resolve));
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test("MCP Bridge deduplicates retried mutations by idempotency key", async () => {
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-idempotency-"),
+  );
+  const store = createMissionStore(path.join(dir, "state.json"));
+  let executions = 0;
+  const server = createBridgeServer({
+    store,
+    runMission: () => {
+      executions += 1;
+    },
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const base = `http://127.0.0.1:${address.port}`;
+  const init = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Idempotency-Key": "mission:retry-1",
+    },
+    body: JSON.stringify({ description: "Only once" }),
+  };
+  const first = await fetch(`${base}/v1/missions`, init);
+  const firstBody = await first.json();
+  const second = await fetch(`${base}/v1/missions`, init);
+  const secondBody = await second.json();
+  assert.equal(first.status, 201);
+  assert.equal(second.status, 201);
+  assert.deepEqual(secondBody, firstBody);
+  assert.equal(store.snapshot().missions.length, 1);
+  assert.equal(executions, 1);
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});

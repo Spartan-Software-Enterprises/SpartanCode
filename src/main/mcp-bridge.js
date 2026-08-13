@@ -52,6 +52,7 @@ function createBridgeRequestHandler({
   runMission,
   token = null,
   events = null,
+  idempotencyCache = new Map(),
 }) {
   if (!store || typeof store.snapshot !== "function")
     throw new Error("A mission store is required");
@@ -79,6 +80,21 @@ function createBridgeRequestHandler({
     }
     if (request.method !== "POST")
       return json(response, 404, { error: "Not found" });
+    const idempotencyKey = request.headers["idempotency-key"];
+    const cacheKey =
+      typeof idempotencyKey === "string" && idempotencyKey.length <= 256
+        ? `${request.method}:${url.pathname}:${idempotencyKey}`
+        : null;
+    const cached = cacheKey ? idempotencyCache.get(cacheKey) : null;
+    if (cached) return json(response, cached.status, cached.body);
+    const mutationResponse = (status, body) => {
+      if (cacheKey) {
+        while (idempotencyCache.size >= 1000)
+          idempotencyCache.delete(idempotencyCache.keys().next().value);
+        idempotencyCache.set(cacheKey, { status, body });
+      }
+      return json(response, status, body);
+    };
     let body;
     try {
       body = await readJson(request);
@@ -96,7 +112,7 @@ function createBridgeRequestHandler({
         });
       const mission = store.addMission(body.description.trim());
       if (typeof runMission === "function") runMission(mission);
-      return json(response, 201, {
+      return mutationResponse(201, {
         mission,
         operationId: `mission:${mission.id}`,
       });
@@ -112,7 +128,7 @@ function createBridgeRequestHandler({
       const approval = store.resolveApproval(approvalMatch[1], body.decision);
       if (!approval)
         return json(response, 404, { error: "Approval not found" });
-      return json(response, 200, {
+      return mutationResponse(200, {
         approval,
         operationId: `approval:${approval.id}`,
       });
@@ -132,7 +148,7 @@ function createBridgeRequestHandler({
       );
       if (!artifact)
         return json(response, 404, { error: "Artifact not found" });
-      return json(response, 200, {
+      return mutationResponse(200, {
         artifact,
         operationId: `artifact:${artifact.id}`,
       });
