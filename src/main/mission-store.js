@@ -14,6 +14,7 @@ const emptyState = () => ({
     voiceEnabled: false,
   },
   connections: [],
+  auditLog: [],
 });
 
 function createMissionStore(filePath) {
@@ -78,6 +79,26 @@ function createMissionStore(filePath) {
     },
     getArtifact(id) {
       return state.artifacts.find((item) => item.id === id) || null;
+    },
+    reviewArtifact(id, decision, note = "") {
+      const artifact = state.artifacts.find((item) => item.id === id);
+      if (!artifact) return null;
+      artifact.review = {
+        decision,
+        note,
+        reviewedAt: new Date().toISOString(),
+      };
+      state.auditLog.unshift({
+        action: `artifact:${decision}`,
+        artifactId: id,
+        note,
+        timestamp: artifact.review.reviewedAt,
+      });
+      persist();
+      return artifact;
+    },
+    auditLog() {
+      return state.auditLog.slice(0, 100);
     },
     addActivity(activity) {
       state.activity.unshift({

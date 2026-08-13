@@ -58,6 +58,13 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
   });
   ipcMain.handle("workspace:snapshot", () => store.snapshot());
   ipcMain.handle("artifact:get", (_event, id) => store.getArtifact(id));
+  ipcMain.handle("artifact:review", (_event, { id, decision, note }) => {
+    const artifact = store.reviewArtifact(id, decision, note);
+    if (!artifact) throw new Error("Artifact was not found");
+    window.webContents.send("workspace:changed", store.snapshot());
+    return artifact;
+  });
+  ipcMain.handle("audit:list", () => store.auditLog());
   ipcMain.handle("mission:plan", (_event, description) =>
     createExecutionPlan(description),
   );

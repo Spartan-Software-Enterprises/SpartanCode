@@ -3,6 +3,9 @@ const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("spartanCode", {
   getSnapshot: () => ipcRenderer.invoke("workspace:snapshot"),
   getArtifact: (id) => ipcRenderer.invoke("artifact:get", id),
+  reviewArtifact: (id, decision, note) =>
+    ipcRenderer.invoke("artifact:review", { id, decision, note }),
+  getAuditLog: () => ipcRenderer.invoke("audit:list"),
   previewPlan: (description) => ipcRenderer.invoke("mission:plan", description),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   updateSettings: (update) => ipcRenderer.invoke("settings:update", update),
