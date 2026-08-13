@@ -17,6 +17,9 @@ first surface keeps the highest-value controls reachable on a phone:
   while keeping labeled buttons available for accessible interaction.
 - **Runtime readiness** — reports MLC Chat, PocketPal, and llama.cpp native
   module availability and applies the licensed model/device gate before use.
+  The native build includes the MIT-licensed `@pocketpalai/llama.rn` adapter;
+  it becomes available only in a prebuilt native binary with a local GGUF
+  model and remains unavailable in Expo Go.
 
 ## Verified behavior
 

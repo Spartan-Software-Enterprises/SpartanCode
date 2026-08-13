@@ -1,5 +1,6 @@
 const http = require("node:http");
 const { exportAuditLog } = require("./audit-export");
+const { createOidcAuthenticator } = require("./oidc");
 
 function createBridgeEventHub({ maxEvents = 100 } = {}) {
   let sequence = 0;
@@ -53,26 +54,31 @@ function createBridgeRequestHandler({
   runMission,
   token = null,
   tokenScopes = null,
+  oidc = null,
   events = null,
   idempotencyCache = new Map(),
 }) {
   if (!store || typeof store.snapshot !== "function")
     throw new Error("A mission store is required");
-  const authenticate = (request) => {
+  const oidcAuthenticator = oidc ? createOidcAuthenticator(oidc) : null;
+  const authenticate = async (request) => {
+    if (token && request.headers.authorization === `Bearer ${token}`) {
+      const scopes = tokenScopes?.[token];
+      return {
+        authenticated: true,
+        // A plain token remains a trusted local-development credential. Scoped
+        // credentials opt into least-privilege enforcement.
+        scopes: Array.isArray(scopes) ? scopes : ["*"],
+      };
+    }
+    if (oidcAuthenticator)
+      return oidcAuthenticator.authenticate(request.headers.authorization);
     if (!token) return { authenticated: true, scopes: ["*"] };
-    if (request.headers.authorization !== `Bearer ${token}`)
-      return { authenticated: false, scopes: [] };
-    const scopes = tokenScopes?.[token];
-    return {
-      authenticated: true,
-      // A plain token remains a trusted local-development credential. Scoped
-      // credentials opt into least-privilege enforcement.
-      scopes: Array.isArray(scopes) ? scopes : ["*"],
-    };
+    return { authenticated: false, scopes: [] };
   };
   return async (request, response) => {
     if (request.method === "OPTIONS") return json(response, 204, {});
-    const identity = authenticate(request);
+    const identity = await authenticate(request);
     if (!identity.authenticated)
       return json(response, 401, { error: "Unauthorized" });
     const requireScope = (scope) =>

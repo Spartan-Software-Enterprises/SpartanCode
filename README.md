@@ -75,6 +75,14 @@ portable `ssh2` runtime.
   reported as ready until their adapter contract is installed and verified.
 - Desktop can invoke a configured llama.cpp CLI with validated model and prompt
   arguments; Android-native MLC/PocketPal runtimes remain optional adapters.
+- Android release builds include the MIT-licensed `@pocketpalai/llama.rn`
+  adapter through Expo prebuild. It activates only in a native binary with a
+  compatible local GGUF model; Expo Go and unsupported devices report it as
+  unavailable.
+- The optional MCP Bridge can validate RS256 OIDC tokens when
+  `SPARTANCODE_BRIDGE_OIDC_ISSUER` and
+  `SPARTANCODE_BRIDGE_OIDC_AUDIENCE` are configured, deriving least-privilege
+  scopes from standard `scope`/`scp` claims.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
 - Collaboration sessions use versioned, auditable events with conflict

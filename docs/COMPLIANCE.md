@@ -16,8 +16,13 @@ legal advice; a commercial release should be reviewed for its target markets.
   tokens from the persisted workspace snapshot.
 - Bridge deployments may provide a token-to-scope map to enforce least
   privilege for read, audit, event, collaboration, mission, approval, and
-  artifact operations. Integrating an OIDC/SSO issuer and key rotation is a
-  deployment responsibility, not silently assumed by the local bridge.
+  artifact operations. The bridge also supports an explicitly configured
+  OIDC issuer through `SPARTANCODE_BRIDGE_OIDC_ISSUER` and
+  `SPARTANCODE_BRIDGE_OIDC_AUDIENCE` (with optional
+  `SPARTANCODE_BRIDGE_OIDC_JWKS_URI`). It verifies RS256 signatures, issuer,
+  audience, expiry, and scope claims with cached JWKS metadata. Key rotation
+  remains a provider/deployment operation; restart or clear the verifier cache
+  after a provider revokes keys.
 - Mission, approval, artifact, and policy activity is retained in the local
   workspace store so users can review decisions. A production distribution
   must publish a retention and deletion policy appropriate to its jurisdiction.

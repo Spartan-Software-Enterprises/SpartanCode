@@ -24,7 +24,9 @@ behavior and a corresponding automated or documented verification path.
   cross-device acceptance remains open.
 - Android now has a typed MLC Chat/PocketPal/llama.cpp native-module registry
   that checks device-compatible licensed models before invocation and reports
-  missing modules honestly; native package installation remains open.
+  missing modules honestly. The MIT-licensed `@pocketpalai/llama.rn` package is
+  integrated through the Expo config plugin as the first real native adapter;
+  MLC Chat/PocketPal remain optional provider adapters.
 - Android pending approvals support tested horizontal swipe decisions in
   addition to accessible labeled controls; physical gesture/accessibility
   acceptance remains open.
@@ -56,6 +58,9 @@ behavior and a corresponding automated or documented verification path.
 - The MCP Bridge supports opt-in least-privilege token scopes for snapshot,
   audit, event, collaboration, mission, approval, and artifact operations;
   plain local-development tokens retain backward-compatible trusted behavior.
+- The MCP Bridge supports explicitly configured OIDC/SSO JWT authentication
+  with issuer, audience, expiry, RS256 signature, cached JWKS, and claim-scope
+  verification; local tokens remain available for local development.
 - Desktop now has a durable, versioned collaboration journal with owner/member/
   observer roles, optimistic revision conflict detection, idempotent event
   merge, and audit-log persistence through the workspace store. Transport to
@@ -74,10 +79,11 @@ behavior and a corresponding automated or documented verification path.
 
 ## Release gates still requiring stronger evidence
 
-- Android MLC/PocketPal inference packages and physical on-device execution are
-  still required. Desktop now has a real llama.cpp CLI adapter when an absolute
-  `SPARTANCODE_LLAMA_CLI` executable and existing GGUF model are supplied; the
-  adapter reports unavailable until those inputs exist.
+- MLC Chat/PocketPal provider-specific packages and physical Android execution
+  remain release-environment gates. Android now has a real llama.cpp native
+  adapter when a prebuilt binary and existing GGUF model are supplied; the
+  adapter reports unavailable until those inputs exist. Desktop has the same
+  verified CLI fallback through `SPARTANCODE_LLAMA_CLI`.
 - Physical-device accessibility acceptance (TalkBack behavior and visual
   verification of large text/reduced motion),
   low-storage/interrupted-download/process-restart acceptance, and tablet
@@ -87,7 +93,8 @@ behavior and a corresponding automated or documented verification path.
   hashes must still be attached to the signed release and reviewed for the
   target distribution.
 - Physical Android collaboration/gesture acceptance, cross-modal expansion,
-  OIDC/SSO provider integration, and a mature external plugin marketplace.
+  provider-specific OIDC account lifecycle/administration, and a mature
+  external plugin marketplace.
 
 These items remain open until their implementation and release-environment
 evidence exist; passing unit tests alone does not close them.

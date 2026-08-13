@@ -11,6 +11,9 @@ export type MobileRuntimeRequest = {
   prompt: string;
   modelId: string;
   quantization: "Q4_K_M" | "Q4_0" | "Q3_K_S";
+  modelPath?: string;
+  maxTokens?: number;
+  temperature?: number;
 };
 
 export type MobileRuntimeStatus = {
@@ -88,6 +91,9 @@ export function createMobileRuntimeRegistry(
         prompt: request.prompt,
         modelId: request.modelId,
         quantization: request.quantization,
+        modelPath: request.modelPath,
+        maxTokens: request.maxTokens,
+        temperature: request.temperature,
       });
       return { ok: true as const, runtime: request.runtime, output };
     },

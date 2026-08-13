@@ -73,6 +73,7 @@ import {
 import type { MobileCollaborationSession } from "./src/core/collaboration";
 import { approvalGestureDecision } from "./src/core/gesture";
 import { createMobileRuntimeRegistry } from "./src/core/local-runtime";
+import { loadLlamaRnRuntime } from "./src/core/llama-rn-runtime";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -138,7 +139,11 @@ export default function App() {
     [deviceProfile],
   );
   const nativeRuntimeStatuses = useMemo(
-    () => createMobileRuntimeRegistry({}, deviceProfile).list(),
+    () =>
+      createMobileRuntimeRegistry(
+        { "llama.cpp": loadLlamaRnRuntime() },
+        deviceProfile,
+      ).list(),
     [deviceProfile],
   );
 

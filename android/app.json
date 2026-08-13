@@ -15,7 +15,14 @@
     "plugins": [
       "expo-secure-store",
       "expo-local-authentication",
-      "expo-speech-recognition"
+      "expo-speech-recognition",
+      [
+        "@pocketpalai/llama.rn",
+        {
+          "enableOpenCL": true,
+          "forceCxx20": true
+        }
+      ]
     ],
     "scheme": "spartancode"
   }

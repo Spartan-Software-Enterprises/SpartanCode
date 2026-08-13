@@ -5,6 +5,22 @@ const { createMissionStore } = require("./mission-store");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const crypto = require("crypto");
+
+function oidcToken(privateKey, issuer, audience) {
+  const encode = (value) =>
+    Buffer.from(JSON.stringify(value)).toString("base64url");
+  const header = encode({ alg: "RS256", typ: "JWT", kid: "bridge-key" });
+  const claims = encode({
+    iss: issuer,
+    aud: audience,
+    sub: "bridge-user",
+    scope: "snapshot",
+    exp: Math.floor(Date.now() / 1000) + 300,
+  });
+  const input = `${header}.${claims}`;
+  return `${input}.${crypto.sign("RSA-SHA256", Buffer.from(input), privateKey).toString("base64url")}`;
+}
 
 test("MCP Bridge serves authenticated snapshots and mission mutations", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-bridge-"));
@@ -215,6 +231,53 @@ test("MCP Bridge enforces opt-in least-privilege token scopes", async () => {
   });
   assert.equal(write.status, 403);
   assert.match((await write.json()).error, /missions:write/);
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("MCP Bridge accepts configured OIDC scopes and denies missing scopes", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-oidc-"));
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+  });
+  const issuer = "https://issuer.example";
+  const server = createBridgeServer({
+    store,
+    oidc: {
+      issuer,
+      audience: "spartancode",
+      fetchImpl: async () => ({
+        ok: true,
+        json: async () => ({
+          keys: [
+            {
+              ...publicKey.export({ format: "jwk" }),
+              kid: "bridge-key",
+              alg: "RS256",
+            },
+          ],
+        }),
+      }),
+      jwksUri: "https://issuer.example/keys",
+    },
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const authorization = `Bearer ${oidcToken(privateKey, issuer, "spartancode")}`;
+  const read = await fetch(`http://127.0.0.1:${address.port}/v1/snapshot`, {
+    headers: { Authorization: authorization },
+  });
+  assert.equal(read.status, 200);
+  const write = await fetch(`http://127.0.0.1:${address.port}/v1/missions`, {
+    method: "POST",
+    headers: {
+      Authorization: authorization,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ description: "OIDC cannot write without scope" }),
+  });
+  assert.equal(write.status, 403);
   await new Promise((resolve) => server.close(resolve));
   fs.rmSync(dir, { recursive: true, force: true });
 });

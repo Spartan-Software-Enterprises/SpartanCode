@@ -34,6 +34,15 @@ function createWindow() {
     bridge = createBridgeServer({
       store,
       token: process.env.SPARTANCODE_BRIDGE_TOKEN || null,
+      oidc:
+        process.env.SPARTANCODE_BRIDGE_OIDC_ISSUER &&
+        process.env.SPARTANCODE_BRIDGE_OIDC_AUDIENCE
+          ? {
+              issuer: process.env.SPARTANCODE_BRIDGE_OIDC_ISSUER,
+              audience: process.env.SPARTANCODE_BRIDGE_OIDC_AUDIENCE,
+              jwksUri: process.env.SPARTANCODE_BRIDGE_OIDC_JWKS_URI || null,
+            }
+          : null,
     });
     bridge.listen(
       Number(process.env.SPARTANCODE_BRIDGE_PORT),

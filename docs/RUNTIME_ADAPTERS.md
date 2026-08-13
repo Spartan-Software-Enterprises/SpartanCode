@@ -13,6 +13,8 @@ Requests through the runtime boundary must provide an absolute existing GGUF
 `temperature` (0–2). The adapter invokes the executable with `execFile` and
 argument arrays; it does not use a shell or interpolate commands.
 
-MLC Chat, PocketPal, and WebLLM remain optional platform adapters. Their
-absence is reported explicitly, and Android does not require a desktop runtime
-for offline planning, queueing, collaboration, or review.
+MLC Chat, PocketPal, and WebLLM remain optional platform adapters. Android
+ships the MIT-licensed `@pocketpalai/llama.rn` native adapter through its Expo
+config plugin; it is only available in a prebuilt native binary and requires
+an absolute local GGUF path. Android does not require a desktop runtime for
+offline planning, queueing, collaboration, or review.
