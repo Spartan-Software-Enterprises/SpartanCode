@@ -565,3 +565,10 @@
  - Remote SSH/MOSH/MCP Bridge configuration validation
  - Renderer now opens the live Agent Manager directly
  - 22 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 11
+ - Centralized mission runner module with injectable scheduling for deterministic verification
+ - Mission execution now publishes plan, build, verify, and completion snapshots through one lifecycle path
+ - Settings persistence rejects unknown fields before writing workspace state
+ - Agent manager navigation no longer registers duplicate click handlers
+ - 24 automated tests passing

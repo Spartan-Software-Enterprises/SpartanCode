@@ -31,6 +31,13 @@ function createMissionStore(filePath) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, JSON.stringify(state, null, 2));
   };
+  const allowedSettings = new Set([
+    "model",
+    "quantization",
+    "protocol",
+    "workspacePath",
+    "voiceEnabled",
+  ]);
 
   return {
     snapshot() {
@@ -149,7 +156,12 @@ function createMissionStore(filePath) {
       persist();
     },
     updateSettings(update) {
-      state.settings = { ...state.settings, ...update };
+      const safeUpdate = Object.fromEntries(
+        Object.entries(update || {}).filter(([key]) =>
+          allowedSettings.has(key),
+        ),
+      );
+      state.settings = { ...state.settings, ...safeUpdate };
       persist();
       return state.settings;
     },

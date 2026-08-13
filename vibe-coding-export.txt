@@ -500,6 +500,13 @@
  validated for SSH, MOSH, and MCP Bridge. Twenty-two automated tests pass.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 11
+ The mission runner is now a dedicated, testable lifecycle module that publishes
+ plan, build, verify, and completion snapshots. Settings updates use an explicit
+ allowlist, duplicate Agent Manager navigation wiring was removed, and twenty-four
+ automated tests pass.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------

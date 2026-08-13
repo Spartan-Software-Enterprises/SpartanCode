@@ -2,62 +2,8 @@ const path = require("path");
 const { app, BrowserWindow } = require("electron");
 const { registerDesktopApi } = require("./desktop-api");
 const { createMissionStore } = require("./mission-store");
-const { createExecutionPlan } = require("./agent-plan");
+const { createMissionRunner } = require("./mission-runner");
 const { createModelCache } = require("./model-cache");
-
-function createMissionRunner(store, window) {
-  return (mission) => {
-    const stages = [
-      {
-        status: "building",
-        agent: "Build agent",
-        message: "Plan approved; implementing the mission",
-      },
-      {
-        status: "verifying",
-        agent: "Verify agent",
-        message: "Build complete; running verification",
-      },
-      {
-        status: "complete",
-        agent: "Verify agent",
-        message: "Verification complete; artifact is ready",
-      },
-    ];
-    const plan = createExecutionPlan(mission.description);
-    store.addMissionPlan(mission.id, plan);
-    store.addArtifact({
-      missionId: mission.id,
-      name: "Execution plan",
-      type: "plan",
-      status: "ready",
-      content: JSON.stringify(plan),
-    });
-    if (!window.isDestroyed())
-      window.webContents.send("workspace:changed", store.snapshot());
-
-    stages.forEach((stage, index) => {
-      setTimeout(
-        () => {
-          store.updateMission(mission.id, { status: stage.status });
-          store.addActivity({ agent: stage.agent, message: stage.message });
-          if (stage.status === "complete") {
-            store.addArtifact({
-              missionId: mission.id,
-              name: "Mission verification report",
-              type: "verification",
-              status: "ready",
-              content: `Verified mission: ${mission.description}`,
-            });
-          }
-          if (!window.isDestroyed())
-            window.webContents.send("workspace:changed", store.snapshot());
-        },
-        900 * (index + 1),
-      );
-    });
-  };
-}
 
 function createWindow() {
   const win = new BrowserWindow({
