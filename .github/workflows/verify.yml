@@ -46,6 +46,7 @@ jobs:
 
   android-emulator-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -69,6 +70,8 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_2
+          emulator-options: "-no-window -no-audio -no-boot-anim -no-snapshot"
+          disable-animations: true
           script: |
             cd android
             npx expo prebuild --platform android --no-install
