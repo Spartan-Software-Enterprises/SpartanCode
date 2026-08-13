@@ -31,7 +31,8 @@ behavior and a corresponding automated or documented verification path.
   addition to accessible labeled controls; physical gesture/accessibility
   acceptance remains open.
 - Explicitly licensed mobile model catalog, compatibility filtering, HTTPS
-  resumable downloads, checksum verification, and deletion.
+  resumable downloads, safe Range fallback, low-storage preflight, checksum
+  verification/cleanup, and deletion.
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, AWS bootstrap/recovery scripts, and local/GitHub synchronization
   procedures.

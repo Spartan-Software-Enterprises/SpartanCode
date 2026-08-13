@@ -15,6 +15,7 @@ export type DownloadStore = {
     quantization: string,
     bytes: Uint8Array<ArrayBufferLike>,
   ) => Promise<void>;
+  clearPartial: (modelId: string, quantization: string) => Promise<void>;
   remove: (modelId: string, quantization: string) => Promise<void>;
 };
 
@@ -23,6 +24,7 @@ export type DownloadRequest = {
   quantization: "Q4_K_M" | "Q4_0" | "Q3_K_S";
   url: string;
   expectedSha256?: string;
+  availableStorageMb?: number;
 };
 
 export type DownloadTransport = (
@@ -42,6 +44,13 @@ function modelFor(request: DownloadRequest) {
     throw new Error("Model is not available under the mobile license policy");
   if (!model.quantizations.includes(request.quantization))
     throw new Error("Quantization is not supported for this model");
+  if (
+    request.availableStorageMb !== undefined &&
+    request.availableStorageMb < 2048
+  )
+    throw new Error(
+      "At least 2 GB of free storage is required for a model download",
+    );
   const url = new URL(request.url);
   if (url.protocol !== "https:")
     throw new Error("Model downloads require HTTPS");
@@ -75,12 +84,19 @@ export async function downloadModel(
   if (!response.ok || (response.status !== 200 && response.status !== 206))
     throw new Error(`Model download failed (${response.status})`);
   const received = new Uint8Array(await response.arrayBuffer());
-  const bytes = append(partial, received);
+  // A server may ignore Range and return the complete object with 200. Never
+  // append a partial prefix to that complete response.
+  const bytes =
+    partial.length && response.status === 206
+      ? append(partial, received)
+      : received;
   await store.writePartial(request.modelId, request.quantization, bytes);
   if (request.expectedSha256) {
     const actual = await sha256(bytes);
-    if (actual.toLowerCase() !== request.expectedSha256.toLowerCase())
+    if (actual.toLowerCase() !== request.expectedSha256.toLowerCase()) {
+      await store.clearPartial(request.modelId, request.quantization);
       throw new Error("Model checksum verification failed");
+    }
   }
   await store.finalize(request.modelId, request.quantization, bytes);
   return {
