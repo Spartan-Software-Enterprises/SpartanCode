@@ -617,3 +617,8 @@
  - Saved remote profiles are reloaded into the settings surface
  - Remote profile creation is validated in the IPC boundary, not only in the renderer
  - Credentials remain excluded from persisted connection records
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 20
+ - Settings now exposes licensed local model preparation
+ - Cached model metadata is reflected in model choices and readiness status
+ - Model preparation stays behind the explicit local runtime action

@@ -1296,6 +1296,13 @@
         <div class="setting-group">
           <label for="modelSelect">Default local model</label
           ><select id="modelSelect"></select>
+          <button type="button" class="context-button" id="prepareModel">
+            Prepare local model
+          </button>
+          <small
+            id="modelStatus"
+            style="display: block; color: var(--muted)"
+          ></small>
         </div>
         <div class="setting-group">
           <label for="protocolSelect">Agent protocol</label
@@ -1428,6 +1435,8 @@
       const modelSelect = document.getElementById("modelSelect");
       const protocolSelect = document.getElementById("protocolSelect");
       const voiceToggle = document.getElementById("voiceToggle");
+      const prepareModelButton = document.getElementById("prepareModel");
+      const modelStatus = document.getElementById("modelStatus");
       const chatModal = document.getElementById("chatModal");
       const chatMessages = document.getElementById("chatMessages");
       const chatInput = document.getElementById("chatInput");
@@ -1630,11 +1639,12 @@
               window.spartanCode.getSettings(),
               window.spartanCode.listModels({ commercialOnly: true }),
               window.spartanCode.listConnections(),
-            ]).then(([settings, models, connections]) => {
+              window.spartanCode.listCachedModels(),
+            ]).then(([settings, models, connections, cachedModels]) => {
               modelSelect.innerHTML = models
                 .map(
                   (model) =>
-                    `<option value="${model.id}">${model.id} · ${model.license}</option>`,
+                    `<option value="${model.id}">${model.id} · ${model.license}${cachedModels.some((cached) => cached.id === model.id) ? " · ready" : ""}</option>`,
                 )
                 .join("");
               modelSelect.value = settings.model;
@@ -1649,6 +1659,11 @@
                 connection?.username || "";
               document.getElementById("connectionTransport").value =
                 connection?.transport || "ssh";
+              modelStatus.textContent = cachedModels.some(
+                (cached) => cached.id === settings.model,
+              )
+                ? "Model metadata is ready for the local runtime."
+                : "Model is not prepared on this device yet.";
               settingsModal.classList.add("open");
             });
           } else if (view === "projects" && window.spartanCode) {
@@ -1823,6 +1838,23 @@
             })
             .catch((error) => showToast(error.message));
         });
+      prepareModelButton.addEventListener("click", () => {
+        if (!window.spartanCode || !modelSelect.value) return;
+        prepareModelButton.disabled = true;
+        modelStatus.textContent = "Preparing licensed model metadata…";
+        window.spartanCode
+          .prepareModel(modelSelect.value, "Q4_K_M")
+          .then((result) => {
+            modelStatus.textContent = result.message || "Model metadata ready.";
+            showToast("Local model prepared");
+          })
+          .catch((error) => {
+            modelStatus.textContent = error.message;
+          })
+          .finally(() => {
+            prepareModelButton.disabled = false;
+          });
+      });
       document.getElementById("clearHistory").addEventListener("click", () => {
         if (window.spartanCode)
           window.spartanCode

@@ -552,6 +552,11 @@
  validates required identity before persistence while continuing to exclude secrets.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 20
+ Settings now exposes explicit preparation for licensed local model metadata and
+ reflects cached readiness in the model selector.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
