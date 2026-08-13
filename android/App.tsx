@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   AppState,
   AccessibilityInfo,
+  PanResponder,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -70,6 +71,7 @@ import {
   normalizeCollaborationSessions,
 } from "./src/core/collaboration";
 import type { MobileCollaborationSession } from "./src/core/collaboration";
+import { approvalGestureDecision } from "./src/core/gesture";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -901,12 +903,33 @@ export default function App() {
           </View>
         ) : (
           (snapshot.approvals ?? []).slice(0, 3).map((item) => (
-            <View style={styles.mission} key={item.id}>
+            <View
+              style={styles.mission}
+              key={item.id}
+              {...PanResponder.create({
+                onMoveShouldSetPanResponder: (_, gesture) =>
+                  item.status === "pending" &&
+                  Math.abs(gesture.dx) > 12 &&
+                  Math.abs(gesture.dx) > Math.abs(gesture.dy),
+                onPanResponderRelease: (_, gesture) => {
+                  const decision = approvalGestureDecision(
+                    gesture.dx,
+                    gesture.dy,
+                  );
+                  if (decision) void resolveApproval(item.id, decision);
+                },
+              }).panHandlers}
+            >
               <View style={styles.missionBody}>
                 <Text style={styles.missionText}>{item.title}</Text>
                 <Text style={styles.missionMeta}>
                   {item.status.toUpperCase()} · {item.detail}
                 </Text>
+                {item.status === "pending" && (
+                  <Text style={styles.missionMeta}>
+                    Swipe right to approve · swipe left to deny
+                  </Text>
+                )}
                 {item.status === "pending" && (
                   <View style={styles.actionRow}>
                     <Pressable

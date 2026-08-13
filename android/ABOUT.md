@@ -13,6 +13,8 @@ first surface keeps the highest-value controls reachable on a phone:
 - **Missions** — shows queued mission descriptions and lifecycle status.
 - **Collaboration** — creates local versioned sessions offline and optionally
   publishes them through the authenticated bridge.
+- **Approval gestures** — supports right-swipe approve and left-swipe deny,
+  while keeping labeled buttons available for accessible interaction.
 
 ## Verified behavior
 

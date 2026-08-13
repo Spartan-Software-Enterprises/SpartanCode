@@ -85,6 +85,11 @@ remote sessions are merged by revision and new sessions can be published over
 the authenticated collaboration routes. The UI labels the bridge as optional
 and does not claim cross-device acceptance until physical testing is complete.
 
+Pending approval cards also accept deliberate horizontal swipes (right to
+approve, left to deny) through a tested gesture classifier. Native labeled
+buttons remain available so gesture support does not replace screen-reader or
+large-text access paths.
+
 When an Android-only user queues a mission offline, the app now persists an
 explicit local plan artifact, activity entry, and audit event. The evidence
 records that build and verification are queued; it does not misrepresent local

@@ -22,6 +22,9 @@ behavior and a corresponding automated or documented verification path.
 - Android now has a local collaboration session surface with validated
   persistence and optional bridge publication/remote-session merge; physical
   cross-device acceptance remains open.
+- Android pending approvals support tested horizontal swipe decisions in
+  addition to accessible labeled controls; physical gesture/accessibility
+  acceptance remains open.
 - Explicitly licensed mobile model catalog, compatibility filtering, HTTPS
   resumable downloads, checksum verification, and deletion.
 - Remote provider cost estimates, home-server/router guidance, connection
@@ -65,8 +68,7 @@ behavior and a corresponding automated or documented verification path.
   gates. The generator itself is implemented and verified; its inventory and
   hashes must still be attached to the signed release and reviewed for the
   target distribution.
-- Android collaboration UI and physical cross-device acceptance, cross-modal
-  gesture workflows,
+- Physical Android collaboration/gesture acceptance,
   enterprise governance, and a mature external plugin marketplace.
 
 These items remain open until their implementation and release-environment

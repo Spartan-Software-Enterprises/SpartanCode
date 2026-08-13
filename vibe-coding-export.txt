@@ -657,6 +657,14 @@
  open gates.
 --------------------------------------------------------------------------------
 
+ ANDROID IMPLEMENTATION STATUS — MILESTONE 37
+ Android now offers an offline-first collaboration surface backed by validated
+ local session storage, optional authenticated bridge publication, and remote
+ revision merge. Pending approvals accept deliberate horizontal swipe
+ decisions while retaining accessible labeled buttons. Physical cross-device,
+ gesture, and TalkBack acceptance remain release-environment checks.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
