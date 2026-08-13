@@ -2,13 +2,13 @@
   "name": "spartancode-android",
   "version": "0.1.0",
   "private": true,
-  "main": "expo-router/entry",
+  "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
     "typecheck": "tsc --noEmit",
     "test": "jest --runInBand",
-    "format:check": "prettier --check \"**/*.{ts,tsx,json}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,json}\" --ignore-path .prettierignore"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -20,7 +20,9 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
+    "@types/jest": "^30.0.0",
     "jest": "^30.1.3",
+    "jest-expo": "~54.0.17",
     "prettier": "^3.9.6",
     "typescript": "~5.9.2"
   }

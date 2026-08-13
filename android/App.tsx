@@ -44,10 +44,28 @@ export default function App() {
       const remote = normalizeBridgeSnapshot(
         await bridgeRequest<unknown>(endpoint.trim(), "/v1/snapshot"),
       );
-      setSnapshot(remote);
-      await writeSnapshot(remote);
+      setSnapshot((current) => {
+        const remoteIds = new Set(remote.missions.map((item) => item.id));
+        const pendingLocal = current.missions.filter(
+          (item) => item.status === "planning" && !remoteIds.has(item.id),
+        );
+        return {
+          ...remote,
+          missions: [...pendingLocal, ...remote.missions],
+        };
+      });
+      const current = await readSnapshot();
+      const remoteIds = new Set(remote.missions.map((item) => item.id));
+      const pendingLocal = current.missions.filter(
+        (item) => item.status === "planning" && !remoteIds.has(item.id),
+      );
+      await writeSnapshot({
+        ...remote,
+        missions: [...pendingLocal, ...remote.missions],
+      });
       setMessage("Connected · synced just now");
     } catch (error) {
+      setSnapshot((current) => ({ ...current, offline: true }));
       setMessage(error instanceof Error ? error.message : "Connection failed");
     }
   }, [endpoint]);
@@ -67,10 +85,18 @@ export default function App() {
         ...snapshot.missions,
       ],
     };
-    setSnapshot(next);
-    setMission("");
-    await writeSnapshot(next);
-    setMessage("Mission queued locally");
+    try {
+      await writeSnapshot(next);
+      setSnapshot(next);
+      setMission("");
+      setMessage("Mission queued locally");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to save mission; retry",
+      );
+    }
   }, [mission, snapshot]);
 
   const statusLabel = useMemo(
@@ -189,30 +215,120 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   content: { gap: 18, padding: 22, paddingBottom: 40 },
-  header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between" },
-  eyebrow: { color: "#72e6c5", fontSize: 11, fontWeight: "800", letterSpacing: 1.5 },
+  header: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  eyebrow: {
+    color: "#72e6c5",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+  },
   title: { color: "#f2f5ff", fontSize: 28, fontWeight: "800", marginTop: 5 },
-  status: { color: "#72e6c5", fontSize: 11, fontWeight: "800", letterSpacing: 1.2, marginTop: 8 },
-  hero: { backgroundColor: "#111b32", borderColor: "#243252", borderRadius: 22, borderWidth: 1, padding: 22 },
-  heroKicker: { color: "#ffbd74", fontSize: 11, fontWeight: "800", letterSpacing: 1.4 },
-  heroTitle: { color: "#ffffff", fontSize: 30, fontWeight: "800", marginTop: 10 },
+  status: {
+    color: "#72e6c5",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    marginTop: 8,
+  },
+  hero: {
+    backgroundColor: "#111b32",
+    borderColor: "#243252",
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 22,
+  },
+  heroKicker: {
+    color: "#ffbd74",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+  },
+  heroTitle: {
+    color: "#ffffff",
+    fontSize: 30,
+    fontWeight: "800",
+    marginTop: 10,
+  },
   heroCopy: { color: "#9eacc8", fontSize: 15, lineHeight: 22, marginTop: 10 },
   section: { color: "#e6ebfa", fontSize: 17, fontWeight: "800", marginTop: 4 },
-  sectionRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  sectionRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
   count: { color: "#72e6c5", fontSize: 14, fontWeight: "800" },
-  card: { backgroundColor: "#11182b", borderColor: "#202d4c", borderRadius: 18, borderWidth: 1, gap: 12, padding: 14 },
-  input: { backgroundColor: "#0a1123", borderColor: "#263657", borderRadius: 12, borderWidth: 1, color: "#f2f5ff", fontSize: 15, minHeight: 48, paddingHorizontal: 14, paddingVertical: 12 },
-  primary: { alignItems: "center", backgroundColor: "#72e6c5", borderRadius: 12, padding: 14 },
+  card: {
+    backgroundColor: "#11182b",
+    borderColor: "#202d4c",
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 12,
+    padding: 14,
+  },
+  input: {
+    backgroundColor: "#0a1123",
+    borderColor: "#263657",
+    borderRadius: 12,
+    borderWidth: 1,
+    color: "#f2f5ff",
+    fontSize: 15,
+    minHeight: 48,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  primary: {
+    alignItems: "center",
+    backgroundColor: "#72e6c5",
+    borderRadius: 12,
+    padding: 14,
+  },
   primaryText: { color: "#07151a", fontSize: 14, fontWeight: "800" },
-  secondary: { alignItems: "center", borderColor: "#72e6c5", borderRadius: 12, borderWidth: 1, padding: 13 },
+  secondary: {
+    alignItems: "center",
+    borderColor: "#72e6c5",
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 13,
+  },
   secondaryText: { color: "#72e6c5", fontSize: 14, fontWeight: "800" },
   message: { color: "#8392ae", fontSize: 12 },
-  empty: { borderColor: "#202d4c", borderRadius: 18, borderStyle: "dashed", borderWidth: 1, padding: 20 },
+  empty: {
+    borderColor: "#202d4c",
+    borderRadius: 18,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    padding: 20,
+  },
   emptyTitle: { color: "#e6ebfa", fontSize: 15, fontWeight: "800" },
   emptyCopy: { color: "#8392ae", fontSize: 13, lineHeight: 19, marginTop: 5 },
-  mission: { alignItems: "flex-start", backgroundColor: "#11182b", borderColor: "#202d4c", borderRadius: 16, borderWidth: 1, flexDirection: "row", gap: 12, padding: 15 },
-  missionDot: { backgroundColor: "#72e6c5", borderRadius: 8, height: 8, marginTop: 5, width: 8 },
+  mission: {
+    alignItems: "flex-start",
+    backgroundColor: "#11182b",
+    borderColor: "#202d4c",
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    padding: 15,
+  },
+  missionDot: {
+    backgroundColor: "#72e6c5",
+    borderRadius: 8,
+    height: 8,
+    marginTop: 5,
+    width: 8,
+  },
   missionBody: { flex: 1 },
   missionText: { color: "#e6ebfa", fontSize: 15, lineHeight: 21 },
-  missionMeta: { color: "#8392ae", fontSize: 10, fontWeight: "800", letterSpacing: 1, marginTop: 7 },
+  missionMeta: {
+    color: "#8392ae",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1,
+    marginTop: 7,
+  },
 });

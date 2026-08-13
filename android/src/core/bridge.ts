@@ -1,8 +1,12 @@
 import type { MobileSnapshot } from "./types";
 import { readBridgeToken } from "./storage";
+import { isConnectionProfile, isMission } from "./types";
 
 export class BridgeError extends Error {
-  constructor(message: string, readonly status?: number) {
+  constructor(
+    message: string,
+    readonly status?: number,
+  ) {
     super(message);
     this.name = "BridgeError";
   }
@@ -13,8 +17,18 @@ export async function bridgeRequest<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
-  const token = await readBridgeToken();
-  const response = await fetch(`${endpoint.replace(/\\/$/, "")}${path}`, {
+  const normalizedEndpoint = endpoint.replace(/\/$/, "");
+  const url = new URL(normalizedEndpoint);
+  if (
+    url.protocol !== "https:" &&
+    !["localhost", "127.0.0.1"].includes(url.hostname)
+  ) {
+    throw new BridgeError(
+      "Bridge endpoints must use HTTPS outside local development",
+    );
+  }
+  const token = await readBridgeToken(normalizedEndpoint);
+  const response = await fetch(`${normalizedEndpoint}${path}`, {
     ...init,
     headers: {
       Accept: "application/json",
@@ -36,13 +50,21 @@ export function normalizeBridgeSnapshot(value: unknown): MobileSnapshot {
   if (!value || typeof value !== "object")
     throw new BridgeError("Bridge returned an invalid snapshot");
   const snapshot = value as Partial<MobileSnapshot>;
+  if (
+    !Array.isArray(snapshot.missions) ||
+    !snapshot.missions.every(isMission) ||
+    !Array.isArray(snapshot.connections) ||
+    !snapshot.connections.every(isConnectionProfile)
+  ) {
+    throw new BridgeError("Bridge returned malformed snapshot items");
+  }
   return {
-    missions: Array.isArray(snapshot.missions) ? snapshot.missions : [],
-    connections: Array.isArray(snapshot.connections)
-      ? snapshot.connections
-      : [],
+    missions: snapshot.missions,
+    connections: snapshot.connections,
     pendingApprovals:
-      typeof snapshot.pendingApprovals === "number"
+      typeof snapshot.pendingApprovals === "number" &&
+      Number.isInteger(snapshot.pendingApprovals) &&
+      snapshot.pendingApprovals >= 0
         ? snapshot.pendingApprovals
         : 0,
     offline: false,
