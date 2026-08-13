@@ -9,6 +9,34 @@ export type DeviceProbe = {
   hasNpu?: unknown;
 };
 
+/**
+ * Read only the capability fields exposed by React Native's platform
+ * constants. Native modules can provide richer probes later; missing fields
+ * remain unknown instead of being guessed.
+ */
+export function platformDeviceProbe(
+  constants: Record<string, unknown> = {},
+): DeviceProbe {
+  return {
+    chipset:
+      typeof constants.Model === "string"
+        ? constants.Model
+        : typeof constants.model === "string"
+          ? constants.model
+          : undefined,
+    totalMemoryMb:
+      typeof constants.TotalMemory === "number"
+        ? constants.TotalMemory / (1024 * 1024)
+        : undefined,
+    hasVulkan:
+      typeof constants.hasVulkan === "boolean"
+        ? constants.hasVulkan
+        : undefined,
+    hasNpu:
+      typeof constants.hasNpu === "boolean" ? constants.hasNpu : undefined,
+  };
+}
+
 const thermalStates = new Set<DeviceProfile["thermalState"]>([
   "nominal",
   "fair",

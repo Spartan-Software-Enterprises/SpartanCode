@@ -29,7 +29,8 @@ export const licensedMobileModels: readonly MobileModel[] = [
 export function listCompatibleModels(profile: DeviceProfile = {}) {
   return licensedMobileModels.filter(
     (model) =>
-      (profile.totalMemoryMb ?? Number.MAX_SAFE_INTEGER) >= model.minimumMemoryMb &&
+      (profile.totalMemoryMb ?? Number.MAX_SAFE_INTEGER) >=
+        model.minimumMemoryMb &&
       (!model.requiresAccelerator || profile.hasAccelerator === true),
   );
 }

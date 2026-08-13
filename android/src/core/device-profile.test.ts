@@ -1,4 +1,8 @@
-import { deviceDiagnostics, normalizeDeviceProfile } from "./device-profile";
+import {
+  deviceDiagnostics,
+  normalizeDeviceProfile,
+  platformDeviceProbe,
+} from "./device-profile";
 
 describe("device capability normalization", () => {
   it("normalizes valid probes and derives accelerator availability", () => {
@@ -27,5 +31,22 @@ describe("device capability normalization", () => {
       "Thermal state limits heavy work; queue builds until cooler.",
       "No Vulkan/NPU accelerator was detected; remote execution is recommended.",
     ]);
+  });
+
+  it("maps platform constants without guessing missing capabilities", () => {
+    expect(
+      normalizeDeviceProfile(
+        platformDeviceProbe({
+          Model: "Test Tablet",
+          TotalMemory: 4 * 1024 ** 3,
+        }),
+      ),
+    ).toMatchObject({ chipset: "Test Tablet", totalMemoryMb: 4096 });
+    expect(platformDeviceProbe({})).toEqual({
+      chipset: undefined,
+      totalMemoryMb: undefined,
+      hasVulkan: undefined,
+      hasNpu: undefined,
+    });
   });
 });

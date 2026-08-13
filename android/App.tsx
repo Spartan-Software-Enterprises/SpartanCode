@@ -14,6 +14,7 @@ import {
   Text,
   TextInput,
   View,
+  Platform,
 } from "react-native";
 import {
   bridgeRequest,
@@ -46,6 +47,11 @@ import {
 import type { RemoteProvider } from "./src/core/remote-guidance";
 import { authorizeSecretAccess } from "./src/core/biometric";
 import { listExtensions } from "./src/core/extensions";
+import {
+  deviceDiagnostics,
+  normalizeDeviceProfile,
+  platformDeviceProbe,
+} from "./src/core/device-profile";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -71,6 +77,19 @@ export default function App() {
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
+  const deviceProfile = useMemo(
+    () =>
+      normalizeDeviceProfile(
+        platformDeviceProbe(
+          (Platform.constants ?? {}) as Record<string, unknown>,
+        ),
+      ),
+    [],
+  );
+  const deviceMessages = useMemo(
+    () => deviceDiagnostics(deviceProfile),
+    [deviceProfile],
+  );
 
   useSpeechRecognitionEvent("start", () => setRecognizing(true));
   useSpeechRecognitionEvent("end", () => setRecognizing(false));
@@ -445,6 +464,21 @@ export default function App() {
           <Text style={styles.message}>
             Android works offline; a bridge only adds optional remote execution.
           </Text>
+        </View>
+
+        <Text style={styles.section}>Device readiness</Text>
+        <View style={styles.card}>
+          <Text style={styles.message}>
+            {deviceProfile.chipset ?? "Hardware details unavailable"} ·{" "}
+            {deviceProfile.totalMemoryMb
+              ? `${Math.round(deviceProfile.totalMemoryMb)} MB RAM reported`
+              : "RAM probe unavailable"}
+          </Text>
+          {deviceMessages.map((diagnostic) => (
+            <Text style={styles.message} key={diagnostic}>
+              {diagnostic}
+            </Text>
+          ))}
         </View>
 
         <Text style={styles.section}>Offline extensions</Text>

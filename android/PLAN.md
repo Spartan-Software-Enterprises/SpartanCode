@@ -59,7 +59,9 @@ The download core resumes partial HTTPS transfers, verifies an optional SHA-256
 checksum before finalization, and supports deletion through an injected store.
 Device probes are normalized into safe memory, storage, thermal, chipset, and
 Vulkan/NPU fields with actionable diagnostics when native capability data is
-missing or constrained.
+missing or constrained. The command center now renders the available platform
+probe and diagnostics directly, while unknown values remain explicitly
+unknown until a richer native probe is available.
 Voice dictation now uses the Expo speech-recognition native module with
 explicit microphone/speech permission handling, transcript insertion into the
 mission field, and a visible unavailable/error state.

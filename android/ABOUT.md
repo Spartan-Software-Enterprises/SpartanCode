@@ -32,7 +32,8 @@ minutes.
 
 Native Android builds, artifact and approval workflows, licensed model
 selection, storage recovery, biometric unlock, offline extension metadata,
-audit rendering, and a guarded signed-release workflow are now implemented;
+audit rendering, device-readiness diagnostics, and a guarded signed-release
+workflow are now implemented;
 physical-device accessibility and production signing still require the release
 environment described in [`PLAN.md`](PLAN.md). The app remains
 standalone-first: a desktop checkout or MCP Bridge is never required for local
