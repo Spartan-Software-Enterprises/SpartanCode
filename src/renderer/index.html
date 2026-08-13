@@ -1366,6 +1366,33 @@
             <option value="mcp-bridge">MCP Bridge</option>
           </select>
         </div>
+        <div class="setting-group">
+          <label for="remoteProvider">Remote server planning</label>
+          <select id="remoteProvider"></select>
+          <select id="remotePlan" style="margin-top: 8px"></select>
+          <button type="button" class="context-button" id="estimateRemoteCost">
+            Estimate monthly cost
+          </button>
+          <small
+            id="remoteCostStatus"
+            style="display: block; color: var(--muted)"
+          ></small>
+        </div>
+        <div class="setting-group">
+          <label for="routerMethod">Home-server connection guidance</label>
+          <select id="routerMethod">
+            <option value="tailscale">Tailscale · private network</option>
+            <option value="upnp">UPnP · router forwarding</option>
+            <option value="ngrok">ngrok · temporary HTTPS tunnel</option>
+          </select>
+          <button type="button" class="context-button" id="showRouterGuidance">
+            Show connection steps
+          </button>
+          <small
+            id="routerStatus"
+            style="display: block; color: var(--muted)"
+          ></small>
+        </div>
         <div class="settings-actions">
           <button type="button" class="settings-close" id="closeSettings">
             Cancel</button
@@ -1665,35 +1692,53 @@
               window.spartanCode.listModels({ commercialOnly: true }),
               window.spartanCode.listConnections(),
               window.spartanCode.listCachedModels(),
-            ]).then(([settings, models, connections, cachedModels]) => {
-              modelSelect.innerHTML = models
-                .map(
-                  (model) =>
-                    `<option value="${model.id}">${model.id} · ${model.license}${cachedModels.some((cached) => cached.id === model.id) ? " · ready" : ""}</option>`,
+              window.spartanCode.listRemoteProviders(),
+            ]).then(
+              ([settings, models, connections, cachedModels, providers]) => {
+                modelSelect.innerHTML = models
+                  .map(
+                    (model) =>
+                      `<option value="${model.id}">${model.id} · ${model.license}${cachedModels.some((cached) => cached.id === model.id) ? " · ready" : ""}</option>`,
+                  )
+                  .join("");
+                modelSelect.value = settings.model;
+                quantizationSelect.value = settings.quantization || "Q4_K_M";
+                protocolSelect.value = settings.protocol;
+                document.getElementById("executionModeSelect").value =
+                  settings.executionMode || "guided";
+                voiceToggle.checked = Boolean(settings.voiceEnabled);
+                const connection = connections?.[0];
+                document.getElementById("connectionName").value =
+                  connection?.name || "";
+                document.getElementById("connectionHost").value =
+                  connection?.host || "";
+                document.getElementById("connectionUsername").value =
+                  connection?.username || "";
+                document.getElementById("connectionTransport").value =
+                  connection?.transport || "ssh";
+                const providerSelect =
+                  document.getElementById("remoteProvider");
+                providerSelect.innerHTML = providers
+                  .map(
+                    (provider) =>
+                      `<option value="${provider.id}">${provider.label}</option>`,
+                  )
+                  .join("");
+                const plans = providers[0]?.plans || [];
+                document.getElementById("remotePlan").innerHTML = plans
+                  .map(
+                    (plan) =>
+                      `<option value="${plan.id}">${plan.label}</option>`,
+                  )
+                  .join("");
+                modelStatus.textContent = cachedModels.some(
+                  (cached) => cached.id === settings.model,
                 )
-                .join("");
-              modelSelect.value = settings.model;
-              quantizationSelect.value = settings.quantization || "Q4_K_M";
-              protocolSelect.value = settings.protocol;
-              document.getElementById("executionModeSelect").value =
-                settings.executionMode || "guided";
-              voiceToggle.checked = Boolean(settings.voiceEnabled);
-              const connection = connections?.[0];
-              document.getElementById("connectionName").value =
-                connection?.name || "";
-              document.getElementById("connectionHost").value =
-                connection?.host || "";
-              document.getElementById("connectionUsername").value =
-                connection?.username || "";
-              document.getElementById("connectionTransport").value =
-                connection?.transport || "ssh";
-              modelStatus.textContent = cachedModels.some(
-                (cached) => cached.id === settings.model,
-              )
-                ? "Model metadata is ready for the local runtime."
-                : "Model is not prepared on this device yet.";
-              settingsModal.classList.add("open");
-            });
+                  ? "Model metadata is ready for the local runtime."
+                  : "Model is not prepared on this device yet.";
+                settingsModal.classList.add("open");
+              },
+            );
           } else if (view === "projects" && window.spartanCode) {
             window.spartanCode
               .getGitStatus()
@@ -1894,6 +1939,53 @@
             prepareModelButton.disabled = false;
           });
       });
+      document
+        .getElementById("remoteProvider")
+        .addEventListener("change", () => {
+          window.spartanCode?.listRemoteProviders().then((providers) => {
+            const provider = providers.find(
+              (item) =>
+                item.id === document.getElementById("remoteProvider").value,
+            );
+            document.getElementById("remotePlan").innerHTML = (
+              provider?.plans || []
+            )
+              .map(
+                (plan) => `<option value="${plan.id}">${plan.label}</option>`,
+              )
+              .join("");
+          });
+        });
+      document
+        .getElementById("estimateRemoteCost")
+        .addEventListener("click", () => {
+          const provider = document.getElementById("remoteProvider").value;
+          const plan = document.getElementById("remotePlan").value;
+          window.spartanCode
+            ?.estimateRemoteCost(provider, plan)
+            .then((estimate) => {
+              document.getElementById("remoteCostStatus").textContent =
+                `Estimated ${estimate.estimatedMonthly.toFixed(2)} / month · ${estimate.memoryGb} GB RAM. ${estimate.disclaimer}`;
+            })
+            .catch((error) => {
+              document.getElementById("remoteCostStatus").textContent =
+                error.message;
+            });
+        });
+      document
+        .getElementById("showRouterGuidance")
+        .addEventListener("click", () => {
+          window.spartanCode
+            ?.getRouterGuidance(document.getElementById("routerMethod").value)
+            .then((guidance) => {
+              document.getElementById("routerStatus").textContent =
+                `${guidance.label}: ${guidance.steps.join(" ")}`;
+            })
+            .catch((error) => {
+              document.getElementById("routerStatus").textContent =
+                error.message;
+            });
+        });
       document.getElementById("clearHistory").addEventListener("click", () => {
         if (window.spartanCode)
           window.spartanCode

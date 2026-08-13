@@ -42,6 +42,10 @@ retains planning missions when a sync response arrives, retries transient
 bridge failures, expires stored tokens, labels stale snapshots, accepts QR
 pairing payloads, and supports deletion of all stored bridge secrets.
 
+Snapshot recovery now quarantines malformed serialized data before clearing it,
+so a cold start can recover without silently reusing corrupt state. The Android
+test suite covers this recovery path alongside the durable idempotent queue.
+
 The Android shell bundles Researcher, Implementer, Verifier, and Sync Guardian
 roles. They use the local execution model when no bridge is connected; a bridge
 can optionally provide remote execution without becoming a mobile dependency.

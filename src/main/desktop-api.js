@@ -16,6 +16,12 @@ const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 const { createModelCache } = require("./model-cache");
 const { validateRemoteConfig } = require("./remote-connection");
 const { loadCustomAgents } = require("./custom-agents");
+const {
+  estimateServerCost,
+  getRouterGuidance,
+  listServerProviders,
+  listServerTemplates,
+} = require("./remote-guidance");
 
 function registerDesktopApi({ store, window, runMission, modelCache }) {
   const voiceService = createVoiceService();
@@ -108,6 +114,14 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
     store.updateSettings(update),
   );
   ipcMain.handle("connections:list", () => store.snapshot().connections);
+  ipcMain.handle("remote:providers", () => listServerProviders());
+  ipcMain.handle("remote:templates", () => listServerTemplates());
+  ipcMain.handle("remote:estimate-cost", (_event, provider, plan, hours) =>
+    estimateServerCost(provider, plan, hours),
+  );
+  ipcMain.handle("remote:router-guidance", (_event, method) =>
+    getRouterGuidance(method),
+  );
   ipcMain.handle("connections:add", (_event, profile) => {
     if (
       !profile ||

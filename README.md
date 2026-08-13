@@ -103,3 +103,13 @@ Android bundles the same core roles and remains fully usable without the desktop
 application, an MCP Bridge, or network access. A bridge is an optional route
 for remote execution and synchronization only; local planning, queueing,
 policy-visible approvals, and review do not depend on it.
+
+### Remote planning
+
+Desktop settings provide non-destructive planning tools for DigitalOcean,
+Linode, Vultr, Hetzner, and AWS server templates. Estimates show the assumed
+hourly rate and exclusions before a server is created. Home-server guidance
+covers private Tailscale access, temporary ngrok tunnels, and UPnP forwarding
+with explicit exposure warnings. SpartanCode does not create provider
+accounts, open router ports, or execute setup scripts without a separate,
+user-directed integration.

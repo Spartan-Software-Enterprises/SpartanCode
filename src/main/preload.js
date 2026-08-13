@@ -18,6 +18,12 @@ contextBridge.exposeInMainWorld("spartanCode", {
   gitStage: () => ipcRenderer.invoke("git:stage"),
   gitCommit: (message) => ipcRenderer.invoke("git:commit", message),
   listConnections: () => ipcRenderer.invoke("connections:list"),
+  listRemoteProviders: () => ipcRenderer.invoke("remote:providers"),
+  listServerTemplates: () => ipcRenderer.invoke("remote:templates"),
+  estimateRemoteCost: (provider, plan, hours) =>
+    ipcRenderer.invoke("remote:estimate-cost", provider, plan, hours),
+  getRouterGuidance: (method) =>
+    ipcRenderer.invoke("remote:router-guidance", method),
   addConnection: (profile) => ipcRenderer.invoke("connections:add", profile),
   validateConnection: (profile) =>
     ipcRenderer.invoke("connections:validate", profile),
