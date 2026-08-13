@@ -62,6 +62,15 @@ portable `ssh2` runtime.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
 
+## Custom agents
+
+Workspace-scoped Antigravity-compatible agents live under
+`.agents/agents/<name>/agent.md`. SpartanCode discovers their YAML frontmatter,
+scopes their declared tools and execution policy, and includes the safe public
+metadata in mission plans. The repository includes Researcher, Implementer,
+Verifier, and Sync Guardian roles. Invalid or oversized definitions are ignored
+without blocking application startup.
+
 ## Android
 
 The Android companion follows the Android-first phases in the authoritative
@@ -81,3 +90,8 @@ command-center shell and queued a mission through the visible controls.
 
 The current Android interface description and verification record are in
 [`android/ABOUT.md`](android/ABOUT.md).
+
+Android bundles the same core roles and remains fully usable without the desktop
+application, an MCP Bridge, or network access. A bridge is an optional route
+for remote execution and synchronization only; local planning, queueing,
+policy-visible approvals, and review do not depend on it.

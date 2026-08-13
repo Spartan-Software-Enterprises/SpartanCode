@@ -613,6 +613,16 @@
  diagnostics for malformed Node manifests. Thirty automated tests pass.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 32
+ Workspace-scoped Antigravity-compatible custom agents are now discovered from
+ .agents/agents agent.md definitions with bounded metadata, safe policy defaults,
+ and invalid-definition isolation. Researcher, Implementer, Verifier, and Sync
+ Guardian roles are included. Android bundles equivalent roles so Android-only
+ users remain fully functional without the desktop application, MCP Bridge, or
+ network access. The GitHub origin/main branch remains the synchronization
+ source of truth.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
