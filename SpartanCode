@@ -612,3 +612,8 @@
  - Agent and Artifact navigation now opens their actual command-center surfaces
  - Artifact rail buttons are keyboard-accessible and visually interactive
  - Renderer remains script-parseable with 27 automated tests passing
+
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 19
+ - Saved remote profiles are reloaded into the settings surface
+ - Remote profile creation is validated in the IPC boundary, not only in the renderer
+ - Credentials remain excluded from persisted connection records

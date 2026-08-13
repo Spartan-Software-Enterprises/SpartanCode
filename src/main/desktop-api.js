@@ -89,6 +89,11 @@ function registerDesktopApi({ store, window, runMission, modelCache }) {
       typeof profile.host !== "string"
     )
       throw new Error("Connection name and host are required");
+    const validation = validateRemoteConfig(profile);
+    if (!validation.valid)
+      throw new Error(
+        `Missing connection fields: ${validation.missing.join(", ")}`,
+      );
     return store.addConnection({
       name: profile.name.trim(),
       host: profile.host.trim(),

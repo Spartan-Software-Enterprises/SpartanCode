@@ -547,6 +547,11 @@
  artifact entries are keyboard-accessible interactive controls.
 --------------------------------------------------------------------------------
 
+ DESKTOP IMPLEMENTATION STATUS — MILESTONE 19
+ Saved remote profiles now repopulate settings, and the IPC connection boundary
+ validates required identity before persistence while continuing to exclude secrets.
+--------------------------------------------------------------------------------
+
 --------------------------------------------------------------------------------
  DESKTOP IMPLEMENTATION STATUS — MILESTONE 1
 --------------------------------------------------------------------------------
