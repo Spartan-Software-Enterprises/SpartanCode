@@ -11,7 +11,11 @@ that ran every 15 minutes after an eight-hour boot window and called
 replacement host. An instance stop/reboot is recoverable; termination removes
 the instance and its instance-role credentials.
 
-After the replacement host is reachable, run as `ubuntu`:
+If a replacement host is created with a root filesystem that already fills its
+larger EBS volume, no resize step is needed. The bootstrap defaults to
+preserving that layout and does not delete caches, SDKs, build outputs, or
+project data. Only if the new AMI leaves the root partition unexpanded, run as
+`ubuntu`:
 
 ```bash
 sudo growpart /dev/sda 1

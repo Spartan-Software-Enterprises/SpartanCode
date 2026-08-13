@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-sudo growpart /dev/sda 1
-sudo xfs_growfs / || sudo resize2fs /dev/sda1
+if [ "${SPARTANCODE_RESIZE_ROOT:-0}" = "1" ]; then
+  sudo growpart /dev/sda 1
+  sudo xfs_growfs / || sudo resize2fs /dev/sda1
+fi
 
 sudo systemctl disable --now spartancode-auto-terminate.timer spartancode-auto-terminate.service 2>/dev/null || true
 sudo rm -f /etc/systemd/system/spartancode-auto-terminate.timer \
