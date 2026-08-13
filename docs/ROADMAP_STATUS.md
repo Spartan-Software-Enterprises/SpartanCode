@@ -30,6 +30,9 @@ behavior and a corresponding automated or documented verification path.
   MLC Chat, PocketPal, and WebLLM. Installed runtimes are invoked only when
   they expose the explicit `generate` contract; unavailable runtimes report a
   typed result instead of being presented as ready.
+- Reproducible release-evidence generation now records the Git commit,
+  SHA-256 hashes for scanned artifacts, and a lockfile-derived third-party
+  component inventory for desktop and Android release workflows.
 
 ## Implemented but environment-dependent
 
@@ -49,8 +52,8 @@ behavior and a corresponding automated or documented verification path.
   verification of large text/reduced motion),
   low-storage/interrupted-download/process-restart acceptance, and tablet
   hardware validation.
-- Signed production AAB/APK, generated license notices, privacy/terms review,
-  and release artifact checksums.
+- Signed production AAB/APK, legal/privacy review, and release-environment
+  publication of the generated license inventory and artifact checksums.
 - Long-term collaboration, cross-modal gesture workflows, enterprise
   governance, and a mature external plugin marketplace.
 

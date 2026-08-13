@@ -32,4 +32,7 @@ EOF
 
 cd "$native_dir"
 ./gradlew bundleRelease assembleRelease
+node ../../scripts/release-manifest.js \
+  --output "$native_dir/app/build/release-evidence" \
+  --scan "$native_dir/app/build/outputs"
 echo "Release artifacts are under $native_dir/app/build/outputs/"

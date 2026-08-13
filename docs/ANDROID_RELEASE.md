@@ -15,5 +15,16 @@ export SPARTANCODE_KEY_PASSWORD='from-your-secret-store'
 
 The script validates the absolute keystore path, generates the native Expo
 project, writes signing properties with restrictive permissions, builds both
-the release AAB and APK, and removes the temporary properties file on exit.
-The keystore itself remains outside the repository.
+the release AAB and APK, generates `release-manifest.json` and
+`THIRD_PARTY_NOTICES.txt` with SHA-256 artifact hashes and lockfile component
+metadata, and removes the temporary properties file on exit. The keystore
+itself remains outside the repository.
+
+Desktop release evidence can be generated after packaging with:
+
+```bash
+npm run release:manifest
+```
+
+The generated files are ignored build outputs and must be attached to the
+release alongside the signed artifacts.
