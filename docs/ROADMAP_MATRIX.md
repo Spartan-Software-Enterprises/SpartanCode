@@ -42,7 +42,7 @@ should be presented as complete.
 |  31 | Emotion-aware interaction                    | Partial     | Explicit user-selected interaction signals and bounded style guidance are implemented; camera/voice/biometric emotion inference is intentionally disabled and physical UX acceptance remains open |
 |  32 | Multi-user collaboration                     | Partial     | Revisioned local/bridge collaboration, desktop controls, and standalone Android event append with idempotent retry publication are implemented; physical cross-device acceptance and deployment lifecycle remain open |
 |  33 | AR/VR integration                            | Partial     | Typed WebXR capability probing and explicit user-gesture session requests are implemented; physical headset/browser support and immersive product UX remain open |
-|  34 | Mature external plugin ecosystem             | Partial     | Registry/marketplace safety foundation exists; community ecosystem is not established                                                                                                                                 |
+|  34 | Mature external plugin ecosystem             | Partial     | Registry/marketplace safety foundation and dependency-free author manifest validation now exist; community publishers, distribution, and governance are not established |
 |  35 | Enterprise SSO/audit/compliance              | Partial     | OIDC/SSO, scopes, audit export, compliance docs, and user-authorized Codespaces API boundaries exist; production administration/legal review remain open                                                               |
 
 The authoritative release and environment gates are maintained in
