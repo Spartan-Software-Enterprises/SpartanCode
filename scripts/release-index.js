@@ -93,8 +93,7 @@ function visualGate(visualResult) {
 }
 
 function kvmGate(kvmResult) {
-  if (!kvmResult)
-    return gate("SKIP", "KVM emulator evidence was not supplied");
+  if (!kvmResult) return gate("SKIP", "KVM emulator evidence was not supplied");
   if (kvmResult.commit !== commit())
     return gate("FAIL", "KVM emulator evidence is tied to a different commit");
   if (kvmResult.status !== "PASS")
@@ -111,14 +110,41 @@ function kvmGate(kvmResult) {
   );
 }
 
-function buildIndex({ verification, visualResult, kvmResult, target }) {
+function desktopGate(desktopResult) {
+  if (!desktopResult)
+    return gate("SKIP", "Desktop baseline evidence was not supplied");
+  if (desktopResult.commit !== commit())
+    return gate(
+      "FAIL",
+      "Desktop baseline evidence is tied to a different commit",
+    );
+  if (
+    desktopResult.status !== "PASS" ||
+    desktopResult.formatCheck !== "PASS" ||
+    !Number.isInteger(desktopResult.testCount) ||
+    desktopResult.passCount !== desktopResult.testCount ||
+    desktopResult.failCount !== 0
+  )
+    return gate("FAIL", "Desktop baseline evidence did not pass");
+  return gate("PASS", "Desktop syntax, tests, and formatting checks passed", [
+    `desktop-tests:${desktopResult.passCount}`,
+  ]);
+}
+
+function buildIndex({
+  verification,
+  visualResult,
+  kvmResult,
+  desktopResult,
+  target,
+}) {
   const android = androidGate(verification);
   const checks = {
     "Canonical source": gate(
       "SKIP",
       "Run scripts/verify-sync.sh for synchronized source evidence",
     ),
-    "Desktop baseline": gate("SKIP", "Run npm test in the release environment"),
+    "Desktop baseline": desktopGate(desktopResult),
     "Desktop visual smoke": visualGate(visualResult),
     "Android baseline": android,
     "KVM emulator": kvmGate(kvmResult),
@@ -158,6 +184,7 @@ function main(argv = process.argv.slice(2)) {
   const verificationPath = argument(argv, "--android-verification", null);
   const visualPath = argument(argv, "--visual-result", null);
   const kvmPath = argument(argv, "--kvm-result", null);
+  const desktopPath = argument(argv, "--desktop-baseline", null);
   const output = path.resolve(
     argument(argv, "--output", path.join(root, "dist", "release-index.json")),
   );
@@ -174,7 +201,16 @@ function main(argv = process.argv.slice(2)) {
   const kvmResult = kvmPath
     ? JSON.parse(fs.readFileSync(path.resolve(kvmPath), "utf8"))
     : null;
-  const index = buildIndex({ verification, visualResult, kvmResult, target });
+  const desktopResult = desktopPath
+    ? JSON.parse(fs.readFileSync(path.resolve(desktopPath), "utf8"))
+    : null;
+  const index = buildIndex({
+    verification,
+    visualResult,
+    kvmResult,
+    desktopResult,
+    target,
+  });
   fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(output, `${JSON.stringify(index, null, 2)}\n`);
   console.log(
@@ -189,4 +225,11 @@ function main(argv = process.argv.slice(2)) {
 
 if (require.main === module) main();
 
-module.exports = { CHECKER_VERSION, GATES, buildIndex, kvmGate, main };
+module.exports = {
+  CHECKER_VERSION,
+  GATES,
+  buildIndex,
+  desktopGate,
+  kvmGate,
+  main,
+};

@@ -14,16 +14,16 @@ Create a clean evidence directory outside the repository, for example
 `release-evidence/<commit>/`. Use stable names and record a SHA-256 for every
 artifact that is retained. The minimum release index should contain:
 
-| Evidence                    | Required fields                                                                            |
-| --------------------------- | ------------------------------------------------------------------------------------------ |
-| `release-index.json`        | release commit, UTC timestamp, target, checker version, status for every gate              |
+| Evidence                    | Required fields                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `release-index.json`        | release commit, UTC timestamp, target, checker version, status for every gate                |
 | `android-verification.json` | exact release commit, static Android checks, environment checks, and verified summary counts |
-| `desktop-visual/`           | test command, display configuration, screenshots, console/error summary                    |
-| `android-emulator/`         | AVD/API, `/dev/kvm` check, APK hash, install/launch result, screenshot/log hashes          |
-| `android-physical/`         | device model, Android version, test scope, consent confirmation, sanitized evidence hashes |
-| `signed-artifacts/`         | AAB/APK names, byte counts, SHA-256, signing-certificate fingerprint                       |
-| `dependency-inventory.json` | lockfile revision, production dependency inventory, generation timestamp                   |
-| `roadmap-audit.txt`         | exact command, exact commit, complete matrix output                                        |
+| `desktop-visual/`           | test command, display configuration, screenshots, console/error summary                      |
+| `android-emulator/`         | AVD/API, `/dev/kvm` check, APK hash, install/launch result, screenshot/log hashes            |
+| `android-physical/`         | device model, Android version, test scope, consent confirmation, sanitized evidence hashes   |
+| `signed-artifacts/`         | AAB/APK names, byte counts, SHA-256, signing-certificate fingerprint                         |
+| `dependency-inventory.json` | lockfile revision, production dependency inventory, generation timestamp                     |
+| `roadmap-audit.txt`         | exact command, exact commit, complete matrix output                                          |
 
 Do not place private keys, Proton exports, AWS credentials, ADB private data,
 raw production data, or unsanitized logcat output in the evidence directory.
@@ -102,6 +102,7 @@ Generate the machine-readable index from the current commit with:
 ```sh
 node scripts/release-index.js \
   --android-verification dist/android-verification.json \
+  --desktop-baseline dist/desktop-baseline.json \
   --visual-result release-evidence/desktop-visual/result.json \
   --kvm-result release-evidence/android-emulator/result.json \
   --target "SpartanCode beta" \
@@ -111,6 +112,9 @@ node scripts/release-index.js \
 Pass `SPARTANCODE_KVM_RESULT=release-evidence/android-emulator/result.json`
 to `scripts/android-kvm-smoke.sh` to emit commit-bound emulator evidence after
 the APK installs, launches, and produces its screenshot.
+
+Run `npm run desktop:evidence -- --output dist/desktop-baseline.json` to emit
+redacted commit-bound desktop test and formatting evidence.
 
 The generator fails closed on stale Android evidence and leaves unavailable
 physical, signing, emulator, visual, synchronization, and product-owner gates

@@ -83,6 +83,26 @@ test("release index accepts commit-bound KVM emulator evidence", () => {
   ]);
 });
 
+test("release index accepts commit-bound desktop baseline evidence", () => {
+  const commit = execFileSync("git", ["rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+  const index = buildIndex({
+    desktopResult: {
+      status: "PASS",
+      commit,
+      testCount: 208,
+      passCount: 208,
+      failCount: 0,
+      formatCheck: "PASS",
+    },
+    target: "SpartanCode beta",
+  });
+  const desktop = index.gates.find((gate) => gate.name === "Desktop baseline");
+  assert.equal(desktop.status, "PASS");
+  assert.deepEqual(desktop.evidence, ["desktop-tests:208"]);
+});
+
 test("release index fails closed when Android evidence belongs to another commit", () => {
   const index = buildIndex({
     target: "test",
