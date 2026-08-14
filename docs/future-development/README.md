@@ -7,9 +7,9 @@ not part of the current SpartanCode implementation scope.
 
 The complete documentation-only plan is [GAME_DEVELOPMENT_EXPANSION.md](../GAME_DEVELOPMENT_EXPANSION.md).
 It defines premium native-engine PC production first and authorized console
-production next as the quality target. Browser/2D tooling and Android are
-limited to optional planning, companion, and validation surfaces—not game
-release targets. It also covers the front-end integration of major engines and
+production next as the quality target. Browser/2D tooling is limited to
+optional planning and validation—not the native game quality target. It also
+covers the front-end integration of major engines and
 creation software, agent roles under Leo, asset and plugin safety, testing,
 release gates, and phased decision points.
 

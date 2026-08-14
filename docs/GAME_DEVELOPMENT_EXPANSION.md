@@ -19,14 +19,13 @@ console production.
 The eventual game workspace should let a user create, edit, preview, test,
 package, and release a premium game through a workstation, build server, or
 authorized devkit workflow. Desktop and server tooling are primary production
-surfaces; Android and other mobile clients are optional companion surfaces for
-planning, review, monitoring, and bounded project authoring. GitHub, Codespaces,
+surfaces. GitHub, Codespaces,
 and remote build workers are integrated production backends where appropriate.
 
 A future user should be able to:
 
 - create a blank or template game project from the desktop or another supported
-  front end, with optional mobile project initiation;
+  front end;
 - describe gameplay goals to Leo and receive a bounded implementation plan;
 - edit code, scenes, configuration, dialogue, and assets from the integrated
   desktop/workstation front end;
@@ -46,10 +45,9 @@ editor, build pipeline, licensing, and platform authority.
 
 ## Initial scope and non-goals
 
-The game expansion is not intended to make low-end or inexpensive 2D or
-Android games. Android game production is not an initial target. Its product
-target is premium, high-fidelity PC production first, followed by authorized
-console production.
+The game expansion targets premium, high-fidelity PC production first,
+followed by authorized console production. Low-end game production is outside
+this expansion's quality target.
 Browser/2D tooling may be used only as an optional planning, simulation, UI,
 or rapid-validation surface; it is not the definition of the game product,
 its quality bar, or its release target. The roadmap must build toward native
@@ -104,9 +102,9 @@ Primary target profiles:
 
 Optional supporting surfaces—not the game quality target—include:
 
-- desktop or mobile browser previews;
+- desktop browser previews;
 - Progressive Web App previews;
-- Android/iOS companion controls and project review only; and
+- optional project review and monitoring surfaces; and
 - server-hosted previews.
 
 The high-end production track targets:
@@ -125,8 +123,7 @@ to a generic desktop binary. Each console target requires its own capability
 declaration, authorized SDK/toolchain, devkit or approved test environment,
 platform security rules, and certification checklist.
 
-Authoring device and release target are independent. A mobile user may review
-or initiate a Windows, Linux, or console project, but premium target builds
+Authoring surface and release target are independent. Premium target builds
 require the appropriate workstation, build worker, SDK, devkit, and engine
 toolchain. Unsupported targets must be shown as unavailable rather than
 silently skipped or represented as verified.
@@ -331,24 +328,22 @@ serialize engine scenes, renderer objects, DOM nodes, WebAudio nodes, physics
 internals, or platform handles. Replay debugging should record deterministic
 seeds and commands rather than screenshots or renderer state.
 
-## Mobile-only authoring workflow
+## Workstation-first production workflow
 
 Project creation should expose genre, orientation, target platforms, input
 modes, art direction, resolution/scaling, offline mode, and optional remote
-build destination. Initial templates should include platformer, top-down,
-twin-stick/action, arcade shooter, puzzle/grid, turn-based tactics,
-visual-novel/dialogue, and blank Phaser projects.
+build destination. The primary surface is a desktop/workstation project hub
+with engine/editor launch, scene and asset handoff, project-owned automation,
+logs, profiling, build graphs, test results, and release evidence. Initial
+templates must be engine- and target-aware rather than tied to a browser
+runtime.
 
-Mobile surfaces should eventually include file/project navigation, a mobile
-code editor, scene/entity inspection, JSON/configuration editing, asset import
-and preview, prompt-driven changes, undo/redo, local autosave, preview/build
-controls, logs, test results, and touch-friendly game testing.
-
-The optional mobile path must cover touch controls, orientation, safe areas,
-viewport scaling, constrained performance, audio interruption,
-background/foreground transitions, offline behavior, and installable PWA
-behavior. Keyboard, mouse, controller, and larger-screen testing may use an
-optional desktop or remote environment.
+The front end must support high-end PC workflows: source and asset navigation,
+engine-specific project inspection, configuration editing, approved editor
+scripts, DCC export jobs, dependency graphs, local and remote builds,
+performance captures, crash/symbol review, collaboration, and immutable
+artifact promotion. Any companion client is optional and cannot be the
+acceptance environment for premium PC quality gates.
 
 ## Agent model
 
@@ -359,15 +354,16 @@ readiness. Future bounded specialist roles are:
 | --- | --- |
 | Game Designer | Fantasy, core loop, progression, difficulty, failure states |
 | Game Architect | Project schema, engine/target adapters, boundaries |
-| Phaser Specialist | Scenes, entities, input, physics, runtime integration |
-| 3D Specialist | Three.js/R3F scene and asset integration when selected |
+| Engine Adapter Specialists | Unreal, Unity, O3DE, Godot, CRYENGINE, GameMaker, and future engines |
+| DCC/Tools Integration Agent | Blender, Maya, 3ds Max, Houdini, Substance, audio, and middleware workflows |
+| 3D/Rendering Specialist | Native engine rendering, shaders, materials, lighting, profiling, and asset integration |
 | Simulation Engineer | Deterministic rules, saves, replay, migration |
-| UI/UX Agent | HUD, menus, touch controls, accessibility |
-| Technical Artist | Sprites, atlases, tilemaps, animation metadata, optimization |
+| UI/UX Agent | Front-end project hub, editor integration, menus, input, accessibility |
+| Technical Artist | Models, materials, animation, LODs, shader metadata, optimization |
 | Audio Agent | Music, effects, mixing, captions, focus behavior |
-| Build Agent | Web, PWA, Android, desktop, and target packaging |
-| QA Agent | Unit, integration, device, browser, and visual tests |
-| Performance Agent | Frame time, memory, asset size, battery, startup |
+| Build Agent | PC, authorized console, engine, DCC, and target packaging |
+| QA Agent | Engine, integration, hardware, visual, performance, and certification tests |
+| Performance Agent | Frame time, GPU, memory, streaming, shader, asset, and startup budgets |
 | Security/License Agent | Plugin, asset, license, privacy, and supply-chain review |
 | Release Agent | Versioning, manifests, checksums, signing, release evidence |
 | Documentation Agent | Tutorials, controls, attribution, troubleshooting |
@@ -388,7 +384,7 @@ compression. Future 3D delivery defaults to GLB/glTF 2.0 with explicit LOD,
 mesh compression, texture compression, and collision-proxy metadata.
 
 Audio should use data-driven music, ambience, effects, and voice buses with
-mute/volume controls, mobile focus handling, browser unlock behavior,
+mute/volume controls, focus handling, browser unlock behavior,
 captions, graceful unavailable states, and test-safe playback defaults.
 
 Imported scripts and plugins are untrusted. Archives require traversal,
@@ -406,38 +402,44 @@ non-redistributable assets, or incompatible plugin/model terms.
 ## Dev Containers and build profiles
 
 Future game-specific Dev Container presets should extend SpartanCode's current
-user-project generator with profiles such as `game-2d-phaser`, `game-3d-three`,
-`game-3d-react-three-fiber`, `game-web-full`, `game-mobile-android`, and
-`game-cross-platform`. Containers remain optional and must not be required for
-Android companion authoring and review.
+user-project generator with profiles such as `game-unreal-pc`, `game-unity-pc`,
+`game-o3de-pc`, `game-godot-pc`, `game-cryengine-pc`,
+`game-dcc-pipeline`, `game-audio-middleware`, `game-console-authorized`, and
+`game-cross-engine`. Containers remain optional; licensed engines, DCCs, SDKs,
+devkits, and vendor tools remain authoritative and may require controlled
+native hosts.
 
-Common optional capabilities include Node LTS, TypeScript/Vite, Playwright,
-Chromium, image/audio inspection, Git LFS guidance, Android SDK/emulator,
-Blender CLI, FFmpeg, Xvfb, non-root development, forwarded preview ports, and
-lockfile-based installation. Credentials must never be baked into images.
+Common optional capabilities include engine CLIs, vendor editor scripting,
+GPU profilers, DCC batch tools, Playwright for the front end, image/audio
+inspection, Git LFS/Perforce guidance, Blender/Houdini/Substance tooling,
+FFmpeg, non-root development, forwarded preview ports, and lockfile-based
+installation. Credentials must never be baked into images.
 
 Build profiles should declare target OS/architecture, required toolchain,
 environment inputs, input directories, output patterns, signing requirements,
 verification commands, unsupported-host behavior, and reproducibility metadata.
-Initial profiles are `web`, `web-pwa`, `desktop-windows`, `desktop-macos`,
-`desktop-linux`, `android`, `ios`, and `custom`.
+Initial profiles are `pc-windows-high-fidelity`, `pc-linux-high-fidelity`,
+`pc-macos-high-fidelity`, `engine-custom`, `console-authorized`,
+`dcc-pipeline`, and `custom`.
 
 ## Preview, testing, and release evidence
 
-The built-in browser should eventually provide live reload where safe, logs,
-device viewports, touch/orientation simulation, network throttling, offline
-mode, FPS/memory indicators, pause/resume, screenshots, reproducible URLs, and
-source-linked error overlays. It must distinguish development-server,
-game-runtime, asset-loading, build, and browser-compatibility failures.
+The built-in preview surface should eventually provide engine/project launch,
+logs, performance indicators, pause/resume, screenshots, reproducible preview
+references, and source-linked error overlays. Browser previews may support
+web-target projects, but they are not the quality gate for native high-end PC
+games. The front end must distinguish editor, game-runtime, asset-loading,
+build, platform, and hardware failures.
 
 Required test layers:
 
 1. deterministic simulation unit tests;
 2. scene, asset, save/load, pause, and audio integration tests;
 3. browser launch and interaction smoke tests;
-4. Playwright visual tests for menus, HUD, gameplay, touch layout,
-   orientation, loading, error, victory, and failure states;
-5. performance smoke tests for startup, frame time, memory, and asset loads;
+4. Playwright visual tests for the SpartanCode front end, project hub, engine
+   integration surfaces, loading, error, and release states;
+5. native runtime and hardware performance tests for startup, frame time,
+   memory, shaders, streaming, input, and asset loads;
 6. package smoke tests for each advertised target;
 7. accessibility tests for keyboard, labels, motion, contrast, and focus; and
 8. adversarial networking tests when networking is explicitly enabled.
@@ -480,7 +482,7 @@ target capability report—not a blank browser game.
 
 ### Phase 2 — Multi-surface front end
 
-Add game templates, desktop and optional mobile project creation,
+Add game templates and desktop project creation,
 asset preview/import, autosave/recovery, prompt-to-change workflow, local
 preview, and export. Exit when the front end can create, edit, save, preview,
 and hand off a serious PC/console project for an authorized native build; a
@@ -503,8 +505,8 @@ evidence. Exit when release readiness requires defined validation gates.
 
 Add reproducible project builds, archive export/restore, manifests, checksums,
 remote build workers, native desktop packaging, and target-specific release
-evidence. Browser previews and mobile companion evaluation remain optional
-support surfaces. Exit when a workstation or authorized build worker can
+evidence. Browser previews remain optional support surfaces. Exit when a
+workstation or authorized build worker can
 produce a versioned high-end PC target release with the front end recording
 complete evidence.
 
@@ -515,17 +517,16 @@ Establish the high-end PC production track with native-engine adapters,
 GPU/performance profiling, large-world asset cooking, shader/LOD workflows,
 and crash diagnostics. Then evaluate console adapters through authorized
 SDK/devkit environments, certification evidence, and engine-specific
-packaging. Browser previews, mobile companions, multiplayer, advanced assets,
+packaging. Browser previews, multiplayer, advanced assets,
 AR/VR, and mature plugin/content ecosystems are supporting or subsequent
 capability tracks, never replacements for the premium PC/console objective.
 
 ### Phase 7 — High-end PC and console production
 
-This phase is the expansion's top-tier production objective, not an Android
-game variant. It should support project orchestration around engines capable of
-shipping high-end PC and console games, with the desktop/workstation and
-authorized build infrastructure as primary production surfaces. Mobile
-planning and review are optional companion surfaces.
+This phase is the expansion's top-tier production objective. It should support
+project orchestration around engines capable of shipping high-end PC and
+console games, with desktop/workstation and authorized build infrastructure as
+the production surfaces.
 
 Deliverables:
 
