@@ -168,8 +168,10 @@ current Implemented/Partial/Open counts.
   processes, bounded I/O, and timeout termination. Declarative plugins remain
   non-executable. A dependency-free publisher helper now validates manifests,
   generates Ed25519 keys, and signs canonical catalogs without overwriting
-  existing key/index files; hosted distribution and community governance remain
-  open. See [PLUGIN_AUTHORING.md](PLUGIN_AUTHORING.md).
+  existing key/index files; publisher governance is now explicitly documented,
+  while hosted distribution and operational adoption remain open. See
+  [PLUGIN_AUTHORING.md](PLUGIN_AUTHORING.md) and
+  [PLUGIN_GOVERNANCE.md](PLUGIN_GOVERNANCE.md).
 - Desktop and Android now share a documented normalized settings contract for
   global/project/agent/session scopes, including `apiProvider` and `autoSync`.
   Both clients use deterministic default-then-identified precedence and ignore

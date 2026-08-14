@@ -50,3 +50,7 @@ renderer-supplied or modified manifests are rejected. Verification is scoped
 to the current process session, so a restart requires fetching and verifying
 the index again. This provenance binding is part of the security contract and
 must be covered by negative tests before marketplace changes are released.
+
+Publisher admission, key rotation, incident response, and hosted distribution
+controls are defined in [PLUGIN_GOVERNANCE.md](PLUGIN_GOVERNANCE.md). Those
+controls remain an operational prerequisite for public marketplace distribution.
