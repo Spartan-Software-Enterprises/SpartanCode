@@ -31,6 +31,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   getGitStatus: () => ipcRenderer.invoke("git:status"),
   gitInit: () => ipcRenderer.invoke("git:init"),
   gitStage: () => ipcRenderer.invoke("git:stage"),
+  gitSuggestCommitMessage: (providerId) =>
+    ipcRenderer.invoke("git:commit-message", providerId),
   gitCommit: (message) => ipcRenderer.invoke("git:commit", message),
   listConnections: () => ipcRenderer.invoke("connections:list"),
   listRemoteProviders: () => ipcRenderer.invoke("remote:providers"),

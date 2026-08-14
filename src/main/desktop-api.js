@@ -2,7 +2,15 @@ const { ipcMain, dialog, shell } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
 const { getRuntimeStatus } = require("./runtime-status");
-const { gitStatusAt, gitInitAt, gitAddAt, gitCommitAt } = require("./git");
+const {
+  createCommitMessagePrompt,
+  gitStatusAt,
+  gitDiffAt,
+  gitInitAt,
+  gitAddAt,
+  gitCommitAt,
+  normalizeCommitMessage,
+} = require("./git");
 const {
   listLicensedModels,
   listAvailableModels,
@@ -404,6 +412,29 @@ function registerDesktopApi({
       return { available: false, message: "Choose a workspace first" };
     try {
       return { available: true, output: await gitStatusAt(workspacePath) };
+    } catch (error) {
+      return { available: false, message: error.stderr || error.message };
+    }
+  });
+  ipcMain.handle("git:commit-message", async (_event, providerId) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    if (!workspacePath)
+      return { available: false, message: "Choose a workspace first" };
+    if (typeof providerId !== "string" || !providerId.trim())
+      throw new Error("Provider id is required");
+    try {
+      const diff = await gitDiffAt(workspacePath);
+      const result = await apiGateway.generate(providerId, {
+        prompt: createCommitMessagePrompt(diff),
+        maxTokens: 80,
+        temperature: 0.2,
+      });
+      return {
+        available: true,
+        provider: result.provider,
+        model: result.model,
+        message: normalizeCommitMessage(result.output),
+      };
     } catch (error) {
       return { available: false, message: error.stderr || error.message };
     }
