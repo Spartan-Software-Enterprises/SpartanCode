@@ -103,8 +103,9 @@ jobs:
           # The hosted runner has about 5 GB free in its temp volume; the
           # default API 35 userdata image is larger than that. Keep the smoke
           # AVD bounded while leaving enough space for install and launch.
-          sed -i 's/^disk\.dataPartition\.size=.*/disk.dataPartition.size=4096M/' \
-            "$ANDROID_AVD_HOME/spartancode-ci.avd/config.ini"
+          avd_config="$ANDROID_AVD_HOME/spartancode-ci.avd/config.ini"
+          sed -i '/^disk\.dataPartition\.size=/d' "$avd_config"
+          printf '%s\n' 'disk.dataPartition.size=2G' >> "$avd_config"
           cd android
           npx expo prebuild --platform android --no-install
           cd android
