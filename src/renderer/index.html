@@ -1648,6 +1648,82 @@
               <option value="yolo">YOLO</option>
             </select>
           </div>
+          <div class="setting-group">
+            <label for="settingsScopedQuantization">Scoped quantization</label>
+            <select id="settingsScopedQuantization">
+              <option value="">Leave unchanged</option>
+              <option>Q4_K_M</option>
+              <option>Q4_0</option>
+              <option>Q3_K_S</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedProtocol">Scoped agent protocol</label>
+            <select id="settingsScopedProtocol">
+              <option value="">Leave unchanged</option>
+              <option>MCP Lite</option>
+              <option>MCP Bridge</option>
+              <option>Full MCP</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedAgent">Scoped default agent</label>
+            <input
+              id="settingsScopedAgent"
+              maxlength="48"
+              placeholder="Leave unchanged"
+            />
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedProvider">Scoped API provider</label>
+            <input
+              id="settingsScopedProvider"
+              maxlength="48"
+              placeholder="Leave unchanged"
+            />
+          </div>
+          <div class="toggle-row">
+            <span>
+              <strong>Scoped voice input</strong><br />
+              <small style="color: var(--muted)"
+                >Leave unchanged unless selected.</small
+              >
+            </span>
+            <select id="settingsScopedVoice" aria-label="Scoped voice input">
+              <option value="">Unchanged</option>
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <span>
+              <strong>Scoped local memory</strong><br />
+              <small style="color: var(--muted)"
+                >Leave unchanged unless selected.</small
+              >
+            </span>
+            <select id="settingsScopedMemory" aria-label="Scoped local memory">
+              <option value="">Unchanged</option>
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedPersona">Scoped assistant name</label>
+            <input
+              id="settingsScopedPersona"
+              maxlength="48"
+              placeholder="Leave unchanged"
+            />
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedWakeWord">Scoped wake word</label>
+            <input
+              id="settingsScopedWakeWord"
+              maxlength="48"
+              placeholder="Leave unchanged"
+            />
+          </div>
           <button type="button" class="context-button" id="settingsScopedSave">
             Save scoped override
           </button>
@@ -2006,6 +2082,30 @@
       );
       const settingsScopedExecution = document.getElementById(
         "settingsScopedExecution",
+      );
+      const settingsScopedQuantization = document.getElementById(
+        "settingsScopedQuantization",
+      );
+      const settingsScopedProtocol = document.getElementById(
+        "settingsScopedProtocol",
+      );
+      const settingsScopedAgent = document.getElementById(
+        "settingsScopedAgent",
+      );
+      const settingsScopedProvider = document.getElementById(
+        "settingsScopedProvider",
+      );
+      const settingsScopedVoice = document.getElementById(
+        "settingsScopedVoice",
+      );
+      const settingsScopedMemory = document.getElementById(
+        "settingsScopedMemory",
+      );
+      const settingsScopedPersona = document.getElementById(
+        "settingsScopedPersona",
+      );
+      const settingsScopedWakeWord = document.getElementById(
+        "settingsScopedWakeWord",
       );
       const settingsScopedMessage = document.getElementById(
         "settingsScopedMessage",
@@ -2720,6 +2820,22 @@
             update.model = settingsScopedModel.value.trim();
           if (settingsScopedExecution.value)
             update.executionMode = settingsScopedExecution.value;
+          if (settingsScopedQuantization.value)
+            update.quantization = settingsScopedQuantization.value;
+          if (settingsScopedProtocol.value)
+            update.protocol = settingsScopedProtocol.value;
+          if (settingsScopedAgent.value.trim())
+            update.defaultAgent = settingsScopedAgent.value.trim();
+          if (settingsScopedProvider.value.trim())
+            update.apiProvider = settingsScopedProvider.value.trim();
+          if (settingsScopedVoice.value)
+            update.voiceEnabled = settingsScopedVoice.value === "true";
+          if (settingsScopedMemory.value)
+            update.memoryEnabled = settingsScopedMemory.value === "true";
+          if (settingsScopedPersona.value.trim())
+            update.personaName = settingsScopedPersona.value.trim();
+          if (settingsScopedWakeWord.value.trim())
+            update.wakeWord = settingsScopedWakeWord.value.trim();
           if (!Object.keys(update).length) {
             settingsScopedMessage.textContent =
               "Choose at least one override before saving.";
