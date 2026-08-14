@@ -37,14 +37,3 @@ tmux ls
 - The local `~/bin/codex` wrapper is operational device configuration and is
   intentionally outside the repository; this document records the contract
   without storing credentials or device-specific secrets.
-
-## Reinstall the launcher
-
-If the wrapper or shell PATH hook is lost, from the checkout run:
-
-```sh
-sh scripts/install-termux-codex-wrapper.sh
-```
-
-The installer requires the Termux `codex` executable and `tmux`, recreates only
-`~/bin/codex`, and adds one marked PATH entry to `~/.bash_profile` if needed.
