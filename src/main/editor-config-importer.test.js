@@ -5,7 +5,7 @@ const path = require("node:path");
 const test = require("node:test");
 const { importEditorConfig } = require("./editor-config-importer");
 
-test("imports bounded Neovim, Emacs, Zed, and Vim metadata without evaluating config", () => {
+test("imports bounded Neovim, Emacs, Zed, Vim, and Sublime metadata without evaluating config", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-editors-"));
   fs.mkdirSync(path.join(root, ".zed"));
   fs.writeFileSync(
@@ -21,19 +21,27 @@ test("imports bounded Neovim, Emacs, Zed, and Vim metadata without evaluating co
     path.join(root, ".zed/settings.json"),
     '{"theme":"Spartan","secret":"hidden"}',
   );
+  fs.writeFileSync(
+    path.join(root, "Spartan.sublime-project"),
+    '{"folders":[{"path":"."}],"settings":{"secret":"hidden"}}',
+  );
   const result = importEditorConfig(root);
   assert.equal(result.execution, "read-only");
   assert.equal(result.credentials, false);
-  assert.equal(result.files.length, 4);
+  assert.equal(result.files.length, 5);
   assert.equal(JSON.stringify(result).includes("secret-plugin"), false);
   assert.equal(
     result.files.find((file) => file.editor === "zed").summary.keyCount,
     2,
   );
+  assert.equal(
+    result.files.find((file) => file.editor === "sublime").summary.keyCount,
+    2,
+  );
   fs.rmSync(root, { recursive: true, force: true });
 });
 
-test("rejects invalid Zed JSON, symlinked config, and relative paths", () => {
+test("rejects invalid editor JSON, symlinked config, and relative paths", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-editors-"));
   fs.mkdirSync(path.join(root, ".zed"));
   fs.writeFileSync(path.join(root, ".zed/settings.json"), "not-json");
@@ -42,6 +50,11 @@ test("rejects invalid Zed JSON, symlinked config, and relative paths", () => {
     /Invalid editor JSON/,
   );
   fs.rmSync(path.join(root, ".zed/settings.json"));
+  fs.writeFileSync(path.join(root, "broken.sublime-project"), "not-json");
+  assert.throws(
+    () => importEditorConfig(root, { editors: ["sublime"] }),
+    /Invalid editor JSON/,
+  );
   fs.writeFileSync(path.join(root, "real.lua"), "print('ok')");
   fs.symlinkSync(path.join(root, "real.lua"), path.join(root, "init.lua"));
   assert.throws(

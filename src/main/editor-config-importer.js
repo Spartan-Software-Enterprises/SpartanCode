@@ -8,6 +8,7 @@ const CONFIG_FILES = {
   vim: [".vimrc", ".vim/init.vim"],
   emacs: ["init.el", ".emacs", ".emacs.d/init.el"],
   zed: [".zed/settings.json", ".zed/tasks.json", ".zed/debug.json"],
+  sublime: [],
 };
 
 function scriptSummary(source) {
@@ -50,9 +51,25 @@ function readConfig(filePath, relative, editor, readFileImpl) {
   return {
     file: relative,
     editor,
-    summary:
-      editor === "zed" ? jsonSummary(source, relative) : scriptSummary(source),
+    summary: ["zed", "sublime"].includes(editor)
+      ? jsonSummary(source, relative)
+      : scriptSummary(source),
   };
+}
+
+function configFilesForEditor(projectRoot, editor) {
+  if (editor !== "sublime") return CONFIG_FILES[editor] || [];
+  return fs
+    .readdirSync(projectRoot, { withFileTypes: true })
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        entry.name.endsWith(".sublime-project") &&
+        entry.name.length <= 160,
+    )
+    .map((entry) => entry.name)
+    .sort()
+    .slice(0, MAX_FILES);
 }
 
 function importEditorConfig(
@@ -81,7 +98,7 @@ function importEditorConfig(
   };
   for (const editor of editors) {
     if (!Object.prototype.hasOwnProperty.call(CONFIG_FILES, editor)) continue;
-    for (const relative of CONFIG_FILES[editor]) {
+    for (const relative of configFilesForEditor(projectRoot, editor)) {
       const filePath = path.join(projectRoot, relative);
       if (!fs.existsSync(filePath)) continue;
       if (fs.realpathSync(filePath) !== filePath)

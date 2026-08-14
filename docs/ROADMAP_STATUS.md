@@ -268,7 +268,7 @@ current Implemented/Partial/Open counts.
   provenance, and test-coverage declarations. Tested read-only importers now
   cover VS Code JSONC, JetBrains `.idea`, Visual Studio solution/project, and
   Eclipse and Xcode/Swift Package project metadata plus Neovim/Vim/Emacs/Zed
-  configuration metadata, including bounded summaries, redaction,
+  configuration metadata, including bounded Sublime project summaries, redaction,
   signing-metadata rejection, symlink rejection, and no-execution guarantees;
   the remaining ecosystem importers and governance remain next. See
   `docs/EXTENSION_CONNECTOR_COMPATIBILITY.md`.
