@@ -49,8 +49,11 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 EOF
-systemctl --user daemon-reload
-systemctl --user enable --now spartancode-sync.timer
+if systemctl --user daemon-reload && systemctl --user enable --now spartancode-sync.timer; then
+  echo "SpartanCode sync timer enabled"
+else
+  echo "SpartanCode sync timer deferred: no user systemd bus in this session"
+fi
 loginctl enable-linger "$USER" >/dev/null 2>&1 || true
 df -h /
 git rev-parse HEAD
