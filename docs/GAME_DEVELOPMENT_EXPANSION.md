@@ -7,7 +7,8 @@ This is a future expansion of SpartanCode, not a change to its current product
 identity. SpartanCode must continue creating and supporting ordinary apps and
 programs for Android, iOS, Windows, macOS, Linux, web, servers, and custom
 operating-system targets. Game development will be an additive project profile
-using the same mobile-first, local-first, optional-remote architecture.
+using the same mobile-first, local-first, optional-remote architecture, with a
+serious native-engine track for high-end PC and console production.
 
 ## Product vision
 
@@ -30,17 +31,22 @@ A future user should be able to:
 
 ## Initial scope and non-goals
 
-The first implementation phase should focus on 2D browser games, with Phaser,
-TypeScript, and Vite as the default path. It should cover static web releases,
-PWA packaging, mobile-first authoring, browser preview, visual testing, and
-exportable project archives.
+The game expansion is not intended to make low-end or inexpensive 2D Android
+games. Its product target is premium, high-fidelity PC and console production.
+Browser/2D tooling may be used only as an optional planning, simulation, UI,
+or rapid-validation surface; it is not the definition of the game product,
+its quality bar, or its release target. The roadmap must build toward native
+engine adapters, remote build infrastructure, target-specific SDK/toolchain
+handling, devkit workflows, performance profiling, asset pipelines, and
+platform certification evidence.
 
 The following are deliberately deferred from the first game release:
 
 - a proprietary game engine;
 - full 3D scene editing;
 - multiplayer backend infrastructure;
-- console SDK integration;
+- console SDK integration before the required platform access, agreements,
+  devkits, and official toolchains are available;
 - real-time collaborative game editing;
 - automatic publishing to every storefront;
 - built-in commercial asset licensing; and
@@ -49,20 +55,25 @@ The following are deliberately deferred from the first game release:
 Godot, Unity, and Unreal should initially be treated as external-project
 workflows: detect their projects, document prerequisites, and orchestrate
 bounded commands where supported, without pretending to replace their editors
-or native export pipelines.
+or native export pipelines. They are nevertheless strategic supported-engine
+paths for the eventual high-end PC and console expansion, subject to the
+engine's license, platform agreements, SDK access, developer hardware, and
+certification rules.
 
 ## Engine and target decision matrix
 
 | Project need | Default path | Alternatives or boundary |
 | --- | --- | --- |
-| 2D sprites, tilemaps, platformers, top-down, arcade, tactics | Phaser + TypeScript + Vite | PixiJS or external-engine orchestration |
+| Optional 2D planning, simulation, or UI validation | Phaser + TypeScript + Vite | PixiJS or external-engine orchestration; never the premium release target |
 | Direct 3D in a plain TypeScript app | Three.js + Vite | Babylon.js or PlayCanvas evaluation |
 | 3D inside a React-first application | React Three Fiber | Vanilla Three.js |
 | Shader-first rendering research | Raw WebGL/WebGPU | Custom Three.js renderer |
 | Existing Godot, Unity, or Unreal project | External project adapter | Official engine toolchain remains authoritative |
 
-Phaser is the default 2D path. Three.js or React Three Fiber should be chosen
-only when the project explicitly needs 3D. Engine adapters must report their
+Phaser is only an optional browser validation path. Premium game projects
+should select an approved native-capable engine and target profile from the
+start; Three.js or React Three Fiber are browser 3D options, not substitutes
+for a native PC/console production pipeline. Engine adapters must report their
 supported host systems, target platforms, SDKs, licenses, headless-build
 support, automated-test support, and hardware requirements.
 
@@ -78,6 +89,22 @@ Initial target profiles:
 - server-hosted browser game;
 - iOS where the required macOS/Xcode environment is available; and
 - custom targets through declared user build commands.
+
+The high-end production track additionally targets:
+
+- Windows, macOS, and Linux PC releases with high-fidelity rendering;
+- console development and export paths where the user has authorized platform
+  access, SDKs, devkits, and the selected engine supports the target;
+- performance-oriented builds with GPU profiling, memory budgets, streaming,
+  shader compilation, LOD, asset cooking, crash diagnostics, and platform
+  input; and
+- certification-ready packaging, submission preparation, rollback artifacts,
+  and platform-specific compliance evidence.
+
+SpartanCode will not claim console support merely because a project can export
+to a generic desktop binary. Each console target requires its own capability
+declaration, authorized SDK/toolchain, devkit or approved test environment,
+platform security rules, and certification checklist.
 
 Authoring device and release target are independent. A phone-only user may
 create a Windows or Linux project; a later build worker may be required to
@@ -295,24 +322,28 @@ save boundaries, asset manifest, build profiles, threat model, license ledger,
 privacy model, and test taxonomy. No implementation begins before this phase is
 approved.
 
-### Phase 1 — 2D foundation
+### Phase 1 — Premium production foundation
 
-Define the Phaser template, action map, scene lifecycle, simulation/render
-separation, asset manifest, DOM HUD/menu shell, save schema, and Dev Container
-preset. Exit when a blank project boots on desktop and mobile browsers.
+Define the native-engine/project adapter contract, action map, scene and
+simulation boundaries, asset manifest, save schema, build profiles, hardware
+requirements, and Dev Container preset. Optional browser/2D validation is
+allowed for early feedback, but the exit criterion is a truthful premium
+target capability report—not a blank browser game.
 
 ### Phase 2 — Mobile authoring
 
 Add game templates, mobile project creation, touch-oriented editing, asset
 preview/import, autosave/recovery, prompt-to-change workflow, local preview,
 and export. Exit when a phone-only user can create, edit, save, preview, and
-export a small game.
+hand off a serious PC/console project for an authorized native build; a small
+browser game is not an acceptance target.
 
-### Phase 3 — Core 2D tooling
+### Phase 3 — Core production tooling
 
-Add sprite/animation, tilemap, scene/entity inspection, audio, effects, and
-reusable gameplay systems. Exit when representative platformer and top-down
-templates can be meaningfully customized.
+Add scene/entity inspection, animation, audio, effects, asset import/cooking,
+profiling hooks, and reusable gameplay systems. Optional 2D templates may
+support planning only; they do not define acceptance. Exit when a premium
+engine project can be meaningfully customized with target-aware diagnostics.
 
 ### Phase 4 — Quality foundation
 
@@ -330,16 +361,52 @@ deployable web release.
 ### Phase 6 — Native and advanced targets
 
 Validate Android, desktop, and optional iOS adapters with target-specific
-signing and capability checks. Later evaluate Three.js, React Three Fiber,
-external-engine orchestration, multiplayer, advanced assets, AR/VR, and mature
-plugin/content ecosystems.
+signing and capability checks. Establish the high-end PC production track with
+native-engine adapters, GPU/performance profiling, large-world asset cooking,
+shader/LOD workflows, and crash diagnostics. Then evaluate console adapters
+through authorized SDK/devkit environments, certification evidence, and
+engine-specific packaging. Three.js, React Three Fiber, external-engine
+orchestration, multiplayer, advanced assets, AR/VR, and mature plugin/content
+ecosystems remain subsequent capability tracks.
+
+### Phase 7 — High-end PC and console production
+
+This phase is the expansion's top-tier production objective, not an Android
+variant. It should support project orchestration around engines capable of
+shipping high-end PC and console games, while preserving SpartanCode's
+mobile-first planning and review surfaces.
+
+Deliverables:
+
+- engine adapters for approved native engines and external projects;
+- PC graphics capability detection, profiling, shader/build caching, asset
+  cooking, streaming, memory budgets, and crash diagnostics;
+- console target manifests, SDK/toolchain checks, devkit connectivity where
+  authorized, packaging/signing boundaries, and certification checklists;
+- remote build workers for toolchains unavailable on the user's phone;
+- deterministic build evidence, symbol/archive handling, test reports, and
+  target-specific release artifacts; and
+- a clear split between source editing/planning from mobile and privileged
+  native/console compilation or publishing on authorized infrastructure.
+
+Exit criteria:
+
+- A project can declare a high-end PC or console target and receive a truthful
+  capability report before work begins.
+- The selected engine can be built through its official supported pipeline in
+  an authorized environment.
+- Performance, packaging, device, security, licensing, and certification gates
+  are evidenced separately for each advertised target.
+- Missing SDKs, devkits, licenses, or platform approvals produce explicit
+  blockers rather than a falsely successful build.
 
 ## Decision gates before implementation
 
 Future product approval must separately decide:
 
-1. browser/PWA only versus Android packaging in the first game beta;
-2. framework-light Phaser UI versus React-hosted UI;
+1. which approved native engine(s) and PC/console target families are in the
+   first game beta;
+2. whether browser/2D validation is included as an optional support surface;
 3. user-owned, Spartan-managed, or hybrid remote build workers;
 4. whether multiplayer is a separate product phase;
 5. permitted asset-generation providers and licenses; and
