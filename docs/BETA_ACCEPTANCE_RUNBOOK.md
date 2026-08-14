@@ -103,9 +103,14 @@ Generate the machine-readable index from the current commit with:
 node scripts/release-index.js \
   --android-verification dist/android-verification.json \
   --visual-result release-evidence/desktop-visual/result.json \
+  --kvm-result release-evidence/android-emulator/result.json \
   --target "SpartanCode beta" \
   --output release-evidence/release-index.json
 ```
+
+Pass `SPARTANCODE_KVM_RESULT=release-evidence/android-emulator/result.json`
+to `scripts/android-kvm-smoke.sh` to emit commit-bound emulator evidence after
+the APK installs, launches, and produces its screenshot.
 
 The generator fails closed on stale Android evidence and leaves unavailable
 physical, signing, emulator, visual, synchronization, and product-owner gates

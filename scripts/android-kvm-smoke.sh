@@ -40,6 +40,7 @@ fi
 
 log_path="${SPARTANCODE_EMULATOR_LOG:-$HOME/${avd_name}-emulator.log}"
 screen_path="${SPARTANCODE_EMULATOR_SCREENSHOT:-$HOME/${avd_name}-screen.png}"
+result_path="${SPARTANCODE_KVM_RESULT:-}"
 # The current emulator can segfault with -no-window on minimal Linux hosts.
 # Xvfb provides a deterministic virtual display while retaining KVM acceleration.
 xvfb-run -a -s "-screen 0 1280x800x24" emulator -avd "$avd_name" \
@@ -76,4 +77,27 @@ timeout 30s adb shell dumpsys package "$package_name" |
 sleep 5
 adb exec-out screencap -p >"$screen_path"
 file "$screen_path"
+if [ -n "$result_path" ]; then
+  node - "$result_path" "$screen_path" "$package_name" "$avd_name" <<'NODE'
+const crypto = require("node:crypto");
+const fs = require("node:fs");
+const { execFileSync } = require("node:child_process");
+const [output, screenshot, packageName, avdName] = process.argv.slice(2);
+const screenshotSha256 = crypto
+  .createHash("sha256")
+  .update(fs.readFileSync(screenshot))
+  .digest("hex");
+const result = {
+  schemaVersion: 1,
+  status: "PASS",
+  commit: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
+  avd: avdName,
+  packageName,
+  screenshot,
+  screenshotSha256,
+};
+fs.mkdirSync(require("node:path").dirname(output), { recursive: true });
+fs.writeFileSync(output, `${JSON.stringify(result, null, 2)}\n`);
+NODE
+fi
 echo "KVM emulator smoke passed"

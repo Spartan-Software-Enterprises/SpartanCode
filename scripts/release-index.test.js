@@ -52,6 +52,37 @@ test("release index preserves incomplete gates and binds Android evidence to the
   );
 });
 
+test("release index accepts commit-bound KVM emulator evidence", () => {
+  const commit = execFileSync("git", ["rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+  const index = buildIndex({
+    verification: {
+      commit,
+      checks: [
+        "Android TypeScript",
+        "Android unit tests",
+        "Android formatting",
+        "Expo configuration",
+        "Committed visual assets",
+      ].map((label) => ({ label, status: "pass" })),
+    },
+    kvmResult: {
+      status: "PASS",
+      commit,
+      screenshot: "/tmp/spartancode-kvm-screen.png",
+      screenshotSha256: "a".repeat(64),
+    },
+    target: "SpartanCode beta",
+  });
+  const kvm = index.gates.find((gate) => gate.name === "KVM emulator");
+  assert.equal(kvm.status, "PASS");
+  assert.deepEqual(kvm.evidence, [
+    "/tmp/spartancode-kvm-screen.png",
+    "a".repeat(64),
+  ]);
+});
+
 test("release index fails closed when Android evidence belongs to another commit", () => {
   const index = buildIndex({
     target: "test",

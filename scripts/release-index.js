@@ -92,7 +92,26 @@ function visualGate(visualResult) {
   );
 }
 
-function buildIndex({ verification, visualResult, target }) {
+function kvmGate(kvmResult) {
+  if (!kvmResult)
+    return gate("SKIP", "KVM emulator evidence was not supplied");
+  if (kvmResult.commit !== commit())
+    return gate("FAIL", "KVM emulator evidence is tied to a different commit");
+  if (kvmResult.status !== "PASS")
+    return gate("FAIL", "KVM emulator evidence did not pass");
+  if (
+    typeof kvmResult.screenshot !== "string" ||
+    !/^[a-f0-9]{64}$/.test(kvmResult.screenshotSha256 || "")
+  )
+    return gate("FAIL", "KVM emulator evidence is missing a screenshot hash");
+  return gate(
+    "PASS",
+    "KVM emulator installed, launched, and captured the release APK",
+    [kvmResult.screenshot, kvmResult.screenshotSha256],
+  );
+}
+
+function buildIndex({ verification, visualResult, kvmResult, target }) {
   const android = androidGate(verification);
   const checks = {
     "Canonical source": gate(
@@ -102,10 +121,7 @@ function buildIndex({ verification, visualResult, target }) {
     "Desktop baseline": gate("SKIP", "Run npm test in the release environment"),
     "Desktop visual smoke": visualGate(visualResult),
     "Android baseline": android,
-    "KVM emulator": gate(
-      "SKIP",
-      "Requires a usable /dev/kvm and a booted pinned AVD",
-    ),
+    "KVM emulator": kvmGate(kvmResult),
     "Physical device": gate(
       "SKIP",
       "Requires an authorized physical Android device",
@@ -141,6 +157,7 @@ function buildIndex({ verification, visualResult, target }) {
 function main(argv = process.argv.slice(2)) {
   const verificationPath = argument(argv, "--android-verification", null);
   const visualPath = argument(argv, "--visual-result", null);
+  const kvmPath = argument(argv, "--kvm-result", null);
   const output = path.resolve(
     argument(argv, "--output", path.join(root, "dist", "release-index.json")),
   );
@@ -154,7 +171,10 @@ function main(argv = process.argv.slice(2)) {
   const visualResult = visualPath
     ? JSON.parse(fs.readFileSync(path.resolve(visualPath), "utf8"))
     : null;
-  const index = buildIndex({ verification, visualResult, target });
+  const kvmResult = kvmPath
+    ? JSON.parse(fs.readFileSync(path.resolve(kvmPath), "utf8"))
+    : null;
+  const index = buildIndex({ verification, visualResult, kvmResult, target });
   fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(output, `${JSON.stringify(index, null, 2)}\n`);
   console.log(
@@ -169,4 +189,4 @@ function main(argv = process.argv.slice(2)) {
 
 if (require.main === module) main();
 
-module.exports = { CHECKER_VERSION, GATES, buildIndex, main };
+module.exports = { CHECKER_VERSION, GATES, buildIndex, kvmGate, main };
