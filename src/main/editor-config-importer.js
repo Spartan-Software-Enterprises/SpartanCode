@@ -9,6 +9,14 @@ const CONFIG_FILES = {
   emacs: ["init.el", ".emacs", ".emacs.d/init.el"],
   zed: [".zed/settings.json", ".zed/tasks.json", ".zed/debug.json"],
   sublime: [],
+  "terminal-agents": [
+    ".aider.conf.yml",
+    "opencode.json",
+    "opencode.jsonc",
+    ".clinerules",
+    ".continue/config.json",
+    ".roo/rules",
+  ],
 };
 
 function scriptSummary(source) {

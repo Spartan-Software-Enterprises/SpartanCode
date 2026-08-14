@@ -5,7 +5,7 @@ const path = require("node:path");
 const test = require("node:test");
 const { importEditorConfig } = require("./editor-config-importer");
 
-test("imports bounded Neovim, Emacs, Zed, Vim, and Sublime metadata without evaluating config", () => {
+test("imports bounded editor and terminal-agent metadata without evaluating config", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-editors-"));
   fs.mkdirSync(path.join(root, ".zed"));
   fs.writeFileSync(
@@ -29,10 +29,17 @@ test("imports bounded Neovim, Emacs, Zed, Vim, and Sublime metadata without eval
     path.join(root, "Spartan.sublime-workspace"),
     '{"folders":[],"buffers":[],"groups":[]}',
   );
+  fs.mkdirSync(path.join(root, ".continue"));
+  fs.writeFileSync(
+    path.join(root, ".aider.conf.yml"),
+    "api-key: secret-value\nmodel: local\n",
+  );
+  fs.writeFileSync(path.join(root, "opencode.json"), '{"provider":"secret"}');
+  fs.writeFileSync(path.join(root, ".continue/config.json"), '{"models":[]}');
   const result = importEditorConfig(root);
   assert.equal(result.execution, "read-only");
   assert.equal(result.credentials, false);
-  assert.equal(result.files.length, 6);
+  assert.equal(result.files.length, 9);
   assert.equal(JSON.stringify(result).includes("secret-plugin"), false);
   assert.equal(
     result.files.find((file) => file.editor === "zed").summary.keyCount,
@@ -46,6 +53,11 @@ test("imports bounded Neovim, Emacs, Zed, Vim, and Sublime metadata without eval
     result.files.filter((file) => file.editor === "sublime").length,
     2,
   );
+  assert.equal(
+    result.files.filter((file) => file.editor === "terminal-agents").length,
+    3,
+  );
+  assert.equal(JSON.stringify(result).includes("secret-value"), false);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
