@@ -5,6 +5,7 @@ const {
   createAppJwt,
   createGitHubAppClient,
   readConfig,
+  verifyGitHubWebhookSignature,
 } = require("./github-app");
 
 test("GitHub App config is redacted and optional", () => {
@@ -90,4 +91,22 @@ test("GitHub App client caches installation tokens and projects repository metad
   ]);
   await client.listRepositories();
   assert.equal(calls, 3);
+});
+
+test("GitHub webhook signatures are verified with timing-safe comparison", () => {
+  const payload = JSON.stringify({ action: "opened" });
+  const secret = "webhook-secret";
+  const digest = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+  assert.equal(
+    verifyGitHubWebhookSignature(payload, `sha256=${digest}`, secret),
+    true,
+  );
+  assert.equal(
+    verifyGitHubWebhookSignature(payload, `sha256=${"0".repeat(64)}`, secret),
+    false,
+  );
+  assert.equal(verifyGitHubWebhookSignature(payload, digest, secret), false);
 });

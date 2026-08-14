@@ -7,6 +7,51 @@ const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
 
+test("MCP Bridge accepts only signed GitHub webhooks", async () => {
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-github-hook-"),
+  );
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const server = createBridgeServer({
+    store,
+    githubWebhookSecret: "hook-secret",
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const body = JSON.stringify({
+    action: "opened",
+    repository: { full_name: "owner/repo" },
+    ignored: "not forwarded",
+  });
+  const endpoint = `http://127.0.0.1:${address.port}/v1/github/webhook`;
+  const denied = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "x-hub-signature-256": `sha256=${"0".repeat(64)}`,
+      "x-github-event": "issues",
+    },
+    body,
+  });
+  assert.equal(denied.status, 401);
+  const signature = `sha256=${crypto
+    .createHmac("sha256", "hook-secret")
+    .update(body)
+    .digest("hex")}`;
+  const accepted = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "x-hub-signature-256": signature,
+      "x-github-event": "issues",
+      "x-github-delivery": "delivery-1",
+    },
+    body,
+  });
+  assert.equal(accepted.status, 202);
+  assert.deepEqual(await accepted.json(), { accepted: true, event: "issues" });
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function oidcToken(privateKey, issuer, audience) {
   const encode = (value) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");

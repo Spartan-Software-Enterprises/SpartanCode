@@ -57,6 +57,8 @@ function createWindow() {
             }
           : null,
       allowUnauthenticated: isLoopback && !hasToken && !hasOidc,
+      githubWebhookSecret:
+        process.env.SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET || null,
       requiresMissionApproval: (description) =>
         requiresMissionApproval(
           description,

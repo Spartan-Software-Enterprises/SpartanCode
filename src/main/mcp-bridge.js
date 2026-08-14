@@ -1,6 +1,7 @@
 const http = require("node:http");
 const { exportAuditLog } = require("./audit-export");
 const { createOidcAuthenticator } = require("./oidc");
+const { verifyGitHubWebhookSignature } = require("./github-app");
 
 function createBridgeEventHub({ maxEvents = 100 } = {}) {
   let sequence = 0;
@@ -49,6 +50,20 @@ const json = (response, status, body) => {
   response.end(JSON.stringify(body));
 };
 
+function readRawBody(request, maxBytes = 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    let raw = "";
+    request.setEncoding("utf8");
+    request.on("data", (chunk) => {
+      raw += chunk;
+      if (Buffer.byteLength(raw, "utf8") > maxBytes)
+        request.destroy(new Error("Request too large"));
+    });
+    request.on("end", () => resolve(raw));
+    request.on("error", reject);
+  });
+}
+
 function createBridgeRequestHandler({
   store,
   runMission,
@@ -57,6 +72,7 @@ function createBridgeRequestHandler({
   oidc = null,
   events = null,
   allowUnauthenticated = false,
+  githubWebhookSecret = null,
   requiresMissionApproval = () => false,
   idempotencyCache = new Map(),
 }) {
@@ -81,6 +97,43 @@ function createBridgeRequestHandler({
   };
   return async (request, response) => {
     if (request.method === "OPTIONS") return json(response, 204, {});
+    const url = new URL(request.url || "/", "http://bridge.local");
+    if (request.method === "POST" && url.pathname === "/v1/github/webhook") {
+      if (!githubWebhookSecret)
+        return json(response, 404, { error: "GitHub webhook unavailable" });
+      let raw;
+      try {
+        raw = await readRawBody(request);
+      } catch (error) {
+        return json(response, 400, {
+          error: error.message || "Invalid payload",
+        });
+      }
+      if (
+        !verifyGitHubWebhookSignature(
+          raw,
+          request.headers["x-hub-signature-256"],
+          githubWebhookSecret,
+        )
+      )
+        return json(response, 401, {
+          error: "Invalid GitHub webhook signature",
+        });
+      let payload;
+      try {
+        payload = JSON.parse(raw);
+      } catch {
+        return json(response, 400, { error: "Invalid GitHub webhook JSON" });
+      }
+      const eventName = request.headers["x-github-event"] || "unknown";
+      events?.publish(`github.${eventName}`, {
+        event: eventName,
+        delivery: request.headers["x-github-delivery"] || null,
+        repository: payload.repository?.full_name || null,
+        action: typeof payload.action === "string" ? payload.action : null,
+      });
+      return json(response, 202, { accepted: true, event: eventName });
+    }
     const identity = await authenticate(request);
     if (!identity.authenticated)
       return json(response, 401, { error: "Unauthorized" });
@@ -88,7 +141,6 @@ function createBridgeRequestHandler({
       identity.scopes.includes("*") || identity.scopes.includes(scope);
     const forbidden = (scope) =>
       json(response, 403, { error: `Scope required: ${scope}` });
-    const url = new URL(request.url || "/", "http://bridge.local");
     if (request.method === "GET" && url.pathname === "/v1/snapshot") {
       if (!requireScope("snapshot")) return forbidden("snapshot");
       return json(response, 200, {

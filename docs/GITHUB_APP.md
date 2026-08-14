@@ -28,11 +28,18 @@ Set these variables in the desktop/server environment:
 SPARTANCODE_GITHUB_APP_ID=123456
 SPARTANCODE_GITHUB_APP_INSTALLATION_ID=12345678
 SPARTANCODE_GITHUB_APP_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----"
+SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET="generate-a-random-secret"
 ```
 
 The settings panel reports whether the installation is configured. Repository
 metadata is available through the desktop API, and future GitHub workflows can
 reuse the same installation-token client without persisting credentials.
+
+When the optional MCP Bridge is enabled, configure the webhook secret and set
+the GitHub App webhook URL to `/v1/github/webhook` on the secured bridge host.
+SpartanCode verifies GitHub's `X-Hub-Signature-256` before publishing bounded
+`github.*` events to the bridge event stream; raw webhook payloads are not
+forwarded or persisted.
 
 ## Codespaces
 

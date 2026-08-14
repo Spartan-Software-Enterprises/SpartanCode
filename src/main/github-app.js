@@ -66,6 +66,25 @@ function githubHeaders(token) {
   };
 }
 
+function verifyGitHubWebhookSignature(payload, signature, secret) {
+  if (typeof payload !== "string" && !Buffer.isBuffer(payload)) return false;
+  if (
+    typeof signature !== "string" ||
+    !/^sha256=[a-f0-9]{64}$/i.test(signature)
+  )
+    return false;
+  if (typeof secret !== "string" || !secret) return false;
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+  const received = signature.slice("sha256=".length);
+  return crypto.timingSafeEqual(
+    Buffer.from(expected, "hex"),
+    Buffer.from(received, "hex"),
+  );
+}
+
 function createGitHubAppClient({
   environment = process.env,
   fetchImpl = fetch,
@@ -155,4 +174,9 @@ function createGitHubAppClient({
   };
 }
 
-module.exports = { createAppJwt, createGitHubAppClient, readConfig };
+module.exports = {
+  createAppJwt,
+  createGitHubAppClient,
+  readConfig,
+  verifyGitHubWebhookSignature,
+};
