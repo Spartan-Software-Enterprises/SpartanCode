@@ -78,6 +78,8 @@ The Android companion keeps high-value controls reachable on a phone:
 
 ![Android mission queued](../android/screenshots/mission-queued.png)
 
+![Android Hugging Face community models](../android/screenshots/community-models.png)
+
 The companion is standalone-first. A bridge is an optional route for remote
 execution and synchronization only; it is never required for local missions,
 bundled agent roles, queueing, or review.
@@ -87,7 +89,9 @@ bundled agent roles, queueing, or review.
 SpartanCode keeps risky actions policy-visible, records execution mode and
 activity, restricts local workspace access, redacts credentials from remote
 profiles and audit exports, and exposes only explicitly licensed model
-metadata. YOLO mode is available for trusted isolated workspaces, but it does
+metadata, while explicitly selected Hugging Face community entries preserve
+their declared license for user-controlled workflows. YOLO mode is available
+for trusted isolated workspaces, but it does
 not remove validation, isolation, credential redaction, or audit history.
 
 For the maintained delivery contract and engineering records, see

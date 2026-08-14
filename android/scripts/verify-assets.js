@@ -2,7 +2,11 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const expected = ["command-center.png", "mission-queued.png"];
+const expected = [
+  "command-center.png",
+  "mission-queued.png",
+  "community-models.png",
+];
 const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const assets = expected.map((name) => {
   const filePath = path.join(__dirname, "..", "screenshots", name);

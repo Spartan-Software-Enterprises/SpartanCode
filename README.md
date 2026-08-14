@@ -68,13 +68,15 @@ Explore the workspace surfaces:
 | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
 | ![Mission composer](docs/assets/desktop-menu-gallery/desktop-composer-filled.png) | ![Android command center](android/screenshots/command-center.png) | ![Android mission queued](android/screenshots/mission-queued.png) |
 
+![Android Hugging Face community models](android/screenshots/community-models.png)
+
 The Android command center puts offline mission queueing, optional bridge
 connection, approval visibility, and the mobile SpartanCode experience on one
 screen. A phone-only user can create a complete project for any supported
 device or operating system, run available checks, package it, and prepare
 release evidence; a desktop, server, or bridge is optional. The queued-mission view shows the handoff from idea to tracked work;
 the companion also includes voice input, local collaboration, full Hugging Face
-model discovery, device diagnostics, and remote planning controls.
+model metadata controls, device diagnostics, and remote planning controls.
 
 ## Why teams use SpartanCode
 
