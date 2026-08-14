@@ -22,14 +22,22 @@ const MAX_ARTIFACTS = 500;
 function normalize(value: unknown): SyncArtifact[] {
   if (!Array.isArray(value) || value.length > MAX_ARTIFACTS)
     throw new Error(`Artifact set must contain at most ${MAX_ARTIFACTS} items`);
-  return value.filter(
-    (item): item is SyncArtifact =>
-      !!item &&
-      typeof item === "object" &&
-      typeof (item as SyncArtifact).id === "string" &&
-      (item as SyncArtifact).id.length > 0 &&
-      (item as SyncArtifact).id.length <= 160,
-  );
+  const ids = new Set<string>();
+  return value.map((item, index) => {
+    if (!item || typeof item !== "object" || Array.isArray(item))
+      throw new Error(`Artifact ${index} must be an object`);
+    const artifact = item as SyncArtifact;
+    if (
+      typeof artifact.id !== "string" ||
+      artifact.id.length === 0 ||
+      artifact.id.length > 160
+    )
+      throw new Error(`Artifact ${index} id is invalid`);
+    if (ids.has(artifact.id))
+      throw new Error(`Artifact ids must be unique: ${artifact.id}`);
+    ids.add(artifact.id);
+    return artifact;
+  });
 }
 
 function fingerprint(item: SyncArtifact | undefined) {
