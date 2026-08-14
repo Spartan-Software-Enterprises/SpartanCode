@@ -217,6 +217,11 @@ current Implemented/Partial/Open counts.
 
 ## Release gates still requiring stronger evidence
 
+- Mobile-only release parity remains a first-class gate: an Android-only user
+  must be able to create a project targeting any supported device or operating
+  system, run the available verification/build steps, package it, and prepare
+  release evidence without installing the desktop app, a server, or a bridge.
+
 - MLC Chat/PocketPal provider-specific packages and physical Android execution
   remain release-environment gates. Android now has a real llama.cpp native
   adapter when a prebuilt binary and existing GGUF model are supplied; the

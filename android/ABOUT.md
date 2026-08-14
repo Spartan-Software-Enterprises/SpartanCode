@@ -4,13 +4,16 @@
 
 SpartanCode turns software ideas into visible, reviewable progress. It is a
 local-first command center for missions, agent teams, artifacts, approvals,
-and verification, wrapped in a distinctive dark Spartan IDE theme designed to
+and verification, wrapped in a distinctive dark SpartanCode theme designed to
 keep attention on the work.
 
 ### Built for the way real projects move
 
 - **Start with an outcome.** Queue a mission from the desktop or Android app,
   even when offline.
+- **Build from a phone.** Create projects for any supported device or operating
+  system, run available checks, package the result, and prepare release evidence
+  without requiring a desktop, server, or bridge.
 - **Let the team work in stages.** Research, implementation, verification,
   and synchronization are represented as inspectable agent roles.
 - **Review what was produced.** Artifacts, activity, approvals, and audit
@@ -23,7 +26,7 @@ keep attention on the work.
 ## Interface gallery
 
 The following gallery shows every primary desktop menu and the assistant
-surface while preserving the Spartan IDE color system.
+surface while preserving the SpartanCode color system.
 
 ![Command center](../docs/assets/desktop-menu-gallery/desktop-home.png)
 
@@ -36,6 +39,12 @@ surface while preserving the Spartan IDE color system.
 ![Workspace settings](../docs/assets/desktop-menu-gallery/desktop-settings.png)
 
 ![Settings governance and extensibility](../docs/assets/desktop-menu-gallery/desktop-settings-governance.png)
+
+![Collaboration settings](../docs/assets/desktop-menu-gallery/desktop-settings-collaboration.png)
+
+![Marketplace settings](../docs/assets/desktop-menu-gallery/desktop-settings-marketplace.png)
+
+![Preview dialog](../docs/assets/desktop-menu-gallery/desktop-preview-dialog.png)
 
 ![Spartan assistant](../docs/assets/desktop-menu-gallery/desktop-menu-assistant.png)
 
