@@ -97,6 +97,9 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, AWS bootstrap/recovery scripts, and local/GitHub synchronization
   procedures.
+- The authenticated MCP Bridge exposes bounded Git status, redacted diff,
+  stage, and explicit commit operations with separate read/write scopes and
+  idempotent mutation handling for remote clients.
 - Mosh now has a tested client lifecycle contract with explicit connecting,
   ready, error, ended, stop, and server-requirement states. The host still
   must provide `mosh-server` and reachable UDP ports before a real session can

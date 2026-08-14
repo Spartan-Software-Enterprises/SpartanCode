@@ -52,6 +52,55 @@ test("MCP Bridge accepts only signed GitHub webhooks", async () => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test("MCP Bridge exposes bounded authenticated Git operations", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-git-bridge-"));
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const calls = [];
+  const server = createBridgeServer({
+    store,
+    token: "git-token",
+    git: {
+      status: async () => "## main\n M file.js",
+      diff: async () => "diff --git a/file.js b/file.js",
+      stage: async () => {
+        calls.push("stage");
+        return "staged";
+      },
+      commit: async (message) => {
+        calls.push(`commit:${message}`);
+        return "committed";
+      },
+    },
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const base = `http://127.0.0.1:${address.port}`;
+  const headers = { Authorization: "Bearer git-token" };
+  assert.equal((await fetch(`${base}/v1/git/status`, { headers })).status, 200);
+  assert.equal((await fetch(`${base}/v1/git/diff`, { headers })).status, 200);
+  const staged = await fetch(`${base}/v1/git/stage`, {
+    method: "POST",
+    headers: { ...headers, "Idempotency-Key": "stage-1" },
+    body: "{}",
+  });
+  assert.equal(staged.status, 200);
+  const committed = await fetch(`${base}/v1/git/commit`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({ message: "Update bridge Git support" }),
+  });
+  assert.equal(committed.status, 200);
+  const tooLong = await fetch(`${base}/v1/git/commit`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({ message: "x".repeat(73) }),
+  });
+  assert.equal(tooLong.status, 400);
+  assert.deepEqual(calls, ["stage", "commit:Update bridge Git support"]);
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function oidcToken(privateKey, issuer, audience) {
   const encode = (value) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");

@@ -73,6 +73,7 @@ function createBridgeRequestHandler({
   events = null,
   allowUnauthenticated = false,
   githubWebhookSecret = null,
+  git = null,
   requiresMissionApproval = () => false,
   idempotencyCache = new Map(),
 }) {
@@ -141,6 +142,24 @@ function createBridgeRequestHandler({
       identity.scopes.includes("*") || identity.scopes.includes(scope);
     const forbidden = (scope) =>
       json(response, 403, { error: `Scope required: ${scope}` });
+    if (
+      request.method === "GET" &&
+      ["/v1/git/status", "/v1/git/diff"].includes(url.pathname)
+    ) {
+      if (!requireScope("git:read")) return forbidden("git:read");
+      if (!git)
+        return json(response, 404, { error: "Git integration unavailable" });
+      try {
+        return json(response, 200, {
+          output:
+            await git[url.pathname.endsWith("status") ? "status" : "diff"](),
+        });
+      } catch (error) {
+        return json(response, 400, {
+          error: error.message || "Git operation failed",
+        });
+      }
+    }
     if (request.method === "GET" && url.pathname === "/v1/snapshot") {
       if (!requireScope("snapshot")) return forbidden("snapshot");
       return json(response, 200, {
@@ -184,7 +203,9 @@ function createBridgeRequestHandler({
             ? "artifacts:write"
             : url.pathname.startsWith("/v1/collaboration/")
               ? "collaboration:write"
-              : null;
+              : url.pathname.startsWith("/v1/git/")
+                ? "git:write"
+                : null;
     if (mutationScope && !requireScope(mutationScope))
       return forbidden(mutationScope);
     const idempotencyKey = request.headers["idempotency-key"];
@@ -207,6 +228,30 @@ function createBridgeRequestHandler({
       body = await readJson(request);
     } catch (error) {
       return json(response, 400, { error: error.message || "Invalid JSON" });
+    }
+    if (["/v1/git/stage", "/v1/git/commit"].includes(url.pathname)) {
+      if (!requireScope("git:write")) return forbidden("git:write");
+      if (!git)
+        return json(response, 404, { error: "Git integration unavailable" });
+      try {
+        if (url.pathname === "/v1/git/stage")
+          return mutationResponse(200, {
+            output: await git.stage(),
+            operationId: `git:stage:${Date.now()}`,
+          });
+        if (typeof body.message !== "string" || !body.message.trim())
+          return json(response, 400, { error: "Commit message is required" });
+        if (body.message.trim().length > 72)
+          return json(response, 400, { error: "Commit message is too long" });
+        return mutationResponse(200, {
+          output: await git.commit(body.message.trim()),
+          operationId: `git:commit:${Date.now()}`,
+        });
+      } catch (error) {
+        return json(response, 400, {
+          error: error.message || "Git operation failed",
+        });
+      }
     }
     if (url.pathname === "/v1/missions") {
       if (

@@ -11,6 +11,7 @@ const { createSecureVault } = require("./secure-vault");
 const { apiProviders } = require("./api-providers");
 const { createPreviewWindow } = require("./preview-window");
 const { createMemoryStore } = require("./memory-store");
+const { gitStatusAt, gitDiffAt, gitAddAt, gitCommitAt } = require("./git");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -85,6 +86,28 @@ function createWindow() {
     }
     bridge = createBridgeServer({
       store,
+      git: {
+        status: async () => {
+          const workspacePath = store.snapshot().settings.workspacePath;
+          if (!workspacePath) throw new Error("Choose a workspace first");
+          return gitStatusAt(workspacePath);
+        },
+        diff: async () => {
+          const workspacePath = store.snapshot().settings.workspacePath;
+          if (!workspacePath) throw new Error("Choose a workspace first");
+          return gitDiffAt(workspacePath);
+        },
+        stage: async () => {
+          const workspacePath = store.snapshot().settings.workspacePath;
+          if (!workspacePath) throw new Error("Choose a workspace first");
+          return gitAddAt(workspacePath);
+        },
+        commit: async (message) => {
+          const workspacePath = store.snapshot().settings.workspacePath;
+          if (!workspacePath) throw new Error("Choose a workspace first");
+          return gitCommitAt(workspacePath, message);
+        },
+      },
       token: savedBridgeToken || null,
       oidc:
         process.env.SPARTANCODE_BRIDGE_OIDC_ISSUER &&
