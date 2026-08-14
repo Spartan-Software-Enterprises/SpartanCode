@@ -85,6 +85,25 @@ test("rejects invalid editor JSON, symlinked config, and relative paths", () => 
     () => importEditorConfig(root, { editors: ["neovim"] }),
     /symlink/,
   );
+  fs.rmSync(path.join(root, "init.lua"));
+  fs.rmSync(path.join(root, ".zed"), { recursive: true, force: true });
+  fs.mkdirSync(path.join(root, "real-rules"));
+  fs.writeFileSync(path.join(root, "real-rules/project.md"), "rule");
+  fs.symlinkSync(
+    path.join(root, "real-rules"),
+    path.join(root, ".roo-rules-link"),
+    "dir",
+  );
+  fs.mkdirSync(path.join(root, ".roo"));
+  fs.symlinkSync(
+    path.join(root, "real-rules"),
+    path.join(root, ".roo/rules"),
+    "dir",
+  );
+  assert.throws(
+    () => importEditorConfig(root, { editors: ["terminal-agents"] }),
+    /symlink/,
+  );
   assert.throws(() => importEditorConfig("relative"), /must be absolute/);
   fs.rmSync(root, { recursive: true, force: true });
 });

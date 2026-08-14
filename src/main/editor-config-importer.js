@@ -83,7 +83,12 @@ function configFilesForEditor(projectRoot, editor) {
   for (const relative of CONFIG_FILES[editor]) {
     const absolute = path.join(projectRoot, relative);
     if (!fs.existsSync(absolute)) continue;
-    if (!fs.statSync(absolute).isDirectory()) {
+    const directoryStat = fs.lstatSync(absolute);
+    if (directoryStat.isSymbolicLink())
+      throw new Error(
+        `Editor configuration symlink is not allowed: ${relative}`,
+      );
+    if (!directoryStat.isDirectory()) {
       files.push(relative);
       continue;
     }
