@@ -8,6 +8,7 @@ const {
   canonicalize,
   downloadMarketplaceArtifact,
   activateMarketplacePlugin,
+  deactivateMarketplacePlugin,
   fetchMarketplaceIndex,
   validateMarketplaceIndex,
   verifyMarketplaceIndex,
@@ -198,6 +199,43 @@ test("marketplace activation installs only validated metadata after integrity re
   assert.equal(
     JSON.parse(fs.readFileSync(staged.metadataPath)).installState,
     "active",
+  );
+  fs.rmSync(stagingDir, { recursive: true, force: true });
+  fs.rmSync(workspacePath, { recursive: true, force: true });
+});
+
+test("marketplace deactivation removes only matching active metadata", async () => {
+  const bytes = Buffer.from("deactivatable artifact");
+  const manifest = {
+    id: "safe-persona",
+    name: "Safe persona",
+    version: "1.0.0",
+    description: "A declarative persona.",
+    license: "MIT",
+    capabilities: ["persona"],
+    sourceUrl: "https://plugins.example/safe-persona.tgz",
+    artifactSha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+  };
+  const stagingDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-marketplace-stage-"),
+  );
+  const workspacePath = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-marketplace-workspace-"),
+  );
+  await downloadMarketplaceArtifact(manifest, {
+    destinationDir: stagingDir,
+    fetchImpl: async () => ({ ok: true, arrayBuffer: async () => bytes }),
+  });
+  const activated = activateMarketplacePlugin(manifest, {
+    stagingDir,
+    workspacePath,
+  });
+  const removed = deactivateMarketplacePlugin(manifest, { workspacePath });
+  assert.equal(removed.manifestPath, activated.manifestPath);
+  assert.equal(fs.existsSync(activated.manifestPath), false);
+  assert.throws(
+    () => deactivateMarketplacePlugin(manifest, { workspacePath }),
+    /not active/,
   );
   fs.rmSync(stagingDir, { recursive: true, force: true });
   fs.rmSync(workspacePath, { recursive: true, force: true });

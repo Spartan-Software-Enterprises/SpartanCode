@@ -2108,6 +2108,13 @@
             >
               Activate metadata
             </button>
+            <button
+              type="button"
+              class="context-button"
+              id="marketplaceDeactivate"
+            >
+              Deactivate metadata
+            </button>
           </div>
           <small
             id="marketplaceMessage"
@@ -3402,6 +3409,23 @@
             const result =
               await window.spartanCode.activateMarketplacePlugin(plugin);
             message.textContent = `${result.id}@${result.version} metadata activated. The artifact remains non-executable.`;
+          } catch (error) {
+            message.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("marketplaceDeactivate")
+        .addEventListener("click", async () => {
+          const plugin = selectedMarketplacePlugin();
+          const message = document.getElementById("marketplaceMessage");
+          if (!plugin) {
+            message.textContent = "Verify an index and select a plugin first.";
+            return;
+          }
+          try {
+            const result =
+              await window.spartanCode.deactivateMarketplacePlugin(plugin);
+            message.textContent = `${result.id}@${result.version} metadata deactivated. The staged artifact was retained.`;
           } catch (error) {
             message.textContent = error.message;
           }

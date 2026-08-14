@@ -45,8 +45,9 @@ test("Proton Drive backup envelope uses the secure vault and hides plaintext", (
     decryptBackup(envelope, "/SpartanCode/backups/evidence.enc", secureVault),
     Buffer.from("private workspace evidence"),
   );
-  const tampered = Buffer.from(envelope);
-  tampered[tampered.length - 4] ^= 1;
+  const tamperedEnvelope = JSON.parse(envelope);
+  tamperedEnvelope.ciphertext = `${tamperedEnvelope.ciphertext.slice(0, -1)}${tamperedEnvelope.ciphertext.endsWith("A") ? "B" : "A"}`;
+  const tampered = Buffer.from(`${JSON.stringify(tamperedEnvelope)}\n`);
   assert.throws(
     () =>
       decryptBackup(tampered, "/SpartanCode/backups/evidence.enc", secureVault),

@@ -40,6 +40,7 @@ const { listPlugins } = require("./plugin-registry");
 const {
   downloadMarketplaceArtifact,
   activateMarketplacePlugin,
+  deactivateMarketplacePlugin,
   fetchMarketplaceIndex,
 } = require("./plugin-marketplace");
 const { exportAuditLog } = require("./audit-export");
@@ -373,6 +374,10 @@ function registerDesktopApi({
       stagingDir: marketplaceDir,
       workspacePath,
     });
+  });
+  ipcMain.handle("plugins:deactivate", (_event, manifest) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    return deactivateMarketplacePlugin(manifest, { workspacePath });
   });
   ipcMain.handle("models:list", (_event, options) =>
     listAvailableModels(options),

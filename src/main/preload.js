@@ -27,6 +27,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("plugins:download", manifest),
   activateMarketplacePlugin: (manifest) =>
     ipcRenderer.invoke("plugins:activate", manifest),
+  deactivateMarketplacePlugin: (manifest) =>
+    ipcRenderer.invoke("plugins:deactivate", manifest),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   getEmotionAwarenessStatus: () => ipcRenderer.invoke("interaction:status"),
   resolveInteractionStyle: (input) =>

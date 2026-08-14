@@ -251,12 +251,43 @@ function activateMarketplacePlugin(
   return { ...activeManifest, manifestPath: targetPath, metadataPath };
 }
 
+function deactivateMarketplacePlugin(manifest, { workspacePath } = {}) {
+  if (typeof workspacePath !== "string" || !path.isAbsolute(workspacePath))
+    throw new Error("A workspace is required to deactivate a plugin");
+  const validated = validateMarketplaceIndex({
+    schemaVersion: 1,
+    issuer: "artifact-deactivation",
+    plugins: [manifest],
+  }).plugins[0];
+  const pluginRoot = path.join(workspacePath, ".spartancode", "plugins");
+  const manifestPath = path.join(pluginRoot, `${validated.id}.json`);
+  if (!fs.existsSync(manifestPath))
+    throw new Error("Marketplace plugin is not active");
+  const installed = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  if (
+    installed.source !== "marketplace" ||
+    installed.id !== validated.id ||
+    installed.artifactSha256 !== validated.artifactSha256
+  )
+    throw new Error(
+      "Active plugin metadata does not match the verified manifest",
+    );
+  fs.unlinkSync(manifestPath);
+  return {
+    id: validated.id,
+    version: validated.version,
+    manifestPath,
+    installState: "staged",
+  };
+}
+
 module.exports = {
   MAX_ENTRIES,
   MAX_ARTIFACT_BYTES,
   canonicalize,
   downloadMarketplaceArtifact,
   activateMarketplacePlugin,
+  deactivateMarketplacePlugin,
   fetchMarketplaceIndex,
   validateMarketplaceIndex,
   verifyMarketplaceIndex,
