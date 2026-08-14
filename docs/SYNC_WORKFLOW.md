@@ -24,6 +24,12 @@ that could terminate the EC2 instance. Replacement hosts must not install that
 timer. Use `docs/AWS_RECOVERY.md` and the bootstrap script when recovering or
 replacing the host.
 
+The AWS checkout authenticates to GitHub through its dedicated
+`spartancode_github_ed25519` SSH key and the `git@github.com` remote. This avoids
+depending on a copied HTTPS token or an interactive credential prompt. The
+corresponding write-enabled deploy key is managed in the SpartanCode GitHub
+repository; the private key remains only on the AWS host.
+
 ## Start-of-session procedure
 
 From the local SpartanCode checkout:
