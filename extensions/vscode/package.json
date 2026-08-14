@@ -39,6 +39,22 @@
         "title": "SpartanCode: Show Workspace Status"
       },
       {
+        "command": "spartancode.gitStatus",
+        "title": "SpartanCode: Show Git Status"
+      },
+      {
+        "command": "spartancode.gitDiff",
+        "title": "SpartanCode: Show Git Diff"
+      },
+      {
+        "command": "spartancode.gitStage",
+        "title": "SpartanCode: Stage Git Changes"
+      },
+      {
+        "command": "spartancode.gitCommit",
+        "title": "SpartanCode: Commit Git Changes"
+      },
+      {
         "command": "spartancode.startMissionFromSelection",
         "title": "SpartanCode: Start Mission From Selection"
       },

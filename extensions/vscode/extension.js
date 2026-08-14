@@ -107,6 +107,24 @@ function collaborationEventsRoute(sessionId) {
   return `/v1/collaboration/sessions/${encodeURIComponent(id)}/events`;
 }
 
+function gitRoute(operation) {
+  if (!["status", "diff", "stage", "commit"].includes(operation))
+    throw new Error("Git operation is invalid");
+  return `/v1/git/${operation}`;
+}
+
+function boundedGitOutput(value) {
+  const output = value && typeof value.output === "string" ? value.output : "";
+  return output.slice(0, 50_000);
+}
+
+function gitCommitMessage(value) {
+  const message = String(value || "").trim();
+  if (!message) throw new Error("Git commit message is required");
+  if (message.length > 72) throw new Error("Git commit message is too long");
+  return message;
+}
+
 function boundedNote(value) {
   return String(value || "")
     .trim()
@@ -210,6 +228,62 @@ async function activate(context) {
     }),
   );
 
+  for (const [operation, title] of [
+    ["status", "Show Git Status"],
+    ["diff", "Show Git Diff"],
+    ["stage", "Stage Git Changes"],
+  ]) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        `spartancode.git${operation[0].toUpperCase()}${operation.slice(1)}`,
+        async () => {
+          const result = await requestBridge(
+            bridgeUrl(),
+            gitRoute(operation),
+            await token(),
+            operation === "stage" ? "POST" : "GET",
+            operation === "stage" ? {} : undefined,
+          );
+          const resultOutput = boundedGitOutput(result);
+          output.appendLine(`Git ${operation}:\n${resultOutput}`);
+          vscode.window.showInformationMessage(
+            `SpartanCode Git ${operation} completed${resultOutput ? `: ${resultOutput.slice(0, 160)}` : "."}`,
+          );
+        },
+      ),
+    );
+  }
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("spartancode.gitCommit", async () => {
+      const message = gitCommitMessage(
+        await vscode.window.showInputBox({
+          prompt: "Commit staged SpartanCode workspace changes",
+          placeHolder: "Describe the change",
+          ignoreFocusOut: true,
+          validateInput: (value) => {
+            try {
+              gitCommitMessage(value);
+              return undefined;
+            } catch (error) {
+              return error.message;
+            }
+          },
+        }),
+      );
+      const result = await requestBridge(
+        bridgeUrl(),
+        gitRoute("commit"),
+        await token(),
+        "POST",
+        { message },
+      );
+      const resultOutput = boundedGitOutput(result);
+      output.appendLine(`Git commit:\n${resultOutput}`);
+      vscode.window.showInformationMessage("SpartanCode Git commit completed.");
+    }),
+  );
+
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "spartancode.listCollaborationSessions",
@@ -294,6 +368,9 @@ module.exports = {
   boundedSelection,
   boundedNote,
   collaborationEventsRoute,
+  gitRoute,
+  boundedGitOutput,
+  gitCommitMessage,
   snapshotPath,
   summarizeSnapshot,
 };

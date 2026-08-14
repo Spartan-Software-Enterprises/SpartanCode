@@ -104,6 +104,9 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
   redacted diff, stage, and explicit commit operations. Core Android use stays
   standalone and does not require the desktop app or bridge; physical Android
   acceptance remains an environment gate.
+- The VS Code extension now exposes authenticated, SecretStorage-backed Git
+  status, redacted diff, stage, and explicit commit commands with bounded
+  output and commit messages.
 - Mosh now has a tested client lifecycle contract with explicit connecting,
   ready, error, ended, stop, and server-requirement states. The host still
   must provide `mosh-server` and reachable UDP ports before a real session can

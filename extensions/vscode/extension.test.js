@@ -5,6 +5,9 @@ const {
   boundedSelection,
   boundedNote,
   collaborationEventsRoute,
+  gitRoute,
+  boundedGitOutput,
+  gitCommitMessage,
   snapshotPath,
   summarizeSnapshot,
 } = require("./extension");
@@ -55,4 +58,17 @@ test("collaboration commands bound notes and encode session routes", () => {
     "/v1/collaboration/sessions/session%20with%20spaces/events",
   );
   assert.throws(() => collaborationEventsRoute(""), /invalid/);
+});
+
+test("VS Code Git commands use bounded authenticated routes and messages", () => {
+  assert.equal(gitRoute("status"), "/v1/git/status");
+  assert.equal(gitRoute("diff"), "/v1/git/diff");
+  assert.equal(gitRoute("stage"), "/v1/git/stage");
+  assert.equal(gitRoute("commit"), "/v1/git/commit");
+  assert.throws(() => gitRoute("reset"), /invalid/);
+  assert.equal(boundedGitOutput({ output: "clean" }), "clean");
+  assert.equal(boundedGitOutput({ output: "x".repeat(60_000) }).length, 50_000);
+  assert.equal(gitCommitMessage("  Add feature  "), "Add feature");
+  assert.throws(() => gitCommitMessage(""), /required/);
+  assert.throws(() => gitCommitMessage("x".repeat(73)), /too long/);
 });
