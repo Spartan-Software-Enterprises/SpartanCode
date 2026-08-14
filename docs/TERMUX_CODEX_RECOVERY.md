@@ -13,6 +13,11 @@ codex
 
 The Termux launcher resolves `codex` to the tmux-backed wrapper in
 `~/bin/codex`. It creates or attaches to the session named `codex`.
+The wrapper checks that tmux and the real Codex executable exist, detects a
+dead pane left by a crash or forced process kill, and recreates that stale
+session instead of attaching to it. If Codex exits, the pane stays open in a
+recovery shell with the exit status visible, so the session does not disappear
+before it can be inspected or recovered.
 
 To reconnect explicitly:
 
@@ -30,6 +35,8 @@ tmux ls
 
 - Reopen Termux and run `codex`; do not start a second Codex process while the
   `codex` tmux session exists.
+- If Codex was killed, run `codex` again; the launcher removes the stale dead
+  pane and starts a fresh process in the same named session.
 - Detach with `Ctrl-b` followed by `d`; do not type `exit` unless the session
   should be intentionally closed.
 - Keep project changes in Git and run the verification commands before ending
