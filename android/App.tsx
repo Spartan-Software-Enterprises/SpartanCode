@@ -29,6 +29,7 @@ import {
   normalizeBridgeSnapshot,
   syncArtifactSets,
 } from "./src/core/bridge";
+import { createAutoSyncLoop } from "./src/core/auto-sync";
 import { decodePairingPayload } from "./src/core/pairing";
 import {
   addConnection,
@@ -568,9 +569,11 @@ export default function App() {
           ? `Connected · ${artifactSync.conflicts.length} artifact conflict${artifactSync.conflicts.length === 1 ? "" : "s"} requires review`
           : "Connected · synced just now",
       );
+      return true;
     } catch (error) {
       setSnapshot((current) => ({ ...current, offline: true }));
       setMessage(error instanceof Error ? error.message : "Connection failed");
+      return false;
     }
   }, [authorizedBridgeRequest, endpoint, token]);
 
@@ -840,12 +843,12 @@ export default function App() {
       if (state === "active") void refresh();
     };
     const subscription = AppState.addEventListener("change", syncWhenActive);
-    const interval = mobileSettings.autoSync
-      ? setInterval(() => void refresh(), 60_000)
+    const stopAutoSync = mobileSettings.autoSync
+      ? createAutoSyncLoop(refresh)
       : undefined;
     return () => {
       subscription.remove();
-      if (interval) clearInterval(interval);
+      stopAutoSync?.();
     };
   }, [endpoint, mobileSettings.autoSync, refresh]);
 

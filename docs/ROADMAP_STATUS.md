@@ -37,8 +37,9 @@ current Implemented/Partial/Open counts.
   credentials and refuses to silently reroute traffic.
 - Optional Proton Drive secure backup/restore now invokes the official CLI
   through a fixed non-shell boundary and encrypts workspace snapshots with an
-  OS-vault-backed AES-256-GCM envelope before upload; continuous conflict-aware
-  sync remains a separate release gate. See [PROTON_DRIVE.md](PROTON_DRIVE.md).
+  OS-vault-backed AES-256-GCM envelope before upload; Proton Pass can provide
+  the primary backup-key reference while the OS vault remains optional recovery
+  storage. See [PROTON_DRIVE.md](PROTON_DRIVE.md) and [PROTON_PASS.md](PROTON_PASS.md).
 - Playwright browser requests can opt into a configured Tor SOCKS proxy; direct
   browser traffic remains the default and invalid proxy configuration fails
   closed.
@@ -123,7 +124,8 @@ current Implemented/Partial/Open counts.
   as explicit conflicts with base/phone/bridge visibility for review, while
   Proton Drive remains encrypted backup/restore rather than a plaintext sync
   transport.
-  Physical cross-device acceptance and a continuous transport remain open;
+  Android now has a bounded continuous polling loop with failure backoff and
+  overlap prevention. Physical cross-device acceptance remains open;
   see [ARTIFACT_SYNC.md](ARTIFACT_SYNC.md).
 - Signed marketplace plugins now support verified staging, metadata-only
   activation, and matching deactivation that retains the opaque artifact.
