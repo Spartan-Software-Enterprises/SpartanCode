@@ -26,16 +26,16 @@ web integration proves native support for another product or console target.
 
 ## Major coding-program families
 
-| Ecosystem | Compatibility target | Safe first capability | Native execution boundary |
-| --- | --- | --- | --- |
-| Visual Studio Code, Cursor, Windsurf, VSCodium | VSIX metadata, settings, tasks, launch files, MCP, LSP, DAP | Import and map project configuration; expose supported tools | VS Code-compatible extension execution requires a reviewed adapter and declared runtime |
-| JetBrains IDEs, Android Studio, IntelliJ, PyCharm, WebStorm, CLion, Rider, GoLand | plugin metadata, run configurations, inspections, LSP, DAP, Gradle/Maven/CMake | Inspect/import project settings and orchestrate official build commands | JetBrains plugin binaries remain external unless a reviewed runtime adapter exists |
-| Visual Studio | VSIX metadata, solutions, projects, MSBuild, CMake, debugger profiles | Import solution/build metadata and invoke approved MSBuild workflows | VSIX execution requires Windows and an approved host integration |
-| Eclipse and Eclipse Theia | plug-in metadata, OSGi/p2 descriptors, workspace settings, LSP, Maven/Gradle | Inspect/import workspace configuration and build profiles | OSGi bundle execution requires a declared Java runtime and sandbox boundary |
-| Xcode and Swift Package Manager | `.xcodeproj`, `.xcworkspace`, Swift packages, schemes, signing profiles | Inspect project targets and generate bounded build plans | Xcode builds require authorized macOS/Xcode infrastructure and signing evidence |
-| Neovim, Vim, Emacs, Sublime Text, Zed | Lua/Vimscript/Emacs Lisp/package metadata, settings, LSP, DAP | Import editor configuration and map language/tool integrations | Editor package execution remains host-specific and opt-in |
-| Terminal coding agents | Codex CLI, Claude Code, OpenCode, Aider, Continue, Cline, Roo Code | Provider/agent configuration, MCP, task handoff, Git/workspace contracts | Credentials stay in the secure key store; commands remain policy-gated |
-| General developer tooling | Git, GitHub, GitLab, Bitbucket, Docker, dev containers, CI/CD, package managers | Connector status, repository operations, build/test orchestration | Provider-specific authentication, billing, permissions, and runners remain explicit |
+| Ecosystem                                                                         | Compatibility target                                                            | Safe first capability                                                    | Native execution boundary                                                               |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Visual Studio Code, Cursor, Windsurf, VSCodium                                    | VSIX metadata, settings, tasks, launch files, MCP, LSP, DAP                     | Import and map project configuration; expose supported tools             | VS Code-compatible extension execution requires a reviewed adapter and declared runtime |
+| JetBrains IDEs, Android Studio, IntelliJ, PyCharm, WebStorm, CLion, Rider, GoLand | plugin metadata, run configurations, inspections, LSP, DAP, Gradle/Maven/CMake  | Inspect/import project settings and orchestrate official build commands  | JetBrains plugin binaries remain external unless a reviewed runtime adapter exists      |
+| Visual Studio                                                                     | VSIX metadata, solutions, projects, MSBuild, CMake, debugger profiles           | Import solution/build metadata and invoke approved MSBuild workflows     | VSIX execution requires Windows and an approved host integration                        |
+| Eclipse and Eclipse Theia                                                         | plug-in metadata, OSGi/p2 descriptors, workspace settings, LSP, Maven/Gradle    | Inspect/import workspace configuration and build profiles                | OSGi bundle execution requires a declared Java runtime and sandbox boundary             |
+| Xcode and Swift Package Manager                                                   | `.xcodeproj`, `.xcworkspace`, Swift packages, schemes, signing profiles         | Inspect project targets and generate bounded build plans                 | Xcode builds require authorized macOS/Xcode infrastructure and signing evidence         |
+| Neovim, Vim, Emacs, Sublime Text, Zed                                             | Lua/Vimscript/Emacs Lisp/package metadata, settings, LSP, DAP                   | Import editor configuration and map language/tool integrations           | Editor package execution remains host-specific and opt-in                               |
+| Terminal coding agents                                                            | Codex CLI, Claude Code, OpenCode, Aider, Continue, Cline, Roo Code              | Provider/agent configuration, MCP, task handoff, Git/workspace contracts | Credentials stay in the secure key store; commands remain policy-gated                  |
+| General developer tooling                                                         | Git, GitHub, GitLab, Bitbucket, Docker, dev containers, CI/CD, package managers | Connector status, repository operations, build/test orchestration        | Provider-specific authentication, billing, permissions, and runners remain explicit     |
 
 This list is the initial major-program coverage map, not a promise that every
 third-party extension is interchangeable. New ecosystems are added through
@@ -101,9 +101,10 @@ security model:
    is implemented in `src/main/editor-config-importer.js` for Neovim/Vim,
    Emacs, Zed, and Sublime project/workspace metadata; it summarizes configuration
    structure without evaluating scripts. A bounded terminal-agent metadata
-   importer also covers Aider, OpenCode, Cline, Continue, and Roo configuration
-   files and bounded rule directories without returning credentials or executing
-   agent commands. Remaining
+   importer also covers Aider, OpenCode, Cline, Continue, Roo, shared `AGENTS.md`,
+   Claude, Gemini, Windsurf, GitHub Copilot, and Cursor instruction/rule
+   formats through bounded files and rule directories without returning
+   credentials or executing agent commands. Remaining
    editor packages remain future work.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
    major agent APIs, and remote workers.

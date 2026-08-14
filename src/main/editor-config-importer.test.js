@@ -34,6 +34,20 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
     path.join(root, ".aider.conf.yml"),
     "api-key: secret-value\nmodel: local\n",
   );
+  fs.writeFileSync(path.join(root, "AGENTS.md"), "secret agent instructions");
+  fs.writeFileSync(path.join(root, "CLAUDE.md"), "secret claude instructions");
+  fs.writeFileSync(path.join(root, "GEMINI.md"), "secret gemini instructions");
+  fs.writeFileSync(path.join(root, ".windsurfrules"), "secret windsurf rules");
+  fs.mkdirSync(path.join(root, ".github"));
+  fs.writeFileSync(
+    path.join(root, ".github/copilot-instructions.md"),
+    "secret copilot instructions",
+  );
+  fs.mkdirSync(path.join(root, ".cursor/rules"), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, ".cursor/rules/project.mdc"),
+    "secret cursor rule",
+  );
   fs.writeFileSync(path.join(root, "opencode.json"), '{"provider":"secret"}');
   fs.writeFileSync(path.join(root, ".continue/config.json"), '{"models":[]}');
   fs.mkdirSync(path.join(root, ".clinerules"));
@@ -43,7 +57,7 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
   const result = importEditorConfig(root);
   assert.equal(result.execution, "read-only");
   assert.equal(result.credentials, false);
-  assert.equal(result.files.length, 11);
+  assert.equal(result.files.length, 17);
   assert.equal(JSON.stringify(result).includes("secret-plugin"), false);
   assert.equal(
     result.files.find((file) => file.editor === "zed").summary.keyCount,
@@ -59,9 +73,19 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
   );
   assert.equal(
     result.files.filter((file) => file.editor === "terminal-agents").length,
-    5,
+    11,
   );
   assert.equal(JSON.stringify(result).includes("secret-value"), false);
+  for (const secret of [
+    "secret agent instructions",
+    "secret claude instructions",
+    "secret gemini instructions",
+    "secret windsurf rules",
+    "secret copilot instructions",
+    "secret cursor rule",
+  ]) {
+    assert.equal(JSON.stringify(result).includes(secret), false);
+  }
   fs.rmSync(root, { recursive: true, force: true });
 });
 
