@@ -10,6 +10,13 @@ current Implemented/Partial/Open counts.
 
 ## Implemented foundation
 
+- Desktop workspace state now uses atomic replacement writes with a
+  last-known-good backup and malformed-state recovery; Electron renderer
+  failures produce bounded redacted diagnostics and automatically reload after
+  non-clean process termination. The Termux Codex launcher preserves the tmux
+  session across PTY interruptions and can restart Codex from its recovery
+  shell. These paths have focused regression tests and synchronized KVM smoke
+  evidence; see [TERMUX_CODEX_RECOVERY.md](TERMUX_CODEX_RECOVERY.md).
 - Desktop project previews open loopback HTTP(S) development servers in a
   native built-in browser window with popup and navigation guards. Playwright
   visual smoke coverage verifies the preview dialog’s local-only boundary, and
