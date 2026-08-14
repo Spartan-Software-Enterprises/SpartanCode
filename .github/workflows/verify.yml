@@ -113,6 +113,7 @@ jobs:
           cd ../..
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
+            -partition-size 2048 \
             -no-window -no-audio -no-boot-anim -no-snapshot \
             -gpu swiftshader_indirect \
             > "${RUNNER_TEMP}/spartancode-emulator.log" 2>&1 &
