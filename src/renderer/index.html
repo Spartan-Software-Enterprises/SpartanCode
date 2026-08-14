@@ -1817,6 +1817,10 @@
             <option value="mosh">MOSH</option>
             <option value="mcp-bridge">MCP Bridge</option>
           </select>
+          <small
+            id="connectionTransportStatus"
+            style="display: block; color: var(--muted)"
+          ></small>
         </div>
         <div class="setting-group">
           <label for="remoteProvider">Remote server planning</label>
@@ -2729,6 +2733,21 @@
           document.getElementById("gitWorkflowMessage").textContent =
             result.available ? result.output : result.message;
           showToast(result.available ? "Git status refreshed" : result.message);
+        });
+      document
+        .getElementById("connectionTransport")
+        .addEventListener("change", async (event) => {
+          const status = document.getElementById("connectionTransportStatus");
+          try {
+            const result = await window.spartanCode.getRemoteTransportStatus(
+              event.target.value,
+            );
+            status.textContent = result.available
+              ? `${result.transport} transport available.`
+              : `${result.transport} transport unavailable. ${result.installHint || "Configure the integration before connecting."}`;
+          } catch (error) {
+            status.textContent = error.message;
+          }
         });
       document
         .getElementById("gitSuggestMessage")
