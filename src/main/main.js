@@ -10,6 +10,7 @@ const { requiresMissionApproval } = require("./policy-engine");
 const { createSecureVault } = require("./secure-vault");
 const { apiProviders } = require("./api-providers");
 const { createPreviewWindow } = require("./preview-window");
+const { createMemoryStore } = require("./memory-store");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -123,6 +124,7 @@ function createWindow() {
     githubEnvironment,
     providerEnvironment,
     previewWindow,
+    memoryStore: createMemoryStore({ secureVault }),
   });
 }
 

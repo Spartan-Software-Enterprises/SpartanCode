@@ -46,6 +46,16 @@ contextBridge.exposeInMainWorld("spartanCode", {
   listRuntimeAdapters: () => ipcRenderer.invoke("runtime:adapters"),
   getBrowserStatus: () => ipcRenderer.invoke("browser:status"),
   runBrowserAutomation: (request) => ipcRenderer.invoke("browser:run", request),
+  listSkillSources: () => ipcRenderer.invoke("skills:sources"),
+  listSkills: () => ipcRenderer.invoke("skills:list"),
+  loadSkill: (skillId) => ipcRenderer.invoke("skills:load", skillId),
+  getMemoryStatus: () => ipcRenderer.invoke("memory:status"),
+  addMemory: (input) => ipcRenderer.invoke("memory:add", input),
+  listMemory: () => ipcRenderer.invoke("memory:list"),
+  searchMemory: (query, limit) =>
+    ipcRenderer.invoke("memory:search", query, limit),
+  deleteMemory: (id) => ipcRenderer.invoke("memory:delete", id),
+  clearMemory: () => ipcRenderer.invoke("memory:clear"),
   generateWithRuntime: (runtimeId, request) =>
     ipcRenderer.invoke("runtime:generate", runtimeId, request),
   getCapabilities: () => ipcRenderer.invoke("capabilities:get"),

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "anthropic-cybersecurity-skills",
+    "repository": "https://github.com/CKissinger1988/Anthropic-Cybersecurity-Skills.git",
+    "commit": "4c0b700ac5d280ba46695062077f0fe922ce3602",
+    "license": "Apache-2.0",
+    "skillCount": 817,
+    "requiresReview": true
+  },
+  {
+    "id": "antigravity-skills",
+    "repository": "https://github.com/CKissinger1988/antigravity-skills.git",
+    "commit": "3eff4af253b3a15e2ba6edf2c2b743b53fd81211",
+    "license": "MIT",
+    "skillCount": 307,
+    "requiresReview": true
+  },
+  {
+    "id": "antigravity-awesome-skills",
+    "repository": "https://github.com/CKissinger1988/antigravity-awesome-skills.git",
+    "commit": "77a348f816d822b16f6ee9c3d72445ec92f70699",
+    "license": "MIT",
+    "skillCount": 2009,
+    "requiresReview": true
+  }
+]

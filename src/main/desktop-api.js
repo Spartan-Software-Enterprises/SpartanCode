@@ -1,4 +1,6 @@
 const { ipcMain, dialog, shell } = require("electron");
+const path = require("node:path");
+const fs = require("node:fs");
 const { getRuntimeStatus } = require("./runtime-status");
 const { gitStatusAt, gitInitAt, gitAddAt, gitCommitAt } = require("./git");
 const {
@@ -28,6 +30,11 @@ const { createGitHubAppClient } = require("./github-app");
 const { createApiGateway } = require("./api-providers");
 const { createBrowserAutomation } = require("./browser-automation");
 const {
+  discoverSkills,
+  listExternalSkillSources,
+  loadSkill,
+} = require("./skill-registry");
+const {
   estimateServerCost,
   getRouterGuidance,
   listServerProviders,
@@ -44,6 +51,7 @@ function registerDesktopApi({
   githubEnvironment = process.env,
   providerEnvironment = process.env,
   previewWindow = null,
+  memoryStore = null,
 }) {
   const voiceService = createVoiceService();
   const chatService = createChatService(store);
@@ -64,6 +72,50 @@ function registerDesktopApi({
   ipcMain.handle("browser:run", (_event, request) =>
     browserAutomation.run(request),
   );
+  ipcMain.handle("skills:sources", () => listExternalSkillSources());
+  const skillRoots = () => {
+    const workspace = store.snapshot().settings.workspacePath;
+    const externalRoot =
+      workspace && path.join(workspace, ".spartancode", "external-skills");
+    const checkedOutRoots =
+      externalRoot && fs.existsSync(externalRoot)
+        ? fs
+            .readdirSync(externalRoot, { withFileTypes: true })
+            .filter((entry) => entry.isDirectory())
+            .map((entry) => path.join(externalRoot, entry.name, "skills"))
+        : [];
+    return [
+      ...checkedOutRoots,
+      ...String(process.env.SPARTANCODE_SKILL_ROOTS || "")
+        .split(path.delimiter)
+        .filter(Boolean),
+    ].filter(Boolean);
+  };
+  ipcMain.handle("skills:list", () => {
+    return discoverSkills(skillRoots()).map(
+      ({ path: _path, ...skill }) => skill,
+    );
+  });
+  ipcMain.handle("skills:load", (_event, skillId) => {
+    if (typeof skillId !== "string" || skillId.length > 96)
+      throw new Error("Skill id is required");
+    const skill = discoverSkills(skillRoots()).find(
+      (item) => item.id === skillId,
+    );
+    if (!skill) throw new Error("Skill was not found in a configured source");
+    return loadSkill(skill);
+  });
+  ipcMain.handle(
+    "memory:status",
+    () => memoryStore?.status() || { enabled: false },
+  );
+  ipcMain.handle("memory:add", (_event, input) => memoryStore.add(input));
+  ipcMain.handle("memory:list", () => memoryStore.list());
+  ipcMain.handle("memory:search", (_event, query, limit) =>
+    memoryStore.search(query, limit),
+  );
+  ipcMain.handle("memory:delete", (_event, id) => memoryStore.delete(id));
+  ipcMain.handle("memory:clear", () => memoryStore.clear());
   ipcMain.handle("runtime:generate", (_event, runtimeId, request) => {
     if (typeof runtimeId !== "string" || !runtimeId.trim())
       throw new Error("Runtime id is required");
@@ -223,6 +275,13 @@ function registerDesktopApi({
   ipcMain.handle("chat:history", () => chatService.history());
   ipcMain.handle("chat:send", (_event, content) => {
     const result = chatService.send(content);
+    if (store.snapshot().settings.memoryEnabled !== false) {
+      try {
+        memoryStore?.add({ content: String(content), source: "chat" });
+      } catch {
+        // Secret-like or unavailable memory content is intentionally skipped.
+      }
+    }
     window.webContents.send("workspace:changed", store.snapshot());
     return result;
   });

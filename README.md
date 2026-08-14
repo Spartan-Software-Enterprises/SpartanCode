@@ -26,6 +26,9 @@ The broader automation roadmap—including Windows system adapters, autonomous
 execution, personas and voice, GUI/browser automation, privacy-network adapters,
 and encrypted RAG memory—is documented in
 [docs/AUTOMATION_CAPABILITIES.md](docs/AUTOMATION_CAPABILITIES.md).
+External Antigravity and cybersecurity skill sources are integrated through a
+pinned, review-gated registry; see [docs/EXTERNAL_SKILLS.md](docs/EXTERNAL_SKILLS.md).
+Encrypted local memory is documented in [docs/LOCAL_MEMORY.md](docs/LOCAL_MEMORY.md).
 
 SpartanCode is local-first and standalone by design: Android users do not need
 the desktop app, a bridge, or a network connection to plan, queue, review, and

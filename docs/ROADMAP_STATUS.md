@@ -14,6 +14,13 @@ behavior and a corresponding automated or documented verification path.
   and text extraction with explicit domain allowlists, timeout/text limits,
   download blocking, redacted activity evidence, and honest Chromium
   availability reporting.
+- Three requested external skill repositories are pinned in
+  `config/external-skills.json`, can be synchronized with `npm run skills:sync`,
+  and are indexed through a metadata-only registry that marks risky or
+  unlicensed content for review without executing imported scripts.
+- Encrypted local vector memory is implemented with bounded records, secret-like
+  content rejection, OS-backed vault encryption, retrieval, deletion, clear,
+  and a user-facing enable/disable setting.
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped
   Electron, renderer, and Android guidance; desktop Settings opens its official
   GitHub App login flow without storing CodeRabbit credentials.

@@ -1547,6 +1547,15 @@
         <div class="settings-runtime-grid" id="settingsRuntimeStatus">
           Loading runtime, provider, and capability status…
         </div>
+        <div class="toggle-row">
+          <span>
+            <strong>Remember useful interactions</strong><br />
+            <small style="color: var(--muted)"
+              >Encrypted local memory; secret-like text is skipped.</small
+            >
+          </span>
+          <input type="checkbox" id="memoryEnabled" />
+        </div>
         <div class="setting-group">
           <label for="quantizationSelect">Quantization</label
           ><select id="quantizationSelect">
@@ -1911,6 +1920,7 @@
           capabilities,
           providers,
           browser,
+          memory,
           voice,
           agents,
           plugins,
@@ -1924,6 +1934,7 @@
           window.spartanCode.getCapabilities(),
           window.spartanCode.getProviderStatus(),
           window.spartanCode.getBrowserStatus(),
+          window.spartanCode.getMemoryStatus(),
           window.spartanCode.getVoiceStatus(),
           window.spartanCode.listAgents(),
           window.spartanCode.listPlugins(),
@@ -1941,6 +1952,12 @@
           settingsStatusRow(
             "Playwright browser",
             `${browser.status} · ${browser.allowlistConfigured ? "allowlist configured" : "allowlist required"}`,
+          ),
+          settingsStatusRow(
+            "Encrypted local memory",
+            memory.enabled
+              ? `${memory.entries} entries · ${memory.dimensions}D`
+              : "Unavailable",
           ),
           ...runtime.runtimes.map((item) =>
             settingsStatusRow(
@@ -2225,6 +2242,8 @@
                 document.getElementById("executionModeSelect").value =
                   settings.executionMode || "guided";
                 voiceToggle.checked = Boolean(settings.voiceEnabled);
+                document.getElementById("memoryEnabled").checked =
+                  settings.memoryEnabled !== false;
                 const connection = connections?.[0];
                 document.getElementById("connectionName").value =
                   connection?.name || "";
@@ -2566,6 +2585,7 @@
               document.getElementById("defaultAgentSelect").value || "leo",
             apiProvider:
               document.getElementById("apiProviderSelect").value || "local",
+            memoryEnabled: document.getElementById("memoryEnabled").checked,
           });
           const connection =
             profile.name && profile.host
