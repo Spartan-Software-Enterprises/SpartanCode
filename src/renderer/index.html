@@ -1502,6 +1502,36 @@
             Check Git status
           </button>
         </div>
+        <details class="settings-advanced">
+          <summary>Review and commit workspace changes</summary>
+          <p>
+            Review the current workspace, optionally get a concise provider
+            suggestion, then stage and commit explicitly.
+          </p>
+          <div class="setting-group">
+            <label for="gitCommitMessage">Commit message</label>
+            <input
+              id="gitCommitMessage"
+              maxlength="72"
+              placeholder="Describe the change"
+            />
+          </div>
+          <div class="settings-inline-actions">
+            <button type="button" class="context-button" id="gitSuggestMessage">
+              Suggest message
+            </button>
+            <button type="button" class="context-button" id="gitStageChanges">
+              Stage changes
+            </button>
+            <button type="button" class="context-button" id="gitCommitChanges">
+              Commit staged changes
+            </button>
+          </div>
+          <small
+            id="gitWorkflowMessage"
+            style="display: block; color: var(--muted)"
+          ></small>
+        </details>
         <div class="settings-group-heading">Intelligence & runtime</div>
         <div class="setting-group">
           <label for="modelSelect">Default local model</label
@@ -2541,14 +2571,59 @@
         });
       document
         .getElementById("settingsGitStatus")
-        .addEventListener("click", () => {
-          window.spartanCode
-            ?.getGitStatus()
-            .then((result) =>
-              showToast(
-                result.available ? "Git workspace is ready" : result.message,
-              ),
-            );
+        .addEventListener("click", async () => {
+          const result = await window.spartanCode?.getGitStatus();
+          if (!result) return;
+          document.getElementById("gitWorkflowMessage").textContent =
+            result.available ? result.output : result.message;
+          showToast(result.available ? "Git status refreshed" : result.message);
+        });
+      document
+        .getElementById("gitSuggestMessage")
+        .addEventListener("click", async () => {
+          const status = document.getElementById("gitWorkflowMessage");
+          status.textContent =
+            "Generating a suggestion from the redacted diff…";
+          try {
+            const provider =
+              document.getElementById("apiProviderSelect").value || "local";
+            const result =
+              await window.spartanCode.gitSuggestCommitMessage(provider);
+            document.getElementById("gitCommitMessage").value = result.message;
+            status.textContent =
+              "Suggestion ready. Review it before committing.";
+          } catch (error) {
+            status.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("gitStageChanges")
+        .addEventListener("click", async () => {
+          const status = document.getElementById("gitWorkflowMessage");
+          try {
+            const result = await window.spartanCode.gitStage();
+            status.textContent = result.output || "Workspace changes staged.";
+          } catch (error) {
+            status.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("gitCommitChanges")
+        .addEventListener("click", async () => {
+          const message = document
+            .getElementById("gitCommitMessage")
+            .value.trim();
+          const status = document.getElementById("gitWorkflowMessage");
+          if (!message) {
+            status.textContent = "Enter or generate a commit message first.";
+            return;
+          }
+          try {
+            const result = await window.spartanCode.gitCommit(message);
+            status.textContent = result.output || "Commit created.";
+          } catch (error) {
+            status.textContent = error.message;
+          }
         });
       document
         .getElementById("settingsExportAudit")
