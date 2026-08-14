@@ -66,6 +66,11 @@ current Implemented/Partial/Open counts.
   state, voice dictation, biometric secret gating, audit activity, tablet and
   landscape layout support. Offline mission creation persists a local plan
   artifact and audit evidence without requiring a desktop or bridge.
+- Android now has a phone-only project workspace: users can create and persist
+  projects targeting Android, iOS, Windows, macOS, Linux, web, or a custom
+  device/OS, then record build, verification, and packaging evidence locally.
+  The release checklist is explicit about target-specific compilation and does
+  not claim an unavailable compiler ran on the phone.
 - Android settings now persist Leo persona and wake-word preferences alongside
   execution, quantization, voice-input, and sync controls with bounded local
   values.

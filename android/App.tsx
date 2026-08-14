@@ -43,11 +43,13 @@ import {
   resolveMobileSettings,
   updateMobileScopedSettings,
   readCollaborationSessions,
+  readMobileProjects,
   saveBridgeToken,
   writeSnapshot,
   writeBiometricSetting,
   writeMobileSettings,
   writeCollaborationSessions,
+  writeMobileProjects,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
 import type { MobileSettings } from "./src/core/storage";
@@ -85,6 +87,13 @@ import { loadLlamaRnRuntime } from "./src/core/llama-rn-runtime";
 import { normalizeSpeechText } from "./src/core/voice";
 import { getOfflineCryptoStatus } from "./src/core/secure-offline-store";
 import {
+  createMobileProject,
+  projectTargets,
+  releaseTargetLabel,
+  setReleaseCheck,
+} from "./src/core/project-release";
+import type { MobileProject } from "./src/core/project-release";
+import {
   gitRoute,
   normalizeGitOutput,
   validateGitCommitMessage,
@@ -105,6 +114,11 @@ export default function App() {
   const [token, setToken] = useState("");
   const [pairingPayload, setPairingPayload] = useState("");
   const [mission, setMission] = useState("");
+  const [projects, setProjects] = useState<MobileProject[]>([]);
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [projectTarget, setProjectTarget] =
+    useState<(typeof projectTargets)[number]>("android");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Offline-first workspace");
   const [remoteProvider, setRemoteProvider] =
@@ -244,6 +258,7 @@ export default function App() {
       readSnapshot(),
       readBiometricSetting(),
       readCollaborationSessions(),
+      readMobileProjects(),
       readMobileSettings(),
     ])
       .then(
@@ -251,16 +266,57 @@ export default function App() {
           savedSnapshot,
           savedBiometric,
           savedCollaboration,
+          savedProjects,
           savedSettings,
         ]) => {
           setSnapshot(savedSnapshot);
           setBiometricEnabled(savedBiometric);
           setCollaborationSessions(savedCollaboration);
+          setProjects(savedProjects);
           setMobileSettings(savedSettings);
         },
       )
       .finally(() => setLoading(false));
   }, []);
+
+  const createProject = useCallback(async () => {
+    try {
+      const project = createMobileProject(
+        projectName,
+        projectDescription,
+        projectTarget,
+      );
+      const next = [project, ...projects];
+      await writeMobileProjects(next);
+      setProjects(next);
+      setProjectName("");
+      setProjectDescription("");
+      setMessage(
+        `${project.name} created for ${releaseTargetLabel(project.target)} · offline release plan ready`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Unable to create project",
+      );
+    }
+  }, [projectDescription, projectName, projectTarget, projects]);
+
+  const updateProjectCheck = useCallback(
+    async (project: MobileProject, check: keyof MobileProject["checks"]) => {
+      const next = projects.map((item) =>
+        item.id === project.id ? setReleaseCheck(item, check) : item,
+      );
+      await writeMobileProjects(next);
+      setProjects(next);
+      const updated = next.find((item) => item.id === project.id);
+      setMessage(
+        updated?.releaseStatus === "ready"
+          ? `${project.name} has a complete release checklist`
+          : `${project.name}: ${check} evidence recorded locally`,
+      );
+    },
+    [projects],
+  );
 
   const refresh = useCallback(async () => {
     setMessage("Connecting…");
@@ -749,6 +805,92 @@ export default function App() {
             every approval visible before an agent changes your workspace.
           </Text>
           <Text style={styles.message}>{workloadLabelText}</Text>
+        </View>
+
+        <Text style={styles.section}>Create a releaseable project</Text>
+        <View style={styles.card}>
+          <Text style={styles.message}>
+            Build from this phone for any supported device or operating system.
+            Desktop, server, and bridge connections are optional.
+          </Text>
+          <TextInput
+            accessibilityLabel="Project name"
+            placeholder="Project name"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={projectName}
+            onChangeText={setProjectName}
+          />
+          <TextInput
+            accessibilityLabel="Project description"
+            placeholder="What should this product do?"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={projectDescription}
+            onChangeText={setProjectDescription}
+            multiline
+          />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {projectTargets.map((target) => (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Target ${releaseTargetLabel(target)}`}
+                key={target}
+                style={
+                  projectTarget === target ? styles.primary : styles.secondary
+                }
+                onPress={() => setProjectTarget(target)}
+              >
+                <Text
+                  style={
+                    projectTarget === target
+                      ? styles.primaryText
+                      : styles.secondaryText
+                  }
+                >
+                  {releaseTargetLabel(target)}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Create project"
+            style={styles.primary}
+            onPress={createProject}
+          >
+            <Text style={styles.primaryText}>Create project offline</Text>
+          </Pressable>
+          {projects.map((project) => (
+            <View key={project.id} style={styles.projectCard}>
+              <View style={styles.agentRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>{project.name}</Text>
+                  <Text style={styles.missionMeta}>
+                    {releaseTargetLabel(project.target)} ·{" "}
+                    {project.releaseStatus}
+                  </Text>
+                </View>
+                <Text style={styles.agentMode}>
+                  {project.releaseStatus === "ready" ? "RELEASE" : "PLAN"}
+                </Text>
+              </View>
+              {(["build", "verify", "package"] as const).map((check) => (
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: project.checks[check] }}
+                  accessibilityLabel={`${project.name} ${check} release check`}
+                  key={check}
+                  style={styles.checkRow}
+                  onPress={() => updateProjectCheck(project, check)}
+                >
+                  <Text style={styles.message}>
+                    {project.checks[check] ? "✓" : "○"} {check}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ))}
         </View>
 
         <Text style={styles.section}>New mission</Text>
@@ -1651,6 +1793,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 12,
     padding: 14,
+  },
+  projectCard: {
+    backgroundColor: "#0d1528",
+    borderColor: "#263657",
+    borderRadius: 14,
+    borderWidth: 1,
+    gap: 8,
+    padding: 12,
+  },
+  checkRow: {
+    borderBottomColor: "#202d4c",
+    borderBottomWidth: 1,
+    paddingVertical: 5,
   },
   input: {
     backgroundColor: "#0a1123",

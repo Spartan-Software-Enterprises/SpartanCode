@@ -6,6 +6,8 @@ import type {
   QueuedOperation,
 } from "./types";
 import type { MobileCollaborationSession } from "./collaboration";
+import type { MobileProject } from "./project-release";
+import { normalizeProject } from "./project-release";
 import { normalizeCollaborationSessions } from "./collaboration";
 import {
   getOfflineCryptoStatus,
@@ -33,6 +35,7 @@ const BIOMETRIC_SETTING_KEY = "spartancode.mobile.biometric-unlock.v1";
 const MOBILE_SETTINGS_KEY = "spartancode.mobile.settings.v1";
 const MOBILE_SETTINGS_LAYERS_KEY = "spartancode.mobile.settings-layers.v1";
 const COLLABORATION_KEY = "spartancode.mobile.collaboration.v1";
+const PROJECTS_KEY = "spartancode.mobile.projects.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
 
 export type MobileSettings = {
@@ -288,6 +291,24 @@ export async function writeCollaborationSessions(
   sessions: MobileCollaborationSession[],
 ) {
   await AsyncStorage.setItem(COLLABORATION_KEY, JSON.stringify(sessions));
+}
+
+export async function readMobileProjects(): Promise<MobileProject[]> {
+  try {
+    const raw = await AsyncStorage.getItem(PROJECTS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed
+          .map(normalizeProject)
+          .filter((item): item is MobileProject => !!item)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function writeMobileProjects(projects: MobileProject[]) {
+  await AsyncStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
 }
 
 export async function readBiometricSetting() {

@@ -13,6 +13,13 @@ The desktop application and MCP Bridge are optional enhancements, never
 requirements. Android-only users must retain bundled agent roles, local
 planning, durable queues, artifact review, and policy-visible state offline.
 
+The phone is also a complete project-control surface: users can create a
+project without a bridge, select Android, iOS, Windows, macOS, Linux, web, or
+custom device/OS targets, and retain a local release checklist for build,
+verification, and packaging evidence. Remote builders and desktop/server
+tooling may accelerate target-specific steps but are not prerequisites for
+creating or managing the product.
+
 ## Phase 1 — Foundation and parity
 
 - Ship Expo/React Native navigation and a responsive phone/tablet shell.
@@ -100,6 +107,12 @@ When an Android-only user queues a mission offline, the app now persists an
 explicit local plan artifact, activity entry, and audit event. The evidence
 records that build and verification are queued; it does not misrepresent local
 planning as completed code execution.
+
+The Android command center now creates and persists target-independent project
+records offline. Each project starts with a local plan and exposes explicit
+build, verify, and package checks; the UI reports `release-ready` only after
+all checks are recorded and never implies that an unavailable target compiler
+ran locally.
 
 Biometric unlock is opt-in and gates bridge-secret access through the device's
 biometric/passcode prompt. Raw biometric data never enters the app; if hardware
