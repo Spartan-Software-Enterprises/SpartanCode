@@ -1,0 +1,28 @@
+{
+  "name": "spartancode-vscode",
+  "displayName": "SpartanCode",
+  "description": "Sync a VS Code workspace with the optional SpartanCode MCP Bridge.",
+  "version": "0.1.0",
+  "publisher": "Spartan-Software-Enterprises",
+  "engines": { "vscode": ">=1.85.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "SpartanCode",
+      "properties": {
+        "spartancode.bridgeUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8787",
+          "description": "Authenticated SpartanCode MCP Bridge URL. Keep this on a trusted local or private network."
+        }
+      }
+    },
+    "commands": [
+      { "command": "spartancode.setBridgeToken", "title": "SpartanCode: Set Bridge Token" },
+      { "command": "spartancode.syncSnapshot", "title": "SpartanCode: Sync Workspace Snapshot" },
+      { "command": "spartancode.startMissionFromSelection", "title": "SpartanCode: Start Mission From Selection" }
+    ]
+  }
+}

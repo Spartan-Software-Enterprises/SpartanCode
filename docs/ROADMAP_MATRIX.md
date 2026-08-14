@@ -34,7 +34,7 @@ should be presented as complete.
 | 23 | Plugin marketplace | Partial | Signed index and digest-verified staging exist; activation/update marketplace lifecycle remains gated |
 | 24 | Agent persona library | Implemented | Leo default plus bundled persona/custom-agent metadata |
 | 25 | Template library | Implemented | Offline-safe starter templates and Android extension metadata |
-| 26 | VS Code synchronization | Open | No VS Code extension or synchronization protocol is present |
+| 26 | VS Code synchronization | Partial | `extensions/vscode` provides authenticated snapshot sync and mission handoff; full editor parity and marketplace distribution remain open |
 | 27 | Audit viewer/transparency | Implemented | Desktop/Android audit activity and redacted export |
 | 28 | Documentation and onboarding | Implemented | README, About surfaces, feature docs, verification matrix, and release docs |
 | 29 | Beta release/feedback loop | Partial | Release-evidence and CI foundations exist; public beta operations and feedback loop remain open |
