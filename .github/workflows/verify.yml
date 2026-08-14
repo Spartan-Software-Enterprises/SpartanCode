@@ -86,12 +86,13 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
-      - run: |
+      - name: Install Android SDK packages
+        run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "platforms;android-30" "build-tools;35.0.0"
       - run: npm ci
         working-directory: android
-      - name: Start bounded API 30 emulator
+      - name: Prepare and boot bounded API 30 emulator
         run: |
           set -euo pipefail
           export ANDROID_SDK_HOME="${HOME}/.spartancode-android-home"
@@ -100,7 +101,7 @@ jobs:
           if [ -e /dev/kvm ]; then
             sudo chmod 666 /dev/kvm
           fi
-          timeout 900s sdkmanager "emulator" "system-images;android-30;default;x86_64"
+          timeout 300s sdkmanager "emulator" "system-images;android-30;default;x86_64"
           echo no | avdmanager create avd \
             --name spartancode-ci \
             --package "system-images;android-30;default;x86_64" \
@@ -135,7 +136,7 @@ jobs:
             "$ANDROID_HOME/build-tools/35.0.0" "$HOME/.m2" \
             android/android/.gradle "$ANDROID_HOME/ndk" \
             "$ANDROID_HOME/cmake"
-          timeout 900s "${ANDROID_HOME}/emulator/emulator" \
+          timeout 600s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
             -partition-size 2048 \
             -no-window -no-audio -no-boot-anim -no-snapshot \
