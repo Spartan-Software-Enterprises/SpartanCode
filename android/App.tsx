@@ -387,16 +387,51 @@ export default function App() {
       const next = [updated, ...collaborationSessions.slice(1)];
       await writeCollaborationSessions(next);
       setCollaborationSessions(next);
-      setMessage(`Event appended at revision ${updated.revision}`);
+      const event = updated.events[updated.events.length - 1];
+      if (!snapshot.offline && endpoint.trim() && event) {
+        const path = `/v1/collaboration/sessions/${encodeURIComponent(session.id)}/events`;
+        try {
+          await authorizedBridgeRequest(
+            normalizeBridgeEndpoint(endpoint),
+            path,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                event,
+                options: { expectedRevision: session.revision },
+              }),
+              headers: { "Idempotency-Key": `collaboration-event:${event.id}` },
+            },
+          );
+          setMessage(
+            `Event appended and synced at revision ${updated.revision}`,
+          );
+        } catch (error) {
+          await enqueueOperation({
+            idempotencyKey: `collaboration-event:${event.id}`,
+            method: "POST",
+            path,
+            body: { event, options: { expectedRevision: session.revision } },
+          });
+          setMessage(
+            `Event saved locally; bridge retry queued (${error instanceof Error ? error.message : "sync failed"})`,
+          );
+        }
+      } else {
+        setMessage(`Event appended at revision ${updated.revision}`);
+      }
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Unable to append event",
       );
     }
   }, [
+    authorizedBridgeRequest,
     collaborationEventPayload,
     collaborationEventType,
     collaborationSessions,
+    endpoint,
+    snapshot.offline,
   ]);
 
   const updateMobileSettings = useCallback(

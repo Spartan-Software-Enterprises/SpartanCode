@@ -74,8 +74,8 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
   without overriding them and surfaces the resulting accessibility state.
 - Android now has a local collaboration session surface with validated
   persistence, revision-checked local event append, and optional bridge
-  publication/remote-session merge; physical cross-device acceptance remains
-  open.
+  publication with idempotent retry queuing/remote-session merge; physical
+  cross-device acceptance remains open.
 - Android now has a typed MLC Chat/PocketPal/llama.cpp native-module registry
   that checks device-compatible licensed models before invocation and reports
   missing modules honestly. The MIT-licensed `@pocketpalai/llama.rn` package is
