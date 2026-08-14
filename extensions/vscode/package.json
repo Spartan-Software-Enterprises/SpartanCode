@@ -4,9 +4,15 @@
   "description": "Sync a VS Code workspace with the optional SpartanCode MCP Bridge.",
   "version": "0.1.0",
   "publisher": "Spartan-Software-Enterprises",
-  "engines": { "vscode": ">=1.85.0" },
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished"],
+  "engines": {
+    "vscode": ">=1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./extension.js",
   "contributes": {
     "configuration": {
@@ -20,9 +26,18 @@
       }
     },
     "commands": [
-      { "command": "spartancode.setBridgeToken", "title": "SpartanCode: Set Bridge Token" },
-      { "command": "spartancode.syncSnapshot", "title": "SpartanCode: Sync Workspace Snapshot" },
-      { "command": "spartancode.startMissionFromSelection", "title": "SpartanCode: Start Mission From Selection" }
+      {
+        "command": "spartancode.setBridgeToken",
+        "title": "SpartanCode: Set Bridge Token"
+      },
+      {
+        "command": "spartancode.syncSnapshot",
+        "title": "SpartanCode: Sync Workspace Snapshot"
+      },
+      {
+        "command": "spartancode.startMissionFromSelection",
+        "title": "SpartanCode: Start Mission From Selection"
+      }
     ]
   }
 }
