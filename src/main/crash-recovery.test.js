@@ -3,7 +3,11 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
-const { createCrashReporter, redact } = require("./crash-recovery");
+const {
+  createCrashReporter,
+  createRendererRecoveryController,
+  redact,
+} = require("./crash-recovery");
 
 test("crash reporter redacts credential-like values", () => {
   const text = redact(
@@ -35,4 +39,35 @@ test("crash reporter keeps bounded atomic diagnostic history", () => {
     false,
   );
   fs.rmSync(directory, { recursive: true, force: true });
+});
+
+test("renderer recovery reloads a bounded number of times and then fails closed", () => {
+  const records = [];
+  let reloads = 0;
+  const controller = createRendererRecoveryController({
+    reporter: { record: (...entry) => records.push(entry) },
+    reload: () => {
+      reloads += 1;
+    },
+    maxAttempts: 2,
+  });
+
+  assert.deepEqual(controller.handle({ reason: "crashed" }), {
+    reloaded: true,
+    exhausted: false,
+  });
+  assert.deepEqual(controller.handle({ reason: "crashed" }), {
+    reloaded: true,
+    exhausted: false,
+  });
+  assert.deepEqual(controller.handle({ reason: "crashed" }), {
+    reloaded: false,
+    exhausted: true,
+  });
+  assert.equal(reloads, 2);
+  assert.equal(records.at(-1)[0], "renderer-recovery-exhausted");
+
+  controller.reset();
+  assert.equal(controller.handle({ reason: "clean-exit" }).reloaded, false);
+  assert.equal(reloads, 2);
 });

@@ -57,4 +57,36 @@ function createCrashReporter(filePath, dependencies = {}) {
   return { read, record };
 }
 
-module.exports = { createCrashReporter, redact };
+function createRendererRecoveryController({
+  reporter,
+  reload,
+  maxAttempts = 3,
+}) {
+  let attempts = 0;
+
+  return {
+    handle(details = {}) {
+      reporter.record("renderer-process-gone", details);
+      if (details.reason === "clean-exit")
+        return { reloaded: false, exhausted: false };
+      if (attempts >= maxAttempts) {
+        reporter.record("renderer-recovery-exhausted", {
+          reason: details.reason,
+        });
+        return { reloaded: false, exhausted: true };
+      }
+      attempts += 1;
+      reload();
+      return { reloaded: true, exhausted: false };
+    },
+    reset() {
+      attempts = 0;
+    },
+  };
+}
+
+module.exports = {
+  createCrashReporter,
+  createRendererRecoveryController,
+  redact,
+};

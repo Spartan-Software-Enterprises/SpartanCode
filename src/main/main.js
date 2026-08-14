@@ -11,7 +11,10 @@ const { createSecureVault } = require("./secure-vault");
 const { apiProviders } = require("./api-providers");
 const { createPreviewWindow } = require("./preview-window");
 const { createMemoryStore } = require("./memory-store");
-const { createCrashReporter } = require("./crash-recovery");
+const {
+  createCrashReporter,
+  createRendererRecoveryController,
+} = require("./crash-recovery");
 const { gitStatusAt, gitDiffAt, gitAddAt, gitCommitAt } = require("./git");
 
 function createWindow(crashReporter) {
@@ -32,10 +35,15 @@ function createWindow(crashReporter) {
   win.webContents.on("will-navigate", (event, url) => {
     if (url !== win.webContents.getURL()) event.preventDefault();
   });
+  const rendererRecovery = createRendererRecoveryController({
+    reporter: crashReporter,
+    reload: () => {
+      if (!win.isDestroyed())
+        win.loadFile(path.join(__dirname, "../renderer/index.html"));
+    },
+  });
   win.webContents.on("render-process-gone", (_event, details) => {
-    crashReporter.record("renderer-process-gone", details);
-    if (details.reason !== "clean-exit" && !win.isDestroyed())
-      win.loadFile(path.join(__dirname, "../renderer/index.html"));
+    rendererRecovery.handle(details);
   });
   win.webContents.on("unresponsive", () => {
     crashReporter.record("renderer-unresponsive");
