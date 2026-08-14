@@ -102,9 +102,10 @@ security model:
    Emacs, Zed, and Sublime project/workspace metadata; it summarizes configuration
    structure without evaluating scripts. A bounded terminal-agent metadata
    importer also covers Aider, OpenCode, Cline, Continue, Roo, shared `AGENTS.md`,
-   Claude, Gemini, Windsurf, GitHub Copilot, and Cursor instruction/rule
-   formats through bounded files and rule directories without returning
-   credentials or executing agent commands. Remaining
+   Claude, Gemini, Windsurf, GitHub Copilot, Cursor, Codeium, Amazon Q, Kiro,
+   Augment, Goose, and Factory instruction/rule formats through bounded files
+   and rule directories without returning credentials or executing agent
+   commands. Remaining
    editor packages remain future work.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
    major agent APIs, and remote workers.

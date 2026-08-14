@@ -34,6 +34,32 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
     path.join(root, ".aider.conf.yml"),
     "api-key: secret-value\nmodel: local\n",
   );
+  fs.mkdirSync(path.join(root, ".codeium"));
+  fs.writeFileSync(
+    path.join(root, ".codeium/instructions.md"),
+    "secret codeium instructions",
+  );
+  fs.mkdirSync(path.join(root, ".amazonq/rules"), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, ".amazonq/rules/project.md"),
+    "secret q rule",
+  );
+  fs.mkdirSync(path.join(root, ".kiro/steering"), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, ".kiro/steering/project.md"),
+    "secret kiro steering",
+  );
+  fs.mkdirSync(path.join(root, ".augment/rules"), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, ".augment/rules/project.md"),
+    "secret augment rule",
+  );
+  fs.writeFileSync(path.join(root, ".goosehints"), "secret goose hints");
+  fs.mkdirSync(path.join(root, ".factory/rules"), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, ".factory/rules/project.md"),
+    "secret factory rule",
+  );
   fs.writeFileSync(path.join(root, "AGENTS.md"), "secret agent instructions");
   fs.writeFileSync(path.join(root, "CLAUDE.md"), "secret claude instructions");
   fs.writeFileSync(path.join(root, "GEMINI.md"), "secret gemini instructions");
@@ -57,7 +83,7 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
   const result = importEditorConfig(root);
   assert.equal(result.execution, "read-only");
   assert.equal(result.credentials, false);
-  assert.equal(result.files.length, 17);
+  assert.equal(result.files.length, 23);
   assert.equal(JSON.stringify(result).includes("secret-plugin"), false);
   assert.equal(
     result.files.find((file) => file.editor === "zed").summary.keyCount,
@@ -73,7 +99,7 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
   );
   assert.equal(
     result.files.filter((file) => file.editor === "terminal-agents").length,
-    11,
+    17,
   );
   assert.equal(JSON.stringify(result).includes("secret-value"), false);
   for (const secret of [
@@ -83,6 +109,12 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
     "secret windsurf rules",
     "secret copilot instructions",
     "secret cursor rule",
+    "secret codeium instructions",
+    "secret q rule",
+    "secret kiro steering",
+    "secret augment rule",
+    "secret goose hints",
+    "secret factory rule",
   ]) {
     assert.equal(JSON.stringify(result).includes(secret), false);
   }

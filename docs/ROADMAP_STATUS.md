@@ -270,7 +270,8 @@ current Implemented/Partial/Open counts.
   Eclipse and Xcode/Swift Package project metadata plus Neovim/Vim/Emacs/Zed
   configuration metadata, including bounded Sublime project/workspace and
   terminal-agent summaries for Aider, OpenCode, Cline, Continue, Roo, AGENTS.md,
-  Claude, Gemini, Windsurf, GitHub Copilot, and Cursor formats, redaction,
+  Claude, Gemini, Windsurf, GitHub Copilot, Cursor, Codeium, Amazon Q, Kiro,
+  Augment, Goose, and Factory formats, redaction,
   signing-metadata rejection, symlink rejection, and no-execution guarantees;
   the remaining ecosystem importers and governance remain next. See
   `docs/EXTENSION_CONNECTOR_COMPATIBILITY.md`.
