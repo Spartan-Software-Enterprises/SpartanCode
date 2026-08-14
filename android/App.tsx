@@ -79,6 +79,7 @@ import { approvalGestureDecision } from "./src/core/gesture";
 import { createMobileRuntimeRegistry } from "./src/core/local-runtime";
 import { loadLlamaRnRuntime } from "./src/core/llama-rn-runtime";
 import { normalizeSpeechText } from "./src/core/voice";
+import { getOfflineCryptoStatus } from "./src/core/secure-offline-store";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -111,6 +112,7 @@ export default function App() {
     personaName: "Leo",
     wakeWord: "Leo",
   });
+  const offlineCryptoStatus = useMemo(() => getOfflineCryptoStatus(), []);
   const [recognizing, setRecognizing] = useState(false);
   const [collaborationName, setCollaborationName] = useState("Android roadmap");
   const [collaborationSessions, setCollaborationSessions] = useState<
@@ -875,6 +877,12 @@ export default function App() {
             Missions, settings, and offline project state stay in app-private
             storage. GitHub is optional; bridge tokens use Android Keystore
             storage and can be protected by biometrics above.
+          </Text>
+          <Text style={styles.missionMeta}>
+            Encrypted offline content:{" "}
+            {offlineCryptoStatus.enabled
+              ? "available"
+              : `unavailable (${offlineCryptoStatus.reason})`}
           </Text>
           <View style={styles.toggleRow}>
             <View style={styles.missionBody}>

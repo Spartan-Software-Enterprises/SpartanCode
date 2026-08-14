@@ -63,6 +63,10 @@ behavior and a corresponding automated or documented verification path.
   values.
 - Android now includes an optional Expo Speech output adapter with bounded
   voice-test text and a visible unavailable/error fallback.
+- Android now includes a SecureStore-key-backed AES-256-GCM offline-content
+  primitive with tamper detection, bounded payloads, cleanup, and automated
+  tests; migration of all legacy AsyncStorage snapshot data remains a tracked
+  release-hardening step.
 - Android reads system reduced-motion, font-scale, and screen-reader settings
   without overriding them and surfaces the resulting accessibility state.
 - Android now has a local collaboration session surface with validated

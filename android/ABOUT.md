@@ -58,6 +58,9 @@ The Android companion keeps high-value controls reachable on a phone:
 - workspace-safe bridge token cleanup, connection controls, remote planning,
   router guidance, and offline audit visibility;
 - app-private local project state with Android Keystore-backed bridge secrets;
+- an AES-256-GCM encrypted offline-content primitive with a device-key-backed
+  SecureStore key, tamper detection, size bounds, and truthful unavailable
+  status when the platform crypto runtime is missing;
 - artifact and approval review without requiring the desktop app.
 
 ![Android command center](../android/screenshots/command-center.png)
