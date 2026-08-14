@@ -35,6 +35,7 @@ const {
   importVisualStudioProject,
 } = require("./visual-studio-project-importer");
 const { importEclipseProject } = require("./eclipse-project-importer");
+const { importXcodeProject } = require("./xcode-project-importer");
 const { writeDevContainerConfig } = require("./devcontainer");
 const { createModelCache } = require("./model-cache");
 const {
@@ -482,6 +483,14 @@ function registerDesktopApi({
       projectPath || ".",
     );
     return importEclipseProject(approvedProject);
+  });
+  ipcMain.handle("xcode:project-import", (_event, projectPath) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    const approvedProject = resolveInsideWorkspace(
+      workspacePath,
+      projectPath || ".",
+    );
+    return importXcodeProject(approvedProject);
   });
   ipcMain.handle("devcontainer:generate", (_event, projectPath, options) => {
     const workspacePath = store.snapshot().settings.workspacePath;

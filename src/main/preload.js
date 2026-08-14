@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("visual-studio:project-import", projectPath),
   importEclipseProject: (projectPath) =>
     ipcRenderer.invoke("eclipse:project-import", projectPath),
+  importXcodeProject: (projectPath) =>
+    ipcRenderer.invoke("xcode:project-import", projectPath),
   generateDevContainer: (projectPath, options) =>
     ipcRenderer.invoke("devcontainer:generate", projectPath, options),
   listCollaborationSessions: () => ipcRenderer.invoke("collaboration:list"),

@@ -132,3 +132,30 @@ test("adapter manifest accepts the declarative Eclipse importer", () => {
   assert.equal(manifest.execution.network, false);
   assert.equal(manifest.targets.eclipse, "available");
 });
+
+test("adapter manifest accepts the declarative Xcode importer", () => {
+  const manifest = normalizeAdapterManifest({
+    ...base,
+    id: "xcode-project",
+    kind: "connector",
+    name: "Xcode project importer",
+    status: "available",
+    hosts: ["macos", "linux", "windows"],
+    targets: { xcode: "available", swiftpm: "available" },
+    operations: ["inspect", "import"],
+    requirements: ["xcode-project-directory"],
+    execution: {
+      mode: "declarative",
+      shell: false,
+      network: false,
+      credentials: false,
+    },
+    testCoverage: [
+      "pbxproj-metadata",
+      "signing-rejection",
+      "symlink-rejection",
+    ],
+  });
+  assert.equal(manifest.execution.credentials, false);
+  assert.equal(manifest.targets.swiftpm, "available");
+});
