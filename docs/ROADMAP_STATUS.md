@@ -27,6 +27,8 @@ behavior and a corresponding automated or documented verification path.
 - A cross-platform GUI automation status contract reports Windows UI Automation
   and PyAutoGUI availability without enabling arbitrary screen control; actions
   remain review-required until a capability-specific audited adapter exists.
+- A bounded native text-to-speech adapter exposes fixed platform commands,
+  length limits, and truthful missing-runtime status through isolated IPC.
 - A privacy-network adapter reports Tor/Proton configuration without exposing
   credentials and refuses to silently reroute traffic.
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped
@@ -53,6 +55,9 @@ behavior and a corresponding automated or documented verification path.
   state, voice dictation, biometric secret gating, audit activity, tablet and
   landscape layout support. Offline mission creation persists a local plan
   artifact and audit evidence without requiring a desktop or bridge.
+- Android settings now persist Leo persona and wake-word preferences alongside
+  execution, quantization, voice-input, and sync controls with bounded local
+  values.
 - Android reads system reduced-motion, font-scale, and screen-reader settings
   without overriding them and surfaces the resulting accessibility state.
 - Android now has a local collaboration session surface with validated
