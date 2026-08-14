@@ -105,7 +105,7 @@ jobs:
           # AVD bounded while leaving enough space for install and launch.
           avd_config="$ANDROID_AVD_HOME/spartancode-ci.avd/config.ini"
           sed -i '/^disk\.dataPartition\.size=/d' "$avd_config"
-          printf '%s\n' 'disk.dataPartition.size=2G' >> "$avd_config"
+          printf '%s\n' 'disk.dataPartition.size=2147483648' >> "$avd_config"
           cd android
           npx expo prebuild --platform android --no-install
           cd android
