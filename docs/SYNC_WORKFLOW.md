@@ -44,7 +44,8 @@ git pull --ff-only origin main
 `scripts/verify-sync.sh` automatically loads the local profile at
 `${XDG_CONFIG_HOME:-$HOME/.config}/spartancode/remote.env` when
 `SPARTANCODE_REMOTE_HOST` is not already exported. Explicit environment values
-remain authoritative, and the profile itself is never committed.
+remain authoritative; only the three expected `export SPARTANCODE_REMOTE_*=`
+fields are read, and the profile itself is never executed or committed.
 
 If the worktree is not clean, preserve the local changes in a commit or a
 clearly named backup branch before pulling. Do not use `git reset --hard` or

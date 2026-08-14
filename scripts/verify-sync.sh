@@ -4,9 +4,21 @@ set -euo pipefail
 if [ -z "${SPARTANCODE_REMOTE_HOST:-}" ]; then
   remote_profile="${SPARTANCODE_REMOTE_PROFILE:-${XDG_CONFIG_HOME:-$HOME/.config}/spartancode/remote.env}"
   if [ -r "$remote_profile" ]; then
-    # This file contains only the active host, user, and private-key path.
-    # Explicitly exported variables remain authoritative when present.
-    . "$remote_profile"
+    # Read only the active host, user, and private-key path. Do not source the
+    # profile as shell code. Explicitly exported variables remain authoritative.
+    while IFS= read -r profile_line || [ -n "$profile_line" ]; do
+      case "$profile_line" in
+        "export SPARTANCODE_REMOTE_HOST="*)
+          SPARTANCODE_REMOTE_HOST="${profile_line#*=}"
+          ;;
+        "export SPARTANCODE_REMOTE_USER="*)
+          SPARTANCODE_REMOTE_USER="${profile_line#*=}"
+          ;;
+        "export SPARTANCODE_REMOTE_KEY="*)
+          SPARTANCODE_REMOTE_KEY="${profile_line#*=}"
+          ;;
+      esac
+    done < "$remote_profile"
   fi
 fi
 
