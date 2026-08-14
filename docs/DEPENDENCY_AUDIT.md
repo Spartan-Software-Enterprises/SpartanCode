@@ -10,7 +10,8 @@ non-breaking automatic update; `npm audit fix --force` proposes an Expo major
 upgrade. That upgrade is intentionally not applied without a compatibility
 pass and new Android emulator evidence.
 
-Android release remains gated on a reviewed dependency upgrade plan, physical
+The signed artifact pipeline may be exercised, but public Android beta
+distribution remains gated on a reviewed dependency upgrade plan, physical
 device validation, and signed-artifact review. CI treats the existing lockfile
 as authoritative and records this audit status rather than hiding it behind a
 forced upgrade.

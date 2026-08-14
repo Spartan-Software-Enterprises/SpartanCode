@@ -140,25 +140,32 @@ The desktop now includes an opt-in MCP Bridge HTTP adapter. Set
 validated snapshots and approval-gated mutation routes. It binds to localhost
 by default; remote access requires an explicit secure network boundary.
 
-## Phase 3 — Device intelligence and extensibility
+## Phase 3 — Device intelligence and extensibility (implemented)
 
-- Detect chipset, RAM, storage, Vulkan/NPU availability, and thermal limits.
-- Add licensed GGUF catalog, resumable downloads, checksums, deletion, and
-  Q4_K_M/Q4_0/Q3_K_S selection.
-- Keep MLC Chat primary, with llama.cpp and PocketPal-compatible adapters behind
-  a runtime interface.
-- Add voice dictation, plugin/template/persona surfaces, and audit browsing.
+- Chipset, RAM, storage, Vulkan/NPU availability, and thermal diagnostics are
+  implemented with explicit unavailable states.
+- Licensed GGUF catalog, resumable downloads, checksums, deletion, and
+  Q4_K_M/Q4_0/Q3_K_S selection are implemented and tested.
+- MLC Chat remains primary, with llama.cpp and PocketPal-compatible adapters
+  behind the runtime interface; native binaries and physical execution remain
+  environment gates.
+- Voice dictation, plugin/template/persona surfaces, and audit browsing are
+  implemented; hardware and provider-specific acceptance remains open.
 
 Gate: no model downloads without an explicit compatible license; low-storage
 and unavailable-accelerator states provide actionable diagnostics.
 
-## Phase 4 — Release and long-term capabilities
+## Phase 4 — Release and long-term capabilities (in progress)
 
-- Add biometric unlock as opt-in protection for local secrets with recovery.
-- Add reduced-motion, large-text, keyboard/tablet, and background-sync support.
-- Add collaboration, cross-modal input, and enterprise governance only after
-  the core mobile safety gates remain green.
-- Produce reproducible signed APK/AAB artifacts and release notes.
+- Biometric unlock is implemented as opt-in protection for local secrets with
+  fail-closed recovery behavior.
+- Reduced-motion, large-text, keyboard/tablet, and background-sync support are
+  implemented; physical accessibility and lifecycle acceptance remain open.
+- Collaboration, cross-modal input, and enterprise governance foundations are
+  implemented; deployment and product-owner acceptance remain open.
+- Reproducible signed APK/AAB artifacts and release notes are supported; public
+  distribution still requires dependency, physical-device, privacy, and beta
+  acceptance gates.
 
 Gate: clean-checkout TypeScript, unit, formatting, Expo export, Android build,
 visual, accessibility, offline/reconnect, and security checks all pass.
@@ -178,10 +185,11 @@ tablet/landscape; offline cold start; reconnect and token expiry; bridge outage;
 snapshot migration/corruption; TalkBack and large text; reduced motion; low
 storage; interrupted sync/download; and process restart during an operation.
 
-The persistent AWS replacement host is available and has produced a successful
+The active AWS replacement host is KVM-capable and has produced a successful
 API 35 native debug build after installing the Android SDK, NDK, CMake, and
-Java toolchain. It is a `t2.large` without `/dev/kvm`; default, Google APIs, and
-smaller software-only AVDs were attempted, but Android framework/package
-services did not become reliable under TCG. The pinned GitHub Actions emulator
-job remains the KVM-capable API-level smoke evidence. Physical-device, tablet,
-TalkBack, and production-signing checks remain release-environment gates.
+Java toolchain. The preserved legacy `t2.large` fallback has no `/dev/kvm`;
+default, Google APIs, and smaller software-only AVDs were attempted there but
+Android framework/package services did not become reliable under TCG. KVM
+evidence must identify the active replacement host. Physical-device, tablet,
+TalkBack, dependency, privacy, and public-distribution checks remain
+release-environment gates.

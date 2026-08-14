@@ -22,15 +22,16 @@ record each release gate. The runbook is the evidence format for the September
       evidence with `scripts/android-kvm-smoke.sh`.
 - [x] Desktop Playwright visual and browser smoke runs on the validation host
       with current screenshots and no renderer errors.
-- [x] Signed Android release AAB/APK is produced by the release-owned key path
-      and independently verified (APK v2, AAB JAR signature, and certificate
-      fingerprint recorded in the validation evidence).
+- [x] Signed Android release AAB/APK can be produced by the release-owned key
+      path and independently verified (APK v2, AAB JAR signature, and
+      certificate fingerprint recorded in validation evidence). This proves
+      artifact signing only; it does not approve public distribution.
 - [x] Final release manifest, dependency inventory, checksums, and roadmap
       audit are generated from the exact release commit.
-- [ ] Product owner completes physical-phone, privacy/consent, and public beta
-      acceptance gates documented in `COMPLIANCE.md` and
-      `VERIFICATION_MATRIX.md`. Production store and legal review remain outside
-      the beta claim.
+- [ ] Product owner completes physical-phone, privacy/consent, dependency,
+      and public-beta acceptance gates documented in `COMPLIANCE.md`,
+      `DEPENDENCY_AUDIT.md`, and `VERIFICATION_MATRIX.md`. Production store and
+      legal review remain outside the beta claim.
 
 ## Operating cadence through the September 1 beta
 

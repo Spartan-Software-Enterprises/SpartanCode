@@ -282,15 +282,16 @@ current Implemented/Partial/Open counts.
 - Android Expo configuration and native release automation are present. A
   dedicated release key is configured in the GitHub Actions secret store and
   was validated on AWS by producing signed AAB/APK artifacts; the private
-  keystore remains outside the repository.
-- AWS validation is available on the persistent replacement host with a
-  512-GiB root volume, default VPC security group only, stop/termination
+  keystore remains outside the repository. This proves signing capability, not
+  public distribution approval.
+- AWS validation is available on the active KVM-capable replacement host with
+  a 512-GiB root volume, default VPC security group only, stop/termination
   protection, a verified `origin/main` synchronization timer, installed Java/
-  Android SDK API 35 tooling, and a successful native debug build. This `t2`
-  host exposes no `/dev/kvm`; multiple software-only AVD images were unable to
-  finish Android framework/package-service startup, so emulator install/launch
-  remains an environment gate. Cost monitoring is configured, but AWS credit
-  balance and billing remain external release-environment checks.
+  Android SDK API 35 tooling, and a successful native debug build. The
+  preserved legacy `t2.large` fallback exposes no `/dev/kvm`; its software-only
+  AVD attempts were unreliable. KVM emulator evidence must identify the active
+  replacement host, while cost monitoring and AWS credit balance remain
+  external release-environment checks.
 - The active KVM host has both `mosh-server` and `mosh-client` installed and
   its loopback lifecycle has been exercised. Security-group UDP reachability
   and physical terminal behavior remain external acceptance gates.
@@ -311,9 +312,9 @@ current Implemented/Partial/Open counts.
   verification of large text/reduced motion),
   low-storage/interrupted-download/process-restart acceptance, and tablet
   hardware validation.
-- Signed production AAB/APK and legal/privacy review remain release-environment
-  gates. The release key and signing workflow are verified; distribution review
-  and legal/privacy approval are still required.
+- Public distribution approval, physical-device evidence, dependency review,
+  and legal/privacy review remain release-environment gates. The signed
+  AAB/APK capability is verified; signing does not equal distribution approval.
 - Physical Android collaboration/gesture acceptance, cross-modal expansion,
   provider-specific OIDC account lifecycle/administration, marketplace artifact
   installation/activation/updates, and a mature external plugin marketplace.
