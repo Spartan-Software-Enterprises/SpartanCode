@@ -34,7 +34,7 @@ async function main() {
     await page.locator(`[data-view="${view}"].active`).waitFor();
     await page.screenshot({ path: path.join(outputDir, `desktop-${view}.png`), fullPage: true });
     const managerClose = page.locator('[aria-label="Close agent manager"]');
-    if (await managerClose.isVisible().catch(() => false)) await managerClose.click();
+    if (await managerClose.isVisible().catch(() => false)) await managerClose.click({ force: true });
   }
 
   await page.locator('[data-view="home"]').click();
