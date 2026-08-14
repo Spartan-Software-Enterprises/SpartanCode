@@ -44,6 +44,12 @@ Android report must not require a desktop installation or MCP Bridge to be
 filed or reproduced. Private diagnostics are opt-in and must be redacted before
 sharing.
 
+Android’s local feedback draft is intentionally bounded to 25 records, 2,000
+characters of details per record, and no attachments or raw diagnostics. It is
+an offline preparation aid, not a second project archive; users may safely
+remove disposable caches and reinstallable dependencies without removing
+source, credentials, or release archives.
+
 ## Maintainer response targets
 
 These are operating targets, not guarantees: acknowledge valid beta reports

@@ -8,6 +8,11 @@ import type {
 } from "./types";
 import type { MobileCollaborationSession } from "./collaboration";
 import type { MobileProject } from "./project-release";
+import {
+  isMobileFeedback,
+  MAX_FEEDBACK_RECORDS,
+  type MobileFeedback,
+} from "./feedback";
 import { createHuggingFaceModel, type MobileModel } from "./model-catalog";
 import { normalizeProject } from "./project-release";
 import { normalizeCollaborationSessions } from "./collaboration";
@@ -40,6 +45,7 @@ const COLLABORATION_KEY = "spartancode.mobile.collaboration.v1";
 const PROJECTS_KEY = "spartancode.mobile.projects.v1";
 const ARTIFACT_SYNC_BASE_KEY = "spartancode.mobile.artifact-sync-base.v1";
 const COMMUNITY_MODELS_KEY = "spartancode.mobile.community-models.v1";
+const FEEDBACK_KEY = "spartancode.mobile.feedback.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
 
 export type MobileSettings = {
@@ -394,6 +400,27 @@ export async function writeCommunityModels(models: MobileModel[]) {
     COMMUNITY_MODELS_KEY,
     JSON.stringify(
       models.filter((model) => model.source === "huggingface").slice(0, 100),
+    ),
+  );
+}
+
+export async function readMobileFeedback(): Promise<MobileFeedback[]> {
+  try {
+    const raw = await AsyncStorage.getItem(FEEDBACK_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter(isMobileFeedback).slice(0, MAX_FEEDBACK_RECORDS)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function writeMobileFeedback(records: MobileFeedback[]) {
+  await AsyncStorage.setItem(
+    FEEDBACK_KEY,
+    JSON.stringify(
+      records.filter(isMobileFeedback).slice(0, MAX_FEEDBACK_RECORDS),
     ),
   );
 }

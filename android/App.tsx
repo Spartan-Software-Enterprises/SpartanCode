@@ -47,6 +47,7 @@ import {
   updateMobileScopedSettings,
   readCollaborationSessions,
   readMobileProjects,
+  readMobileFeedback,
   readCommunityModels,
   saveBridgeToken,
   writeSnapshot,
@@ -54,11 +55,14 @@ import {
   writeMobileSettings,
   writeCollaborationSessions,
   writeMobileProjects,
+  writeMobileFeedback,
   writeCommunityModels,
   writeArtifactSyncBase,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
 import type { MobileSettings } from "./src/core/storage";
+import { createMobileFeedback, feedbackKinds } from "./src/core/feedback";
+import type { MobileFeedback } from "./src/core/feedback";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
 import { availableAgents, bundledAgents } from "./src/core/agents";
 import {
@@ -141,6 +145,11 @@ export default function App() {
   const [hfModelLicense, setHfModelLicense] = useState("");
   const [hfModelUncensored, setHfModelUncensored] = useState(false);
   const [hfModelDistilled, setHfModelDistilled] = useState(false);
+  const [feedbackKind, setFeedbackKind] =
+    useState<MobileFeedback["kind"]>("bug");
+  const [feedbackSummary, setFeedbackSummary] = useState("");
+  const [feedbackDetails, setFeedbackDetails] = useState("");
+  const [feedbackMessage, setFeedbackMessage] = useState("");
   const [artifactConflicts, setArtifactConflicts] = useState<
     ArtifactSyncResult["conflicts"]
   >([]);
@@ -351,6 +360,50 @@ export default function App() {
     hfModelLicense,
     hfModelUncensored,
   ]);
+
+  const saveFeedback = useCallback(async () => {
+    try {
+      const record = createMobileFeedback(
+        feedbackKind,
+        feedbackSummary,
+        feedbackDetails,
+      );
+      const stored = await readMobileFeedback();
+      await writeMobileFeedback([record, ...stored]);
+      const next = {
+        ...snapshot,
+        artifacts: [
+          {
+            id: `feedback-artifact:${record.id}`,
+            name: `${record.kind} feedback · ${record.summary}`,
+            type: "feedback",
+            status: "recorded",
+            content: JSON.stringify(record),
+            createdAt: record.createdAt,
+          },
+          ...(snapshot.artifacts ?? []),
+        ],
+        auditLog: [
+          {
+            action: "feedback:recorded-local",
+            feedbackId: record.id,
+            kind: record.kind,
+            timestamp: record.createdAt,
+          },
+          ...(snapshot.auditLog ?? []),
+        ],
+      };
+      await writeSnapshot(next);
+      setSnapshot(next);
+      setFeedbackSummary("");
+      setFeedbackDetails("");
+      setFeedbackMessage("Feedback saved locally · sanitize before sharing");
+    } catch (error) {
+      setFeedbackMessage(
+        error instanceof Error ? error.message : "Feedback could not be saved",
+      );
+    }
+  }, [feedbackDetails, feedbackKind, feedbackSummary, snapshot]);
 
   const createProject = useCallback(async () => {
     try {
@@ -1911,6 +1964,60 @@ export default function App() {
           </Pressable>
           {remotePlanMessage ? (
             <Text style={styles.message}>{remotePlanMessage}</Text>
+          ) : null}
+        </View>
+
+        <Text style={styles.section}>Beta feedback</Text>
+        <View style={styles.card}>
+          <Text style={styles.message}>
+            Save a small, sanitized draft locally. Public submission remains
+            optional; never include keys, private code, or raw diagnostics.
+          </Text>
+          <View style={styles.actionRow}>
+            {feedbackKinds.map((kind) => (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Feedback type ${kind}`}
+                key={kind}
+                style={[
+                  styles.smallAction,
+                  feedbackKind === kind && styles.selectedAction,
+                ]}
+                onPress={() => setFeedbackKind(kind)}
+              >
+                <Text style={styles.smallActionText}>{kind}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <TextInput
+            accessibilityLabel="Feedback summary"
+            maxLength={200}
+            onChangeText={setFeedbackSummary}
+            placeholder="Short summary"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={feedbackSummary}
+          />
+          <TextInput
+            accessibilityLabel="Feedback details"
+            maxLength={2000}
+            multiline
+            onChangeText={setFeedbackDetails}
+            placeholder="Sanitized details"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={feedbackDetails}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Save beta feedback locally"
+            style={styles.secondary}
+            onPress={() => void saveFeedback()}
+          >
+            <Text style={styles.secondaryText}>Save feedback locally</Text>
+          </Pressable>
+          {feedbackMessage ? (
+            <Text style={styles.message}>{feedbackMessage}</Text>
           ) : null}
         </View>
 

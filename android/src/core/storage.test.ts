@@ -19,6 +19,8 @@ import {
   writeArtifactSyncBase,
   readCommunityModels,
   writeCommunityModels,
+  readMobileFeedback,
+  writeMobileFeedback,
 } from "./storage";
 import { createMobileCollaborationSession } from "./collaboration";
 
@@ -171,6 +173,22 @@ describe("storage recovery", () => {
         distilled: true,
       }),
     ]);
+  });
+
+  it("persists only validated mobile feedback records", async () => {
+    await writeMobileFeedback([
+      {
+        id: "feedback-1",
+        kind: "feature",
+        summary: "Add export",
+        details: "Export a sanitized report.",
+        client: "android",
+        sanitized: true,
+        createdAt: "2026-08-14T00:00:00.000Z",
+      },
+      { malformed: true } as never,
+    ]);
+    expect(await readMobileFeedback()).toHaveLength(1);
   });
 });
 

@@ -99,6 +99,20 @@ git bundle create ../SpartanCode-$(git rev-parse --short HEAD).bundle main
 sha256sum ../SpartanCode-*.tar.gz ../SpartanCode-*.bundle
 ```
 
+The tarball is the compressed local project folder: it contains the committed
+source, documentation, lockfiles, and tracked release evidence. If AWS has
+unique non-secret generated evidence, copy only those files into a separate
+staging folder, include that folder in a final compressed archive, and record
+its SHA-256 beside the Git archive and bundle. Do not duplicate dependencies,
+temporary build directories, caches, credentials, private keys, or secure-vault
+state in the archive.
+
+This final archive is an additional shutdown safeguard, not a replacement for
+the canonical `origin/main` history or the clean AWS validation mirror during
+active development. Keeping the development checkouts committed and
+reconciled prevents a last-minute device failure from leaving work only in a
+local temporary folder.
+
 Copy any uniquely generated, non-secret release evidence from the AWS checkout
 to local storage, verify the AWS checkout is clean and at the same commit, and
 confirm the commit is present on `origin/main`. Then terminate the exact EC2
