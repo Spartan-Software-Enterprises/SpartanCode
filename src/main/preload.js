@@ -145,6 +145,15 @@ contextBridge.exposeInMainWorld("spartanCode", {
   listCachedModels: () => ipcRenderer.invoke("models:cache"),
   prepareModel: (modelId, quantization, selectedModel) =>
     ipcRenderer.invoke("models:prepare", modelId, quantization, selectedModel),
+  downloadModel: (modelId, url, expectedSha256, quantization, selectedModel) =>
+    ipcRenderer.invoke(
+      "models:download",
+      modelId,
+      url,
+      expectedSha256,
+      quantization,
+      selectedModel,
+    ),
   classifyCommand: (command) => ipcRenderer.invoke("policy:classify", command),
   listWorkspace: (requestedPath) =>
     ipcRenderer.invoke("workspace:list", requestedPath),

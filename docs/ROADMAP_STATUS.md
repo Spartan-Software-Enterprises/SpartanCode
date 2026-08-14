@@ -132,6 +132,10 @@ current Implemented/Partial/Open counts.
   character query limit, 50-result cap, ten-second abort timeout, and explicit
   malformed-response handling. Model byte downloads and runtime availability
   remain environment-dependent.
+- Desktop model caching now has an explicit HTTPS download boundary with
+  resumable `Range` support, safe fallback when a server returns `200`, bounded
+  artifact size, SHA-256 verification before finalization, and cleanup on
+  mismatch. Runtime loading and physical storage acceptance remain open.
 - `scripts/release-index.js` now generates a commit-bound machine-readable beta
   gate index, preserves `PASS`/`SKIP`/`FAIL` states, and fails closed when
   Android verification evidence belongs to another commit. External release

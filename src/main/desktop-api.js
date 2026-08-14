@@ -420,6 +420,17 @@ function registerDesktopApi({
   );
   ipcMain.handle("models:cache", () => modelCache.list());
   ipcMain.handle(
+    "models:download",
+    (_event, modelId, url, expectedSha256, quantization, selectedModel) =>
+      modelCache.download(
+        modelId,
+        url,
+        expectedSha256,
+        quantization,
+        selectedModel,
+      ),
+  );
+  ipcMain.handle(
     "models:prepare",
     (_event, modelId, quantization, selectedModel) =>
       modelCache.prepare(modelId, quantization, selectedModel),
