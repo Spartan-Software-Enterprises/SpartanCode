@@ -5,6 +5,8 @@ an item is marked implemented only where the repository contains both the
 behavior and a corresponding automated or documented verification path.
 The complete reconciliation against the exported 35-feature source roadmap is
 in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
+Run `npm run roadmap:audit` to validate the ordered 35-row matrix and print its
+current Implemented/Partial/Open counts.
 
 ## Implemented foundation
 
