@@ -12,6 +12,7 @@ Run it from the repository root:
 
 ```bash
 node android/scripts/verify-matrix.js --output dist/android-verification.json
+node scripts/verify-android-evidence.js --report dist/android-verification.json
 node scripts/release-index.js \
   --android-verification dist/android-verification.json \
   --output dist/release-index.json
@@ -45,6 +46,10 @@ The release-index generator binds the report to the current Git commit and
 preserves unavailable gates as `SKIP`; it cannot convert missing emulator,
 physical-device, signing, synchronization, visual, or product-owner evidence
 into a passing release claim.
+
+`verify-android-evidence.js` independently checks the report schema, exact
+commit, required static passes, environment skip reasons, and summary counts.
+It does not require an SDK, keystore, emulator, or attached device.
 
 The local Android phone can provide physical Android evidence through
 [LOCAL_DEVICE_TESTING.md](LOCAL_DEVICE_TESTING.md); an attached authorized ADB

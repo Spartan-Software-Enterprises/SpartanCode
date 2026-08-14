@@ -17,6 +17,7 @@ artifact that is retained. The minimum release index should contain:
 | Evidence                    | Required fields                                                                            |
 | --------------------------- | ------------------------------------------------------------------------------------------ |
 | `release-index.json`        | release commit, UTC timestamp, target, checker version, status for every gate              |
+| `android-verification.json` | exact release commit, static Android checks, environment checks, and verified summary counts |
 | `desktop-visual/`           | test command, display configuration, screenshots, console/error summary                    |
 | `android-emulator/`         | AVD/API, `/dev/kvm` check, APK hash, install/launch result, screenshot/log hashes          |
 | `android-physical/`         | device model, Android version, test scope, consent confirmation, sanitized evidence hashes |
