@@ -4,16 +4,37 @@ function createPairingService({ origin, token, ttlMs = 5 * 60 * 1000 } = {}) {
   if (!origin || !token)
     throw new Error("Pairing origin and token are required");
   const pending = new Map();
+  function pruneExpired() {
+    const now = Date.now();
+    for (const [nonce, entry] of pending) {
+      if (entry.used || entry.expiresAt <= now) pending.delete(nonce);
+    }
+  }
   return {
     create(scopes = ["snapshot", "missions", "approvals"]) {
+      pruneExpired();
+      if (
+        !Array.isArray(scopes) ||
+        scopes.length === 0 ||
+        scopes.some((scope) => typeof scope !== "string" || scope.length === 0)
+      )
+        throw new Error("Pairing scopes are invalid");
       const nonce = crypto.randomBytes(18).toString("base64url");
-      const expiresAt = new Date(Date.now() + ttlMs).toISOString();
-      pending.set(nonce, { expiresAt, used: false });
+      const expiresAt = Date.now() + ttlMs;
+      pending.set(nonce, { expiresAt, scopes: [...scopes], used: false });
       return Buffer.from(
-        JSON.stringify({ version: 1, origin, token, scopes, nonce, expiresAt }),
+        JSON.stringify({
+          version: 1,
+          origin,
+          token,
+          scopes,
+          nonce,
+          expiresAt: new Date(expiresAt).toISOString(),
+        }),
       ).toString("base64url");
     },
     redeem(payload) {
+      pruneExpired();
       let value;
       try {
         value = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
@@ -23,21 +44,16 @@ function createPairingService({ origin, token, ttlMs = 5 * 60 * 1000 } = {}) {
       const entry = pending.get(value.nonce);
       if (!entry || entry.used)
         throw new Error("Pairing payload was already used");
-      if (Date.parse(value.expiresAt) <= Date.now())
+      if (entry.expiresAt <= Date.now())
         throw new Error("Pairing payload expired");
       if (value.origin !== origin || value.token !== token)
         throw new Error("Pairing payload does not match this bridge");
-      if (
-        !Array.isArray(value.scopes) ||
-        value.scopes.some((scope) => typeof scope !== "string")
-      )
-        throw new Error("Pairing scopes are invalid");
       entry.used = true;
       return {
         origin,
         token,
-        scopes: value.scopes,
-        expiresAt: value.expiresAt,
+        scopes: [...entry.scopes],
+        expiresAt: new Date(entry.expiresAt).toISOString(),
       };
     },
   };

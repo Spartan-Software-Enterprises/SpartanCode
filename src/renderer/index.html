@@ -2643,7 +2643,7 @@
         chatMessages.innerHTML = (messages || [])
           .map(
             (message) =>
-              `<div class="chat-message ${message.role}"><small>${message.role === "user" ? "You" : "Spartan"}</small>${escapeChat(message.content)}</div>`,
+              `<div class="chat-message ${message.role === "user" ? "user" : "assistant"}"><small>${message.role === "user" ? "You" : "Spartan"}</small>${escapeChat(message.content)}</div>`,
           )
           .join("");
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -2747,7 +2747,7 @@
             ]
               .map(
                 ([name, role, state]) =>
-                  `<div class="manager-agent"><strong>${name}</strong><small>${role}</small><span class="manager-state">${state}</span></div>`,
+                  `<div class="manager-agent"><strong>${escapeHtml(name)}</strong><small>${escapeHtml(role)}</small><span class="manager-state">${escapeHtml(state)}</span></div>`,
               )
               .join("");
             managerActivity.innerHTML =
@@ -2847,7 +2847,7 @@
                 modelSelect.innerHTML = models
                   .map(
                     (model) =>
-                      `<option value="${model.id}">${model.id} · ${model.license}${cachedModels.some((cached) => cached.id === model.id) ? " · ready" : ""}</option>`,
+                      `<option value="${escapeHtml(model.id)}">${escapeHtml(model.id)} · ${escapeHtml(model.license)}${cachedModels.some((cached) => cached.id === model.id) ? " · ready" : ""}</option>`,
                   )
                   .join("");
                 modelSelect.value = settings.model;
@@ -2856,7 +2856,7 @@
                 document.getElementById("defaultAgentSelect").innerHTML = agents
                   .map(
                     (agent) =>
-                      `<option value="${agent.name}">${agent.name} · ${agent.description}</option>`,
+                      `<option value="${escapeHtml(agent.name)}">${escapeHtml(agent.name)} · ${escapeHtml(agent.description)}</option>`,
                   )
                   .join("");
                 document.getElementById("defaultAgentSelect").value =
@@ -2865,7 +2865,7 @@
                   providers
                     .map(
                       (provider) =>
-                        `<option value="${provider.id}">${provider.name} · ${provider.status}</option>`,
+                        `<option value="${escapeHtml(provider.id)}">${escapeHtml(provider.name)} · ${escapeHtml(provider.status)}</option>`,
                     )
                     .join("");
                 document.getElementById("apiProviderSelect").value =
@@ -2876,7 +2876,7 @@
                     .filter((provider) => provider.keyName)
                     .map(
                       (provider) =>
-                        `<option value="${provider.keyName}">${provider.name} · ${provider.status}</option>`,
+                        `<option value="${escapeHtml(provider.keyName)}">${escapeHtml(provider.name)} · ${escapeHtml(provider.status)}</option>`,
                     ),
                 ].join("");
                 quantizationSelect.value = settings.quantization || "Q4_K_M";
@@ -2910,21 +2910,21 @@
                 providerSelect.innerHTML = providers
                   .map(
                     (provider) =>
-                      `<option value="${provider.id}">${provider.label}</option>`,
+                      `<option value="${escapeHtml(provider.id)}">${escapeHtml(provider.label)}</option>`,
                   )
                   .join("");
                 const plans = providers[0]?.plans || [];
                 document.getElementById("remotePlan").innerHTML = plans
                   .map(
                     (plan) =>
-                      `<option value="${plan.id}">${plan.label}</option>`,
+                      `<option value="${escapeHtml(plan.id)}">${escapeHtml(plan.label)}</option>`,
                   )
                   .join("");
                 document.getElementById("remoteTemplate").innerHTML =
                   serverTemplates
                     .map(
                       (template) =>
-                        `<option value="${template.id}">${template.name} · ${template.platform}</option>`,
+                        `<option value="${escapeHtml(template.id)}">${escapeHtml(template.name)} · ${escapeHtml(template.platform)}</option>`,
                     )
                     .join("");
                 modelStatus.textContent = cachedModels.some(
@@ -2981,7 +2981,7 @@
                 .slice(0, 5)
                 .map(
                   (item) =>
-                    `<div class="history-row"><span class="artifact-icon">✦</span><span><strong>${escapeHtml(item.description)}</strong><small>${item.status.replaceAll("_", " ")}</small></span><span class="history-status ${item.status}">${item.status.replaceAll("_", " ")}</span></div>`,
+                    `<div class="history-row"><span class="artifact-icon">✦</span><span><strong>${escapeHtml(item.description)}</strong><small>${escapeHtml(item.status.replaceAll("_", " "))}</small></span><span class="history-status ${escapeHtml(item.status)}">${escapeHtml(item.status.replaceAll("_", " "))}</span></div>`,
                 )
                 .join("")
             : '<span class="empty-state">Your completed missions will appear here.</span>';
@@ -3788,7 +3788,8 @@
               provider?.plans || []
             )
               .map(
-                (plan) => `<option value="${plan.id}">${plan.label}</option>`,
+                (plan) =>
+                  `<option value="${escapeHtml(plan.id)}">${escapeHtml(plan.label)}</option>`,
               )
               .join("");
           });

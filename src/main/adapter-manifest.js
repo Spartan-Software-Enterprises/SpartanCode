@@ -17,6 +17,7 @@ const KINDS = new Set([
   "runtime",
 ]);
 const MAX_ITEMS = 64;
+const EXECUTION_MODES = new Set(["declarative", "external-process"]);
 
 function boundedString(value, label, { pattern = null, max = 128 } = {}) {
   if (typeof value !== "string" || value.length === 0 || value.length > max)
@@ -74,7 +75,7 @@ function normalizeAdapterManifest(input) {
     name,
     adapterVersion,
     status,
-    hosts: boundedList(input.hosts || "", "Adapter hosts"),
+    hosts: boundedList(input.hosts || [], "Adapter hosts"),
     targets: boundedMap(input.targets || {}, "Adapter targets"),
     operations: boundedList(input.operations || [], "Adapter operations", {
       itemPattern: ADAPTER_ID,
@@ -108,6 +109,8 @@ function normalizeAdapterManifest(input) {
       "Adapter test coverage",
     ),
   };
+  if (!EXECUTION_MODES.has(descriptor.execution.mode))
+    throw new Error("Execution mode is unsupported");
   if (descriptor.execution.shell && descriptor.execution.mode === "declarative")
     throw new Error("Declarative adapters cannot request shell execution");
   if (

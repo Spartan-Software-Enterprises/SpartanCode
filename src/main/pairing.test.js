@@ -24,3 +24,19 @@ test("pairing rejects payloads from another bridge", () => {
   });
   assert.throws(() => second.redeem(first.create()), /already used/);
 });
+
+test("pairing redemption uses the server-side scopes and expiry", () => {
+  const service = createPairingService({
+    origin: "https://bridge.example",
+    token: "secret",
+  });
+  const original = JSON.parse(
+    Buffer.from(service.create(["snapshot"]), "base64url").toString("utf8"),
+  );
+  original.scopes = ["admin"];
+  original.expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const tampered = Buffer.from(JSON.stringify(original)).toString("base64url");
+  const result = service.redeem(tampered);
+  assert.deepEqual(result.scopes, ["snapshot"]);
+  assert.notEqual(result.expiresAt, original.expiresAt);
+});

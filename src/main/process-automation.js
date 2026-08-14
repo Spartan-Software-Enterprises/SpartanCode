@@ -54,6 +54,9 @@ function createProcessAutomation({
         stdio: "ignore",
         windowsHide: true,
       });
+      if (child && typeof child.once === "function") {
+        child.once("error", () => {});
+      }
       return {
         ok: true,
         status: "started",
