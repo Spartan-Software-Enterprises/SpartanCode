@@ -26,3 +26,11 @@ sudo xfs_growfs / || sudo resize2fs /dev/sda1
 Then run `scripts/aws-dev-bootstrap.sh`. It removes any stale termination
 timer, fast-forwards a clean checkout from `origin/main`, and installs only a
 safe synchronization timer that refuses to overwrite dirty work.
+
+The replacement instance user-data is kept in
+`scripts/aws-instance-user-data.sh`. It installs the validation toolchain,
+expands the larger root filesystem when the AMI leaves it unexpanded, removes
+the retired termination timer, and bootstraps a clean `origin/main` checkout
+with the synchronization timer. It contains no credentials. The replacement
+uses only the default VPC security group; the retired `spartan-dev-ssh` group
+is not required.
