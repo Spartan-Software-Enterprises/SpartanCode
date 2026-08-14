@@ -32,12 +32,14 @@ legal advice; a commercial release should be reviewed for its target markets.
 
 ## Model and dependency policy
 
-- The mobile catalog currently permits only the explicitly identified MIT and
-  Apache-2.0 model entries. Downloads require HTTPS and optionally verify a
-  supplied SHA-256 checksum before finalization.
+- Built-in mobile distribution entries remain limited to explicitly reviewed
+  MIT and Apache-2.0 models. User-selected Hugging Face repositories may be
+  discovered and prepared locally with source/license metadata intact.
+  Downloads require HTTPS and can verify a supplied SHA-256 checksum.
 - No model is silently redistributed from an unlicensed or license-unknown
-  source. Any future catalog entry requires a recorded license and review of
-  its model-card terms.
+  source. User-selected Hugging Face models may be discovered and prepared
+  locally, but their repository license and source metadata remain attached and
+  SpartanCode does not claim or redistribute those rights.
 - Third-party package licenses are represented by the committed lockfiles;
   release automation must include the generated notices for the shipped
   desktop and Android artifacts.

@@ -104,6 +104,37 @@ describe("licensed resumable model downloads", () => {
     expect(memory.clearedPartial).toBe(true);
   });
 
+  it("supports an explicitly selected Hugging Face community model", async () => {
+    const memory = memoryStore();
+    const result = await downloadModel(
+      {
+        modelId: "org/uncensored-distill",
+        quantization: "Q4_0",
+        url: "https://huggingface.co/org/uncensored-distill/resolve/main/model.gguf",
+        model: {
+          id: "org/uncensored-distill",
+          provider: "Community",
+          license: "Unknown",
+          quantizations: ["Q4_K_M", "Q4_0", "Q3_K_S"],
+          minimumMemoryMb: 2048,
+          requiresAccelerator: false,
+          source: "huggingface",
+          communityModel: true,
+          uncensored: true,
+          distilled: true,
+        },
+      },
+      memory.store,
+      async () => ({
+        ok: true,
+        status: 200,
+        arrayBuffer: async () => new Uint8Array([1, 2]).buffer,
+      }),
+      async () => "",
+    );
+    expect(result.modelId).toBe("org/uncensored-distill");
+  });
+
   it("does not duplicate a partial when a server ignores the Range header", async () => {
     const memory = memoryStore();
     await memory.store.writePartial(

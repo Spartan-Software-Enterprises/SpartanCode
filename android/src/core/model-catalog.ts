@@ -1,10 +1,14 @@
 export type MobileModel = {
   id: string;
   provider: string;
-  license: "Apache-2.0" | "MIT";
+  license: string;
   quantizations: readonly ["Q4_K_M", "Q4_0", "Q3_K_S"];
   minimumMemoryMb: number;
   requiresAccelerator: boolean;
+  source?: "builtin" | "huggingface";
+  communityModel?: boolean;
+  uncensored?: boolean;
+  distilled?: boolean;
 };
 
 export const licensedMobileModels: readonly MobileModel[] = [
@@ -26,8 +30,11 @@ export const licensedMobileModels: readonly MobileModel[] = [
   },
 ];
 
-export function listCompatibleModels(profile: DeviceProfile = {}) {
-  return licensedMobileModels.filter(
+export function listCompatibleModels(
+  profile: DeviceProfile = {},
+  models: readonly MobileModel[] = licensedMobileModels,
+) {
+  return models.filter(
     (model) =>
       (profile.totalMemoryMb ?? Number.MAX_SAFE_INTEGER) >=
         model.minimumMemoryMb &&

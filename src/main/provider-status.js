@@ -1,3 +1,5 @@
+const { getApiProviderStatus } = require("./api-providers");
+
 function getProviderStatus(environment = process.env) {
   return [
     {
@@ -6,18 +8,7 @@ function getProviderStatus(environment = process.env) {
       status: "preferred",
       detail: "Offline-first",
     },
-    {
-      id: "openai",
-      name: "OpenAI",
-      status: environment.OPENAI_API_KEY ? "configured" : "not configured",
-      detail: "Cloud fallback",
-    },
-    {
-      id: "anthropic",
-      name: "Anthropic",
-      status: environment.ANTHROPIC_API_KEY ? "configured" : "not configured",
-      detail: "Cloud fallback",
-    },
+    ...getApiProviderStatus(environment),
   ];
 }
 

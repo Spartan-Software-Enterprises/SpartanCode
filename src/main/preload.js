@@ -48,6 +48,9 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("runtime:generate", runtimeId, request),
   getCapabilities: () => ipcRenderer.invoke("capabilities:get"),
   getProviderStatus: () => ipcRenderer.invoke("providers:get"),
+  listApiProviders: () => ipcRenderer.invoke("api:providers"),
+  generateWithApiProvider: (providerId, request) =>
+    ipcRenderer.invoke("api:generate", providerId, request),
   getGitHubAppStatus: () => ipcRenderer.invoke("github-app:status"),
   listGitHubRepositories: () => ipcRenderer.invoke("github-app:repositories"),
   getSecureVaultStatus: () => ipcRenderer.invoke("secure-vault:status"),
@@ -60,9 +63,11 @@ contextBridge.exposeInMainWorld("spartanCode", {
   getMcpTools: () => ipcRenderer.invoke("mcp:tools"),
   dispatchMcp: (request) => ipcRenderer.invoke("mcp:dispatch", request),
   listModels: (options) => ipcRenderer.invoke("models:list", options),
+  searchModels: (query, options) =>
+    ipcRenderer.invoke("models:search", query, options),
   listCachedModels: () => ipcRenderer.invoke("models:cache"),
-  prepareModel: (modelId, quantization) =>
-    ipcRenderer.invoke("models:prepare", modelId, quantization),
+  prepareModel: (modelId, quantization, selectedModel) =>
+    ipcRenderer.invoke("models:prepare", modelId, quantization, selectedModel),
   classifyCommand: (command) => ipcRenderer.invoke("policy:classify", command),
   listWorkspace: (requestedPath) =>
     ipcRenderer.invoke("workspace:list", requestedPath),

@@ -1,4 +1,8 @@
-import { licensedMobileModels, validateModelLicense } from "./model-catalog";
+import {
+  licensedMobileModels,
+  validateModelLicense,
+  type MobileModel,
+} from "./model-catalog";
 
 export type DownloadStore = {
   readPartial: (
@@ -25,6 +29,7 @@ export type DownloadRequest = {
   url: string;
   expectedSha256?: string;
   availableStorageMb?: number;
+  model?: MobileModel;
 };
 
 export type DownloadTransport = (
@@ -37,11 +42,15 @@ export type DownloadTransport = (
 }>;
 
 function modelFor(request: DownloadRequest) {
-  const model = licensedMobileModels.find(
-    (item) => item.id === request.modelId,
-  );
-  if (!model || !validateModelLicense(model))
-    throw new Error("Model is not available under the mobile license policy");
+  const model =
+    request.model ||
+    licensedMobileModels.find((item) => item.id === request.modelId);
+  if (!model || model.id !== request.modelId)
+    throw new Error("Model metadata is required for this Hugging Face model");
+  if (model.source !== "huggingface" && !validateModelLicense(model))
+    throw new Error(
+      "Built-in model is not available under the distribution policy",
+    );
   if (!model.quantizations.includes(request.quantization))
     throw new Error("Quantization is not supported for this model");
   if (

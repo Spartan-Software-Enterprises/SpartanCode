@@ -14,6 +14,8 @@ const emptyState = () => ({
     workspacePath: null,
     voiceEnabled: false,
     executionMode: "guided",
+    defaultAgent: "leo",
+    apiProvider: "local",
   },
   connections: [],
   auditLog: [],
@@ -42,6 +44,8 @@ function createMissionStore(filePath) {
     "workspacePath",
     "voiceEnabled",
     "executionMode",
+    "defaultAgent",
+    "apiProvider",
   ]);
   const createId = (prefix) => `${prefix}-${Date.now()}-${sequence++}`;
   const collaboration = createCollaborationStore({

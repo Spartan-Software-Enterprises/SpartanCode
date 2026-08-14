@@ -9,6 +9,13 @@ export type MobileAgent = {
 // a bridge, and network access.
 export const bundledAgents: readonly MobileAgent[] = [
   {
+    name: "leo",
+    description:
+      "Default SpartanCode agent for planning, implementation, and verification.",
+    model: "local",
+    subagent: true,
+  },
+  {
     name: "researcher",
     description: "Investigate requirements, risks, and workspace patterns.",
     model: "local",

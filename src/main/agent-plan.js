@@ -1,10 +1,18 @@
-const { loadCustomAgents } = require("./custom-agents");
+const { listBundledAgents, loadCustomAgents } = require("./custom-agents");
 
-function createExecutionPlan(description, { workspacePath } = {}) {
+function createExecutionPlan(
+  description,
+  { workspacePath, defaultAgent = "leo" } = {},
+) {
   const goal = String(description || "").trim();
-  const customAgents = loadCustomAgents(workspacePath);
+  const customAgents = [
+    ...listBundledAgents(),
+    ...loadCustomAgents(workspacePath),
+  ];
   return {
     goal,
+    defaultAgent,
+    commander: "leo",
     customAgents: customAgents.map(({ prompt, ...agent }) => agent),
     stages: [
       {
@@ -13,6 +21,7 @@ function createExecutionPlan(description, { workspacePath } = {}) {
         agentId: "plan",
         action: "Understand requirements and define system design",
         status: "ready",
+        commander: "leo",
       },
       {
         id: "build",
@@ -20,6 +29,7 @@ function createExecutionPlan(description, { workspacePath } = {}) {
         agentId: "build",
         action: "Implement the smallest complete solution",
         status: "queued",
+        commander: "leo",
       },
       {
         id: "verify",
@@ -27,6 +37,7 @@ function createExecutionPlan(description, { workspacePath } = {}) {
         agentId: "verify",
         action: "Run tests, security checks, and performance checks",
         status: "queued",
+        commander: "leo",
       },
     ],
     assumptions: [

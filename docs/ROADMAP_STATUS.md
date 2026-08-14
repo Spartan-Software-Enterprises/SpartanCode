@@ -63,6 +63,12 @@ behavior and a corresponding automated or documented verification path.
 - Desktop secure local vault with OS-backed key wrapping, AES-256-GCM records,
   tamper detection, no plaintext fallback, and settings controls; Android
   bridge secrets remain in SecureStore/Keystore with optional biometric gating.
+- Full Hugging Face discovery and preparation includes community, uncensored,
+  and distilled model metadata; built-in commercial filtering remains available
+  for distribution-safe workflows.
+- API agent gateway covers OpenAI, Anthropic, Gemini, Mistral, Groq, xAI,
+  DeepSeek, Together, OpenRouter, Fireworks, Cohere, and Perplexity through
+  isolated provider adapters with secure-key integration.
 - A bounded plugin registry now discovers workspace metadata, enforces explicit
   MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
   plugins, and exposes metadata through isolated IPC without executing plugin

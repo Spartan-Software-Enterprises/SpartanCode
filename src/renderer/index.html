@@ -1498,6 +1498,36 @@
             id="modelStatus"
             style="display: block; color: var(--muted)"
           ></small>
+          <details class="settings-advanced">
+            <summary>Explore all Hugging Face models</summary>
+            <input
+              id="modelSearch"
+              placeholder="Search models, including uncensored or distilled"
+            />
+            <button type="button" class="context-button" id="searchModels">
+              Search Hugging Face
+            </button>
+            <small
+              id="modelSearchStatus"
+              style="display: block; color: var(--muted)"
+            ></small>
+          </details>
+        </div>
+        <div class="setting-group">
+          <label for="defaultAgentSelect">Default agent</label>
+          <select id="defaultAgentSelect"></select>
+          <small style="display: block; color: var(--muted)">
+            Leo is the default coordinator; other agents remain available for
+            specialized work.
+          </small>
+        </div>
+        <div class="setting-group">
+          <label for="apiProviderSelect">API agent provider</label>
+          <select id="apiProviderSelect"></select>
+          <small style="display: block; color: var(--muted)">
+            Local is offline-first; configured API providers are optional
+            fallbacks.
+          </small>
         </div>
         <div class="settings-runtime-grid" id="settingsRuntimeStatus">
           Loading runtime, provider, and capability status…
@@ -1764,6 +1794,8 @@
       const voiceToggle = document.getElementById("voiceToggle");
       const prepareModelButton = document.getElementById("prepareModel");
       const modelStatus = document.getElementById("modelStatus");
+      let selectedModelMetadata = null;
+      const discoveredModels = new Map();
       const chatModal = document.getElementById("chatModal");
       const chatMessages = document.getElementById("chatMessages");
       const chatInput = document.getElementById("chatInput");
@@ -2070,12 +2102,23 @@
           } else if (view === "settings" && window.spartanCode) {
             Promise.all([
               window.spartanCode.getSettings(),
-              window.spartanCode.listModels({ commercialOnly: true }),
+              window.spartanCode.listModels({ commercialOnly: false }),
+              window.spartanCode.listAgents(),
               window.spartanCode.listConnections(),
               window.spartanCode.listCachedModels(),
               window.spartanCode.listRemoteProviders(),
             ]).then(
-              ([settings, models, connections, cachedModels, providers]) => {
+              ([
+                settings,
+                models,
+                agents,
+                connections,
+                cachedModels,
+                providers,
+              ]) => {
+                models.forEach((model) =>
+                  discoveredModels.set(model.id, model),
+                );
                 modelSelect.innerHTML = models
                   .map(
                     (model) =>
@@ -2083,6 +2126,25 @@
                   )
                   .join("");
                 modelSelect.value = settings.model;
+                selectedModelMetadata =
+                  discoveredModels.get(modelSelect.value) || null;
+                document.getElementById("defaultAgentSelect").innerHTML = agents
+                  .map(
+                    (agent) =>
+                      `<option value="${agent.name}">${agent.name} · ${agent.description}</option>`,
+                  )
+                  .join("");
+                document.getElementById("defaultAgentSelect").value =
+                  settings.defaultAgent || "leo";
+                document.getElementById("apiProviderSelect").innerHTML =
+                  providers
+                    .map(
+                      (provider) =>
+                        `<option value="${provider.id}">${provider.name} · ${provider.status}</option>`,
+                    )
+                    .join("");
+                document.getElementById("apiProviderSelect").value =
+                  settings.apiProvider || "local";
                 quantizationSelect.value = settings.quantization || "Q4_K_M";
                 protocolSelect.value = settings.protocol;
                 document.getElementById("executionModeSelect").value =
@@ -2382,6 +2444,10 @@
             protocol: protocolSelect.value,
             executionMode: document.getElementById("executionModeSelect").value,
             voiceEnabled: voiceToggle.checked,
+            defaultAgent:
+              document.getElementById("defaultAgentSelect").value || "leo",
+            apiProvider:
+              document.getElementById("apiProviderSelect").value || "local",
           });
           const connection =
             profile.name && profile.host
@@ -2402,9 +2468,15 @@
       prepareModelButton.addEventListener("click", () => {
         if (!window.spartanCode || !modelSelect.value) return;
         prepareModelButton.disabled = true;
-        modelStatus.textContent = "Preparing licensed model metadata…";
+        modelStatus.textContent = "Preparing selected model metadata…";
         window.spartanCode
-          .prepareModel(modelSelect.value, quantizationSelect.value)
+          .prepareModel(
+            modelSelect.value,
+            quantizationSelect.value,
+            selectedModelMetadata?.source === "huggingface"
+              ? selectedModelMetadata
+              : null,
+          )
           .then((result) => {
             modelStatus.textContent = result.message || "Model metadata ready.";
             showToast("Local model prepared");
@@ -2416,6 +2488,36 @@
             prepareModelButton.disabled = false;
           });
       });
+      modelSelect.addEventListener("change", () => {
+        selectedModelMetadata = discoveredModels.get(modelSelect.value) || null;
+      });
+      document
+        .getElementById("searchModels")
+        .addEventListener("click", async () => {
+          const query = document.getElementById("modelSearch").value.trim();
+          const searchStatus = document.getElementById("modelSearchStatus");
+          searchStatus.textContent = "Searching the full Hugging Face catalog…";
+          try {
+            const results = await window.spartanCode.searchModels(query, {
+              limit: 50,
+            });
+            results.forEach((model) => discoveredModels.set(model.id, model));
+            modelSelect.innerHTML = results
+              .map((model) => {
+                const flags = [
+                  model.uncensored ? "uncensored" : "",
+                  model.distilled ? "distilled" : "",
+                ].filter(Boolean);
+                return `<option value="${escapeHtml(model.id)}">${escapeHtml(model.id)} · ${escapeHtml(model.license)}${flags.length ? ` · ${flags.join("/")}` : ""}</option>`;
+              })
+              .join("");
+            selectedModelMetadata = results[0] || null;
+            if (results[0]) modelSelect.value = results[0].id;
+            searchStatus.textContent = `${results.length} Hugging Face models found. License metadata is informational; verify the repository before use.`;
+          } catch (error) {
+            searchStatus.textContent = error.message;
+          }
+        });
       document
         .getElementById("remoteProvider")
         .addEventListener("change", () => {

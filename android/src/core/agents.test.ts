@@ -3,6 +3,7 @@ import { availableAgents, bundledAgents } from "./agents";
 describe("bundled Android agents", () => {
   it("provides a complete offline catalog", () => {
     expect(bundledAgents.map((agent) => agent.name)).toEqual([
+      "leo",
       "researcher",
       "implementer",
       "verifier",

@@ -25,7 +25,27 @@ test("Hugging Face catalog preserves user-selected models and license metadata",
     source: "huggingface",
     downloadable: true,
     downloads: 0,
+    tags: [],
+    pipelineTag: null,
+    modelType: null,
+    communityModel: true,
+    modelFamily: "custom-model",
+    uncensored: false,
+    distilled: false,
   });
+});
+
+test("Hugging Face metadata identifies uncensored and distilled community models", () => {
+  const model = normalizeHuggingFaceModel({
+    id: "org/distilled-uncensored-model",
+    tags: ["text-generation", "uncensored"],
+    pipeline_tag: "text-generation",
+    library_name: "transformers",
+  });
+  assert.equal(model.communityModel, true);
+  assert.equal(model.uncensored, true);
+  assert.equal(model.distilled, true);
+  assert.equal(model.pipelineTag, "text-generation");
 });
 
 test("Hugging Face search is bounded and normalizes results", async () => {

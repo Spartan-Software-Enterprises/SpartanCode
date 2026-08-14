@@ -8,6 +8,7 @@ const { createLocalStageExecutor } = require("./stage-executor");
 const { createBridgeServer } = require("./mcp-bridge");
 const { requiresMissionApproval } = require("./policy-engine");
 const { createSecureVault } = require("./secure-vault");
+const { apiProviders } = require("./api-providers");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -57,6 +58,11 @@ function createWindow() {
       process.env.SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET ||
       savedSecret("SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET"),
   };
+  const providerEnvironment = { ...process.env };
+  for (const provider of apiProviders) {
+    if (!providerEnvironment[provider.key])
+      providerEnvironment[provider.key] = savedSecret(provider.key);
+  }
   const savedBridgeToken =
     process.env.SPARTANCODE_BRIDGE_TOKEN ||
     savedSecret("SPARTANCODE_BRIDGE_TOKEN");
@@ -113,6 +119,7 @@ function createWindow() {
     marketplaceDir: path.join(app.getPath("userData"), "marketplace"),
     secureVault,
     githubEnvironment,
+    providerEnvironment,
   });
 }
 

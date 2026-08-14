@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { listLicensedModels } = require("./model-catalog");
+const { listAvailableModels } = require("./model-catalog");
 
 function createModelCache(filePath) {
   let state = { models: [] };
@@ -18,7 +18,7 @@ function createModelCache(filePath) {
       return state.models.map((model) => ({ ...model }));
     },
     prepare(modelId, quantization = "Q4_K_M", selectedModel = null) {
-      const model = listLicensedModels({ commercialOnly: true }).find(
+      const model = listAvailableModels({ commercialOnly: false }).find(
         (item) => item.id === modelId,
       );
       const external =
@@ -33,10 +33,6 @@ function createModelCache(filePath) {
         throw new Error(
           "Hugging Face selection does not match the requested model",
         );
-      if (external && external.licenseStatus === "unknown")
-        throw new Error(
-          "Acknowledge the Hugging Face model license before preparing it",
-        );
       if (model && !model.quantizations.includes(quantization))
         throw new Error("Unsupported quantization for model");
       const selected = model || external;
@@ -47,6 +43,10 @@ function createModelCache(filePath) {
         status: "ready",
         source: selected.source,
         license: selected.license,
+        licenseStatus: selected.licenseStatus || "unknown",
+        communityModel: selected.source === "huggingface",
+        uncensored: selected.uncensored === true,
+        distilled: selected.distilled === true,
         preparedAt: new Date().toISOString(),
       };
       state.models = [

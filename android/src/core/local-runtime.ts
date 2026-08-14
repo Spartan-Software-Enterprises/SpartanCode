@@ -1,4 +1,4 @@
-import { listCompatibleModels, validateModelLicense } from "./model-catalog";
+import { listCompatibleModels, licensedMobileModels } from "./model-catalog";
 import type { DeviceProfile } from "./runtime";
 
 export type MobileRuntimeId = "mlc-chat" | "pocketpal" | "llama.cpp";
@@ -39,9 +39,9 @@ function isRuntimeModule(value: unknown): value is MobileRuntimeModule {
 export function createMobileRuntimeRegistry(
   modules: Partial<Record<MobileRuntimeId, unknown>> = {},
   profile: DeviceProfile = {},
+  availableModels = licensedMobileModels,
 ) {
-  const compatibleModels =
-    listCompatibleModels(profile).filter(validateModelLicense);
+  const compatibleModels = listCompatibleModels(profile, availableModels);
   const statuses: MobileRuntimeStatus[] = runtimeIds.map((id) => ({
     id,
     status: isRuntimeModule(modules[id]) ? "available" : "unavailable",

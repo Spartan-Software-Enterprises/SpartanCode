@@ -40,9 +40,18 @@ function listLicensedModels({ commercialOnly = false } = {}) {
   );
 }
 
+function listAvailableModels({ commercialOnly = false } = {}) {
+  return listLicensedModels({ commercialOnly });
+}
+
 function normalizeHuggingFaceModel(item) {
   if (!item || typeof item !== "object" || typeof item.id !== "string")
     return null;
+  const tags = Array.isArray(item.tags)
+    ? item.tags.filter((tag) => typeof tag === "string").slice(0, 50)
+    : [];
+  const searchableId = item.id.toLowerCase();
+  const searchableTags = tags.join(" ").toLowerCase();
   return {
     id: item.id,
     provider: typeof item.author === "string" ? item.author : "Hugging Face",
@@ -53,6 +62,17 @@ function normalizeHuggingFaceModel(item) {
     source: "huggingface",
     downloadable: true,
     downloads: typeof item.downloads === "number" ? item.downloads : 0,
+    tags,
+    pipelineTag:
+      typeof item.pipeline_tag === "string" ? item.pipeline_tag : null,
+    modelType: typeof item.library_name === "string" ? item.library_name : null,
+    communityModel: true,
+    modelFamily: searchableId.split("/").pop(),
+    uncensored:
+      searchableId.includes("uncensored") ||
+      searchableTags.includes("uncensored"),
+    distilled:
+      searchableId.includes("distill") || searchableTags.includes("distill"),
   };
 }
 
@@ -74,6 +94,7 @@ async function searchHuggingFaceModels(
 
 module.exports = {
   listLicensedModels,
+  listAvailableModels,
   normalizeHuggingFaceModel,
   searchHuggingFaceModels,
   supportedModels,

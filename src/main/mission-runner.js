@@ -10,7 +10,9 @@ function createMissionRunner(
   } = {},
 ) {
   return (mission) => {
-    const plan = createExecutionPlan(mission.description);
+    const plan = createExecutionPlan(mission.description, {
+      defaultAgent: store.snapshot().settings.defaultAgent || "leo",
+    });
     store.addMissionPlan(mission.id, plan);
     const planArtifact = store.addArtifact({
       missionId: mission.id,

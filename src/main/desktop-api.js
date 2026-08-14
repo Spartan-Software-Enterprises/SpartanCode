@@ -3,6 +3,7 @@ const { getRuntimeStatus } = require("./runtime-status");
 const { gitStatusAt, gitInitAt, gitAddAt, gitCommitAt } = require("./git");
 const {
   listLicensedModels,
+  listAvailableModels,
   searchHuggingFaceModels,
 } = require("./model-catalog");
 const { classifyCommand, requiresMissionApproval } = require("./policy-engine");
@@ -15,7 +16,7 @@ const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 const { createModelCache } = require("./model-cache");
 const { validateRemoteConfig } = require("./remote-connection");
-const { loadCustomAgents } = require("./custom-agents");
+const { listBundledAgents, loadCustomAgents } = require("./custom-agents");
 const { createRuntimeRegistry } = require("./runtime-adapters");
 const { listPlugins } = require("./plugin-registry");
 const {
@@ -24,6 +25,7 @@ const {
 } = require("./plugin-marketplace");
 const { exportAuditLog } = require("./audit-export");
 const { createGitHubAppClient } = require("./github-app");
+const { createApiGateway } = require("./api-providers");
 const {
   estimateServerCost,
   getRouterGuidance,
@@ -39,11 +41,13 @@ function registerDesktopApi({
   marketplaceDir,
   secureVault,
   githubEnvironment = process.env,
+  providerEnvironment = process.env,
 }) {
   const voiceService = createVoiceService();
   const chatService = createChatService(store);
   const runtimeRegistry = createRuntimeRegistry();
   const githubApp = createGitHubAppClient({ environment: githubEnvironment });
+  const apiGateway = createApiGateway({ environment: providerEnvironment });
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
   ipcMain.handle("runtime:generate", (_event, runtimeId, request) => {
@@ -54,7 +58,11 @@ function registerDesktopApi({
     return runtimeRegistry.generate(runtimeId, request);
   });
   ipcMain.handle("capabilities:get", () => getCapabilities());
-  ipcMain.handle("providers:get", () => getProviderStatus());
+  ipcMain.handle("providers:get", () => getProviderStatus(providerEnvironment));
+  ipcMain.handle("api:providers", () => apiGateway.status());
+  ipcMain.handle("api:generate", (_event, providerId, request) =>
+    apiGateway.generate(providerId, request),
+  );
   ipcMain.handle("github-app:status", () => githubApp.status());
   ipcMain.handle("github-app:repositories", () => githubApp.listRepositories());
   ipcMain.handle("secure-vault:status", () => secureVault.status());
@@ -62,17 +70,28 @@ function registerDesktopApi({
   ipcMain.handle("secure-vault:set", (_event, name, value) => {
     const result = secureVault.set(name, value);
     if (typeof name === "string" && name.startsWith("SPARTANCODE_")) {
-      const nextEnvironment = {
-        ...githubEnvironment,
-        [name]: value,
-      };
-      githubApp.refresh(nextEnvironment);
+      githubEnvironment[name] = value;
+      githubApp.refresh(githubEnvironment);
+    }
+    if (typeof name === "string" && /^[A-Z0-9_]+_API_KEY$/.test(name)) {
+      providerEnvironment[name] = value;
+      apiGateway.refresh(providerEnvironment);
     }
     return result;
   });
-  ipcMain.handle("secure-vault:delete", (_event, name) =>
-    secureVault.delete(name),
-  );
+  ipcMain.handle("secure-vault:delete", (_event, name) => {
+    const deleted = secureVault.delete(name);
+    if (deleted && typeof name === "string") {
+      delete providerEnvironment[name];
+      if (name.startsWith("SPARTANCODE_")) {
+        delete githubEnvironment[name];
+        githubApp.refresh(githubEnvironment);
+      }
+      if (/^[A-Z0-9_]+_API_KEY$/.test(name))
+        apiGateway.refresh(providerEnvironment);
+    }
+    return deleted;
+  });
   ipcMain.handle("voice:status", () => voiceService.status());
   ipcMain.handle("voice:start", () => voiceService.start());
   ipcMain.handle("mcp:tools", () => [
@@ -111,9 +130,10 @@ function registerDesktopApi({
     return registry.dispatch(request);
   });
   ipcMain.handle("agents:list", () =>
-    loadCustomAgents(store.snapshot().settings.workspacePath).map(
-      ({ prompt, ...agent }) => agent,
-    ),
+    [
+      ...listBundledAgents(),
+      ...loadCustomAgents(store.snapshot().settings.workspacePath),
+    ].map(({ prompt, ...agent }) => agent),
   );
   ipcMain.handle("plugins:list", () =>
     listPlugins(store.snapshot().settings.workspacePath),
@@ -134,10 +154,10 @@ function registerDesktopApi({
     });
   });
   ipcMain.handle("models:list", (_event, options) =>
-    listLicensedModels(options),
+    listAvailableModels(options),
   );
-  ipcMain.handle("models:search", (_event, query) =>
-    searchHuggingFaceModels(typeof query === "string" ? query : ""),
+  ipcMain.handle("models:search", (_event, query, options) =>
+    searchHuggingFaceModels(typeof query === "string" ? query : "", options),
   );
   ipcMain.handle("models:cache", () => modelCache.list());
   ipcMain.handle(

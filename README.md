@@ -45,8 +45,8 @@ Explore the workspace surfaces:
 The Android command center puts offline mission queueing, optional bridge
 connection, approval visibility, and the mobile Spartan IDE experience on one
 screen. The queued-mission view shows the handoff from idea to tracked work;
-the companion also includes voice input, local collaboration, licensed model
-readiness, device diagnostics, and remote planning controls.
+the companion also includes voice input, local collaboration, full Hugging Face
+model discovery, device diagnostics, and remote planning controls.
 
 ## Why teams use SpartanCode
 
@@ -55,8 +55,11 @@ readiness, device diagnostics, and remote planning controls.
 - **Custom agent teams:** add workspace-scoped Researcher, Implementer,
   Verifier, or your own compatible agent definitions without coupling the app
   to a hosted service.
-- **Local-first intelligence:** use licensed local model metadata and runtime
-  readiness checks while keeping work available offline.
+- **Model freedom:** discover Hugging Face models, including community,
+  uncensored, and distilled variants, while preserving repository metadata.
+- **Agent API choice:** route optional cloud-agent requests through OpenAI,
+  Anthropic, Gemini, Mistral, Groq, xAI, DeepSeek, Together, OpenRouter,
+  Fireworks, Cohere, or Perplexity; keys remain local and encrypted.
 - **Evidence you can trust:** inspect artifacts, approvals, activity, audit
   exports, screenshots, test output, and release evidence in one place.
 - **Android independence:** carry the command center in your pocket with
@@ -118,7 +121,9 @@ portable `ssh2` runtime.
 
 - Local-first operation remains available without cloud credentials.
 - External mutations and dangerous commands require an explicit approval.
-- Only explicitly licensed local models are exposed by the model catalog.
+- Built-in distribution-safe models are clearly identified, while user-selected
+  Hugging Face models remain available with their repository metadata and are
+  never silently re-licensed or redistributed by SpartanCode.
 - Runtime availability is detected honestly; optional model runtimes are never
   reported as ready until their adapter contract is installed and verified.
 - Desktop can invoke a configured llama.cpp CLI with validated model and prompt

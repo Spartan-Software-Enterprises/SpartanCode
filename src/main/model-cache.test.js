@@ -5,13 +5,13 @@ const path = require("path");
 const test = require("node:test");
 const { createModelCache } = require("./model-cache");
 
-test("model cache only prepares explicitly licensed models", () => {
+test("model cache prepares built-in and explicitly selected community models", () => {
   const directory = fs.mkdtempSync(
     path.join(os.tmpdir(), "spartancode-models-"),
   );
   const cache = createModelCache(path.join(directory, "models.json"));
   assert.equal(cache.prepare("Qwen3-1.7B").status, "ready");
-  assert.throws(() => cache.prepare("Llama-3.2-1B"), /commercial license/);
+  assert.equal(cache.prepare("Llama-3.2-1B").status, "ready");
   fs.rmSync(directory, { recursive: true, force: true });
 });
 
@@ -30,14 +30,11 @@ test("model cache accepts an explicitly selected Hugging Face model", () => {
     cache.prepare(model.id, "repository-defined", model).source,
     "huggingface",
   );
-  assert.throws(
-    () =>
-      cache.prepare("org/unknown", "repository-defined", {
-        ...model,
-        id: "org/unknown",
-        licenseStatus: "unknown",
-      }),
-    /Acknowledge/,
-  );
+  const unknown = cache.prepare("org/unknown", "repository-defined", {
+    ...model,
+    id: "org/unknown",
+    licenseStatus: "unknown",
+  });
+  assert.equal(unknown.licenseStatus, "unknown");
   fs.rmSync(directory, { recursive: true, force: true });
 });

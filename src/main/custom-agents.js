@@ -5,6 +5,22 @@ const AGENT_NAME = /^[a-z0-9][a-z0-9-]{0,47}$/;
 const MAX_AGENT_FILES = 32;
 const MAX_AGENT_BYTES = 64 * 1024;
 
+const bundledAgents = [
+  {
+    name: "leo",
+    description:
+      "Default SpartanCode agent for planning, implementation, and verification.",
+    tools: ["workspace.list", "workspace.read", "git", "terminal"],
+    model: "inherit",
+    commandExecutionPolicy: "sandbox",
+    subagent: true,
+    mainAgent: true,
+    prompt:
+      "You are Leo, the default SpartanCode agent. Coordinate the mission lifecycle, keep work local-first, preserve user data, and leave reproducible verification evidence.",
+    path: "bundled/leo",
+  },
+];
+
 function parseScalar(value) {
   const trimmed = value.trim();
   if (!trimmed) return "";
@@ -94,4 +110,8 @@ function loadCustomAgents(workspacePath) {
   return agents.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-module.exports = { loadCustomAgents, parseFrontmatter };
+function listBundledAgents() {
+  return bundledAgents.map((agent) => ({ ...agent }));
+}
+
+module.exports = { listBundledAgents, loadCustomAgents, parseFrontmatter };
