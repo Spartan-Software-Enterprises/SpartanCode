@@ -128,6 +128,10 @@ current Implemented/Partial/Open counts.
   phone UI can search the bounded Hugging Face API, select results, and save
   and reload that metadata offline. Search is HTTPS-only, result-bounded, and
   fails closed on malformed or unavailable responses.
+- Desktop Hugging Face search now matches the bounded contract with a 200
+  character query limit, 50-result cap, ten-second abort timeout, and explicit
+  malformed-response handling. Model byte downloads and runtime availability
+  remain environment-dependent.
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, bounded desktop/Android home-server setup plans, AWS
   bootstrap/recovery scripts, and local/GitHub synchronization procedures.

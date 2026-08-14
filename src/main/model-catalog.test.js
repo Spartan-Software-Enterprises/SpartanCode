@@ -1,6 +1,7 @@
 const assert = require("assert");
 const test = require("node:test");
 const {
+  MAX_HUGGINGFACE_QUERY_LENGTH,
   listLicensedModels,
   normalizeHuggingFaceModel,
   searchHuggingFaceModels,
@@ -60,6 +61,37 @@ test("Hugging Face search is bounded and normalizes results", async () => {
       };
     },
   });
-  assert.equal(request.searchParams.get("limit"), "100");
+  assert.equal(request.searchParams.get("limit"), "50");
+  assert.ok(request.searchParams.get("search"));
   assert.equal(results[0].source, "huggingface");
+});
+
+test("Hugging Face search rejects oversized and malformed requests", async () => {
+  await assert.rejects(
+    searchHuggingFaceModels("x".repeat(MAX_HUGGINGFACE_QUERY_LENGTH + 1)),
+    /query is too long/,
+  );
+  await assert.rejects(
+    searchHuggingFaceModels("q", {
+      fetchImpl: async () => ({ ok: true, json: async () => ({}) }),
+    }),
+    /malformed data/,
+  );
+});
+
+test("Hugging Face search aborts slow requests", async () => {
+  await assert.rejects(
+    searchHuggingFaceModels("q", {
+      timeoutMs: 1,
+      fetchImpl: (_url, { signal }) =>
+        new Promise((resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            const error = new Error("aborted");
+            error.name = "AbortError";
+            reject(error);
+          });
+        }),
+    }),
+    /timed out/,
+  );
 });

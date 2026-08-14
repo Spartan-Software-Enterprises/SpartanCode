@@ -31,6 +31,10 @@ const supportedModels = [
   },
 ];
 
+const MAX_HUGGINGFACE_QUERY_LENGTH = 200;
+const MAX_HUGGINGFACE_RESULTS = 50;
+const HUGGINGFACE_TIMEOUT_MS = 10_000;
+
 function listLicensedModels({ commercialOnly = false } = {}) {
   return supportedModels.filter(
     (model) =>
@@ -78,18 +82,35 @@ function normalizeHuggingFaceModel(item) {
 
 async function searchHuggingFaceModels(
   query,
-  { fetchImpl = fetch, limit = 20 } = {},
+  { fetchImpl = fetch, limit = 20, timeoutMs = HUGGINGFACE_TIMEOUT_MS } = {},
 ) {
+  if (typeof query !== "string")
+    throw new Error("Hugging Face query must be text");
+  if (query.length > MAX_HUGGINGFACE_QUERY_LENGTH)
+    throw new Error("Hugging Face query is too long");
   const url = new URL("https://huggingface.co/api/models");
   if (query) url.searchParams.set("search", query);
-  url.searchParams.set("limit", String(Math.min(Math.max(limit, 1), 100)));
-  const response = await fetchImpl(url);
-  if (!response.ok)
-    throw new Error(`Hugging Face search failed (${response.status})`);
-  const models = await response.json();
-  return Array.isArray(models)
-    ? models.map(normalizeHuggingFaceModel).filter(Boolean)
-    : [];
+  url.searchParams.set(
+    "limit",
+    String(Math.min(Math.max(Number(limit) || 1, 1), MAX_HUGGINGFACE_RESULTS)),
+  );
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetchImpl(url, { signal: controller.signal });
+    if (!response.ok)
+      throw new Error(`Hugging Face search failed (${response.status})`);
+    const models = await response.json();
+    if (!Array.isArray(models))
+      throw new Error("Hugging Face search returned malformed data");
+    return models.map(normalizeHuggingFaceModel).filter(Boolean);
+  } catch (error) {
+    if (error?.name === "AbortError")
+      throw new Error("Hugging Face search timed out");
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 module.exports = {
@@ -98,4 +119,6 @@ module.exports = {
   normalizeHuggingFaceModel,
   searchHuggingFaceModels,
   supportedModels,
+  MAX_HUGGINGFACE_QUERY_LENGTH,
+  MAX_HUGGINGFACE_RESULTS,
 };
