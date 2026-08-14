@@ -1,14 +1,54 @@
-# SpartanCode Desktop
+# SpartanCode — Your Local-First AI Engineering Workspace
 
-SpartanCode is an agent-first, local-first Vibe coding command center. It is
-designed around missions, agent stages, artifacts, approvals, and workspace
-handoff rather than a conventional editor layout.
+Turn an idea into a verified software change with a calm, focused command
+center for missions, custom agents, local models, artifacts, and review. The
+Spartan IDE theme keeps the workspace dark, readable, and purpose-built for
+serious engineering on desktop or Android.
+
+SpartanCode is local-first and standalone by design: Android users do not need
+the desktop app, a bridge, or a network connection to plan, queue, review, and
+track work. Optional remote connectivity is an extension—not a dependency.
 
 ![SpartanCode desktop command center](docs/assets/spartancode-workspace.png)
 
 This interface capture was produced by the Playwright Electron visual smoke
 test on the AWS development host and covers the home command center, mission
 composer, agent stages, artifacts, and live status surfaces.
+
+## See the workspace in action
+
+Every primary menu and documented desktop surface is captured from the verified
+Playwright visual run:
+
+| Command center | Projects | Agent manager |
+| --- | --- | --- |
+| ![Command center](docs/assets/desktop-menu-gallery/desktop-home.png) | ![Projects](docs/assets/desktop-menu-gallery/desktop-projects.png) | ![Agent manager](docs/assets/desktop-menu-gallery/desktop-agents.png) |
+
+| Artifact review | Workspace settings | Spartan assistant |
+| --- | --- | --- |
+| ![Artifact review](docs/assets/desktop-menu-gallery/desktop-artifacts.png) | ![Workspace settings](docs/assets/desktop-menu-gallery/desktop-settings.png) | ![Assistant menu](docs/assets/desktop-menu-gallery/desktop-menu-assistant.png) |
+
+| Mission composer | Android command center | Android mission queue |
+| --- | --- | --- |
+| ![Mission composer](docs/assets/desktop-menu-gallery/desktop-composer-filled.png) | ![Android command center](android/screenshots/command-center.png) | ![Android mission queued](android/screenshots/mission-queued.png) |
+
+## Why teams use SpartanCode
+
+- **Mission-driven development:** describe the outcome, follow planning,
+  implementation, verification, and artifact review as visible stages.
+- **Custom agent teams:** add workspace-scoped Researcher, Implementer,
+  Verifier, or your own compatible agent definitions without coupling the app
+  to a hosted service.
+- **Local-first intelligence:** use licensed local model metadata and runtime
+  readiness checks while keeping work available offline.
+- **Evidence you can trust:** inspect artifacts, approvals, activity, audit
+  exports, screenshots, test output, and release evidence in one place.
+- **Android independence:** carry the command center in your pocket with
+  offline missions, approvals, collaboration sessions, voice input, and device
+  readiness diagnostics.
+- **Safe extensibility:** optional bridges, remote planning, plugins, and
+  marketplace metadata are bounded, validated, and never required for core
+  workflows.
 
 ## Development
 

@@ -1,62 +1,80 @@
-# SpartanCode Android interface
+# SpartanCode
 
-The Android companion is a mobile command center, not a full code editor. Its
-first surface keeps the highest-value controls reachable on a phone:
+## A focused AI engineering workspace—in your pocket or on your desk
 
-- **Command center** — local/synced status and mission-control context.
-- **New mission** — queues a mission locally while offline.
-- **Voice dictation** — requests explicit speech permissions and inserts a
-  transcript into the mission field when the native recognizer is available.
-- **Bridge connection** — accepts an MCP Bridge endpoint and reports sync or
-  connection failure explicitly. Optional bridge tokens are stored in
-  origin-scoped Expo SecureStore entries and never shown after sync.
-- **Missions** — shows queued mission descriptions and lifecycle status.
-- **Collaboration** — creates local versioned sessions offline and optionally
-  publishes them through the authenticated bridge.
-- **Approval gestures** — supports right-swipe approve and left-swipe deny,
-  while keeping labeled buttons available for accessible interaction.
-- **Runtime readiness** — reports MLC Chat, PocketPal, and llama.cpp native
-  module availability and applies the licensed model/device gate before use.
-  The native build includes the MIT-licensed `@pocketpalai/llama.rn` adapter;
-  it becomes available only in a prebuilt native binary with a local GGUF
-  model and remains unavailable in Expo Go.
+SpartanCode turns software ideas into visible, reviewable progress. It is a
+local-first command center for missions, agent teams, artifacts, approvals,
+and verification, wrapped in a distinctive dark Spartan IDE theme designed to
+keep attention on the work.
 
-## Verified behavior
+### Built for the way real projects move
 
-The companion is documented alongside the desktop command center so the
-standalone Android workflow and the optional desktop workflow are visible in
-the same product record:
+- **Start with an outcome.** Queue a mission from the desktop or Android app,
+  even when offline.
+- **Let the team work in stages.** Research, implementation, verification,
+  and synchronization are represented as inspectable agent roles.
+- **Review what was produced.** Artifacts, activity, approvals, and audit
+  history make progress easy to understand before anything risky is applied.
+- **Stay independent.** Android works without a desktop installation, MCP
+  Bridge, cloud credentials, or network access for core planning and review.
+- **Extend when you choose.** Optional local models, remote connections,
+  plugins, and bridges add capability without becoming a prerequisite.
 
-![SpartanCode desktop command center](../docs/assets/spartancode-workspace.png)
+## Interface gallery
 
-On 2026-08-13, the dev server exported the Expo web surface and Playwright ran
-at a 390×844 viewport with device scale factor 2. The smoke test verified:
+The following images are committed evidence from the Playwright visual smoke
+run on the AWS development server. They show every primary desktop menu and
+the assistant surface while preserving the Spartan IDE color system.
 
-1. “Command center” renders exactly once.
-2. “Queue mission” is an accessible button.
-3. A mission can be entered and queued through the visible UI.
-4. The queued mission appears in the missions list.
-5. Screenshots in the root README match those verified states.
+![Command center](../docs/assets/desktop-menu-gallery/desktop-home.png)
 
-The committed PNG evidence is checked for signature and the documented
-780×1688 (390×844 at 2x) dimensions by `scripts/verify-assets.js`; this does
-not replace physical-device, emulator, or TalkBack acceptance.
+![Projects](../docs/assets/desktop-menu-gallery/desktop-projects.png)
 
-The connection foundation also validates HTTPS endpoints (with localhost
-allowed for development), persists a named bridge profile after a successful
-sync, preserves the offline queue while applying a remote snapshot, retries
-transient bridge failures, cancels in-flight retry loops, uses route-scoped
-idempotency keys for remote mutations, and marks snapshots stale after five
-minutes.
+![Agent manager](../docs/assets/desktop-menu-gallery/desktop-agents.png)
 
-Native Android builds, artifact and approval workflows, licensed model
-selection, storage recovery, biometric unlock, offline extension metadata,
-audit rendering, device-readiness diagnostics, and a guarded signed-release
-workflow are now implemented. The AWS host produced a successful API 35 native
-debug build; its lack of KVM prevents reliable emulator framework startup, so
-install/launch evidence remains assigned to a KVM-capable CI runner or physical
-device;
-physical-device accessibility and production signing still require the release
-environment described in [`PLAN.md`](PLAN.md). The app remains
-standalone-first: a desktop checkout or MCP Bridge is never required for local
-mission planning, bundled agent roles, queueing, or review.
+![Artifact review](../docs/assets/desktop-menu-gallery/desktop-artifacts.png)
+
+![Workspace settings](../docs/assets/desktop-menu-gallery/desktop-settings.png)
+
+![Spartan assistant](../docs/assets/desktop-menu-gallery/desktop-menu-assistant.png)
+
+![Mission composer](../docs/assets/desktop-menu-gallery/desktop-composer-filled.png)
+
+## Android command center
+
+The Android companion keeps high-value controls reachable on a phone:
+
+- local and synced status with offline mission queueing;
+- voice dictation when the native recognizer is available;
+- optional bridge profiles with secure token storage;
+- local collaboration sessions and approval gestures;
+- model, storage, biometric, and runtime readiness diagnostics;
+- artifact and approval review without requiring the desktop app.
+
+![Android command center](../android/screenshots/command-center.png)
+
+![Android mission queued](../android/screenshots/mission-queued.png)
+
+The companion is standalone-first. A bridge is an optional route for remote
+execution and synchronization only; it is never required for local missions,
+bundled agent roles, queueing, or review.
+
+## Trust and transparency
+
+SpartanCode keeps risky actions policy-visible, records execution mode and
+activity, restricts local workspace access, redacts credentials from remote
+profiles and audit exports, and exposes only explicitly licensed model
+metadata. YOLO mode is available for trusted isolated workspaces, but it does
+not remove validation, isolation, credential redaction, or audit history.
+
+## Verification status
+
+The desktop application has automated unit, integration, build, and Playwright
+visual coverage. Android has typecheck, Jest, formatting, native build, and
+release-signing verification. Emulator launch evidence is assigned to the
+KVM-capable CI runner or a physical device; the AWS development host is used
+for native builds and server-side verification.
+
+See [`PLAN.md`](PLAN.md), [`docs/ROADMAP_STATUS.md`](../docs/ROADMAP_STATUS.md),
+and [`docs/VERIFICATION_MATRIX.md`](../docs/VERIFICATION_MATRIX.md) for the
+maintained delivery and release records.
