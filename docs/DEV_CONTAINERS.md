@@ -15,3 +15,8 @@ caller explicitly supplies `overwrite: true`.
 This creates the development environment only. It does not upload user code,
 create a billable Codespace, install a bridge, or store credentials. Codespaces
 still requires the user's separate GitHub authorization and cost review.
+
+Dev Containers are an optional build workspace, not a target restriction:
+SpartanCode projects can target Android, iOS, Windows, macOS, Linux, web, or a
+custom device/operating system. The selected target's compiler and signing
+requirements remain explicit release-evidence gates.
