@@ -35,6 +35,7 @@ const { createRuntimeRegistry } = require("./runtime-adapters");
 const { listPlugins } = require("./plugin-registry");
 const {
   downloadMarketplaceArtifact,
+  activateMarketplacePlugin,
   fetchMarketplaceIndex,
 } = require("./plugin-marketplace");
 const { exportAuditLog } = require("./audit-export");
@@ -281,6 +282,14 @@ function registerDesktopApi({
     if (!marketplaceDir) throw new Error("Marketplace staging is unavailable");
     return downloadMarketplaceArtifact(manifest, {
       destinationDir: marketplaceDir,
+    });
+  });
+  ipcMain.handle("plugins:activate", (_event, manifest) => {
+    if (!marketplaceDir) throw new Error("Marketplace staging is unavailable");
+    const workspacePath = store.snapshot().settings.workspacePath;
+    return activateMarketplacePlugin(manifest, {
+      stagingDir: marketplaceDir,
+      workspacePath,
     });
   });
   ipcMain.handle("models:list", (_event, options) =>

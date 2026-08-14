@@ -25,6 +25,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("plugins:marketplace", url, publicKey),
   downloadMarketplacePlugin: (manifest) =>
     ipcRenderer.invoke("plugins:download", manifest),
+  activateMarketplacePlugin: (manifest) =>
+    ipcRenderer.invoke("plugins:activate", manifest),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   resolveSettings: (context) => ipcRenderer.invoke("settings:resolve", context),
   updateSettings: (update) => ipcRenderer.invoke("settings:update", update),

@@ -33,6 +33,8 @@ Indexes are capped at 100 entries and 1 MiB. Every entry requires an explicit
 MIT or Apache-2.0 license, a safe capability, an HTTPS source URL, and an
 artifact digest. An explicitly selected entry may be downloaded over HTTPS,
 bounded to 50 MiB, SHA-256 verified, and atomically staged in the application
-cache with mode `0600` metadata. Staging does not extract, load, activate,
-replace, update, or execute code; human review and an explicit installer remain
-required before an artifact can become active.
+cache with mode `0600` metadata. An explicit activation call can install only
+the validated declarative manifest into the workspace plugin registry after
+rechecking the staged artifact digest; the artifact remains opaque and is never
+extracted, loaded, or executed. Human review and an explicit installer remain
+required for executable behavior.

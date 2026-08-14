@@ -7,6 +7,7 @@ const test = require("node:test");
 const {
   canonicalize,
   downloadMarketplaceArtifact,
+  activateMarketplacePlugin,
   fetchMarketplaceIndex,
   validateMarketplaceIndex,
   verifyMarketplaceIndex,
@@ -153,4 +154,51 @@ test("marketplace stages HTTPS artifacts only after bounded digest verification"
     ),
     /SHA-256 verification failed/,
   );
+});
+
+test("marketplace activation installs only validated metadata after integrity recheck", async () => {
+  const bytes = Buffer.from("opaque plugin artifact");
+  const manifest = {
+    id: "safe-persona",
+    name: "Safe persona",
+    version: "1.0.0",
+    description: "A declarative persona.",
+    license: "MIT",
+    capabilities: ["persona"],
+    sourceUrl: "https://plugins.example/safe-persona.tgz",
+    artifactSha256: crypto.createHash("sha256").update(bytes).digest("hex"),
+    publisher: "Spartan",
+  };
+  const stagingDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-marketplace-stage-"),
+  );
+  const workspacePath = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-marketplace-workspace-"),
+  );
+  const staged = await downloadMarketplaceArtifact(manifest, {
+    destinationDir: stagingDir,
+    fetchImpl: async () => ({
+      ok: true,
+      arrayBuffer: async () =>
+        bytes.buffer.slice(
+          bytes.byteOffset,
+          bytes.byteOffset + bytes.byteLength,
+        ),
+    }),
+  });
+  const activated = activateMarketplacePlugin(manifest, {
+    stagingDir,
+    workspacePath,
+    now: "2026-08-14T00:00:00.000Z",
+  });
+  assert.equal(activated.version, "1.0.0");
+  const installed = JSON.parse(fs.readFileSync(activated.manifestPath));
+  assert.deepEqual(installed.capabilities, ["persona"]);
+  assert.equal(installed.source, "marketplace");
+  assert.equal(
+    JSON.parse(fs.readFileSync(staged.metadataPath)).installState,
+    "active",
+  );
+  fs.rmSync(stagingDir, { recursive: true, force: true });
+  fs.rmSync(workspacePath, { recursive: true, force: true });
 });

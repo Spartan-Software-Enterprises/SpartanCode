@@ -186,11 +186,77 @@ async function downloadMarketplaceArtifact(
   return { ...metadata, artifactPath, metadataPath };
 }
 
+function activateMarketplacePlugin(
+  manifest,
+  { stagingDir, workspacePath, now = new Date().toISOString() } = {},
+) {
+  if (typeof stagingDir !== "string" || !path.isAbsolute(stagingDir))
+    throw new Error("Marketplace staging directory must be absolute");
+  if (typeof workspacePath !== "string" || !path.isAbsolute(workspacePath))
+    throw new Error("A workspace is required to activate a plugin");
+  const validated = validateMarketplaceIndex({
+    schemaVersion: 1,
+    issuer: "artifact-activation",
+    plugins: [manifest],
+  }).plugins[0];
+  const stagedDir = path.join(stagingDir, validated.id, validated.version);
+  const artifactPath = path.join(stagedDir, "artifact.bin");
+  const metadataPath = path.join(stagedDir, "metadata.json");
+  if (!fs.existsSync(artifactPath) || !fs.existsSync(metadataPath))
+    throw new Error("A verified staged artifact is required");
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+  if (
+    metadata.installState !== "staged" ||
+    metadata.artifactSha256 !== validated.artifactSha256
+  )
+    throw new Error("Staged artifact metadata is invalid");
+  const digest = crypto
+    .createHash("sha256")
+    .update(fs.readFileSync(artifactPath))
+    .digest("hex");
+  if (digest !== validated.artifactSha256)
+    throw new Error("Staged artifact integrity verification failed");
+
+  // Activation installs only the validated declarative manifest. The staged
+  // artifact remains opaque and is never extracted, loaded, or executed.
+  const pluginDir = path.join(workspacePath, ".spartancode", "plugins");
+  fs.mkdirSync(pluginDir, { recursive: true, mode: 0o700 });
+  const targetPath = path.join(pluginDir, `${validated.id}.json`);
+  const temporaryPath = `${targetPath}.${process.pid}.tmp`;
+  const activeManifest = {
+    id: validated.id,
+    name: validated.name,
+    version: validated.version,
+    description: validated.description,
+    license: validated.license,
+    capabilities: validated.capabilities,
+    source: "marketplace",
+    publisher: validated.publisher,
+    artifactSha256: validated.artifactSha256,
+    activatedAt: now,
+  };
+  fs.writeFileSync(
+    temporaryPath,
+    `${JSON.stringify(activeManifest, null, 2)}\n`,
+    {
+      mode: 0o600,
+    },
+  );
+  fs.renameSync(temporaryPath, targetPath);
+  fs.writeFileSync(
+    metadataPath,
+    `${JSON.stringify({ ...metadata, installState: "active", activatedAt: now }, null, 2)}\n`,
+    { mode: 0o600 },
+  );
+  return { ...activeManifest, manifestPath: targetPath, metadataPath };
+}
+
 module.exports = {
   MAX_ENTRIES,
   MAX_ARTIFACT_BYTES,
   canonicalize,
   downloadMarketplaceArtifact,
+  activateMarketplacePlugin,
   fetchMarketplaceIndex,
   validateMarketplaceIndex,
   verifyMarketplaceIndex,
