@@ -35,12 +35,14 @@ with the synchronization timer. It contains no credentials. The replacement
 uses only the default VPC security group; the retired `spartan-dev-ssh` group
 is not required.
 
-The active replacement is a persistent `t2.large` in `us-east-1c` with a
-512-GiB gp3 root volume, stop and termination protection, and no automatic
+The active replacement is a KVM-capable `c8i.xlarge` in `us-east-1c` with
+nested virtualization enabled, a 512-GiB gp3 root volume, and no automatic
 termination timer. Its current public address is managed operationally rather
-than committed as configuration. GitHub credentials are provisioned separately
-on the host for private-repository synchronization; they are never placed in
-user-data or committed to this repository.
+than committed as configuration. The former `t2.large` is stopped and
+preserved as a fallback instance; stop it again whenever it is restarted for
+recovery. GitHub credentials are provisioned separately on the host for
+private-repository synchronization; they are never placed in user-data or
+committed to this repository.
 
 AWS account budget monitoring is configured as
 `SpartanCode-Monthly-Cost-Guardrail` with a $50 monthly limit. This is a
@@ -48,7 +50,7 @@ monitoring guardrail, not a billing or credit guarantee: AWS credit balance is
 not exposed by the EC2 CLI, and a budget does not automatically stop compute.
 Check Cost Explorer and the budget before extending the host's use.
 
-The `t2.large` replacement does not expose `/dev/kvm`. Android SDK setup and
-native Gradle builds work there, but reliable emulator install/launch requires
-an environment with hardware virtualization (such as the pinned GitHub
-Actions runner or a separately approved KVM-capable host).
+The active KVM host exposes `/dev/kvm` with `660 root:kvm` permissions. Verify
+this after every restart with `test -e /dev/kvm` and `stat -c '%a %U:%G' /dev/kvm`.
+If the check fails, do not count emulator evidence as passing; use the pinned
+GitHub Actions runner until the host is repaired.

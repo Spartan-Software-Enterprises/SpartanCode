@@ -11,6 +11,7 @@ const {
   snapshotPath,
   snapshotRevision,
   snapshotEnvelope,
+  readSnapshotEnvelope,
   summarizeSnapshot,
   collaborationParticipantsRoute,
 } = require("./extension");
@@ -78,6 +79,9 @@ test("snapshot persistence has a bounded revision-aware envelope", () => {
     artifacts: 0,
   });
   assert.throws(() => snapshotEnvelope("not an object"), /snapshot is invalid/);
+  assert.deepEqual(readSnapshotEnvelope(JSON.stringify(envelope)), envelope);
+  assert.throws(() => readSnapshotEnvelope("{}"), /envelope is invalid/);
+  assert.throws(() => readSnapshotEnvelope("not json"), /valid JSON/);
 });
 
 test("collaboration commands bound notes and encode session routes", () => {

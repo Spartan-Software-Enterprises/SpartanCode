@@ -1,6 +1,10 @@
 const { Client } = require("ssh2");
 const { spawn, spawnSync } = require("node:child_process");
 
+const REMOTE_CAPABILITY_COMMAND =
+  "uname -srm 2>/dev/null || true; if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then echo SPARTANCODE_KVM=available; elif [ -e /dev/kvm ]; then echo SPARTANCODE_KVM=permission-denied; else echo SPARTANCODE_KVM=unavailable; fi";
+const MAX_PROBE_OUTPUT = 8_192;
+
 function commandAvailable(command, runner = spawnSync) {
   const result = runner(command, [], { stdio: "ignore" });
   return result.status === 0;
@@ -125,6 +129,99 @@ function createRemoteConnection(config) {
   return client;
 }
 
+function parseRemoteCapabilities(output) {
+  const lines = String(output || "")
+    .slice(0, MAX_PROBE_OUTPUT)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const kvm = lines.find((line) => line.startsWith("SPARTANCODE_KVM="));
+  const kvmState = kvm?.slice("SPARTANCODE_KVM=".length);
+  return {
+    platform:
+      lines.find((line) => !line.startsWith("SPARTANCODE_KVM=")) || null,
+    kvm: ["available", "permission-denied", "unavailable"].includes(kvmState)
+      ? kvmState
+      : "unknown",
+  };
+}
+
+function probeRemoteConnection(
+  config = {},
+  { ClientClass = Client, timeoutMs = 10_000 } = {},
+) {
+  const validation = validateRemoteConfig(config);
+  if (!validation.valid)
+    return Promise.resolve({
+      reachable: false,
+      validation,
+      error: "Invalid remote configuration",
+    });
+  const boundedTimeout = Math.max(
+    1_000,
+    Math.min(Number(timeoutMs) || 10_000, 30_000),
+  );
+  return new Promise((resolve) => {
+    const client = new ClientClass();
+    let settled = false;
+    let timer;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      try {
+        client.end();
+      } catch {
+        // A failed connection may not have a usable end method.
+      }
+      resolve(result);
+    };
+    timer = setTimeout(
+      () => finish({ reachable: false, error: "Remote probe timed out" }),
+      boundedTimeout,
+    );
+    client.once("error", (error) =>
+      finish({ reachable: false, error: String(error?.message || error) }),
+    );
+    client.once("ready", () => {
+      client.exec(REMOTE_CAPABILITY_COMMAND, (error, stream) => {
+        if (error) {
+          finish({
+            reachable: true,
+            capabilities: null,
+            error: String(error.message || error),
+          });
+          return;
+        }
+        let output = "";
+        stream.on("data", (chunk) => {
+          if (output.length < MAX_PROBE_OUTPUT)
+            output += String(chunk).slice(0, MAX_PROBE_OUTPUT - output.length);
+        });
+        stream.once("close", () =>
+          finish({
+            reachable: true,
+            capabilities: parseRemoteCapabilities(output),
+            error: null,
+          }),
+        );
+      });
+    });
+    try {
+      client.connect({
+        host: config.host,
+        port: config.port || 22,
+        username: config.username,
+        ...(config.password ? { password: config.password } : {}),
+        ...(config.privateKey ? { privateKey: config.privateKey } : {}),
+        readyTimeout: boundedTimeout,
+      });
+    } catch (error) {
+      finish({ reachable: false, error: String(error?.message || error) });
+    }
+  });
+}
+
 function validateRemoteConfig(config = {}) {
   const transport = config.transport || "ssh";
   const validTransports = ["ssh", "mosh", "mcp-bridge"];
@@ -165,5 +262,8 @@ module.exports = {
   createMoshSession,
   createRemoteConnection,
   getTransportStatus,
+  parseRemoteCapabilities,
+  probeRemoteConnection,
+  REMOTE_CAPABILITY_COMMAND,
   validateRemoteConfig,
 };

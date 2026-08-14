@@ -178,7 +178,10 @@ current Implemented/Partial/Open counts.
   configured path.
 - Reproducible release-evidence generation now records the Git commit,
   SHA-256 hashes for scanned artifacts, and a lockfile-derived third-party
-  component inventory for desktop and Android release workflows.
+  component inventory for desktop and Android release workflows. The
+  independent `scripts/verify-release-evidence.js` gate now fail-closes on
+  modified/missing artifacts, path traversal, missing control-evidence sources,
+  incomplete notices, and a manifest commit that differs from the checkout.
 - A guarded manual/tag Android release workflow now provisions Java/Android
   tooling, consumes release-owned keystore secrets only in the runner
   temporary directory, and uploads signed AAB/APK plus release evidence.

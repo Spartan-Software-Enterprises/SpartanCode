@@ -5,6 +5,9 @@ const {
   buildMoshArgs,
   createMoshSession,
   getTransportStatus,
+  parseRemoteCapabilities,
+  probeRemoteConnection,
+  REMOTE_CAPABILITY_COMMAND,
   validateRemoteConfig,
 } = require("./remote-connection");
 
@@ -90,4 +93,69 @@ test("Mosh session surfaces process errors without exposing credentials", () => 
   assert.equal(session.snapshot().state, "error");
   assert.equal(session.snapshot().error, "mosh unavailable for dev@home.local");
   assert.equal(JSON.stringify(session.snapshot()).includes("password"), false);
+});
+
+test("remote capability parsing reports platform and KVM state", () => {
+  assert.deepEqual(
+    parseRemoteCapabilities("Linux 6.8.0 x86_64\nSPARTANCODE_KVM=available\n"),
+    { platform: "Linux 6.8.0 x86_64", kvm: "available" },
+  );
+  assert.deepEqual(parseRemoteCapabilities("Windows\n"), {
+    platform: "Windows",
+    kvm: "unknown",
+  });
+});
+
+test("remote capability probe uses a fixed command and never returns credentials", async () => {
+  class FakeClient extends EventEmitter {
+    connect(options) {
+      this.options = options;
+      queueMicrotask(() => this.emit("ready"));
+    }
+
+    exec(command, callback) {
+      assert.equal(command, REMOTE_CAPABILITY_COMMAND);
+      const stream = new EventEmitter();
+      callback(null, stream);
+      queueMicrotask(() => {
+        stream.emit("data", "Linux 6.8.0 x86_64\nSPARTANCODE_KVM=available\n");
+        stream.emit("close");
+      });
+    }
+
+    end() {
+      this.ended = true;
+    }
+  }
+  const result = await probeRemoteConnection(
+    {
+      host: "kvm.example",
+      username: "ubuntu",
+      password: "super-secret",
+    },
+    { ClientClass: FakeClient },
+  );
+  assert.deepEqual(result, {
+    reachable: true,
+    capabilities: { platform: "Linux 6.8.0 x86_64", kvm: "available" },
+    error: null,
+  });
+  assert.doesNotMatch(JSON.stringify(result), /super-secret/);
+});
+
+test("remote capability probe reports connection errors without rejecting", async () => {
+  class FailingClient extends EventEmitter {
+    connect() {
+      queueMicrotask(() => this.emit("error", new Error("connection refused")));
+    }
+
+    end() {}
+  }
+  assert.deepEqual(
+    await probeRemoteConnection(
+      { host: "kvm.example", username: "ubuntu" },
+      { ClientClass: FailingClient },
+    ),
+    { reachable: false, error: "connection refused" },
+  );
 });

@@ -34,6 +34,10 @@ Physical Android/iOS hardware gates use the optional workflow in
 [AWS_DEVICE_FARM.md](AWS_DEVICE_FARM.md). EC2 emulator results do not count as
 biometric, NPU, camera, AR/VR, or physical-network acceptance.
 
+The complete September 1 beta acceptance sequence, evidence naming convention,
+and product-owner sign-off record are in
+[BETA_ACCEPTANCE_RUNBOOK.md](BETA_ACCEPTANCE_RUNBOOK.md).
+
 The local Android phone can provide physical Android evidence through
 [LOCAL_DEVICE_TESTING.md](LOCAL_DEVICE_TESTING.md); an attached authorized ADB
 device is required before those checks count as passed.

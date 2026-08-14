@@ -60,6 +60,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   addConnection: (profile) => ipcRenderer.invoke("connections:add", profile),
   validateConnection: (profile) =>
     ipcRenderer.invoke("connections:validate", profile),
+  probeConnection: (profile) =>
+    ipcRenderer.invoke("connections:probe", profile),
   getRuntimeStatus: () => ipcRenderer.invoke("runtime:status"),
   listRuntimeAdapters: () => ipcRenderer.invoke("runtime:adapters"),
   getBrowserStatus: () => ipcRenderer.invoke("browser:status"),

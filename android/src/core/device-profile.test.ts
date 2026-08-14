@@ -2,6 +2,7 @@ import {
   deviceDiagnostics,
   normalizeDeviceProfile,
   platformDeviceProbe,
+  verifyDeviceReadiness,
 } from "./device-profile";
 
 describe("device capability normalization", () => {
@@ -51,5 +52,64 @@ describe("device capability normalization", () => {
     expect(normalizeDeviceProfile()).toMatchObject({
       hasAccelerator: undefined,
     });
+  });
+
+  it("reports pass, fail, and unknown readiness states for a physical device", () => {
+    expect(
+      verifyDeviceReadiness(
+        normalizeDeviceProfile({
+          totalMemoryMb: 4096,
+          availableStorageMb: 8192,
+          thermalState: "nominal",
+          hasVulkan: true,
+        }),
+      ),
+    ).toEqual([
+      {
+        id: "memory",
+        label: "Memory",
+        status: "pass",
+        detail: "4096 MB RAM reported",
+      },
+      {
+        id: "storage",
+        label: "Storage",
+        status: "pass",
+        detail: "8192 MB free",
+      },
+      {
+        id: "thermal",
+        label: "Thermal state",
+        status: "pass",
+        detail: "nominal",
+      },
+      {
+        id: "accelerator",
+        label: "Local accelerator",
+        status: "pass",
+        detail: "Vulkan or NPU available",
+      },
+    ]);
+
+    expect(
+      verifyDeviceReadiness(
+        normalizeDeviceProfile({
+          totalMemoryMb: 1024,
+          availableStorageMb: 512,
+          thermalState: "critical",
+          hasVulkan: false,
+          hasNpu: false,
+        }),
+      ).map(({ id, status }) => ({ id, status })),
+    ).toEqual([
+      { id: "memory", status: "fail" },
+      { id: "storage", status: "fail" },
+      { id: "thermal", status: "fail" },
+      { id: "accelerator", status: "warn" },
+    ]);
+
+    expect(
+      verifyDeviceReadiness({}).every((check) => check.status === "warn"),
+    ).toBe(true);
   });
 });

@@ -85,5 +85,19 @@ the ordinary unit-test gate:
    offline/reconnect, and process-restart acceptance tests.
 6. Record the release commit, artifact checksums, and verification results.
 
+The generated evidence must also pass the independent verifier before it is
+published:
+
+```bash
+node scripts/verify-release-evidence.js \
+  --manifest dist/release-evidence/release-manifest.json
+```
+
+The verifier fails closed if an artifact is missing or modified, a recorded
+source-control evidence file is absent, a path escapes the checkout, notices
+omit a component or artifact hash, or the manifest commit differs from the
+current checkout. This is release-integrity evidence, not a signature,
+attestation, legal review, or proof that the release is secure.
+
 The repository's automated checks prove implementation invariants but do not
 substitute for these release-environment or legal-review gates.

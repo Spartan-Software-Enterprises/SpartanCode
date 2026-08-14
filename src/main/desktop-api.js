@@ -33,6 +33,7 @@ const {
 const {
   getTransportStatus,
   validateRemoteConfig,
+  probeRemoteConnection,
 } = require("./remote-connection");
 const { listBundledAgents, loadCustomAgents } = require("./custom-agents");
 const { createRuntimeRegistry } = require("./runtime-adapters");
@@ -526,6 +527,9 @@ function registerDesktopApi({
         : `Missing connection fields: ${validation.missing.join(", ")}`,
     };
   });
+  ipcMain.handle("connections:probe", (_event, profile) =>
+    probeRemoteConnection(profile || {}),
+  );
   ipcMain.handle("workspace:choose", async () => {
     const result = await dialog.showOpenDialog(window, {
       properties: ["openDirectory", "createDirectory"],

@@ -140,6 +140,32 @@ function snapshotEnvelope(snapshot) {
   return serialized;
 }
 
+function readSnapshotEnvelope(serialized) {
+  if (
+    typeof serialized !== "string" ||
+    Buffer.byteLength(serialized, "utf8") > MAX_SNAPSHOT_BYTES
+  )
+    throw new Error("SpartanCode snapshot is too large to read");
+  let envelope;
+  try {
+    envelope = JSON.parse(serialized);
+  } catch {
+    throw new Error("SpartanCode snapshot is not valid JSON");
+  }
+  if (
+    !envelope ||
+    typeof envelope !== "object" ||
+    Array.isArray(envelope) ||
+    envelope.schemaVersion !== 1 ||
+    !/^[a-f0-9]{64}$/.test(envelope.snapshotRevision || "") ||
+    !envelope.snapshot ||
+    typeof envelope.snapshot !== "object" ||
+    Array.isArray(envelope.snapshot)
+  )
+    throw new Error("SpartanCode snapshot envelope is invalid");
+  return envelope;
+}
+
 function summarizeSnapshot(snapshot = {}) {
   const missions = Array.isArray(snapshot.missions) ? snapshot.missions : [];
   const approvals = Array.isArray(snapshot.approvals) ? snapshot.approvals : [];
@@ -246,6 +272,25 @@ async function activate(context) {
       vscode.window.showInformationMessage(
         "SpartanCode workspace snapshot synced.",
       );
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("spartancode.openSnapshot", async () => {
+      const folder = workspaceFolder();
+      if (!folder)
+        throw new Error(
+          "Open a workspace folder before opening a SpartanCode snapshot.",
+        );
+      const target = snapshotPath(folder);
+      if (!fs.existsSync(target))
+        throw new Error(
+          "No local SpartanCode snapshot exists; sync one first.",
+        );
+      readSnapshotEnvelope(fs.readFileSync(target, "utf8"));
+      const document = await vscode.workspace.openTextDocument(target);
+      await vscode.window.showTextDocument(document, { preview: false });
+      output.appendLine(`Opened local snapshot ${target}`);
     }),
   );
 
@@ -469,5 +514,6 @@ module.exports = {
   snapshotPath,
   snapshotRevision,
   snapshotEnvelope,
+  readSnapshotEnvelope,
   summarizeSnapshot,
 };

@@ -90,6 +90,7 @@ import {
   deviceDiagnostics,
   normalizeDeviceProfile,
   platformDeviceProbe,
+  verifyDeviceReadiness,
 } from "./src/core/device-profile";
 import {
   appendMobileCollaborationEvent,
@@ -228,6 +229,10 @@ export default function App() {
   );
   const deviceMessages = useMemo(
     () => deviceDiagnostics(deviceProfile),
+    [deviceProfile],
+  );
+  const deviceVerification = useMemo(
+    () => verifyDeviceReadiness(deviceProfile),
     [deviceProfile],
   );
   const authorizedBridgeRequest = useCallback(
@@ -1187,6 +1192,16 @@ export default function App() {
               ? `${Math.round(deviceProfile.totalMemoryMb)} MB RAM reported`
               : "RAM probe unavailable"}
           </Text>
+          {deviceVerification.map((check) => (
+            <Text style={styles.message} key={check.id}>
+              {check.status === "pass"
+                ? "PASS"
+                : check.status === "fail"
+                  ? "BLOCKED"
+                  : "CHECK"}{" "}
+              · {check.label}: {check.detail}
+            </Text>
+          ))}
           {deviceMessages.map((diagnostic) => (
             <Text style={styles.message} key={diagnostic}>
               {diagnostic}

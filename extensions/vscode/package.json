@@ -35,6 +35,10 @@
         "title": "SpartanCode: Sync Workspace Snapshot"
       },
       {
+        "command": "spartancode.openSnapshot",
+        "title": "SpartanCode: Open Local Snapshot"
+      },
+      {
         "command": "spartancode.showStatus",
         "title": "SpartanCode: Show Workspace Status"
       },
