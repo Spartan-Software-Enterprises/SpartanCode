@@ -70,6 +70,9 @@ jobs:
           export ANDROID_SDK_HOME="${RUNNER_TEMP}/android-home"
           export ANDROID_AVD_HOME="${RUNNER_TEMP}/android-avd"
           mkdir -p "$ANDROID_SDK_HOME" "$ANDROID_AVD_HOME"
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+          fi
           sdkmanager "emulator" "system-images;android-35;default;x86_64"
           echo no | avdmanager create avd \
             --name spartancode-ci \
