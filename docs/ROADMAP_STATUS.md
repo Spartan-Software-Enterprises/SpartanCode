@@ -236,7 +236,10 @@ current Implemented/Partial/Open counts.
   for VS Code-compatible tools, JetBrains/Android Studio, Visual Studio,
   Eclipse, Xcode, Neovim/Vim, Emacs, Sublime, Zed, terminal coding agents,
   and developer-service connectors. Adapter implementation and ecosystem
-  governance remain partial; see
+  governance remain partial. A bounded shared adapter-manifest validator now
+  provides normalized host, target, operation, permission, execution-boundary,
+  provenance, and test-coverage declarations; read-only ecosystem importers
+  remain next. See
   `docs/EXTENSION_CONNECTOR_COMPATIBILITY.md`.
 - Desktop audit export now emits bounded, credential-redacted, SHA-256-verified
   governance bundles through isolated IPC.

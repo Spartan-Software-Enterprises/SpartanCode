@@ -76,7 +76,9 @@ security model:
 
 ## Acceptance sequence
 
-1. Finalize the adapter manifest and capability-report schema.
+1. The shared versioned adapter manifest and capability-report contract is now
+   implemented as a bounded declarative validator in
+   `src/main/adapter-manifest.js` with negative tests for unsafe declarations.
 2. Add read-only importers for VS Code/compatible, JetBrains, Visual Studio,
    Eclipse, Xcode/SPM, Neovim/Vim, Emacs, Sublime, and Zed formats.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
