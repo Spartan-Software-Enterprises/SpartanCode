@@ -158,6 +158,10 @@ behavior and a corresponding automated or documented verification path.
   bounded, tokenized `execFile` launches; the current standard security review
   recorded no reportable findings, with delegated-worker coverage explicitly
   documented as unavailable in this environment.
+- Dependency review is documented in [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md):
+  desktop production dependencies are clean, while Android has 18 transitive
+  Expo/React Native toolchain findings that require a compatibility-tested
+  major upgrade rather than an unsafe forced fix.
 
 ## Implemented but environment-dependent
 
