@@ -14,6 +14,15 @@ behavior and a corresponding automated or documented verification path.
   Electron, renderer, and Android guidance; desktop Settings opens its official
   GitHub App login flow without storing CodeRabbit credentials.
 
+## Next capability expansion
+
+- Cross-platform automation capability roadmap documented for Windows OS and
+  hardware adapters, autonomous Leo execution, personas and voice, GUI
+  automation, Playwright browser control, Proton/Tor adapters, and encrypted
+  local RAG memory. Each slice must ship with typed capabilities, policy
+  boundaries, audit evidence, and truthful unavailable states; see
+  [AUTOMATION_CAPABILITIES.md](AUTOMATION_CAPABILITIES.md).
+
 - Desktop Electron shell with isolated preload IPC and workspace path/symlink
   boundaries.
 - Mission Plan/Build/Verify lifecycle, durable artifacts, approvals, audit

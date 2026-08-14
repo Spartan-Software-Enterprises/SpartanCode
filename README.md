@@ -22,6 +22,11 @@ in the desktop test gate. See [project previews](docs/PROJECT_PREVIEWS.md).
 CodeRabbit review configuration and GitHub App login are documented in
 [docs/CODERABBIT.md](docs/CODERABBIT.md).
 
+The broader automation roadmap—including Windows system adapters, autonomous
+execution, personas and voice, GUI/browser automation, privacy-network adapters,
+and encrypted RAG memory—is documented in
+[docs/AUTOMATION_CAPABILITIES.md](docs/AUTOMATION_CAPABILITIES.md).
+
 SpartanCode is local-first and standalone by design: Android users do not need
 the desktop app, a bridge, or a network connection to plan, queue, review, and
 track work. Optional remote connectivity is an extension—not a dependency.
