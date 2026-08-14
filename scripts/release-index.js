@@ -131,11 +131,34 @@ function desktopGate(desktopResult) {
   ]);
 }
 
+function integrityGate(manifest) {
+  if (!manifest) return gate("SKIP", "Release manifest was not supplied");
+  if (manifest.gitCommit !== commit())
+    return gate("FAIL", "Release manifest is tied to a different commit");
+  if (
+    manifest.schemaVersion !== 1 ||
+    !Array.isArray(manifest.artifacts) ||
+    !Array.isArray(manifest.components) ||
+    !Array.isArray(manifest.controlEvidence)
+  )
+    return gate("FAIL", "Release manifest is incomplete or malformed");
+  return gate(
+    "PASS",
+    "Release manifest inventories artifacts, components, and control evidence",
+    [
+      `artifacts:${manifest.artifacts.length}`,
+      `components:${manifest.components.length}`,
+      `controls:${manifest.controlEvidence.length}`,
+    ],
+  );
+}
+
 function buildIndex({
   verification,
   visualResult,
   kvmResult,
   desktopResult,
+  releaseManifest,
   target,
 }) {
   const android = androidGate(verification);
@@ -156,10 +179,7 @@ function buildIndex({
       "SKIP",
       "Requires release-owned signing credentials and generated artifacts",
     ),
-    "Integrity bundle": gate(
-      "SKIP",
-      "Run release manifest, dependency inventory, and roadmap audit for this commit",
-    ),
+    "Integrity bundle": integrityGate(releaseManifest),
     "Product acceptance": gate(
       "SKIP",
       "Requires product-owner scope, privacy, and consent sign-off",
@@ -185,6 +205,7 @@ function main(argv = process.argv.slice(2)) {
   const visualPath = argument(argv, "--visual-result", null);
   const kvmPath = argument(argv, "--kvm-result", null);
   const desktopPath = argument(argv, "--desktop-baseline", null);
+  const manifestPath = argument(argv, "--release-manifest", null);
   const output = path.resolve(
     argument(argv, "--output", path.join(root, "dist", "release-index.json")),
   );
@@ -204,11 +225,15 @@ function main(argv = process.argv.slice(2)) {
   const desktopResult = desktopPath
     ? JSON.parse(fs.readFileSync(path.resolve(desktopPath), "utf8"))
     : null;
+  const releaseManifest = manifestPath
+    ? JSON.parse(fs.readFileSync(path.resolve(manifestPath), "utf8"))
+    : null;
   const index = buildIndex({
     verification,
     visualResult,
     kvmResult,
     desktopResult,
+    releaseManifest,
     target,
   });
   fs.mkdirSync(path.dirname(output), { recursive: true });
@@ -230,6 +255,7 @@ module.exports = {
   GATES,
   buildIndex,
   desktopGate,
+  integrityGate,
   kvmGate,
   main,
 };

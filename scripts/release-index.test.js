@@ -103,6 +103,31 @@ test("release index accepts commit-bound desktop baseline evidence", () => {
   assert.deepEqual(desktop.evidence, ["desktop-tests:208"]);
 });
 
+test("release index accepts a commit-bound integrity manifest", () => {
+  const commit = execFileSync("git", ["rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+  const index = buildIndex({
+    releaseManifest: {
+      schemaVersion: 1,
+      gitCommit: commit,
+      artifacts: [{ path: "dist/example", sha256: "a".repeat(64) }],
+      components: [{ name: "example", version: "1.0.0" }],
+      controlEvidence: [{ id: "example", sourceFiles: ["README.md"] }],
+    },
+    target: "SpartanCode beta",
+  });
+  const integrity = index.gates.find(
+    (gate) => gate.name === "Integrity bundle",
+  );
+  assert.equal(integrity.status, "PASS");
+  assert.deepEqual(integrity.evidence, [
+    "artifacts:1",
+    "components:1",
+    "controls:1",
+  ]);
+});
+
 test("release index fails closed when Android evidence belongs to another commit", () => {
   const index = buildIndex({
     target: "test",

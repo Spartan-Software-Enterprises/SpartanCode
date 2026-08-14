@@ -103,6 +103,7 @@ Generate the machine-readable index from the current commit with:
 node scripts/release-index.js \
   --android-verification dist/android-verification.json \
   --desktop-baseline dist/desktop-baseline.json \
+  --release-manifest dist/release-evidence/release-manifest.json \
   --visual-result release-evidence/desktop-visual/result.json \
   --kvm-result release-evidence/android-emulator/result.json \
   --target "SpartanCode beta" \
