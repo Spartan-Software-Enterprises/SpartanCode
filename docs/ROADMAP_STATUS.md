@@ -110,6 +110,12 @@ current Implemented/Partial/Open counts.
   bootstrap/recovery scripts, and local/GitHub synchronization procedures.
   Setup plans remain guidance-only and require the user to review and execute
   commands on a host they control; see [HOME_SERVER_SETUP.md](HOME_SERVER_SETUP.md).
+- Artifact synchronization now has a bounded desktop bridge and Android
+  three-way merge contract. One-sided edits apply automatically; divergent
+  edits are returned as explicit conflicts for review, while Proton Drive
+  remains encrypted backup/restore rather than a plaintext sync transport.
+  Physical cross-device acceptance and a continuous transport remain open;
+  see [ARTIFACT_SYNC.md](ARTIFACT_SYNC.md).
 - The authenticated MCP Bridge exposes bounded Git status, redacted diff,
   stage, and explicit commit operations with separate read/write scopes and
   idempotent mutation handling for remote clients.

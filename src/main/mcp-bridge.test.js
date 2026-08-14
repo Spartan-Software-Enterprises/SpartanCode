@@ -144,6 +144,41 @@ test("MCP Bridge serves authenticated snapshots and mission mutations", async ()
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test("MCP Bridge resolves artifact sync and returns conflicts for review", async () => {
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-artifact-sync-"),
+  );
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const server = createBridgeServer({
+    store,
+    token: "artifact-token",
+    tokenScopes: { "artifact-token": ["artifacts:write"] },
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const response = await fetch(
+    `http://127.0.0.1:${address.port}/v1/artifacts/sync`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer artifact-token",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        base: [{ id: "a", name: "file", type: "text", content: "base" }],
+        local: [{ id: "a", name: "file", type: "text", content: "phone" }],
+        remote: [{ id: "a", name: "file", type: "text", content: "server" }],
+      }),
+    },
+  );
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.requiresReview, true);
+  assert.equal(result.conflicts[0].id, "a");
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test("MCP Bridge fails closed without authentication and preserves mission approvals", async () => {
   const dir = fs.mkdtempSync(
     path.join(os.tmpdir(), "spartancode-bridge-auth-"),

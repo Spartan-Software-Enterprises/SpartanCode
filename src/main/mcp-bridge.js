@@ -2,6 +2,7 @@ const http = require("node:http");
 const { exportAuditLog } = require("./audit-export");
 const { createOidcAuthenticator } = require("./oidc");
 const { verifyGitHubWebhookSignature } = require("./github-app");
+const { mergeArtifactSets } = require("./artifact-sync");
 
 function createBridgeEventHub({ maxEvents = 100 } = {}) {
   let sequence = 0;
@@ -228,6 +229,25 @@ function createBridgeRequestHandler({
       body = await readJson(request);
     } catch (error) {
       return json(response, 400, { error: error.message || "Invalid JSON" });
+    }
+    if (url.pathname === "/v1/artifacts/sync") {
+      try {
+        const result = mergeArtifactSets({
+          base: body?.base,
+          local: body?.local,
+          remote: body?.remote,
+        });
+        events?.publish("artifacts.sync", {
+          conflictCount: result.conflicts.length,
+          requiresReview: result.requiresReview,
+        });
+        return mutationResponse(200, {
+          ...result,
+          operationId: `artifacts:sync:${Date.now()}`,
+        });
+      } catch (error) {
+        return json(response, 400, { error: error.message });
+      }
     }
     if (["/v1/git/stage", "/v1/git/commit"].includes(url.pathname)) {
       if (!requireScope("git:write")) return forbidden("git:write");
