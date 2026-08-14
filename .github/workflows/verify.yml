@@ -94,10 +94,10 @@ jobs:
           if [ -e /dev/kvm ]; then
             sudo chmod 666 /dev/kvm
           fi
-          timeout 900s sdkmanager "emulator" "system-images;android-30;google_apis;x86_64"
+          timeout 900s sdkmanager "emulator" "system-images;android-30;default;x86_64"
           echo no | avdmanager create avd \
             --name spartancode-ci \
-            --package "system-images;android-30;google_apis;x86_64" \
+            --package "system-images;android-30;default;x86_64" \
             --device pixel_2 \
             --force
           # The hosted runner has about 5 GB free in its temp volume; the
