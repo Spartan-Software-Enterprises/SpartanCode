@@ -283,6 +283,9 @@ current Implemented/Partial/Open counts.
   finish Android framework/package-service startup, so emulator install/launch
   remains an environment gate. Cost monitoring is configured, but AWS credit
   balance and billing remain external release-environment checks.
+- The active KVM host has both `mosh-server` and `mosh-client` installed and
+  its loopback lifecycle has been exercised. Security-group UDP reachability
+  and physical terminal behavior remain external acceptance gates.
 
 ## Release gates still requiring stronger evidence
 
