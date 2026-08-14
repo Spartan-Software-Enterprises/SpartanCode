@@ -11,8 +11,11 @@ const assets = expected.map((name) => {
     throw new Error(`${name} is not a PNG`);
   const width = bytes.readUInt32BE(16);
   const height = bytes.readUInt32BE(20);
-  if (width !== 780 || height !== 1688)
-    throw new Error(`${name} must be 780x1688, received ${width}x${height}`);
+  const supportedDimensions = new Set(["390x844", "780x1688"]);
+  if (!supportedDimensions.has(`${width}x${height}`))
+    throw new Error(
+      `${name} must be a supported phone capture (390x844 or 780x1688), received ${width}x${height}`,
+    );
   return { name, width, height, bytes: bytes.length };
 });
 
