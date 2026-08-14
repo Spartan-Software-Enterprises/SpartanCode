@@ -38,7 +38,7 @@ jobs:
           cache: npm
       - run: sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xvfb libgtk-3-0 libnss3 libasound2t64 libgbm1
       - run: npm ci
-      - run: xvfb-run -a npm run test:visual
+      - run: timeout 300s xvfb-run -a npm run test:visual
         env:
           SPARTANCODE_VISUAL_OUTPUT: ${{ runner.temp }}/spartancode-visual
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

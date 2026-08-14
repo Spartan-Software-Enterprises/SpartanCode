@@ -130,7 +130,8 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
   Android SDK/emulator, signing, and AWS environment gaps as explicit skips.
 - GitHub verification now includes a pinned Electron/Playwright visual job that
   exercises every desktop navigation view and the mission composer, uploads
-  screenshot evidence, and fails on renderer errors.
+  screenshot evidence, fails on renderer errors, and enforces bounded launch,
+  interaction, navigation, and process timeouts.
 - GitHub verification now also includes a bounded API 30 Android emulator job
   that provisions and boots an AVD with explicit SDK commands, builds the debug
   native binary, installs it, launches the package, and verifies package

@@ -4,6 +4,7 @@ const { _electron: electron } = require("playwright");
 
 const outputDir =
   process.env.SPARTANCODE_VISUAL_OUTPUT || "/tmp/spartancode-visual";
+const VISUAL_TIMEOUT_MS = 4 * 60 * 1000;
 fs.mkdirSync(outputDir, { recursive: true });
 
 async function main() {
@@ -13,8 +14,11 @@ async function main() {
     executablePath: require("electron"),
     args: [path.resolve(__dirname, "..")],
     env: { ...process.env, ELECTRON_IS_DEV: "0" },
+    timeout: 60_000,
   });
   const page = await app.firstWindow();
+  page.setDefaultTimeout(15_000);
+  page.setDefaultNavigationTimeout(15_000);
   page.on("pageerror", (error) => errors.push(String(error)));
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
@@ -136,7 +140,15 @@ async function main() {
   console.log(JSON.stringify(result, null, 2));
 }
 
-main().catch((error) => {
-  console.error(error.stack || error);
-  process.exitCode = 1;
-});
+const watchdog = setTimeout(() => {
+  console.error(`Visual smoke exceeded ${VISUAL_TIMEOUT_MS / 1000}s`);
+  process.exit(1);
+}, VISUAL_TIMEOUT_MS);
+watchdog.unref();
+
+main()
+  .catch((error) => {
+    console.error(error.stack || error);
+    process.exitCode = 1;
+  })
+  .finally(() => clearTimeout(watchdog));
