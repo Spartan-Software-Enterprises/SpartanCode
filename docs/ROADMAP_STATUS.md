@@ -67,6 +67,9 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
 - Android settings now persist Leo persona and wake-word preferences alongside
   execution, quantization, voice-input, and sync controls with bounded local
   values.
+- Android Settings now exposes compact global/project/agent/session scope
+  controls that save and load the same deterministic override hierarchy without
+  requiring a desktop or bridge.
 - Android now includes an optional Expo Speech output adapter with bounded
   voice-test text and a visible unavailable/error fallback.
 - Android now includes a SecureStore-key-backed AES-256-GCM offline-content

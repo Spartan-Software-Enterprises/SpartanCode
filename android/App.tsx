@@ -39,6 +39,9 @@ import {
   readSnapshot,
   readBiometricSetting,
   readMobileSettings,
+  readMobileSettingsLayers,
+  resolveMobileSettings,
+  updateMobileScopedSettings,
   readCollaborationSessions,
   saveBridgeToken,
   writeSnapshot,
@@ -115,6 +118,11 @@ export default function App() {
     emotionMode: "explicit",
     interactionSignal: "calm",
   });
+  const [settingsScope, setSettingsScope] = useState<
+    "global" | "project" | "agent" | "session"
+  >("project");
+  const [settingsScopeId, setSettingsScopeId] = useState("");
+  const [settingsScopeMessage, setSettingsScopeMessage] = useState("");
   const offlineCryptoStatus = useMemo(() => getOfflineCryptoStatus(), []);
   const [recognizing, setRecognizing] = useState(false);
   const [collaborationName, setCollaborationName] = useState("Android roadmap");
@@ -444,6 +452,40 @@ export default function App() {
     },
     [mobileSettings],
   );
+
+  const saveScopedMobileSettings = useCallback(async () => {
+    const id = settingsScope === "global" ? "default" : settingsScopeId.trim();
+    if (settingsScope !== "global" && !id) {
+      setSettingsScopeMessage(`Enter a ${settingsScope} identifier first.`);
+      return;
+    }
+    try {
+      await updateMobileScopedSettings(settingsScope, id, mobileSettings);
+      setSettingsScopeMessage(`${settingsScope} settings saved for ${id}.`);
+    } catch (error) {
+      setSettingsScopeMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to save scoped settings",
+      );
+    }
+  }, [mobileSettings, settingsScope, settingsScopeId]);
+
+  const loadScopedMobileSettings = useCallback(async () => {
+    const id = settingsScope === "global" ? "default" : settingsScopeId.trim();
+    if (settingsScope !== "global" && !id) {
+      setSettingsScopeMessage(`Enter a ${settingsScope} identifier first.`);
+      return;
+    }
+    const layers = await readMobileSettingsLayers();
+    const resolved = resolveMobileSettings(mobileSettings, layers, {
+      projectId: settingsScope === "project" ? id : undefined,
+      agentId: settingsScope === "agent" ? id : undefined,
+      sessionId: settingsScope === "session" ? id : undefined,
+    });
+    setMobileSettings(resolved);
+    setSettingsScopeMessage(`${settingsScope} settings loaded for ${id}.`);
+  }, [mobileSettings, settingsScope, settingsScopeId]);
 
   const createMission = useCallback(async () => {
     const description = mission.trim();
@@ -1166,6 +1208,58 @@ export default function App() {
             Signals are user-selected. Camera, voice-emotion, and biometric
             inference are not used.
           </Text>
+          <Text style={styles.missionText}>Scoped settings</Text>
+          <Text style={styles.missionMeta}>
+            Save or load the current settings for a project, agent, or session.
+          </Text>
+          <View style={styles.toggleRow}>
+            {(["global", "project", "agent", "session"] as const).map(
+              (scope) => (
+                <Pressable
+                  key={scope}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${scope} settings scope`}
+                  style={[
+                    styles.scopeChip,
+                    settingsScope === scope && styles.scopeChipActive,
+                  ]}
+                  onPress={() => setSettingsScope(scope)}
+                >
+                  <Text style={styles.smallActionText}>{scope}</Text>
+                </Pressable>
+              ),
+            )}
+          </View>
+          {settingsScope !== "global" ? (
+            <TextInput
+              accessibilityLabel={`${settingsScope} settings identifier`}
+              maxLength={160}
+              onChangeText={setSettingsScopeId}
+              placeholder={`${settingsScope} identifier`}
+              placeholderTextColor="#52617f"
+              style={styles.input}
+              value={settingsScopeId}
+            />
+          ) : null}
+          <View style={styles.toggleRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Save scoped settings"
+              style={styles.smallAction}
+              onPress={() => void saveScopedMobileSettings()}
+            >
+              <Text style={styles.smallActionText}>Save scope</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Load scoped settings"
+              style={styles.smallAction}
+              onPress={() => void loadScopedMobileSettings()}
+            >
+              <Text style={styles.smallActionText}>Load scope</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.message}>{settingsScopeMessage}</Text>
           <View style={styles.toggleRow}>
             <Text style={styles.message}>Sync automatically on resume</Text>
             <Switch
@@ -1545,6 +1639,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
+  scopeChip: {
+    borderColor: "#263657",
+    borderRadius: 8,
+    borderWidth: 1,
+    flex: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 7,
+  },
+  scopeChipActive: { backgroundColor: "#183b3a", borderColor: "#72e6c5" },
   selectedAction: { borderColor: "#72e6c5", backgroundColor: "#183b3a" },
   smallActionText: { color: "#72e6c5", fontSize: 11, fontWeight: "800" },
 });
