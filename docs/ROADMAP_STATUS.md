@@ -51,6 +51,9 @@ behavior and a corresponding automated or documented verification path.
 - A clean-checkout GitHub Actions workflow and local Android verification
   matrix now run the repeatable TypeScript/Jest/format/Expo baseline and record
   Android SDK/emulator, signing, and AWS environment gaps as explicit skips.
+- GitHub verification now includes a pinned Electron/Playwright visual job that
+  exercises every desktop navigation view and the mission composer, uploads
+  screenshot evidence, and fails on renderer errors.
 - GitHub verification now also includes a bounded API 35 Android emulator job
   that provisions and boots an AVD with explicit SDK commands, builds the debug
   native binary, installs it, launches the package, and verifies package

@@ -18,6 +18,8 @@ smoke job on every push and pull request. The smoke job provisions the AVD with
 the Android SDK tools, starts it headlessly with explicit boot bounds, builds
 the debug native binary, installs it, launches the application, and verifies the
 package is registered.
+The same workflow also runs the Electron Playwright visual smoke suite under
+Xvfb and uploads its screenshots as CI evidence.
 Physical TalkBack/gesture checks, additional API-level coverage, and signed
 artifacts remain separate release-environment evidence and must be attached
 when available.
