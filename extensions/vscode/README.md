@@ -8,15 +8,21 @@ Commands:
 
 - `SpartanCode: Set Bridge Token` stores the token in VS Code SecretStorage.
 - `SpartanCode: Sync Workspace Snapshot` writes a bounded bridge snapshot to
-  `.spartancode/vscode-snapshot.json` with restrictive file permissions.
+  `.spartancode/vscode-snapshot.json` with restrictive file permissions. The
+  file contains a schema version, bounded status summary, and SHA-256 snapshot
+  revision so local consumers can detect changed bridge state.
 - `SpartanCode: Show Workspace Status` displays active missions, pending
-  approvals, and artifact counts from the authenticated snapshot route.
+  approvals, artifact counts, and a short snapshot revision from the bounded
+  authenticated `/v1/workspace/status` route. It does not download the full
+  workspace snapshot just to render status.
 - `SpartanCode: Start Mission From Selection` queues the selected text through
   the bridge’s normal mission and approval policy.
 - `SpartanCode: List Collaboration Sessions` reads authenticated session
   summaries through the bridge.
 - `SpartanCode: Append Collaboration Note` appends a revision-checked note as
-  a joined participant; conflicts remain visible as bridge errors.
+  a joined participant with an idempotent request key and explicit base
+  revision; stale revisions are rejected with the current remote revision and
+  require an explicit refresh/retry.
 - `SpartanCode: Show Git Status` reads bounded workspace status through the
   authenticated `git:read` bridge scope.
 - `SpartanCode: Show Git Diff` displays the bounded, redacted bridge diff.
@@ -25,7 +31,9 @@ Commands:
 - `SpartanCode: Commit Git Changes` prompts for a bounded commit subject and
   commits through the authenticated bridge.
 
-Set `spartancode.bridgeUrl` to the trusted local/private bridge URL. Full
+Every bridge request requires a non-empty token retrieved from VS Code
+SecretStorage; response bodies and persisted snapshots are bounded. Set
+`spartancode.bridgeUrl` to the trusted local/private bridge URL. Full
 editor parity, live collaboration UI, and marketplace distribution remain
 future work; the extension does not claim those capabilities. Git commands
 remain optional and do not replace the standalone desktop or Android workflow.

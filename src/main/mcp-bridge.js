@@ -1,8 +1,32 @@
 const http = require("node:http");
+const crypto = require("node:crypto");
 const { exportAuditLog } = require("./audit-export");
 const { createOidcAuthenticator } = require("./oidc");
 const { verifyGitHubWebhookSignature } = require("./github-app");
 const { mergeArtifactSets } = require("./artifact-sync");
+
+function snapshotRevision(snapshot = {}) {
+  return crypto
+    .createHash("sha256")
+    .update(JSON.stringify(snapshot), "utf8")
+    .digest("hex");
+}
+
+function snapshotSummary(snapshot = {}) {
+  const missions = Array.isArray(snapshot.missions) ? snapshot.missions : [];
+  const approvals = Array.isArray(snapshot.approvals) ? snapshot.approvals : [];
+  const artifacts = Array.isArray(snapshot.artifacts) ? snapshot.artifacts : [];
+  return {
+    missions: missions.length,
+    activeMissions: missions.filter(
+      (mission) => !["complete", "failed"].includes(mission.status),
+    ).length,
+    pendingApprovals: approvals.filter(
+      (approval) => approval.status === "pending",
+    ).length,
+    artifacts: artifacts.length,
+  };
+}
 
 function createBridgeEventHub({ maxEvents = 100 } = {}) {
   let sequence = 0;
@@ -161,10 +185,23 @@ function createBridgeRequestHandler({
         });
       }
     }
+    if (request.method === "GET" && url.pathname === "/v1/workspace/status") {
+      if (!requireScope("snapshot")) return forbidden("snapshot");
+      const snapshot = store.snapshot();
+      return json(response, 200, {
+        schemaVersion: 1,
+        revision: snapshotRevision(snapshot),
+        syncedAt: new Date().toISOString(),
+        summary: snapshotSummary(snapshot),
+      });
+    }
     if (request.method === "GET" && url.pathname === "/v1/snapshot") {
       if (!requireScope("snapshot")) return forbidden("snapshot");
+      const snapshot = store.snapshot();
       return json(response, 200, {
-        ...store.snapshot(),
+        ...snapshot,
+        schemaVersion: 1,
+        revision: snapshotRevision(snapshot),
         syncedAt: new Date().toISOString(),
       });
     }
@@ -439,4 +476,6 @@ module.exports = {
   createBridgeEventHub,
   createBridgeRequestHandler,
   createBridgeServer,
+  snapshotRevision,
+  snapshotSummary,
 };

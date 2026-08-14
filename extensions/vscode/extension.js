@@ -1,15 +1,39 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const http = require("node:http");
 const https = require("node:https");
 
-function bridgeRequestOptions(bridgeUrl, route, token, method = "GET", body) {
+const MAX_BRIDGE_RESPONSE_BYTES = 2 * 1024 * 1024;
+const MAX_SNAPSHOT_BYTES = 2 * 1024 * 1024;
+
+class BridgeRequestError extends Error {
+  constructor(status, body) {
+    super(`SpartanCode bridge returned ${status}`);
+    this.name = "BridgeRequestError";
+    this.status = status;
+    this.body = body;
+  }
+}
+
+function bridgeRequestOptions(
+  bridgeUrl,
+  route,
+  token,
+  method = "GET",
+  body,
+  extraHeaders = {},
+) {
+  if (typeof bridgeUrl !== "string" || bridgeUrl.length > 2048)
+    throw new Error("Bridge URL is required and must be bounded");
   const url = new URL(
     route,
     bridgeUrl.endsWith("/") ? bridgeUrl : `${bridgeUrl}/`,
   );
   if (!/^https?:$/.test(url.protocol))
     throw new Error("Bridge URL must use HTTP(S)");
+  if (typeof token !== "string" || !token.trim() || token.length > 16 * 1024)
+    throw new Error("A bounded bridge token from SecretStorage is required");
   const payload = body === undefined ? null : JSON.stringify(body);
   return {
     url,
@@ -17,6 +41,7 @@ function bridgeRequestOptions(bridgeUrl, route, token, method = "GET", body) {
       method,
       headers: {
         Accept: "application/json",
+        ...extraHeaders,
         ...(payload
           ? {
               "Content-Type": "application/json",
@@ -30,13 +55,21 @@ function bridgeRequestOptions(bridgeUrl, route, token, method = "GET", body) {
   };
 }
 
-function requestBridge(bridgeUrl, route, token, method = "GET", body) {
+function requestBridge(
+  bridgeUrl,
+  route,
+  token,
+  method = "GET",
+  body,
+  extraHeaders = {},
+) {
   const { url, options, payload } = bridgeRequestOptions(
     bridgeUrl,
     route,
     token,
     method,
     body,
+    extraHeaders,
   );
   return new Promise((resolve, reject) => {
     const transport = url.protocol === "https:" ? https : http;
@@ -48,6 +81,10 @@ function requestBridge(bridgeUrl, route, token, method = "GET", body) {
         response.setEncoding("utf8");
         response.on("data", (chunk) => {
           raw += chunk;
+          if (Buffer.byteLength(raw, "utf8") > MAX_BRIDGE_RESPONSE_BYTES)
+            response.destroy(
+              new Error("SpartanCode bridge response is too large"),
+            );
         });
         response.on("end", () => {
           let value;
@@ -57,9 +94,7 @@ function requestBridge(bridgeUrl, route, token, method = "GET", body) {
             value = { raw: raw.slice(0, 4096) };
           }
           if (response.statusCode < 200 || response.statusCode >= 300) {
-            reject(
-              new Error(`SpartanCode bridge returned ${response.statusCode}`),
-            );
+            reject(new BridgeRequestError(response.statusCode, value));
             return;
           }
           resolve(value);
@@ -84,6 +119,27 @@ function snapshotPath(workspaceFolder) {
   return path.join(workspaceFolder, ".spartancode", "vscode-snapshot.json");
 }
 
+function snapshotRevision(snapshot = {}) {
+  const serialized = JSON.stringify(snapshot);
+  return crypto.createHash("sha256").update(serialized).digest("hex");
+}
+
+function snapshotEnvelope(snapshot) {
+  if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot))
+    throw new Error("SpartanCode snapshot is invalid");
+  const envelope = {
+    schemaVersion: 1,
+    syncedAt: new Date().toISOString(),
+    snapshotRevision: snapshotRevision(snapshot),
+    summary: summarizeSnapshot(snapshot),
+    snapshot,
+  };
+  const serialized = `${JSON.stringify(envelope, null, 2)}\n`;
+  if (Buffer.byteLength(serialized, "utf8") > MAX_SNAPSHOT_BYTES)
+    throw new Error("SpartanCode snapshot is too large to persist");
+  return serialized;
+}
+
 function summarizeSnapshot(snapshot = {}) {
   const missions = Array.isArray(snapshot.missions) ? snapshot.missions : [];
   const approvals = Array.isArray(snapshot.approvals) ? snapshot.approvals : [];
@@ -105,6 +161,14 @@ function collaborationEventsRoute(sessionId) {
   if (!id || id.length > 120)
     throw new Error("Collaboration session id is invalid");
   return `/v1/collaboration/sessions/${encodeURIComponent(id)}/events`;
+}
+
+function collaborationParticipantsRoute(sessionId) {
+  return `${collaborationEventsRoute(sessionId).replace(/\/events$/, "")}/participants`;
+}
+
+function collaborationEventId() {
+  return `vscode-${crypto.randomUUID()}`;
 }
 
 function gitRoute(operation) {
@@ -176,11 +240,7 @@ async function activate(context) {
       );
       const target = snapshotPath(folder);
       fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.writeFileSync(
-        target,
-        `${JSON.stringify({ syncedAt: new Date().toISOString(), snapshot }, null, 2)}\n`,
-        { mode: 0o600 },
-      );
+      fs.writeFileSync(target, snapshotEnvelope(snapshot), { mode: 0o600 });
       status.text = `$(check) SpartanCode synced ${new Date().toLocaleTimeString()}`;
       output.appendLine(`Synced snapshot to ${target}`);
       vscode.window.showInformationMessage(
@@ -215,13 +275,17 @@ async function activate(context) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("spartancode.showStatus", async () => {
-      const snapshot = await requestBridge(
+      const workspaceStatus = await requestBridge(
         bridgeUrl(),
-        "/v1/snapshot",
+        "/v1/workspace/status",
         await token(),
       );
-      const summary = summarizeSnapshot(snapshot);
-      const message = `${summary.activeMissions} active mission${summary.activeMissions === 1 ? "" : "s"} · ${summary.pendingApprovals} pending approval${summary.pendingApprovals === 1 ? "" : "s"} · ${summary.artifacts} artifact${summary.artifacts === 1 ? "" : "s"}`;
+      const summary = workspaceStatus.summary || {};
+      const revision = String(workspaceStatus.revision || "unknown").slice(
+        0,
+        12,
+      );
+      const message = `${summary.activeMissions} active mission${summary.activeMissions === 1 ? "" : "s"} · ${summary.pendingApprovals} pending approval${summary.pendingApprovals === 1 ? "" : "s"} · ${summary.artifacts} artifact${summary.artifacts === 1 ? "" : "s"} · rev ${revision}`;
       status.text = `$(pulse) ${message}`;
       output.appendLine(`Workspace status: ${message}`);
       vscode.window.showInformationMessage(`SpartanCode: ${message}`);
@@ -342,20 +406,48 @@ async function activate(context) {
           }),
         );
         if (!authorId) throw new Error("Participant ID is required");
-        await requestBridge(
-          bridgeUrl(),
-          collaborationEventsRoute(choice.session.id),
-          await token(),
-          "POST",
-          {
-            event: {
-              authorId,
-              type: "vscode.note",
-              payload: { text: note },
+        try {
+          const joined = await requestBridge(
+            bridgeUrl(),
+            collaborationParticipantsRoute(choice.session.id),
+            await token(),
+            "POST",
+            { participantId: authorId, role: "member" },
+          );
+          const baseRevision = Number.isInteger(joined.session?.revision)
+            ? joined.session.revision
+            : choice.session.revision;
+          const eventId = collaborationEventId();
+          await requestBridge(
+            bridgeUrl(),
+            collaborationEventsRoute(choice.session.id),
+            await token(),
+            "POST",
+            {
+              eventId,
+              event: {
+                eventId,
+                authorId,
+                type: "vscode.note",
+                payload: { text: note },
+                baseRevision,
+              },
+              options: { baseRevision },
             },
-            options: { expectedRevision: choice.session.revision },
-          },
-        );
+            { "Idempotency-Key": `vscode:collaboration:${eventId}` },
+          );
+        } catch (error) {
+          if (error instanceof BridgeRequestError && error.status === 409) {
+            const latest = error.body?.session;
+            const revision = Number.isInteger(latest?.revision)
+              ? latest.revision
+              : "unknown";
+            throw new Error(
+              `Collaboration changed before this note was saved; refresh and retry at revision ${revision}.`,
+            );
+          }
+          throw error;
+        }
         vscode.window.showInformationMessage("Collaboration note appended.");
       },
     ),
@@ -367,10 +459,15 @@ module.exports = {
   bridgeRequestOptions,
   boundedSelection,
   boundedNote,
+  BridgeRequestError,
   collaborationEventsRoute,
+  collaborationParticipantsRoute,
+  collaborationEventId,
   gitRoute,
   boundedGitOutput,
   gitCommitMessage,
   snapshotPath,
+  snapshotRevision,
+  snapshotEnvelope,
   summarizeSnapshot,
 };

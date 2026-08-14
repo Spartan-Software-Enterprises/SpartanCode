@@ -1,6 +1,10 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { createBridgeServer } = require("./mcp-bridge");
+const {
+  createBridgeServer,
+  snapshotRevision,
+  snapshotSummary,
+} = require("./mcp-bridge");
 const { createMissionStore } = require("./mission-store");
 const fs = require("fs");
 const os = require("os");
@@ -140,6 +144,39 @@ test("MCP Bridge serves authenticated snapshots and mission mutations", async ()
   const payload = await snapshot.json();
   assert.equal(payload.missions[0].description, "Build a mobile experience");
   assert.ok(payload.syncedAt);
+  assert.equal(payload.schemaVersion, 1);
+  assert.equal(payload.revision, snapshotRevision(store.snapshot()));
+  await new Promise((resolve) => server.close(resolve));
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("MCP Bridge serves bounded authenticated workspace status revisions", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-status-"));
+  const store = createMissionStore(path.join(dir, "state.json"));
+  const server = createBridgeServer({
+    store,
+    token: "status-token",
+    tokenScopes: { "status-token": ["snapshot"] },
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  const base = `http://127.0.0.1:${address.port}`;
+  const denied = await fetch(`${base}/v1/workspace/status`);
+  assert.equal(denied.status, 401);
+  const response = await fetch(`${base}/v1/workspace/status`, {
+    headers: { Authorization: "Bearer status-token" },
+  });
+  const status = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(status.schemaVersion, 1);
+  assert.equal(status.revision, snapshotRevision(store.snapshot()));
+  assert.deepEqual(status.summary, snapshotSummary(store.snapshot()));
+  const changed = store.addMission("status revision check");
+  assert.ok(changed.id);
+  const next = await fetch(`${base}/v1/workspace/status`, {
+    headers: { Authorization: "Bearer status-token" },
+  });
+  assert.notEqual((await next.json()).revision, status.revision);
   await new Promise((resolve) => server.close(resolve));
   fs.rmSync(dir, { recursive: true, force: true });
 });
