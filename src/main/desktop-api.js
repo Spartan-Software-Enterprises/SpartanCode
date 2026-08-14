@@ -198,6 +198,36 @@ function registerDesktopApi({
   });
   ipcMain.handle("github-app:status", () => githubApp.status());
   ipcMain.handle("github-app:repositories", () => githubApp.listRepositories());
+  const codespacesClient = () =>
+    githubApp.createUserAuthorizedCodespacesClient({
+      tokenProvider: () => secureVault.get("GITHUB_USER_TOKEN"),
+    });
+  ipcMain.handle("github-app:codespaces-status", () => {
+    let tokenConfigured = false;
+    try {
+      tokenConfigured = Boolean(secureVault.get("GITHUB_USER_TOKEN"));
+    } catch {
+      tokenConfigured = false;
+    }
+    return {
+      tokenConfigured,
+      authorization: "user token in encrypted local vault",
+      installationTokenSupported: false,
+    };
+  });
+  ipcMain.handle("github-app:codespaces-list", () => codespacesClient().list());
+  ipcMain.handle("github-app:codespaces-create", (_event, input) =>
+    codespacesClient().create(input || {}),
+  );
+  ipcMain.handle("github-app:codespaces-start", (_event, name) =>
+    codespacesClient().start(name),
+  );
+  ipcMain.handle("github-app:codespaces-stop", (_event, name) =>
+    codespacesClient().stop(name),
+  );
+  ipcMain.handle("github-app:codespaces-delete", (_event, name) =>
+    codespacesClient().delete(name),
+  );
   ipcMain.handle("secure-vault:status", () => secureVault.status());
   ipcMain.handle("secure-vault:list", () => secureVault.list());
   ipcMain.handle("secure-vault:set", (_event, name, value) => {

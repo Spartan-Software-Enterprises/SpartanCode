@@ -92,6 +92,16 @@ contextBridge.exposeInMainWorld("spartanCode", {
   openCodeRabbitLogin: () => ipcRenderer.invoke("coderabbit:login"),
   getGitHubAppStatus: () => ipcRenderer.invoke("github-app:status"),
   listGitHubRepositories: () => ipcRenderer.invoke("github-app:repositories"),
+  getCodespacesStatus: () => ipcRenderer.invoke("github-app:codespaces-status"),
+  listCodespaces: () => ipcRenderer.invoke("github-app:codespaces-list"),
+  createCodespace: (input) =>
+    ipcRenderer.invoke("github-app:codespaces-create", input),
+  startCodespace: (name) =>
+    ipcRenderer.invoke("github-app:codespaces-start", name),
+  stopCodespace: (name) =>
+    ipcRenderer.invoke("github-app:codespaces-stop", name),
+  deleteCodespace: (name) =>
+    ipcRenderer.invoke("github-app:codespaces-delete", name),
   getSecureVaultStatus: () => ipcRenderer.invoke("secure-vault:status"),
   listSecureKeys: () => ipcRenderer.invoke("secure-vault:list"),
   saveSecureKey: (name, value) =>

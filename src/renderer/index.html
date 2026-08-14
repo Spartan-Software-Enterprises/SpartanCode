@@ -1984,6 +1984,55 @@
           GitHub App access is optional. Codespaces requires a user-authorized
           GitHub session.
         </small>
+        <details class="settings-advanced">
+          <summary>User-authorized Codespaces</summary>
+          <p>
+            Store a user token only in the encrypted local vault, then manage
+            Codespaces with explicit controls. Installation tokens cannot create
+            billable Codespaces.
+          </p>
+          <div class="setting-group">
+            <label for="githubUserToken">GitHub user token</label>
+            <input
+              id="githubUserToken"
+              type="password"
+              autocomplete="off"
+              placeholder="Stored in encrypted vault"
+            />
+          </div>
+          <div class="settings-inline-actions">
+            <button
+              type="button"
+              class="context-button"
+              id="githubUserTokenSave"
+            >
+              Save user token
+            </button>
+            <button type="button" class="context-button" id="codespacesRefresh">
+              Refresh Codespaces
+            </button>
+          </div>
+          <div class="setting-group">
+            <label for="codespaceRepositoryId">Repository ID</label>
+            <input
+              id="codespaceRepositoryId"
+              inputmode="numeric"
+              placeholder="GitHub numeric repository ID"
+            />
+          </div>
+          <div class="settings-inline-actions">
+            <input id="codespaceRef" placeholder="ref (optional)" />
+            <input id="codespaceMachine" placeholder="machine (optional)" />
+            <button type="button" class="context-button" id="codespaceCreate">
+              Create Codespace
+            </button>
+          </div>
+          <small
+            id="codespacesMessage"
+            style="display: block; color: var(--muted)"
+          ></small>
+          <div id="codespacesList" class="settings-runtime-grid"></div>
+        </details>
         <div class="settings-group-heading">CodeRabbit review</div>
         <div class="settings-summary">
           Authentication is handled securely by CodeRabbit’s GitHub App. Open
@@ -3120,6 +3169,71 @@
               : "The installation has no visible repositories.";
           } catch (error) {
             settingsGithubMessage.textContent = error.message;
+          }
+        });
+      const renderCodespaces = (items) => {
+        const target = document.getElementById("codespacesList");
+        target.innerHTML = items.length
+          ? items
+              .map(
+                (item) =>
+                  `<div class="settings-runtime-item"><strong>${escapeHtml(item.name || "Unnamed")}</strong><span>${escapeHtml(item.state || "unknown")} · ${escapeHtml(item.repository || "no repository")}</span></div>`,
+              )
+              .join("")
+          : '<div class="settings-runtime-item">No Codespaces returned.</div>';
+      };
+      const refreshCodespaces = async () => {
+        const message = document.getElementById("codespacesMessage");
+        try {
+          const status = await window.spartanCode.getCodespacesStatus();
+          if (!status.tokenConfigured) {
+            message.textContent = "Save a user-authorized token to manage Codespaces.";
+            renderCodespaces([]);
+            return;
+          }
+          const items = await window.spartanCode.listCodespaces();
+          renderCodespaces(items);
+          message.textContent = `${items.length} Codespace${items.length === 1 ? "" : "s"} returned.`;
+        } catch (error) {
+          message.textContent = error.message;
+        }
+      };
+      document
+        .getElementById("githubUserTokenSave")
+        .addEventListener("click", async () => {
+          const token = document.getElementById("githubUserToken").value;
+          const message = document.getElementById("codespacesMessage");
+          try {
+            if (!token.trim()) throw new Error("Enter a user-authorized token first");
+            await window.spartanCode.saveSecureKey("GITHUB_USER_TOKEN", token);
+            document.getElementById("githubUserToken").value = "";
+            message.textContent = "User token saved to encrypted local storage.";
+          } catch (error) {
+            message.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("codespacesRefresh")
+        .addEventListener("click", refreshCodespaces);
+      document
+        .getElementById("codespaceCreate")
+        .addEventListener("click", async () => {
+          const message = document.getElementById("codespacesMessage");
+          try {
+            const repositoryId = document
+              .getElementById("codespaceRepositoryId")
+              .value.trim();
+            const ref = document.getElementById("codespaceRef").value.trim();
+            const machine = document.getElementById("codespaceMachine").value.trim();
+            await window.spartanCode.createCodespace({
+              repositoryId,
+              ...(ref ? { ref } : {}),
+              ...(machine ? { machine } : {}),
+            });
+            message.textContent = "Codespace creation requested.";
+            await refreshCodespaces();
+          } catch (error) {
+            message.textContent = error.message;
           }
         });
       document
