@@ -34,6 +34,7 @@ const { importJetbrainsProject } = require("./jetbrains-project-importer");
 const {
   importVisualStudioProject,
 } = require("./visual-studio-project-importer");
+const { importEclipseProject } = require("./eclipse-project-importer");
 const { writeDevContainerConfig } = require("./devcontainer");
 const { createModelCache } = require("./model-cache");
 const {
@@ -473,6 +474,14 @@ function registerDesktopApi({
       projectPath || ".",
     );
     return importVisualStudioProject(approvedProject);
+  });
+  ipcMain.handle("eclipse:project-import", (_event, projectPath) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    const approvedProject = resolveInsideWorkspace(
+      workspacePath,
+      projectPath || ".",
+    );
+    return importEclipseProject(approvedProject);
   });
   ipcMain.handle("devcontainer:generate", (_event, projectPath, options) => {
     const workspacePath = store.snapshot().settings.workspacePath;

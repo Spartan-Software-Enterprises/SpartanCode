@@ -109,3 +109,26 @@ test("adapter manifest accepts the declarative Visual Studio importer", () => {
   assert.equal(manifest.execution.shell, false);
   assert.equal(manifest.targets["visual-studio"], "available");
 });
+
+test("adapter manifest accepts the declarative Eclipse importer", () => {
+  const manifest = normalizeAdapterManifest({
+    ...base,
+    id: "eclipse-project",
+    kind: "connector",
+    name: "Eclipse project importer",
+    status: "available",
+    hosts: ["windows", "macos", "linux"],
+    targets: { eclipse: "available", maven: "available", gradle: "available" },
+    operations: ["inspect", "import"],
+    requirements: ["eclipse-project-directory"],
+    execution: {
+      mode: "declarative",
+      shell: false,
+      network: false,
+      credentials: false,
+    },
+    testCoverage: ["xml-metadata", "classpath-bounds", "symlink-rejection"],
+  });
+  assert.equal(manifest.execution.network, false);
+  assert.equal(manifest.targets.eclipse, "available");
+});

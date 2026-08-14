@@ -90,8 +90,11 @@ security model:
    read-only Visual Studio importing is implemented in
    `src/main/visual-studio-project-importer.js`; it summarizes solution/project
    metadata without executing Visual Studio, MSBuild, debuggers, or VSIX files.
-   Add read-only importers for
-   Eclipse, Xcode/SPM, Neovim/Vim, Emacs, Sublime, and Zed formats.
+   Read-only Eclipse importing is implemented in
+   `src/main/eclipse-project-importer.js`; it summarizes `.project`,
+   `.classpath`, and Maven/Gradle markers without executing Java, OSGi, Maven,
+   or Gradle. Add read-only importers for Xcode/SPM, Neovim/Vim, Emacs,
+   Sublime, and Zed formats.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
    major agent APIs, and remote workers.
 4. Add Android settings and project-level configuration with offline storage.
