@@ -84,6 +84,11 @@ import { createMobileRuntimeRegistry } from "./src/core/local-runtime";
 import { loadLlamaRnRuntime } from "./src/core/llama-rn-runtime";
 import { normalizeSpeechText } from "./src/core/voice";
 import { getOfflineCryptoStatus } from "./src/core/secure-offline-store";
+import {
+  gitRoute,
+  normalizeGitOutput,
+  validateGitCommitMessage,
+} from "./src/core/git";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -123,6 +128,10 @@ export default function App() {
   >("project");
   const [settingsScopeId, setSettingsScopeId] = useState("");
   const [settingsScopeMessage, setSettingsScopeMessage] = useState("");
+  const [remoteGitStatus, setRemoteGitStatus] = useState("");
+  const [remoteGitDiff, setRemoteGitDiff] = useState("");
+  const [remoteGitCommitMessage, setRemoteGitCommitMessage] = useState("");
+  const [remoteGitMessage, setRemoteGitMessage] = useState("");
   const offlineCryptoStatus = useMemo(() => getOfflineCryptoStatus(), []);
   const [recognizing, setRecognizing] = useState(false);
   const [collaborationName, setCollaborationName] = useState("Android roadmap");
@@ -486,6 +495,42 @@ export default function App() {
     setMobileSettings(resolved);
     setSettingsScopeMessage(`${settingsScope} settings loaded for ${id}.`);
   }, [mobileSettings, settingsScope, settingsScopeId]);
+
+  const runRemoteGit = useCallback(
+    async (operation: "status" | "diff" | "stage" | "commit") => {
+      if (!endpoint.trim()) {
+        setRemoteGitMessage("Enter an authenticated bridge endpoint first.");
+        return;
+      }
+      try {
+        const init: RequestInit =
+          operation === "stage"
+            ? { method: "POST", body: "{}" }
+            : operation === "commit"
+              ? {
+                  method: "POST",
+                  body: JSON.stringify({
+                    message: validateGitCommitMessage(remoteGitCommitMessage),
+                  }),
+                }
+              : {};
+        const response = await authorizedBridgeRequest<Record<string, unknown>>(
+          normalizeBridgeEndpoint(endpoint),
+          gitRoute(operation),
+          init,
+        );
+        const output = normalizeGitOutput(response);
+        if (operation === "status") setRemoteGitStatus(output);
+        if (operation === "diff") setRemoteGitDiff(output);
+        setRemoteGitMessage(`Remote Git ${operation} completed.`);
+      } catch (error) {
+        setRemoteGitMessage(
+          error instanceof Error ? error.message : "Remote Git request failed",
+        );
+      }
+    },
+    [authorizedBridgeRequest, endpoint, remoteGitCommitMessage],
+  );
 
   const createMission = useCallback(async () => {
     const description = mission.trim();
@@ -1260,6 +1305,64 @@ export default function App() {
             </Pressable>
           </View>
           <Text style={styles.message}>{settingsScopeMessage}</Text>
+          <Text style={styles.missionText}>Remote Git (optional bridge)</Text>
+          <Text style={styles.message}>
+            Android remains fully standalone. These controls use the
+            authenticated bridge only when you want to inspect or update the
+            connected workspace.
+          </Text>
+          <View style={styles.actionRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Refresh remote Git status"
+              style={styles.smallAction}
+              onPress={() => void runRemoteGit("status")}
+            >
+              <Text style={styles.smallActionText}>Refresh status</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="View remote Git diff"
+              style={styles.smallAction}
+              onPress={() => void runRemoteGit("diff")}
+            >
+              <Text style={styles.smallActionText}>View diff</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Stage remote Git changes"
+              style={styles.smallAction}
+              onPress={() => void runRemoteGit("stage")}
+            >
+              <Text style={styles.smallActionText}>Stage changes</Text>
+            </Pressable>
+          </View>
+          <TextInput
+            accessibilityLabel="Remote Git commit message"
+            maxLength={72}
+            onChangeText={setRemoteGitCommitMessage}
+            placeholder="Remote Git commit message"
+            placeholderTextColor="#52617f"
+            style={styles.input}
+            value={remoteGitCommitMessage}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Commit remote Git changes"
+            style={styles.secondary}
+            onPress={() => void runRemoteGit("commit")}
+          >
+            <Text style={styles.secondaryText}>Commit changes</Text>
+          </Pressable>
+          {remoteGitMessage ? (
+            <Text style={styles.message}>{remoteGitMessage}</Text>
+          ) : null}
+          {remoteGitStatus ? (
+            <Text style={styles.missionMeta}>Status: {remoteGitStatus}</Text>
+          ) : null}
+          {remoteGitDiff ? (
+            <Text style={styles.missionMeta}>Diff: {remoteGitDiff}</Text>
+          ) : null}
           <View style={styles.toggleRow}>
             <Text style={styles.message}>Sync automatically on resume</Text>
             <Switch

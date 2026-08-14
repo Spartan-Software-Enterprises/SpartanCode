@@ -100,6 +100,10 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
 - The authenticated MCP Bridge exposes bounded Git status, redacted diff,
   stage, and explicit commit operations with separate read/write scopes and
   idempotent mutation handling for remote clients.
+- Android exposes optional authenticated-bridge controls for remote Git status,
+  redacted diff, stage, and explicit commit operations. Core Android use stays
+  standalone and does not require the desktop app or bridge; physical Android
+  acceptance remains an environment gate.
 - Mosh now has a tested client lifecycle contract with explicit connecting,
   ready, error, ended, stop, and server-requirement states. The host still
   must provide `mosh-server` and reachable UDP ports before a real session can
