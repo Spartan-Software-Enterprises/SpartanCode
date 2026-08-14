@@ -37,13 +37,16 @@ import {
   updateQueuedOperation,
   readSnapshot,
   readBiometricSetting,
+  readMobileSettings,
   readCollaborationSessions,
   saveBridgeToken,
   writeSnapshot,
   writeBiometricSetting,
+  writeMobileSettings,
   writeCollaborationSessions,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
+import type { MobileSettings } from "./src/core/storage";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
 import { availableAgents } from "./src/core/agents";
 import {
@@ -98,6 +101,12 @@ export default function App() {
     useState<keyof typeof routerGuidance>("tailscale");
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
   const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [mobileSettings, setMobileSettings] = useState<MobileSettings>({
+    executionMode: "guided",
+    quantization: "Q4_K_M",
+    voiceEnabled: false,
+    autoSync: true,
+  });
   const [recognizing, setRecognizing] = useState(false);
   const [collaborationName, setCollaborationName] = useState("Android roadmap");
   const [collaborationSessions, setCollaborationSessions] = useState<
@@ -204,12 +213,21 @@ export default function App() {
       readSnapshot(),
       readBiometricSetting(),
       readCollaborationSessions(),
+      readMobileSettings(),
     ])
-      .then(([savedSnapshot, savedBiometric, savedCollaboration]) => {
-        setSnapshot(savedSnapshot);
-        setBiometricEnabled(savedBiometric);
-        setCollaborationSessions(savedCollaboration);
-      })
+      .then(
+        ([
+          savedSnapshot,
+          savedBiometric,
+          savedCollaboration,
+          savedSettings,
+        ]) => {
+          setSnapshot(savedSnapshot);
+          setBiometricEnabled(savedBiometric);
+          setCollaborationSessions(savedCollaboration);
+          setMobileSettings(savedSettings);
+        },
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -337,6 +355,15 @@ export default function App() {
     snapshot.offline,
   ]);
 
+  const updateMobileSettings = useCallback(
+    async (update: Partial<MobileSettings>) => {
+      const next = { ...mobileSettings, ...update };
+      setMobileSettings(next);
+      await writeMobileSettings(next);
+    },
+    [mobileSettings],
+  );
+
   const createMission = useCallback(async () => {
     const description = mission.trim();
     if (!description) return;
@@ -405,12 +432,14 @@ export default function App() {
       if (state === "active") void refresh();
     };
     const subscription = AppState.addEventListener("change", syncWhenActive);
-    const interval = setInterval(() => void refresh(), 60_000);
+    const interval = mobileSettings.autoSync
+      ? setInterval(() => void refresh(), 60_000)
+      : undefined;
     return () => {
       subscription.remove();
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
     };
-  }, [endpoint, refresh]);
+  }, [endpoint, mobileSettings.autoSync, refresh]);
 
   const resolveApproval = useCallback(
     async (id: string, decision: "approved" | "denied") => {
@@ -829,6 +858,91 @@ export default function App() {
                     : "Biometric unlock disabled",
                 );
               }}
+              trackColor={{ false: "#263657", true: "#2d806f" }}
+              thumbColor="#f2f5ff"
+            />
+          </View>
+        </View>
+
+        <Text style={styles.section}>App settings</Text>
+        <View style={styles.card}>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>Execution preference</Text>
+              <Text style={styles.missionMeta}>
+                {mobileSettings.executionMode === "guided"
+                  ? "Guided · review risky actions"
+                  : "YOLO · trusted workspace automation"}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change execution preference"
+              style={styles.smallAction}
+              onPress={() =>
+                void updateMobileSettings({
+                  executionMode:
+                    mobileSettings.executionMode === "guided"
+                      ? "yolo"
+                      : "guided",
+                })
+              }
+            >
+              <Text style={styles.smallActionText}>Change</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.message}>
+            Approval state, audit activity, and validation remain visible in
+            both modes.
+          </Text>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>Local model quantization</Text>
+              <Text style={styles.missionMeta}>
+                {mobileSettings.quantization}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change local model quantization"
+              style={styles.smallAction}
+              onPress={() => {
+                const options: MobileSettings["quantization"][] = [
+                  "Q4_K_M",
+                  "Q4_0",
+                  "Q3_K_S",
+                ];
+                const next =
+                  options[
+                    (options.indexOf(mobileSettings.quantization) + 1) %
+                      options.length
+                  ];
+                void updateMobileSettings({ quantization: next });
+              }}
+            >
+              <Text style={styles.smallActionText}>Change</Text>
+            </Pressable>
+          </View>
+          <View style={styles.toggleRow}>
+            <Text style={styles.message}>Enable voice command input</Text>
+            <Switch
+              accessibilityLabel="Enable voice command input"
+              value={mobileSettings.voiceEnabled}
+              onValueChange={(enabled) =>
+                void updateMobileSettings({ voiceEnabled: enabled })
+              }
+              trackColor={{ false: "#263657", true: "#2d806f" }}
+              thumbColor="#f2f5ff"
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <Text style={styles.message}>Sync automatically on resume</Text>
+            <Switch
+              accessibilityLabel="Sync automatically on resume"
+              value={mobileSettings.autoSync}
+              onValueChange={(enabled) =>
+                void updateMobileSettings({ autoSync: enabled })
+              }
               trackColor={{ false: "#263657", true: "#2d806f" }}
               thumbColor="#f2f5ff"
             />

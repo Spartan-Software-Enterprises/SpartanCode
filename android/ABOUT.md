@@ -50,6 +50,10 @@ The Android companion keeps high-value controls reachable on a phone:
 - optional bridge profiles with secure token storage;
 - local collaboration sessions and approval gestures;
 - model, storage, biometric, and runtime readiness diagnostics;
+- persisted app settings for guided/YOLO execution preference, local model
+  quantization, voice input, and automatic sync on resume;
+- workspace-safe bridge token cleanup, connection controls, remote planning,
+  router guidance, and offline audit visibility;
 - artifact and approval review without requiring the desktop app.
 
 ![Android command center](../android/screenshots/command-center.png)

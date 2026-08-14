@@ -4,10 +4,12 @@ import {
   readCollaborationSessions,
   readSnapshot,
   readBiometricSetting,
+  readMobileSettings,
   readQueuedOperations,
   removeQueuedOperation,
   updateQueuedOperation,
   writeBiometricSetting,
+  writeMobileSettings,
   writeCollaborationSessions,
 } from "./storage";
 import { createMobileCollaborationSession } from "./collaboration";
@@ -130,5 +132,30 @@ describe("standalone collaboration storage", () => {
       JSON.stringify([session, { malformed: true }]),
     );
     expect(await readCollaborationSessions()).toEqual([session]);
+  });
+});
+
+describe("mobile settings", () => {
+  beforeEach(async () => AsyncStorage.clear());
+
+  it("persists safe execution, model, voice, and sync preferences", async () => {
+    expect(await readMobileSettings()).toMatchObject({
+      executionMode: "guided",
+      quantization: "Q4_K_M",
+      voiceEnabled: false,
+      autoSync: true,
+    });
+    await writeMobileSettings({
+      executionMode: "yolo",
+      quantization: "Q4_0",
+      voiceEnabled: true,
+      autoSync: false,
+    });
+    expect(await readMobileSettings()).toEqual({
+      executionMode: "yolo",
+      quantization: "Q4_0",
+      voiceEnabled: true,
+      autoSync: false,
+    });
   });
 });

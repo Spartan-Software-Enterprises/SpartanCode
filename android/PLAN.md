@@ -118,6 +118,9 @@ policy is visible in the UI: HTTPS is required, only MIT/Apache-2.0 catalog
 entries are eligible, low-storage requests are rejected before transport,
 resume responses that ignore Range are handled without duplicate bytes, and
 supplied checksums are verified before finalization with partial cleanup.
+The standalone app also persists mobile settings for execution preference,
+local model quantization, voice input, and automatic sync on resume; these
+settings remain local and do not require a desktop checkout or bridge.
 
 The desktop now includes an opt-in MCP Bridge HTTP adapter. Set
 `SPARTANCODE_BRIDGE_PORT` and preferably `SPARTANCODE_BRIDGE_TOKEN` to expose

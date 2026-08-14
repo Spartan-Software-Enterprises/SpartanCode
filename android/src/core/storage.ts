@@ -24,8 +24,23 @@ const BRIDGE_TOKEN_INDEX_KEY = "spartancode.mobile.bridge-token-index.v1";
 const SNAPSHOT_QUARANTINE_KEY = "spartancode.mobile.snapshot.quarantine.v1";
 const QUEUE_QUARANTINE_KEY = "spartancode.mobile.queue.quarantine.v1";
 const BIOMETRIC_SETTING_KEY = "spartancode.mobile.biometric-unlock.v1";
+const MOBILE_SETTINGS_KEY = "spartancode.mobile.settings.v1";
 const COLLABORATION_KEY = "spartancode.mobile.collaboration.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
+
+export type MobileSettings = {
+  executionMode: "guided" | "yolo";
+  quantization: "Q4_K_M" | "Q4_0" | "Q3_K_S";
+  voiceEnabled: boolean;
+  autoSync: boolean;
+};
+
+const defaultMobileSettings: MobileSettings = {
+  executionMode: "guided",
+  quantization: "Q4_K_M",
+  voiceEnabled: false,
+  autoSync: true,
+};
 
 function emptySnapshot(): MobileSnapshot {
   return {
@@ -145,6 +160,29 @@ export async function writeBiometricSetting(enabled: boolean) {
     BIOMETRIC_SETTING_KEY,
     enabled ? "enabled" : "disabled",
   );
+}
+
+export async function readMobileSettings(): Promise<MobileSettings> {
+  try {
+    const raw = await AsyncStorage.getItem(MOBILE_SETTINGS_KEY);
+    const parsed = raw ? (JSON.parse(raw) as Partial<MobileSettings>) : {};
+    return {
+      ...defaultMobileSettings,
+      executionMode: parsed.executionMode === "yolo" ? "yolo" : "guided",
+      quantization:
+        parsed.quantization === "Q4_0" || parsed.quantization === "Q3_K_S"
+          ? parsed.quantization
+          : "Q4_K_M",
+      voiceEnabled: parsed.voiceEnabled === true,
+      autoSync: parsed.autoSync !== false,
+    };
+  } catch {
+    return { ...defaultMobileSettings };
+  }
+}
+
+export async function writeMobileSettings(settings: MobileSettings) {
+  await AsyncStorage.setItem(MOBILE_SETTINGS_KEY, JSON.stringify(settings));
 }
 
 export async function readQueuedOperations(): Promise<QueuedOperation[]> {
