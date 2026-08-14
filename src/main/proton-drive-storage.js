@@ -44,6 +44,40 @@ function readBackupKey(secureVault) {
   return key;
 }
 
+async function resolveBackupKey({
+  secureVault,
+  protonPassProvider,
+  reference,
+}) {
+  if (protonPassProvider && reference) {
+    const result = await protonPassProvider.get(reference);
+    const key = Buffer.from(result.value, "base64url");
+    if (key.length !== 32) throw new Error("Proton Pass backup key is invalid");
+    return key;
+  }
+  return readBackupKey(secureVault);
+}
+
+function encryptBackupWithKey(bytes, remotePath, key) {
+  if (!Buffer.isBuffer(bytes) || bytes.length > MAX_BACKUP_BYTES)
+    throw new Error("Proton Drive backup content is invalid or too large");
+  const safeRemotePath = validateRemotePath(remotePath);
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  cipher.setAAD(Buffer.from(safeRemotePath, "utf8"));
+  const ciphertext = Buffer.concat([cipher.update(bytes), cipher.final()]);
+  return Buffer.from(
+    JSON.stringify({
+      schemaVersion: 1,
+      algorithm: "AES-256-GCM",
+      remotePath: safeRemotePath,
+      iv: iv.toString("base64url"),
+      tag: cipher.getAuthTag().toString("base64url"),
+      ciphertext: ciphertext.toString("base64url"),
+    }) + "\n",
+  );
+}
+
 function encryptBackup(bytes, remotePath, secureVault) {
   if (!Buffer.isBuffer(bytes) || bytes.length > MAX_BACKUP_BYTES)
     throw new Error("Proton Drive backup content is invalid or too large");
@@ -68,7 +102,7 @@ function encryptBackup(bytes, remotePath, secureVault) {
   );
 }
 
-function decryptBackup(envelopeBytes, remotePath, secureVault) {
+function decryptBackupWithKey(envelopeBytes, remotePath, key) {
   if (
     !Buffer.isBuffer(envelopeBytes) ||
     envelopeBytes.length > MAX_BACKUP_BYTES
@@ -93,7 +127,7 @@ function decryptBackup(envelopeBytes, remotePath, secureVault) {
   try {
     const decipher = crypto.createDecipheriv(
       "aes-256-gcm",
-      readBackupKey(secureVault),
+      key,
       Buffer.from(envelope.iv, "base64url"),
     );
     decipher.setAAD(Buffer.from(safeRemotePath, "utf8"));
@@ -110,9 +144,18 @@ function decryptBackup(envelopeBytes, remotePath, secureVault) {
   }
 }
 
+function decryptBackup(envelopeBytes, remotePath, secureVault) {
+  return decryptBackupWithKey(
+    envelopeBytes,
+    remotePath,
+    readBackupKey(secureVault),
+  );
+}
+
 function createProtonDriveStorage({
   environment = process.env,
   secureVault,
+  protonPassProvider = null,
   execFileImpl = execFile,
 } = {}) {
   const binary = () =>
@@ -180,7 +223,12 @@ function createProtonDriveStorage({
       if (!/^[A-Za-z0-9._-]+$/.test(fileName))
         throw new Error("Proton Drive backup filename is invalid");
       const remotePath = `${safeParent.replace(/\/$/, "")}/${fileName}`;
-      const encrypted = encryptBackup(bytes, remotePath, secureVault);
+      const key = await resolveBackupKey({
+        secureVault,
+        protonPassProvider,
+        reference: environment.SPARTANCODE_PROTON_DRIVE_BACKUP_KEY_REF,
+      });
+      const encrypted = encryptBackupWithKey(bytes, remotePath, key);
       const temporaryDir = fs.mkdtempSync(
         path.join(os.tmpdir(), "spartancode-proton-drive-"),
       );
@@ -232,10 +280,15 @@ function createProtonDriveStorage({
           "--json",
         ]);
         validateLocalFile(downloadedPath);
-        const restored = decryptBackup(
+        const key = await resolveBackupKey({
+          secureVault,
+          protonPassProvider,
+          reference: environment.SPARTANCODE_PROTON_DRIVE_BACKUP_KEY_REF,
+        });
+        const restored = decryptBackupWithKey(
           fs.readFileSync(downloadedPath),
           safeRemotePath,
-          secureVault,
+          key,
         );
         fs.mkdirSync(path.dirname(destinationPath), {
           recursive: true,

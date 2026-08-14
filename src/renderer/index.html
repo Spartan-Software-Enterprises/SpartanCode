@@ -2178,11 +2178,37 @@
           </small>
         </details>
         <details class="settings-advanced">
+          <summary>Proton Pass primary key store</summary>
+          <p>
+            Proton Pass is the preferred credential system of record.
+            SpartanCode resolves only explicit <code>pass://</code> references
+            through the official CLI. The OS-backed vault remains optional local
+            recovery storage and is never used as a silent fallback. A Proton
+            account is required to use Proton Pass services.
+          </p>
+          <div class="settings-runtime-grid" id="settingsProtonPassStatus">
+            Loading Proton Pass status…
+          </div>
+          <div class="settings-inline-actions">
+            <button type="button" class="context-button" id="protonPassVersion">
+              Check CLI
+            </button>
+          </div>
+          <small
+            id="settingsProtonPassMessage"
+            style="display: block; color: var(--muted)"
+          >
+            Install the official Proton Pass CLI and sign in with
+            <code>pass-cli login</code>.
+          </small>
+        </details>
+        <details class="settings-advanced">
           <summary>Proton Drive secure backup</summary>
           <p>
             Proton Drive is optional. SpartanCode encrypts the workspace
             snapshot locally with AES-256-GCM before the official Proton Drive
-            CLI uploads it; Android-only workflows remain independent.
+            CLI uploads it; Android-only workflows remain independent. A Proton
+            account is required to sign in and use Proton Drive.
           </p>
           <div class="settings-runtime-grid" id="settingsProtonDriveStatus">
             Loading Proton Drive status…
@@ -2388,6 +2414,12 @@
       const settingsSecureMessage = document.getElementById(
         "settingsSecureMessage",
       );
+      const settingsProtonPassStatus = document.getElementById(
+        "settingsProtonPassStatus",
+      );
+      const settingsProtonPassMessage = document.getElementById(
+        "settingsProtonPassMessage",
+      );
       const settingsProtonDriveStatus = document.getElementById(
         "settingsProtonDriveStatus",
       );
@@ -2459,6 +2491,7 @@
           github,
           secureStorage,
           secureKeys,
+          protonPass,
           protonDrive,
         ] = await Promise.all([
           window.spartanCode.getRuntimeStatus(),
@@ -2474,6 +2507,7 @@
           window.spartanCode.getGitHubAppStatus(),
           window.spartanCode.getSecureVaultStatus(),
           window.spartanCode.listSecureKeys(),
+          window.spartanCode.getProtonPassStatus(),
           window.spartanCode.getProtonDriveStatus(),
         ]);
         settingsWorkspaceSummary.textContent = settings.workspacePath
@@ -2553,6 +2587,16 @@
           settingsStatusRow("Encryption", protonDrive.encryption),
         ].join("");
         settingsProtonDriveMessage.textContent = protonDrive.message;
+        settingsProtonPassStatus.innerHTML = [
+          settingsStatusRow("Provider", protonPass.provider),
+          settingsStatusRow("Mode", protonPass.mode),
+          settingsStatusRow(
+            "Availability",
+            protonPass.available ? "Configured" : "Unavailable",
+          ),
+          settingsStatusRow("Authentication", protonPass.authenticated),
+        ].join("");
+        settingsProtonPassMessage.textContent = protonPass.message;
       };
       const escapeChat = (value) => escapeHtml(value).replace(/\n/g, "<br>");
       const renderChat = (messages) => {
@@ -3476,6 +3520,16 @@
             settingsProtonDriveMessage.textContent = `Proton Drive CLI: ${result.output}`;
           } catch (error) {
             settingsProtonDriveMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("protonPassVersion")
+        .addEventListener("click", async () => {
+          try {
+            const result = await window.spartanCode.getProtonPassVersion();
+            settingsProtonPassMessage.textContent = `Proton Pass CLI: ${result.output}`;
+          } catch (error) {
+            settingsProtonPassMessage.textContent = error.message;
           }
         });
       document

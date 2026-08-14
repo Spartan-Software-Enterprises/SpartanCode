@@ -11,7 +11,8 @@ depend on it.
 
 GitHub is never required: local workspaces, mission history, and offline
 planning remain available on-device. Advanced desktop settings can save
-credentials in OS-backed encrypted storage; Android bridge secrets use the
+credentials through the optional OS-backed encrypted recovery vault; Proton
+Pass is the preferred primary credential store and Android bridge secrets use the
 platform secure store and optional biometrics.
 
 Turn an idea into a verified software change with a calm, focused command
@@ -60,8 +61,8 @@ Explore the workspace surfaces:
 
 ![Settings governance and extensibility](docs/assets/desktop-menu-gallery/desktop-settings-governance.png)
 
-| Collaboration settings | Marketplace settings | Preview dialog |
-| ---------------------- | -------------------- | -------------- |
+| Collaboration settings                                                                         | Marketplace settings                                                                       | Preview dialog                                                                 |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
 | ![Collaboration settings](docs/assets/desktop-menu-gallery/desktop-settings-collaboration.png) | ![Marketplace settings](docs/assets/desktop-menu-gallery/desktop-settings-marketplace.png) | ![Preview dialog](docs/assets/desktop-menu-gallery/desktop-preview-dialog.png) |
 
 | Mission composer                                                                  | Android command center                                            | Android mission queue                                             |

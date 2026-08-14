@@ -57,6 +57,7 @@ const { createGuiAutomation } = require("./gui-automation");
 const { createProcessAutomation } = require("./process-automation");
 const { createProtonAdapter } = require("./proton-adapter");
 const { createProtonDriveStorage } = require("./proton-drive-storage");
+const { createProtonPassProvider } = require("./proton-pass");
 const { createPrivacyNetwork } = require("./privacy-network");
 const {
   estimateServerCost,
@@ -99,9 +100,13 @@ function registerDesktopApi({
     environment: providerEnvironment,
     secureVault,
   });
+  const protonPassProvider = createProtonPassProvider({
+    environment: providerEnvironment,
+  });
   const protonDriveStorage = createProtonDriveStorage({
     environment: providerEnvironment,
     secureVault,
+    protonPassProvider,
   });
   const privacyNetwork = createPrivacyNetwork();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
@@ -128,6 +133,11 @@ function registerDesktopApi({
   );
   ipcMain.handle("proton-drive:status", () => protonDriveStorage.status());
   ipcMain.handle("proton-drive:version", () => protonDriveStorage.version());
+  ipcMain.handle("proton-pass:status", () => protonPassProvider.status());
+  ipcMain.handle("proton-pass:version", () => protonPassProvider.version());
+  ipcMain.handle("proton-pass:get", (_event, reference) =>
+    protonPassProvider.get(reference),
+  );
   ipcMain.handle("proton-drive:backup", (_event, sourcePath, remoteParent) => {
     const workspacePath = store.snapshot().settings.workspacePath;
     if (!workspacePath) throw new Error("Choose a workspace before backing up");

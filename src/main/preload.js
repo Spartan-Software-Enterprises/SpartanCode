@@ -78,6 +78,10 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("proton-drive:backup-workspace", remoteParent),
   restoreFromProtonDrive: (remotePath, destinationPath) =>
     ipcRenderer.invoke("proton-drive:restore", remotePath, destinationPath),
+  getProtonPassStatus: () => ipcRenderer.invoke("proton-pass:status"),
+  getProtonPassVersion: () => ipcRenderer.invoke("proton-pass:version"),
+  getProtonPassSecret: (reference) =>
+    ipcRenderer.invoke("proton-pass:get", reference),
   getPrivacyNetworkStatus: () => ipcRenderer.invoke("privacy:status"),
   configurePrivacyNetwork: (request) =>
     ipcRenderer.invoke("privacy:configure", request),
