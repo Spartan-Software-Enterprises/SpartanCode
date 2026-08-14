@@ -132,6 +132,10 @@ current Implemented/Partial/Open counts.
   character query limit, 50-result cap, ten-second abort timeout, and explicit
   malformed-response handling. Model byte downloads and runtime availability
   remain environment-dependent.
+- `scripts/release-index.js` now generates a commit-bound machine-readable beta
+  gate index, preserves `PASS`/`SKIP`/`FAIL` states, and fails closed when
+  Android verification evidence belongs to another commit. External release
+  gates remain intentionally open until their evidence exists.
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, bounded desktop/Android home-server setup plans, AWS
   bootstrap/recovery scripts, and local/GitHub synchronization procedures.

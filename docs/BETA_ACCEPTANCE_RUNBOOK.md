@@ -95,3 +95,16 @@ Signed off (UTC):
 
 The runbook supplements [RELEASE_PLAN.md](RELEASE_PLAN.md); it does not turn
 an unavailable environment into a passing result.
+
+Generate the machine-readable index from the current commit with:
+
+```sh
+node scripts/release-index.js \
+  --android-verification dist/android-verification.json \
+  --target "SpartanCode beta" \
+  --output release-evidence/release-index.json
+```
+
+The generator fails closed on stale Android evidence and leaves unavailable
+physical, signing, emulator, visual, synchronization, and product-owner gates
+as `SKIP` until their evidence is supplied.

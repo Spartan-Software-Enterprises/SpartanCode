@@ -1,0 +1,71 @@
+const assert = require("node:assert/strict");
+const test = require("node:test");
+const { execFileSync } = require("node:child_process");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { GATES, buildIndex } = require("./release-index");
+
+test("release index preserves incomplete gates and binds Android evidence to the commit", () => {
+  const commit = execFileSync("git", ["rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+  const index = buildIndex({
+    target: "test",
+    verification: {
+      commit,
+      checks: [
+        "Android TypeScript",
+        "Android unit tests",
+        "Android formatting",
+        "Expo configuration",
+        "Committed visual assets",
+      ].map((label) => ({ label, status: "pass" })),
+    },
+  });
+  assert.equal(index.releaseCommit, commit);
+  assert.equal(index.status, "INCOMPLETE");
+  assert.deepEqual(
+    index.gates.map((gate) => gate.name),
+    GATES,
+  );
+  assert.equal(
+    index.gates.find((gate) => gate.name === "Android baseline").status,
+    "PASS",
+  );
+  assert.equal(
+    index.gates.find((gate) => gate.name === "Physical device").status,
+    "SKIP",
+  );
+});
+
+test("release index fails closed when Android evidence belongs to another commit", () => {
+  const index = buildIndex({
+    target: "test",
+    verification: { commit: "0".repeat(40), checks: [] },
+  });
+  assert.equal(
+    index.gates.find((gate) => gate.name === "Android baseline").status,
+    "FAIL",
+  );
+  assert.equal(index.status, "FAIL");
+});
+
+test("release index CLI writes a bounded machine-readable file", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-release-index-"),
+  );
+  const output = path.join(directory, "release-index.json");
+  execFileSync(
+    process.execPath,
+    [path.join(__dirname, "release-index.js"), "--output", output],
+    {
+      cwd: path.resolve(__dirname, ".."),
+      stdio: "ignore",
+    },
+  );
+  const parsed = JSON.parse(fs.readFileSync(output, "utf8"));
+  assert.equal(parsed.schemaVersion, 1);
+  assert.equal(parsed.gates.length, GATES.length);
+  fs.rmSync(directory, { recursive: true, force: true });
+});

@@ -12,6 +12,9 @@ Run it from the repository root:
 
 ```bash
 node android/scripts/verify-matrix.js --output dist/android-verification.json
+node scripts/release-index.js \
+  --android-verification dist/android-verification.json \
+  --output dist/release-index.json
 ```
 
 GitHub Actions runs the same baseline and a bounded API 30 Android emulator
@@ -37,6 +40,11 @@ biometric, NPU, camera, AR/VR, or physical-network acceptance.
 The complete September 1 beta acceptance sequence, evidence naming convention,
 and product-owner sign-off record are in
 [BETA_ACCEPTANCE_RUNBOOK.md](BETA_ACCEPTANCE_RUNBOOK.md).
+
+The release-index generator binds the report to the current Git commit and
+preserves unavailable gates as `SKIP`; it cannot convert missing emulator,
+physical-device, signing, synchronization, visual, or product-owner evidence
+into a passing release claim.
 
 The local Android phone can provide physical Android evidence through
 [LOCAL_DEVICE_TESTING.md](LOCAL_DEVICE_TESTING.md); an attached authorized ADB
