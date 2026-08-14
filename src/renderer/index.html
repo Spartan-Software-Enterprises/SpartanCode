@@ -991,6 +991,124 @@
         margin: 0 0 10px;
         font-size: 14px;
       }
+
+      /* Spartan IDE theme: shared with the standalone Android command center. */
+      :root {
+        color-scheme: dark;
+        --ink: #f2f5ff;
+        --muted: #93a4c4;
+        --line: #263657;
+        --surface: #11182b;
+        --canvas: #080d1c;
+        --blue: #72e6c5;
+        --blue-soft: #183b3a;
+        --violet: #a99bff;
+        --violet-soft: #28244a;
+        --green: #72e6c5;
+        --green-soft: #183b3a;
+        --amber: #ffb454;
+        --amber-soft: #3a2a1b;
+      }
+      body,
+      .sidebar,
+      .right-rail,
+      .topbar,
+      .main {
+        background: var(--canvas);
+        color: var(--ink);
+      }
+      .sidebar,
+      .right-rail {
+        background: var(--surface);
+        border-color: var(--line);
+      }
+      .brand-mark {
+        background: linear-gradient(145deg, #72e6c5, #5d8dff);
+      }
+      .nav-item,
+      .workspace-sub,
+      .artifact-time,
+      .activity time,
+      .agent-card p,
+      .mission-meta,
+      .history-row small,
+      .progress-count,
+      .empty-state {
+        color: var(--muted);
+      }
+      .nav-item:hover,
+      .workspace-card,
+      .mission-composer,
+      .agent-card,
+      .history-row,
+      .artifact,
+      .activity,
+      .activity-button,
+      .settings-card,
+      .chat-panel,
+      .artifact-review,
+      .manager-card,
+      .manager-agent,
+      .approval-card {
+        background: #111b32;
+        border-color: var(--line);
+        color: var(--ink);
+      }
+      .mission-composer textarea,
+      input,
+      textarea,
+      select {
+        background: #0a1123;
+        border-color: var(--line);
+        color: var(--ink);
+      }
+      .mission-composer textarea::placeholder,
+      input::placeholder,
+      textarea::placeholder {
+        color: #70809b;
+      }
+      .primary-button,
+      .send-button,
+      .settings-save,
+      .approval-allow,
+      .artifact-accept {
+        background: var(--blue);
+        color: #07111f;
+      }
+      .context-button,
+      .round-button,
+      .secondary,
+      .settings-close,
+      .approval-deny,
+      .artifact-reject {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+      .agent-card.active,
+      .agent-card.running {
+        border-color: #357f76;
+        box-shadow: 0 14px 35px #02071280;
+      }
+      .manager-modal,
+      .settings-modal,
+      .chat-modal,
+      .artifact-modal,
+      .approval-modal {
+        background: #020712b8;
+      }
+      .manager-agent {
+        background: #0d162a;
+      }
+      .manager-agent .manager-state,
+      .artifact-state,
+      .live-status {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+      .settings-card select,
+      .settings-card input {
+        background: #0a1123;
+      }
       @media (max-width: 1120px) {
         body {
           min-width: 760px;
