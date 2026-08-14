@@ -160,6 +160,8 @@ function createWindow(crashReporter) {
       path.join(app.getPath("userData"), "models.json"),
     ),
     marketplaceDir: path.join(app.getPath("userData"), "marketplace"),
+    marketplacePublicKey:
+      process.env.SPARTANCODE_MARKETPLACE_PUBLIC_KEY || null,
     secureVault,
     githubEnvironment,
     providerEnvironment,

@@ -2107,14 +2107,10 @@
               placeholder="https://example.invalid/plugins.json"
             />
           </div>
-          <div class="setting-group">
-            <label for="marketplacePublicKey">Ed25519 public key</label>
-            <textarea
-              id="marketplacePublicKey"
-              rows="3"
-              placeholder="PEM public key"
-            ></textarea>
-          </div>
+          <p class="settings-summary">
+            The Ed25519 verification key is configured by the main process and
+            is never accepted from renderer input.
+          </p>
           <button type="button" class="context-button" id="marketplaceFetch">
             Verify marketplace index
           </button>
@@ -3442,7 +3438,6 @@
           try {
             const index = await window.spartanCode.fetchMarketplacePlugins(
               document.getElementById("marketplaceUrl").value.trim(),
-              document.getElementById("marketplacePublicKey").value.trim(),
             );
             marketplacePlugins = index.plugins || [];
             document.getElementById("marketplacePluginSelect").innerHTML =

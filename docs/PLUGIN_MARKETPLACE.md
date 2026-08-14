@@ -2,8 +2,10 @@
 
 SpartanCode supports a signed metadata index and a safe artifact-staging step;
 it does not execute arbitrary plugin code. The desktop isolated API accepts an
-HTTPS index and an Ed25519 public key, verifies the detached `signature`, and
-returns only validated metadata.
+HTTPS index and an Ed25519 public key configured in the main process, verifies
+the detached `signature`, and returns only validated metadata. The renderer
+cannot supply or replace the verification key; verification fails closed when
+`SPARTANCODE_MARKETPLACE_PUBLIC_KEY` is not configured.
 
 The signed payload has this shape:
 

@@ -92,6 +92,7 @@ function registerDesktopApi({
   runMission,
   modelCache,
   marketplaceDir,
+  marketplacePublicKey = null,
   secureVault,
   githubEnvironment = process.env,
   providerEnvironment = process.env,
@@ -385,14 +386,20 @@ function registerDesktopApi({
   ipcMain.handle("plugins:list", () =>
     listPlugins(store.snapshot().settings.workspacePath),
   );
-  ipcMain.handle("plugins:marketplace", async (_event, url, publicKey) => {
+  ipcMain.handle("plugins:marketplace", async (_event, url) => {
     if (typeof url !== "string" || url.length > 2048)
       throw new Error("Marketplace URL is required and must be bounded");
-    if (typeof publicKey !== "string" || publicKey.length > 16 * 1024)
+    if (
+      typeof marketplacePublicKey !== "string" ||
+      marketplacePublicKey.length === 0 ||
+      marketplacePublicKey.length > 16 * 1024
+    )
       throw new Error(
-        "Marketplace verification key is required and must be bounded",
+        "Marketplace verification is unavailable until the main-process key is configured",
       );
-    const index = await fetchMarketplaceIndex(url, { publicKey });
+    const index = await fetchMarketplaceIndex(url, {
+      publicKey: marketplacePublicKey,
+    });
     marketplaceTrust.remember(index);
     return index;
   });

@@ -35,8 +35,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   previewPlan: (description) => ipcRenderer.invoke("mission:plan", description),
   listAgents: () => ipcRenderer.invoke("agents:list"),
   listPlugins: () => ipcRenderer.invoke("plugins:list"),
-  fetchMarketplacePlugins: (url, publicKey) =>
-    ipcRenderer.invoke("plugins:marketplace", url, publicKey),
+  fetchMarketplacePlugins: (url) =>
+    ipcRenderer.invoke("plugins:marketplace", url),
   downloadMarketplacePlugin: (manifest) =>
     ipcRenderer.invoke("plugins:download", manifest),
   activateMarketplacePlugin: (manifest) =>
