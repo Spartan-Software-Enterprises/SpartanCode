@@ -3,7 +3,11 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const test = require("node:test");
-const { createMissionStore } = require("./mission-store");
+const {
+  MAX_MISSION_DESCRIPTION,
+  MAX_MISSIONS,
+  createMissionStore,
+} = require("./mission-store");
 
 test("mission store persists missions, activities, and artifacts", () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-"));
@@ -78,5 +82,22 @@ test("mission store writes a valid replacement and keeps the previous state as b
     false,
   );
 
+  fs.rmSync(directory, { recursive: true, force: true });
+});
+
+test("mission store bounds descriptions, retained missions, and activity", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-"));
+  const filePath = path.join(directory, "workspace.json");
+  const store = createMissionStore(filePath);
+  assert.throws(
+    () => store.addMission("x".repeat(MAX_MISSION_DESCRIPTION + 1)),
+    /too long/,
+  );
+  for (let index = 0; index < MAX_MISSIONS + 5; index += 1)
+    store.addMission(`Mission ${index}`);
+  const snapshot = store.snapshot();
+  assert.equal(snapshot.missions.length, MAX_MISSIONS);
+  assert.equal(snapshot.activity.length, 30);
+  assert.equal(snapshot.missions[0].description, `Mission ${MAX_MISSIONS + 4}`);
   fs.rmSync(directory, { recursive: true, force: true });
 });

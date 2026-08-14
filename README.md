@@ -148,10 +148,10 @@ portable `ssh2` runtime.
   `SPARTANCODE_BRIDGE_OIDC_ISSUER` and
   `SPARTANCODE_BRIDGE_OIDC_AUDIENCE` are configured, deriving least-privilege
   scopes from standard `scope`/`scp` claims.
-- Non-loopback MCP Bridge listeners fail closed unless token or complete OIDC
-  authentication is configured, and bridge missions use the same approval
-  policy as desktop missions. Android bridge mutations and queued operations
-  honor the optional biometric gate.
+- Every MCP Bridge listener, including loopback, requires a token or complete
+  OIDC authentication, and guided bridge missions require approval regardless
+  of description wording. Android bridge mutations and queued operations honor
+  the optional biometric gate.
 - Remote profiles never persist passwords, private keys, or tokens.
 - The renderer does not expose Node.js or filesystem primitives directly.
 - Collaboration sessions use versioned, auditable events with conflict

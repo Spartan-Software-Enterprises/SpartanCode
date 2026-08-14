@@ -18,10 +18,12 @@ release evidence.
   operating system secret store. SpartanCode never asks users to paste a
   Proton password or session token into the app.
 - Uploads are bounded to 64 MiB, remote paths reject traversal, and workspace
-  backup IPC accepts only the selected workspace context.
+  backup IPC accepts only the selected workspace context after canonical
+  symlink checks.
 - Restore downloads into a temporary directory, verifies the authenticated
-  AES-256-GCM envelope, and writes only to a new destination inside the
-  selected workspace; existing files are never overwritten.
+  AES-256-GCM envelope, canonicalizes existing destination components, and
+  writes only to a new destination inside the selected workspace; existing
+  files and symlink escapes are rejected.
 
 ## Setup
 

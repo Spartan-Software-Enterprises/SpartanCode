@@ -7,6 +7,7 @@ const {
   listWorkspaceFiles,
   readWorkspaceFile,
   resolveInsideWorkspace,
+  resolveWritableInsideWorkspace,
   verifyWorkspace,
 } = require("./workspace-tools");
 
@@ -58,6 +59,32 @@ test("workspace tools reject symlink escapes", () => {
       () => readWorkspaceFile(directory, "linked/secret.txt"),
       /symlink/,
     );
+  } catch (error) {
+    if (error.code !== "EPERM") throw error;
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+    fs.rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("writable workspace paths reject symlinked parents and allow new files", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-workspace-write-"),
+  );
+  const outside = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-outside-write-"),
+  );
+  try {
+    fs.symlinkSync(outside, path.join(directory, "linked"), "junction");
+    assert.throws(
+      () => resolveWritableInsideWorkspace(directory, "linked/restored.json"),
+      /symlink/,
+    );
+    const target = resolveWritableInsideWorkspace(
+      directory,
+      "new/restored.json",
+    );
+    assert.equal(target, path.join(directory, "new", "restored.json"));
   } catch (error) {
     if (error.code !== "EPERM") throw error;
   } finally {

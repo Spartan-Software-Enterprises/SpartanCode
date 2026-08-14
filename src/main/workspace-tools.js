@@ -38,6 +38,35 @@ function resolveInsideWorkspace(workspacePath, requestedPath = ".") {
   return target;
 }
 
+function resolveWritableInsideWorkspace(workspacePath, requestedPath = ".") {
+  if (!workspacePath) throw new Error("No workspace selected");
+  const verification = verifyWorkspace(workspacePath);
+  if (!verification.verified) throw new Error(verification.reason);
+  const { root, canonicalRoot } = verification;
+  const target = path.resolve(root, requestedPath);
+  if (target !== root && !target.startsWith(`${root}${path.sep}`))
+    throw new Error("Path escapes the approved workspace");
+
+  let existingParent = path.dirname(target);
+  while (!fs.existsSync(existingParent) && existingParent !== root)
+    existingParent = path.dirname(existingParent);
+  const canonicalParent = fs.realpathSync(existingParent);
+  if (
+    canonicalParent !== canonicalRoot &&
+    !canonicalParent.startsWith(`${canonicalRoot}${path.sep}`)
+  )
+    throw new Error("Path escapes the approved workspace through a symlink");
+  if (fs.existsSync(target)) {
+    const canonicalTarget = fs.realpathSync(target);
+    if (
+      canonicalTarget !== canonicalRoot &&
+      !canonicalTarget.startsWith(`${canonicalRoot}${path.sep}`)
+    )
+      throw new Error("Path escapes the approved workspace through a symlink");
+  }
+  return target;
+}
+
 function listWorkspaceFiles(workspacePath, requestedPath = ".", limit = 100) {
   const directory = resolveInsideWorkspace(workspacePath, requestedPath);
   return fs
@@ -57,6 +86,7 @@ function readWorkspaceFile(workspacePath, requestedPath) {
 module.exports = {
   verifyWorkspace,
   resolveInsideWorkspace,
+  resolveWritableInsideWorkspace,
   listWorkspaceFiles,
   readWorkspaceFile,
 };

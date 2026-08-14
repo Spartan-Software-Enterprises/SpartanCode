@@ -301,10 +301,12 @@ current Implemented/Partial/Open counts.
   other devices is now available through authenticated MCP Bridge session,
   participant, event, and merge routes; physical cross-device acceptance
   testing remains open.
-- Security review hardened the bridge boundary: non-loopback listeners require
-  a token or complete OIDC configuration, unauthenticated handler instances
-  fail closed, bridge mission requests reuse the desktop approval policy, and
-  Android bridge mutations/queued synchronization honor the biometric gate.
+- Security review hardened the bridge boundary: every listener requires a
+  token or complete OIDC configuration, unauthenticated handler instances fail
+  closed, guided bridge missions require approval regardless of description
+  wording, and Android bridge mutations/queued synchronization honor the
+  biometric gate. Mission state and descriptions are bounded, and Proton Drive
+  backup/restore canonicalizes workspace paths to reject symlink escapes.
   GitHub Actions in the release and verification workflows are pinned to
   reviewed immutable commit SHAs. Remaining release hardening is limited to
   provider-specific runtime provenance attestations and physical/device-

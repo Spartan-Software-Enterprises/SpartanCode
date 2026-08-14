@@ -8,6 +8,9 @@ const {
   normalizeSettingsOverride,
 } = require("./settings-hierarchy");
 
+const MAX_MISSIONS = 100;
+const MAX_MISSION_DESCRIPTION = 4 * 1024;
+
 const emptyState = () => ({
   missions: [],
   artifacts: [],
@@ -102,20 +105,27 @@ function createMissionStore(filePath) {
       return snapshot;
     },
     addMission(description) {
+      const normalizedDescription = String(description || "").trim();
+      if (!normalizedDescription)
+        throw new Error("Mission description is required");
+      if (normalizedDescription.length > MAX_MISSION_DESCRIPTION)
+        throw new Error("Mission description is too long");
       const mission = {
         id: createId("mission"),
-        description,
+        description: normalizedDescription,
         status: "planning",
         createdAt: new Date().toISOString(),
         plan: null,
       };
       state.missions.unshift(mission);
+      state.missions = state.missions.slice(0, MAX_MISSIONS);
       state.activity.unshift({
         id: createId("activity"),
         agent: "Plan agent",
         message: "Mission received; preparing an execution plan",
         createdAt: mission.createdAt,
       });
+      state.activity = state.activity.slice(0, 30);
       persist();
       return mission;
     },
@@ -302,4 +312,8 @@ function createMissionStore(filePath) {
   };
 }
 
-module.exports = { createMissionStore };
+module.exports = {
+  MAX_MISSION_DESCRIPTION,
+  MAX_MISSIONS,
+  createMissionStore,
+};

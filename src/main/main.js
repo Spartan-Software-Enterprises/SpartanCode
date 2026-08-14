@@ -6,7 +6,6 @@ const { createMissionRunner } = require("./mission-runner");
 const { createModelCache } = require("./model-cache");
 const { createLocalStageExecutor } = require("./stage-executor");
 const { createBridgeServer } = require("./mcp-bridge");
-const { requiresMissionApproval } = require("./policy-engine");
 const { createSecureVault } = require("./secure-vault");
 const { apiProviders } = require("./api-providers");
 const { createPreviewWindow } = require("./preview-window");
@@ -95,10 +94,9 @@ function createWindow(crashReporter) {
       process.env.SPARTANCODE_BRIDGE_OIDC_ISSUER &&
       process.env.SPARTANCODE_BRIDGE_OIDC_AUDIENCE,
     );
-    const isLoopback = ["127.0.0.1", "::1", "localhost"].includes(bridgeHost);
-    if (!hasToken && !hasOidc && !isLoopback) {
+    if (!hasToken && !hasOidc) {
       throw new Error(
-        "SPARTANCODE_BRIDGE_TOKEN or complete OIDC configuration is required for a non-loopback bridge",
+        "SPARTANCODE_BRIDGE_TOKEN or complete OIDC configuration is required for every bridge",
       );
     }
     bridge = createBridgeServer({
@@ -135,14 +133,10 @@ function createWindow(crashReporter) {
               jwksUri: process.env.SPARTANCODE_BRIDGE_OIDC_JWKS_URI || null,
             }
           : null,
-      allowUnauthenticated: isLoopback && !hasToken && !hasOidc,
       githubWebhookSecret:
         githubEnvironment.SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET || null,
-      requiresMissionApproval: (description) =>
-        requiresMissionApproval(
-          description,
-          store.snapshot().settings.executionMode,
-        ),
+      requiresMissionApproval: () =>
+        store.snapshot().settings.executionMode !== "yolo",
     });
     bridge.listen(Number(process.env.SPARTANCODE_BRIDGE_PORT), bridgeHost);
     app.once("will-quit", () => bridge.close());

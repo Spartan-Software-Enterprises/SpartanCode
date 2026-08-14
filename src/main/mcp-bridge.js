@@ -97,7 +97,6 @@ function createBridgeRequestHandler({
   tokenScopes = null,
   oidc = null,
   events = null,
-  allowUnauthenticated = false,
   githubWebhookSecret = null,
   git = null,
   requiresMissionApproval = () => false,
@@ -126,8 +125,6 @@ function createBridgeRequestHandler({
     }
     if (oidcAuthenticator)
       return oidcAuthenticator.authenticate(request.headers.authorization);
-    if (!token && allowUnauthenticated)
-      return { authenticated: true, scopes: ["*"] };
     return { authenticated: false, scopes: [] };
   };
   return async (request, response) => {

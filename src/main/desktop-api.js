@@ -28,6 +28,7 @@ const {
   listWorkspaceFiles,
   readWorkspaceFile,
   resolveInsideWorkspace,
+  resolveWritableInsideWorkspace,
 } = require("./workspace-tools");
 const { importVscodeProject } = require("./vscode-project-importer");
 const { importJetbrainsProject } = require("./jetbrains-project-importer");
@@ -165,11 +166,8 @@ function registerDesktopApi({
     if (typeof sourcePath !== "string" || !path.isAbsolute(sourcePath))
       throw new Error("Backup source must be an absolute path");
     const relative = path.relative(workspacePath, sourcePath);
-    if (relative.startsWith("..") || path.isAbsolute(relative))
-      throw new Error(
-        "Backup source must remain inside the selected workspace",
-      );
-    return protonDriveStorage.backupFile(sourcePath, remoteParent);
+    const safeSourcePath = resolveInsideWorkspace(workspacePath, relative);
+    return protonDriveStorage.backupFile(safeSourcePath, remoteParent);
   });
   ipcMain.handle("proton-drive:backup-workspace", (_event, remoteParent) => {
     const workspacePath = store.snapshot().settings.workspacePath;
@@ -192,11 +190,11 @@ function registerDesktopApi({
       )
         throw new Error("Restore destination must be an absolute path");
       const relative = path.relative(workspacePath, destinationPath);
-      if (relative.startsWith("..") || path.isAbsolute(relative))
-        throw new Error(
-          "Restore destination must remain inside the selected workspace",
-        );
-      return protonDriveStorage.restoreFile(remotePath, destinationPath);
+      const safeDestinationPath = resolveWritableInsideWorkspace(
+        workspacePath,
+        relative,
+      );
+      return protonDriveStorage.restoreFile(remotePath, safeDestinationPath);
     },
   );
   ipcMain.handle("privacy:status", () => privacyNetwork.status());
