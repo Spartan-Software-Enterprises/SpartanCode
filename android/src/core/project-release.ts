@@ -1,3 +1,5 @@
+import type { Activity, Artifact, AuditEvent } from "./types";
+
 export const projectTargets = [
   "android",
   "ios",
@@ -25,6 +27,12 @@ export type MobileProject = {
   createdAt: string;
   checks: ProjectReleaseChecks;
   releaseStatus: "planning" | "ready";
+};
+
+export type LocalReleaseEvidence = {
+  artifact: Artifact;
+  activity: Activity;
+  audit: AuditEvent;
 };
 
 const emptyChecks = (): ProjectReleaseChecks => ({
@@ -106,4 +114,45 @@ export function releaseTargetLabel(target: ProjectTarget) {
   return target === "custom"
     ? "Custom device / OS"
     : target.charAt(0).toUpperCase() + target.slice(1);
+}
+
+/**
+ * Record a phone-authored release checklist entry without claiming that a
+ * target-specific compiler or packaging tool actually ran on the phone.
+ */
+export function createLocalReleaseEvidence(
+  project: MobileProject,
+  check: keyof ProjectReleaseChecks,
+  now = new Date().toISOString(),
+): LocalReleaseEvidence {
+  const artifactId = `local-release:${project.id}:${check}`;
+  const message = `${check} evidence recorded for ${releaseTargetLabel(project.target)}`;
+  return {
+    artifact: {
+      id: artifactId,
+      name: `${project.name} · ${check} evidence`,
+      type: "release-evidence",
+      status: "recorded",
+      content: JSON.stringify({
+        projectId: project.id,
+        target: project.target,
+        check,
+        source: "android-local",
+        executionClaim: "not-run-on-phone",
+      }),
+      createdAt: now,
+    },
+    activity: {
+      id: `local-release-activity:${project.id}:${check}`,
+      agent: "Release checklist",
+      message,
+      createdAt: now,
+    },
+    audit: {
+      action: `release:${check}:recorded-local`,
+      projectId: project.id,
+      target: project.target,
+      timestamp: now,
+    },
+  };
 }

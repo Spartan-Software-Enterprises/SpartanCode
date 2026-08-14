@@ -93,6 +93,7 @@ import { loadLlamaRnRuntime } from "./src/core/llama-rn-runtime";
 import { normalizeSpeechText } from "./src/core/voice";
 import { getOfflineCryptoStatus } from "./src/core/secure-offline-store";
 import {
+  createLocalReleaseEvidence,
   createMobileProject,
   projectTargets,
   releaseTargetLabel,
@@ -323,13 +324,28 @@ export default function App() {
       await writeMobileProjects(next);
       setProjects(next);
       const updated = next.find((item) => item.id === project.id);
+      if (!updated) return;
+      const evidence = createLocalReleaseEvidence(updated, check);
+      const nextSnapshot = {
+        ...snapshot,
+        artifacts: [
+          evidence.artifact,
+          ...(snapshot.artifacts ?? []).filter(
+            (item) => item.id !== evidence.artifact.id,
+          ),
+        ],
+        activity: [evidence.activity, ...(snapshot.activity ?? [])],
+        auditLog: [evidence.audit, ...(snapshot.auditLog ?? [])],
+      };
+      await writeSnapshot(nextSnapshot);
+      setSnapshot(nextSnapshot);
       setMessage(
-        updated?.releaseStatus === "ready"
+        updated.releaseStatus === "ready"
           ? `${project.name} has a complete release checklist`
           : `${project.name}: ${check} evidence recorded locally`,
       );
     },
-    [projects],
+    [projects, snapshot],
   );
 
   const refresh = useCallback(async () => {
