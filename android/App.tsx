@@ -112,6 +112,8 @@ export default function App() {
     autoSync: true,
     personaName: "Leo",
     wakeWord: "Leo",
+    emotionMode: "explicit",
+    interactionSignal: "calm",
   });
   const offlineCryptoStatus = useMemo(() => getOfflineCryptoStatus(), []);
   const [recognizing, setRecognizing] = useState(false);
@@ -1110,6 +1112,59 @@ export default function App() {
           <Text style={styles.message}>
             Identity preferences are stored locally; speech runtime availability
             is reported separately.
+          </Text>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>Adaptive interaction</Text>
+              <Text style={styles.missionMeta}>
+                {mobileSettings.emotionMode === "explicit"
+                  ? `Explicit signal · ${mobileSettings.interactionSignal}`
+                  : "Off"}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change adaptive interaction mode"
+              style={styles.smallAction}
+              onPress={() =>
+                void updateMobileSettings({
+                  emotionMode:
+                    mobileSettings.emotionMode === "explicit"
+                      ? "off"
+                      : "explicit",
+                })
+              }
+            >
+              <Text style={styles.smallActionText}>Change</Text>
+            </Pressable>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Change interaction signal"
+            style={styles.secondary}
+            disabled={mobileSettings.emotionMode === "off"}
+            onPress={() => {
+              const signals: MobileSettings["interactionSignal"][] = [
+                "calm",
+                "focused",
+                "frustrated",
+                "uncertain",
+                "excited",
+                "tired",
+              ];
+              const next =
+                signals[
+                  (signals.indexOf(mobileSettings.interactionSignal) + 1) %
+                    signals.length
+                ];
+              void updateMobileSettings({ interactionSignal: next });
+            }}
+          >
+            <Text style={styles.secondaryText}>Change interaction signal</Text>
+          </Pressable>
+          <Text style={styles.message}>
+            Signals are user-selected. Camera, voice-emotion, and biometric
+            inference are not used.
           </Text>
           <View style={styles.toggleRow}>
             <Text style={styles.message}>Sync automatically on resume</Text>

@@ -152,6 +152,8 @@ describe("mobile settings", () => {
       autoSync: true,
       personaName: "Leo",
       wakeWord: "Leo",
+      emotionMode: "explicit",
+      interactionSignal: "calm",
     });
     await writeMobileSettings({
       executionMode: "yolo",
@@ -160,6 +162,8 @@ describe("mobile settings", () => {
       autoSync: false,
       personaName: "Commander Leo",
       wakeWord: "Hey Spartan",
+      emotionMode: "off",
+      interactionSignal: "frustrated",
     });
     expect(await readMobileSettings()).toEqual({
       executionMode: "yolo",
@@ -168,6 +172,8 @@ describe("mobile settings", () => {
       autoSync: false,
       personaName: "Commander Leo",
       wakeWord: "Hey Spartan",
+      emotionMode: "off",
+      interactionSignal: "frustrated",
     });
   });
 });

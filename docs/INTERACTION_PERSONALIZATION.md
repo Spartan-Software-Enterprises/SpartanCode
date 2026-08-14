@@ -12,7 +12,9 @@ status API reports `inference: "disabled"` and
 `off`; the assistant then uses its configured persona without adaptive tone
 guidance.
 
-This is intentionally an explicit preference rather than a claim that the
-assistant can reliably determine a person's emotional state. Any future
+The same explicit controls are available in the standalone Android app and
+persist in app-private storage, without requiring a desktop or bridge. This is
+intentionally an explicit preference rather than a claim that the assistant
+can reliably determine a person's emotional state. Any future
 inference feature would require separate consent, retention, privacy, and
 physical-device validation before it could be enabled.

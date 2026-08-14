@@ -41,6 +41,9 @@ export type MobileSettings = {
   autoSync: boolean;
   personaName: string;
   wakeWord: string;
+  emotionMode: "off" | "explicit";
+  interactionSignal:
+    "calm" | "focused" | "frustrated" | "uncertain" | "excited" | "tired";
 };
 
 const defaultMobileSettings: MobileSettings = {
@@ -50,6 +53,8 @@ const defaultMobileSettings: MobileSettings = {
   autoSync: true,
   personaName: "Leo",
   wakeWord: "Leo",
+  emotionMode: "explicit",
+  interactionSignal: "calm",
 };
 
 function emptySnapshot(): MobileSnapshot {
@@ -217,6 +222,15 @@ export async function readMobileSettings(): Promise<MobileSettings> {
         typeof parsed.wakeWord === "string" && parsed.wakeWord.trim()
           ? parsed.wakeWord.trim().slice(0, 48)
           : "Leo",
+      emotionMode: parsed.emotionMode === "off" ? "off" : "explicit",
+      interactionSignal:
+        parsed.interactionSignal === "focused" ||
+        parsed.interactionSignal === "frustrated" ||
+        parsed.interactionSignal === "uncertain" ||
+        parsed.interactionSignal === "excited" ||
+        parsed.interactionSignal === "tired"
+          ? parsed.interactionSignal
+          : "calm",
     };
   } catch {
     return { ...defaultMobileSettings };
