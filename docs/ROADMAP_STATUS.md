@@ -61,6 +61,8 @@ behavior and a corresponding automated or documented verification path.
 - Android settings now persist Leo persona and wake-word preferences alongside
   execution, quantization, voice-input, and sync controls with bounded local
   values.
+- Android now includes an optional Expo Speech output adapter with bounded
+  voice-test text and a visible unavailable/error fallback.
 - Android reads system reduced-motion, font-scale, and screen-reader settings
   without overriding them and surfaces the resulting accessibility state.
 - Android now has a local collaboration session surface with validated
