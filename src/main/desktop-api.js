@@ -26,6 +26,7 @@ const {
 const { exportAuditLog } = require("./audit-export");
 const { createGitHubAppClient } = require("./github-app");
 const { createApiGateway } = require("./api-providers");
+const { createBrowserAutomation } = require("./browser-automation");
 const {
   estimateServerCost,
   getRouterGuidance,
@@ -49,8 +50,20 @@ function registerDesktopApi({
   const runtimeRegistry = createRuntimeRegistry();
   const githubApp = createGitHubAppClient({ environment: githubEnvironment });
   const apiGateway = createApiGateway({ environment: providerEnvironment });
+  const browserAutomation = createBrowserAutomation({
+    environment: process.env,
+    audit: ({ action, host }) =>
+      store.addActivity({
+        agent: "Browser adapter",
+        message: `${action} completed on ${host}`,
+      }),
+  });
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
+  ipcMain.handle("browser:status", () => browserAutomation.status());
+  ipcMain.handle("browser:run", (_event, request) =>
+    browserAutomation.run(request),
+  );
   ipcMain.handle("runtime:generate", (_event, runtimeId, request) => {
     if (typeof runtimeId !== "string" || !runtimeId.trim())
       throw new Error("Runtime id is required");

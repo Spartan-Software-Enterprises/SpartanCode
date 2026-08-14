@@ -10,6 +10,10 @@ behavior and a corresponding automated or documented verification path.
   native built-in browser window with popup and navigation guards. Playwright
   visual smoke coverage verifies the preview dialog’s local-only boundary, and
   Prettier remains enforced in the desktop test gate.
+- A typed Playwright browser-automation adapter now supports bounded navigation
+  and text extraction with explicit domain allowlists, timeout/text limits,
+  download blocking, redacted activity evidence, and honest Chromium
+  availability reporting.
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped
   Electron, renderer, and Android guidance; desktop Settings opens its official
   GitHub App login flow without storing CodeRabbit credentials.

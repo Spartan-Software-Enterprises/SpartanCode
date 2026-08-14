@@ -17,3 +17,13 @@ surface into an unrestricted browser.
 
 The Playwright visual smoke suite opens the preview dialog and verifies that a
 public URL is rejected. Prettier runs as part of the normal desktop test gate.
+
+## Browser automation
+
+The desktop IPC boundary also exposes a separate Playwright automation adapter
+for agent workflows. It supports bounded navigation and text extraction only;
+each request requires an explicit domain allowlist supplied by
+`SPARTANCODE_BROWSER_ALLOWLIST` or the request, enforces a 30-second maximum
+timeout, disables downloads, limits extracted text, and records a redacted
+activity event. It is independent from the preview window and reports
+`browser-download-required` until Chromium is installed.

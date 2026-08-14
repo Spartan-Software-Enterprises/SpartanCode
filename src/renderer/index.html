@@ -1910,6 +1910,7 @@
           runtime,
           capabilities,
           providers,
+          browser,
           voice,
           agents,
           plugins,
@@ -1922,6 +1923,7 @@
           window.spartanCode.getRuntimeStatus(),
           window.spartanCode.getCapabilities(),
           window.spartanCode.getProviderStatus(),
+          window.spartanCode.getBrowserStatus(),
           window.spartanCode.getVoiceStatus(),
           window.spartanCode.listAgents(),
           window.spartanCode.listPlugins(),
@@ -1936,6 +1938,10 @@
           : "No workspace selected — local planning is still available.";
         settingsRuntimeStatus.innerHTML = [
           settingsStatusRow("Runtime mode", runtime.mode),
+          settingsStatusRow(
+            "Playwright browser",
+            `${browser.status} · ${browser.allowlistConfigured ? "allowlist configured" : "allowlist required"}`,
+          ),
           ...runtime.runtimes.map((item) =>
             settingsStatusRow(
               item.id,

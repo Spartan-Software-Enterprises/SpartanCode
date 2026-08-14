@@ -44,6 +44,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("connections:validate", profile),
   getRuntimeStatus: () => ipcRenderer.invoke("runtime:status"),
   listRuntimeAdapters: () => ipcRenderer.invoke("runtime:adapters"),
+  getBrowserStatus: () => ipcRenderer.invoke("browser:status"),
+  runBrowserAutomation: (request) => ipcRenderer.invoke("browser:run", request),
   generateWithRuntime: (runtimeId, request) =>
     ipcRenderer.invoke("runtime:generate", runtimeId, request),
   getCapabilities: () => ipcRenderer.invoke("capabilities:get"),
