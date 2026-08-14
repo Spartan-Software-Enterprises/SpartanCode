@@ -159,3 +159,31 @@ test("adapter manifest accepts the declarative Xcode importer", () => {
   assert.equal(manifest.execution.credentials, false);
   assert.equal(manifest.targets.swiftpm, "available");
 });
+
+test("adapter manifest accepts the declarative editor config importer", () => {
+  const manifest = normalizeAdapterManifest({
+    ...base,
+    id: "editor-config",
+    kind: "connector",
+    name: "Editor configuration importer",
+    status: "available",
+    hosts: ["windows", "macos", "linux"],
+    targets: {
+      neovim: "available",
+      vim: "available",
+      emacs: "available",
+      zed: "available",
+    },
+    operations: ["inspect", "import"],
+    requirements: ["editor-project-directory"],
+    execution: {
+      mode: "declarative",
+      shell: false,
+      network: false,
+      credentials: false,
+    },
+    testCoverage: ["script-summary", "json-bounds", "symlink-rejection"],
+  });
+  assert.equal(manifest.execution.shell, false);
+  assert.equal(manifest.targets.neovim, "available");
+});
