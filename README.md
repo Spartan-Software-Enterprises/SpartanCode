@@ -30,6 +30,12 @@ Explore the workspace surfaces:
 | --- | --- | --- |
 | ![Mission composer](docs/assets/desktop-menu-gallery/desktop-composer-filled.png) | ![Android command center](android/screenshots/command-center.png) | ![Android mission queued](android/screenshots/mission-queued.png) |
 
+The Android command center puts offline mission queueing, optional bridge
+connection, approval visibility, and the mobile Spartan IDE experience on one
+screen. The queued-mission view shows the handoff from idea to tracked work;
+the companion also includes voice input, local collaboration, licensed model
+readiness, device diagnostics, and remote planning controls.
+
 ## Why teams use SpartanCode
 
 - **Mission-driven development:** describe the outcome, follow planning,
