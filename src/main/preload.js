@@ -46,6 +46,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   listRuntimeAdapters: () => ipcRenderer.invoke("runtime:adapters"),
   getBrowserStatus: () => ipcRenderer.invoke("browser:status"),
   runBrowserAutomation: (request) => ipcRenderer.invoke("browser:run", request),
+  getSystemAutomationStatus: () => ipcRenderer.invoke("system:status"),
+  runSystemAutomation: (request) => ipcRenderer.invoke("system:run", request),
   listSkillSources: () => ipcRenderer.invoke("skills:sources"),
   listSkills: () => ipcRenderer.invoke("skills:list"),
   loadSkill: (skillId) => ipcRenderer.invoke("skills:load", skillId),

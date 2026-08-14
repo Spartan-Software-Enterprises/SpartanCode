@@ -20,8 +20,9 @@ setting can bypass the interactive mission prompt only; it does not disable
 input validation, containment, network restrictions, audit logging, or typed
 capability checks.
 
-The built-in project-preview browser, Playwright adapter, and encrypted local
-RAG memory are now implemented foundations. Windows and GUI adapter contracts,
+The built-in project-preview browser, Playwright adapter, encrypted local RAG
+memory, and a Windows PowerShell read-only adapter contract are now implemented
+foundations. Windows and GUI write-capability adapters,
 personas/wake-word configuration, and Proton/Tor adapters remain the next
 platform-specific slices; they must report unavailable rather than being
 presented as ready when their runtime is absent.

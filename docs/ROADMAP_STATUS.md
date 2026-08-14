@@ -21,6 +21,9 @@ behavior and a corresponding automated or documented verification path.
 - Encrypted local vector memory is implemented with bounded records, secret-like
   content rejection, OS-backed vault encryption, retrieval, deletion, clear,
   and a user-facing enable/disable setting.
+- A Windows system-automation contract now reports platform availability and
+  supports bounded read-only PowerShell inspection through fixed executable
+  arguments; write-capability and GUI adapters remain explicitly gated work.
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped
   Electron, renderer, and Android guidance; desktop Settings opens its official
   GitHub App login flow without storing CodeRabbit credentials.

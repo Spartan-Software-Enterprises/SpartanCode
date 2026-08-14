@@ -34,6 +34,7 @@ const {
   listExternalSkillSources,
   loadSkill,
 } = require("./skill-registry");
+const { createWindowsAutomation } = require("./windows-automation");
 const {
   estimateServerCost,
   getRouterGuidance,
@@ -66,11 +67,16 @@ function registerDesktopApi({
         message: `${action} completed on ${host}`,
       }),
   });
+  const windowsAutomation = createWindowsAutomation();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
   ipcMain.handle("browser:status", () => browserAutomation.status());
   ipcMain.handle("browser:run", (_event, request) =>
     browserAutomation.run(request),
+  );
+  ipcMain.handle("system:status", () => windowsAutomation.status());
+  ipcMain.handle("system:run", (_event, request) =>
+    windowsAutomation.execute(request),
   );
   ipcMain.handle("skills:sources", () => listExternalSkillSources());
   const skillRoots = () => {
