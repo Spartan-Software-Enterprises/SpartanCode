@@ -102,6 +102,21 @@ test("marketplace indexes verify an Ed25519 signature and preserve metadata only
   assert.equal(fetched.plugins[0].id, "review-persona");
 });
 
+test("marketplace index requests receive an abort signal", async () => {
+  const { privateKey, publicKey } = crypto.generateKeyPairSync("ed25519");
+  const index = signedIndex(privateKey);
+  let signal;
+  await fetchMarketplaceIndex("https://plugins.example/index.json", {
+    publicKey,
+    fetchImpl: async (_url, options) => {
+      signal = options.signal;
+      return { ok: true, text: async () => JSON.stringify(index) };
+    },
+  });
+  assert.equal(signal instanceof AbortSignal, true);
+  assert.equal(signal.aborted, false);
+});
+
 test("marketplace trust registry rejects renderer-authored or modified entries", () => {
   const { privateKey } = crypto.generateKeyPairSync("ed25519");
   const index = signedIndex(privateKey);

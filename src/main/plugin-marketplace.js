@@ -149,9 +149,17 @@ async function fetchMarketplaceIndex(
     throw new Error("Marketplace URL must use HTTPS");
   if (typeof fetchImpl !== "function")
     throw new Error("Marketplace fetch is unavailable");
-  const response = await fetchImpl(target.toString(), {
-    headers: { Accept: "application/json" },
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let response;
+  try {
+    response = await fetchImpl(target.toString(), {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!response?.ok)
     throw new Error(
       `Marketplace request failed (${response?.status || "unknown"})`,
