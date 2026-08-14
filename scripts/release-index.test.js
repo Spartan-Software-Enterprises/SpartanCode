@@ -128,6 +128,26 @@ test("release index accepts a commit-bound integrity manifest", () => {
   ]);
 });
 
+test("release index accepts commit-bound canonical source evidence", () => {
+  const commit = execFileSync("git", ["rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+  const index = buildIndex({
+    canonicalResult: {
+      schemaVersion: 1,
+      status: "PASS",
+      commit,
+      synchronizedCommit: commit,
+    },
+    target: "SpartanCode beta",
+  });
+  const canonical = index.gates.find(
+    (gate) => gate.name === "Canonical source",
+  );
+  assert.equal(canonical.status, "PASS");
+  assert.deepEqual(canonical.evidence, [commit]);
+});
+
 test("release index fails closed when Android evidence belongs to another commit", () => {
   const index = buildIndex({
     target: "test",

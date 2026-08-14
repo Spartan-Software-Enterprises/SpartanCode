@@ -18,6 +18,7 @@
     "release:manifest": "node scripts/release-manifest.js --output dist/release-evidence",
     "release:verify": "node scripts/verify-release-evidence.js",
     "desktop:evidence": "node scripts/desktop-baseline.js",
+    "canonical:evidence": "node scripts/canonical-source-evidence.js",
     "android:evidence:verify": "node scripts/verify-android-evidence.js",
     "format:check": "prettier --check \"src/**/*.js\" \"src/**/*.html\"",
     "test": "npm run check && node --test src/main/*.test.js scripts/*.test.js && npm run format:check"

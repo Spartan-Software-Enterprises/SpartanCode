@@ -153,20 +153,36 @@ function integrityGate(manifest) {
   );
 }
 
+function canonicalGate(canonicalResult) {
+  if (!canonicalResult)
+    return gate("SKIP", "Canonical source evidence was not supplied");
+  if (canonicalResult.commit !== commit())
+    return gate(
+      "FAIL",
+      "Canonical source evidence is tied to a different commit",
+    );
+  if (
+    canonicalResult.status !== "PASS" ||
+    canonicalResult.synchronizedCommit !== commit()
+  )
+    return gate("FAIL", "Canonical source synchronization did not pass");
+  return gate("PASS", "Local and validation worktrees are synchronized", [
+    canonicalResult.synchronizedCommit,
+  ]);
+}
+
 function buildIndex({
   verification,
   visualResult,
   kvmResult,
   desktopResult,
   releaseManifest,
+  canonicalResult,
   target,
 }) {
   const android = androidGate(verification);
   const checks = {
-    "Canonical source": gate(
-      "SKIP",
-      "Run scripts/verify-sync.sh for synchronized source evidence",
-    ),
+    "Canonical source": canonicalGate(canonicalResult),
     "Desktop baseline": desktopGate(desktopResult),
     "Desktop visual smoke": visualGate(visualResult),
     "Android baseline": android,
@@ -206,6 +222,7 @@ function main(argv = process.argv.slice(2)) {
   const kvmPath = argument(argv, "--kvm-result", null);
   const desktopPath = argument(argv, "--desktop-baseline", null);
   const manifestPath = argument(argv, "--release-manifest", null);
+  const canonicalPath = argument(argv, "--canonical-source", null);
   const output = path.resolve(
     argument(argv, "--output", path.join(root, "dist", "release-index.json")),
   );
@@ -228,12 +245,16 @@ function main(argv = process.argv.slice(2)) {
   const releaseManifest = manifestPath
     ? JSON.parse(fs.readFileSync(path.resolve(manifestPath), "utf8"))
     : null;
+  const canonicalResult = canonicalPath
+    ? JSON.parse(fs.readFileSync(path.resolve(canonicalPath), "utf8"))
+    : null;
   const index = buildIndex({
     verification,
     visualResult,
     kvmResult,
     desktopResult,
     releaseManifest,
+    canonicalResult,
     target,
   });
   fs.mkdirSync(path.dirname(output), { recursive: true });
@@ -254,6 +275,7 @@ module.exports = {
   CHECKER_VERSION,
   GATES,
   buildIndex,
+  canonicalGate,
   desktopGate,
   integrityGate,
   kvmGate,

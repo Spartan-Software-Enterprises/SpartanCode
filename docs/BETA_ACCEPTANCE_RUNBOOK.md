@@ -103,6 +103,7 @@ Generate the machine-readable index from the current commit with:
 node scripts/release-index.js \
   --android-verification dist/android-verification.json \
   --desktop-baseline dist/desktop-baseline.json \
+  --canonical-source dist/canonical-source-evidence.json \
   --release-manifest dist/release-evidence/release-manifest.json \
   --visual-result release-evidence/desktop-visual/result.json \
   --kvm-result release-evidence/android-emulator/result.json \
@@ -116,6 +117,9 @@ the APK installs, launches, and produces its screenshot.
 
 Run `npm run desktop:evidence -- --output dist/desktop-baseline.json` to emit
 redacted commit-bound desktop test and formatting evidence.
+
+Run `npm run canonical:evidence -- --output dist/canonical-source-evidence.json`
+to record the redacted synchronized commit from `scripts/verify-sync.sh`.
 
 The generator fails closed on stale Android evidence and leaves unavailable
 physical, signing, emulator, visual, synchronization, and product-owner gates
