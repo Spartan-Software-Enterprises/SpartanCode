@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/spartan-software-enterprises-logo.jpg" alt="Spartan Software Enterprises" width="280">
+</p>
+
 # SpartanCode — Your Local-First AI Engineering Workspace
 
 Optional GitHub App integration adds installation-scoped repository access and
@@ -33,8 +37,6 @@ Encrypted local memory is documented in [docs/LOCAL_MEMORY.md](docs/LOCAL_MEMORY
 SpartanCode is local-first and standalone by design: Android users do not need
 the desktop app, a bridge, or a network connection to plan, queue, review, and
 track work. Optional remote connectivity is an extension—not a dependency.
-
-![Spartan Software Enterprises](docs/assets/spartan-software-enterprises-logo.jpg)
 
 ![SpartanCode desktop command center](docs/assets/spartancode-workspace.png)
 
