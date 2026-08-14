@@ -4,6 +4,12 @@ SpartanCode is an agent-first, local-first Vibe coding command center. It is
 designed around missions, agent stages, artifacts, approvals, and workspace
 handoff rather than a conventional editor layout.
 
+![SpartanCode desktop command center](docs/assets/spartancode-workspace.png)
+
+This interface capture was produced by the Playwright Electron visual smoke
+test on the AWS development host and covers the home command center, mission
+composer, agent stages, artifacts, and live status surfaces.
+
 ## Development
 
 ```bash

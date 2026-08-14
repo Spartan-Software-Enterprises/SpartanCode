@@ -23,6 +23,12 @@ first surface keeps the highest-value controls reachable on a phone:
 
 ## Verified behavior
 
+The companion is documented alongside the desktop command center so the
+standalone Android workflow and the optional desktop workflow are visible in
+the same product record:
+
+![SpartanCode desktop command center](../docs/assets/spartancode-workspace.png)
+
 On 2026-08-13, the dev server exported the Expo web surface and Playwright ran
 at a 390×844 viewport with device scale factor 2. The smoke test verified:
 
