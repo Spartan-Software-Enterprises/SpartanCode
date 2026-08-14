@@ -6,11 +6,11 @@ comes before making the three locations identical.
 
 ## Authorities
 
-| Location | Role | Expected branch/path |
-| --- | --- | --- |
-| GitHub | Canonical source of truth and durable collaboration history | `origin/main` |
-| Local workspace | Active development checkout | `SpartanCode`, branch `main` |
-| AWS dev server | Remote validation mirror when reachable | Active replacement host recorded in the release environment, branch `main` |
+| Location        | Role                                                        | Expected branch/path                                                       |
+| --------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
+| GitHub          | Canonical source of truth and durable collaboration history | `origin/main`                                                              |
+| Local workspace | Active development checkout                                 | `SpartanCode`, branch `main`                                               |
+| AWS dev server  | Remote validation mirror when reachable                     | Active replacement host recorded in the release environment, branch `main` |
 
 The AWS host is for development validation. It must not be treated as a second
 source of truth, and it must not receive force pushes or destructive resets.
@@ -87,6 +87,25 @@ ssh -i /data/data/com.termux/files/home/SpartanDev.pem \
 
 The hashes must match, and both worktrees must be empty. A session is not
 complete until this check passes.
+
+## Final AWS backup and termination
+
+When SpartanCode is ready for release and AWS is no longer needed, preserve the
+validated source before terminating the development host:
+
+```sh
+git archive --format=tar.gz --output=../SpartanCode-$(git rev-parse --short HEAD).tar.gz HEAD
+git bundle create ../SpartanCode-$(git rev-parse --short HEAD).bundle main
+sha256sum ../SpartanCode-*.tar.gz ../SpartanCode-*.bundle
+```
+
+Copy any uniquely generated, non-secret release evidence from the AWS checkout
+to local storage, verify the AWS checkout is clean and at the same commit, and
+confirm the commit is present on `origin/main`. Then terminate the exact EC2
+instance through the AWS console or CLI and verify `State.Name` is
+`terminated`. Do not delete the local archive, Git bundle, or GitHub history.
+Never copy AWS credential caches, secure-vault data, private keys, or runtime
+secrets into the archive or repository.
 
 ## Conflict and recovery rules
 
