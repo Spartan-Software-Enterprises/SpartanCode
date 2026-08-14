@@ -9,7 +9,7 @@ apt-get install -y ca-certificates cloud-guest-utils curl e2fsprogs git nodejs n
 
 root_source="$(findmnt -n -o SOURCE /)"
 root_disk="$(lsblk -no PKNAME "$root_source")"
-root_part="$(lsblk -no PARTNUM "$root_source")"
+root_part="$(lsblk -no PARTN "$root_source")"
 if [ -n "$root_disk" ] && [ -n "$root_part" ]; then
   growpart "/dev/$root_disk" "$root_part" || true
 fi
