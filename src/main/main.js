@@ -11,9 +11,10 @@ const { createSecureVault } = require("./secure-vault");
 const { apiProviders } = require("./api-providers");
 const { createPreviewWindow } = require("./preview-window");
 const { createMemoryStore } = require("./memory-store");
+const { createCrashReporter } = require("./crash-recovery");
 const { gitStatusAt, gitDiffAt, gitAddAt, gitCommitAt } = require("./git");
 
-function createWindow() {
+function createWindow(crashReporter) {
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -30,6 +31,14 @@ function createWindow() {
   win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.webContents.on("will-navigate", (event, url) => {
     if (url !== win.webContents.getURL()) event.preventDefault();
+  });
+  win.webContents.on("render-process-gone", (_event, details) => {
+    crashReporter.record("renderer-process-gone", details);
+    if (details.reason !== "clean-exit" && !win.isDestroyed())
+      win.loadFile(path.join(__dirname, "../renderer/index.html"));
+  });
+  win.webContents.on("unresponsive", () => {
+    crashReporter.record("renderer-unresponsive");
   });
   win.loadFile(path.join(__dirname, "../renderer/index.html"));
   const store = createMissionStore(
@@ -152,13 +161,15 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  createWindow();
+  const crashReporter = createCrashReporter(
+    path.join(app.getPath("userData"), "crash-recovery.json"),
+  );
+  createWindow(crashReporter);
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(crashReporter);
+  });
 });
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
-});
-
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
