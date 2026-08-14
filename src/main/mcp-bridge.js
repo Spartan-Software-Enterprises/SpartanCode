@@ -93,6 +93,7 @@ function createBridgeRequestHandler({
   store,
   runMission,
   token = null,
+  tokens = null,
   tokenScopes = null,
   oidc = null,
   events = null,
@@ -106,8 +107,16 @@ function createBridgeRequestHandler({
     throw new Error("A mission store is required");
   const oidcAuthenticator = oidc ? createOidcAuthenticator(oidc) : null;
   const authenticate = async (request) => {
-    if (token && request.headers.authorization === `Bearer ${token}`) {
-      const scopes = tokenScopes?.[token];
+    const bearer = request.headers.authorization?.startsWith("Bearer ")
+      ? request.headers.authorization.slice(7)
+      : null;
+    const tokenAccepted =
+      (token && bearer === token) ||
+      (tokens &&
+        typeof tokens === "object" &&
+        Object.prototype.hasOwnProperty.call(tokens, bearer));
+    if (tokenAccepted) {
+      const scopes = tokenScopes?.[bearer] || tokens?.[bearer];
       return {
         authenticated: true,
         // A plain token remains a trusted local-development credential. Scoped

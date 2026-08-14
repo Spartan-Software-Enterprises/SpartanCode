@@ -172,6 +172,10 @@ current Implemented/Partial/Open counts.
 - The authenticated MCP Bridge exposes bounded Git status, redacted diff,
   stage, and explicit commit operations with separate read/write scopes and
   idempotent mutation handling for remote clients.
+- A loopback integration harness now exercises two independently authenticated
+  bridge clients against real temporary Git state, three-way artifact conflicts,
+  collaboration revision conflicts, and idempotent retries. Physical
+  cross-device acceptance remains a separate gate.
 - Android exposes optional authenticated-bridge controls for remote Git status,
   redacted diff, stage, and explicit commit operations. Core Android use stays
   standalone and does not require the desktop app or bridge; physical Android
