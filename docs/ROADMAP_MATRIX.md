@@ -18,7 +18,7 @@ should be presented as complete.
 | 7 | Settings hierarchy | Partial | Persisted settings exist; full global/project/agent/session layering remains open |
 | 8 | Human-in-the-loop dangerous-command approval | Implemented | Policy engine, mission approval, and audit tests |
 | 9 | QR pairing | Implemented | Android pairing validation, expiry, and storage tests |
-| 10 | SSH/Mosh terminal fallback | Partial | SSH connection foundation exists; Mosh transport is not implemented |
+| 10 | SSH/Mosh terminal fallback | Partial | SSH foundation plus truthful Mosh client detection/tokenized launch arguments exist; interactive Mosh terminal lifecycle and server-side acceptance remain open |
 | 11 | Git operations with AI commit messages | Partial | Bounded Git init/status/add/commit exists; AI-generated commit-message workflow is not complete |
 | 12 | Biometric authentication | Partial | Android biometric gate exists; physical device recovery/accessibility evidence remains open |
 | 13 | React Native mobile adaptation | Implemented | Android Expo app, standalone queue, and CI emulator smoke |

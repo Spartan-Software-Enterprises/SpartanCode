@@ -18,7 +18,10 @@ const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 const { createModelCache } = require("./model-cache");
-const { validateRemoteConfig } = require("./remote-connection");
+const {
+  getTransportStatus,
+  validateRemoteConfig,
+} = require("./remote-connection");
 const { listBundledAgents, loadCustomAgents } = require("./custom-agents");
 const { createRuntimeRegistry } = require("./runtime-adapters");
 const { listPlugins } = require("./plugin-registry");
@@ -348,6 +351,9 @@ function registerDesktopApi({
   );
   ipcMain.handle("remote:router-guidance", (_event, method) =>
     getRouterGuidance(method),
+  );
+  ipcMain.handle("remote:transport-status", (_event, transport) =>
+    getTransportStatus(transport),
   );
   ipcMain.handle("connections:add", (_event, profile) => {
     if (

@@ -39,6 +39,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("remote:estimate-cost", provider, plan, hours),
   getRouterGuidance: (method) =>
     ipcRenderer.invoke("remote:router-guidance", method),
+  getRemoteTransportStatus: (transport) =>
+    ipcRenderer.invoke("remote:transport-status", transport),
   addConnection: (profile) => ipcRenderer.invoke("connections:add", profile),
   validateConnection: (profile) =>
     ipcRenderer.invoke("connections:validate", profile),
