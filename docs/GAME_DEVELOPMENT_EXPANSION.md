@@ -131,6 +131,134 @@ require the appropriate workstation, build worker, SDK, devkit, and engine
 toolchain. Unsupported targets must be shown as unavailable rather than
 silently skipped or represented as verified.
 
+## Unified engine and creation-tool front end
+
+SpartanCode is the control plane for the entire game-production toolchain. It
+must not become a single-engine editor or assume that one engine can satisfy
+every project. A project may combine an engine, DCC tools, material and audio
+tools, middleware, source control, build workers, QA systems, and platform
+services. The front end presents one project graph, capability report, task
+queue, log surface, artifact history, and release workflow while each vendor's
+tool remains authoritative for its native data and export rules.
+
+Initial major engine adapters:
+
+| Engine | Native project surface | Orchestration surface | Strategic role |
+| --- | --- | --- | --- |
+| Unreal Engine | `.uproject`, Config, Content, Source, Plugins | UnrealBuildTool, commandlets, AutomationTool/UAT, `BuildCookRun`, BuildGraph, Project Launcher | First high-end PC adapter and leading PC/console path |
+| Unity | `Assets`, `Packages`, `ProjectSettings`, Editor scripts | Batch mode, `-executeMethod`, BuildPipeline, Build Profiles, Build Automation | Broad commercial alternative with strong editor automation |
+| O3DE | `project.json`, Gems, CMake, Assets | `o3de` CLI, CMake, AssetProcessorBatch, AssetBundlerBatch | Open-source, modular high-end alternative |
+| Godot | `project.godot`, scenes, resources, scripts | Headless editor, export presets, `--export-release`, editor scripts | Open and scriptable PC integration; console requires a separate porting path |
+| CRYENGINE | `.cryproject`, Assets, Code, plugins | CMake, Resource Compiler, Job XML, packaging scripts | High-fidelity existing-project integration with more version-specific work |
+| GameMaker and other engines | Vendor project/resource formats | Vendor compiler or project-owned build wrappers | Additional engine adapters; not the high-end PC foundation |
+
+This is an expandable adapter family, not a limit on supported engines. The
+same contract must accept future proprietary, open-source, and specialist
+engines without changing the SpartanCode front end.
+
+Major creation-tool adapters must cover Blender, Maya, 3ds Max, Houdini,
+Substance, photogrammetry tools, FMOD, Wwise, localization tools, Git/Git LFS,
+Perforce, CI runners, QA systems, and artifact stores. DCC adapters own
+discovery, version/license checks, approved scripts or batch jobs, export,
+validation, optimization, cancellation, logs, hashes, and provenance. They do
+not attempt to recreate every proprietary scene, rig, simulation, shader, or
+binary asset format.
+
+The common asset flow is:
+
+```text
+source asset
+  -> DCC/tool preflight
+  -> approved export/interchange
+  -> geometry/material/texture/audio validation
+  -> optimization and LOD generation
+  -> engine import
+  -> engine-owned cook/chunk/package
+  -> immutable release artifact
+```
+
+USD is preferred for layered scene composition where supported; FBX remains a
+useful animation/geometry interchange; glTF/GLB is a runtime-oriented option;
+engine-native assets remain authoritative for final production. Every
+conversion records tool versions, settings, source hashes, generated hashes,
+coordinate and color conventions, and known loss or unsupported features.
+
+## High-end PC production gates
+
+High-end PC support means more than producing a desktop executable. Before a
+build or performance claim, the adapter must detect the OS, architecture, GPU
+vendor/device/driver, D3D12/Vulkan/Metal features, shader model, ray tracing,
+mesh shaders, VRS, sampler feedback, local/shared memory budgets, display/HDR
+state, input devices, accessibility context, compiler, SDK, profilers, and
+symbol tools.
+
+PC validation must capture cold boot, first playable frame, shader-heavy and
+worst-case scenes, loading/traversal, and representative gameplay traces. The
+evidence includes frame-time percentiles, long frames, CPU/GPU queue timing,
+shader compilation/cache hits and stalls, streaming and memory peaks,
+HDR/SDR behavior, input/rebinding/hot-plug behavior, accessibility, and crash
+diagnostics.
+
+The first-class profiles are D3D12 production/validation, Vulkan
+production/validation, and Metal where macOS is a target. Optional vendor
+profiles may use PIX, NVIDIA Nsight/Aftermath, AMD Radeon GPU Profiler/Memory
+Visualizer/GPU Detective, and equivalent tools when installed. Shader caches
+are keyed by API, GPU, driver, engine/build, compiler, and configuration.
+Crash bundles retain matching symbols, shader debug data, device/driver
+identity, API diagnostics, logs, memory state, and artifact digest.
+
+## Engine-neutral build and release contract
+
+Every build request binds an immutable source revision, exact engine and
+adapter versions, target, build definition, runner class, SDK/toolchain
+constraints, cache policy, and release intent. Every result records artifact
+and manifest digests, engine/compiler/SDK/plugin versions, runner identity,
+resolved dependencies, raw and normalized logs, tests, performance reports,
+symbols, provenance, signatures, external gates, and rollback references.
+
+The standard graph is:
+
+```text
+source-resolve -> environment-verify -> compile -> import/cook
+  -> package -> symbols/provenance -> automated-tests -> smoke-test
+  -> platform-validation -> external-certification -> release-promotion
+```
+
+Promotion selects an existing immutable artifact; it never rebuilds a moving
+branch. Console and signing runners are isolated and never receive untrusted
+fork code. The states are `blocked`, `waiting_external_gate`, `failed`,
+`succeeded`, `eligible`, `released`, and `rollback_available`; a successful
+PC build is never silently promoted to a console or certification claim.
+
+## Console integration boundary
+
+Console production is an adapter over authorized platform programs, not a
+feature SpartanCode can grant by itself. Each target requires developer
+registration, agreements/NDA, confidential SDK/toolchain, authorized devkit or
+approved test environment, platform package/signing/encryption tools,
+physical validation, and certification evidence. PlayStation, Xbox, and
+Nintendo access is account- and partner-controlled. Xbox publicly documents
+XVC packaging, validation/submission, sandboxes, and GDK access gates; Unreal
+documents console support and its source-build requirement; Unity requires
+eligible licensing and platform access; Godot relies on third-party or private
+ports.
+
+SpartanCode may invoke tools present in an authorized environment, but it may
+not acquire, redistribute, or bypass confidential SDKs, devkit access,
+platform signing material, or certification controls. The UI must say
+“console build blocked: SDK unavailable,” “devkit deployment unavailable,” or
+“certification not performed” when those gates are missing.
+
+## Primary research sources
+
+- [Unreal build operations](https://dev.epicgames.com/documentation/en-us/unreal-engine/build-operations-cooking-packaging-deploying-and-running-projects-in-unreal-engine), [Automation Tool](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-automation-tool-overview-for-unreal-engine), and [BuildGraph](https://dev.epicgames.com/documentation/unreal-engine/buildgraph-for-unreal-engine?lang=en-US)
+- [Unity command-line builds](https://docs.unity3d.com/Manual/build-command-line.html) and [Build Automation](https://docs.unity.com/en-us/build-automation)
+- [Godot command-line export](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html) and [console support](https://godotengine.org/consoles/)
+- [O3DE CLI](https://docs.o3de.org/docs/user-guide/project-config/cli-reference/)
+- [Xbox onboarding and packaging](https://learn.microsoft.com/en-us/gaming/game-publishing/onboarding/overview), [Nintendo developer process](https://developer.nintendo.com/the-process), and [PlayStation registration](https://register.playstation.net/)
+- [D3D12 feature queries](https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_feature), [D3D12 memory](https://learn.microsoft.com/en-us/windows/win32/direct3d12/memory-management-strategies), [Vulkan features](https://docs.vulkan.org/spec/latest/chapters/features.html), and [PIX](https://learn.microsoft.com/en-us/windows/win32/direct3dtools/pix/articles/general/pix-overview)
+- [OpenUSD](https://openusd.org/release/), [Khronos glTF](https://registry.khronos.org/glTF/), [Houdini PDG/TOPs](https://www.sidefx.com/docs/houdini/tops/), and [Git LFS](https://git-lfs.com/)
+
 ## Proposed project contract
 
 Generated game projects should use a stable structure similar to:
