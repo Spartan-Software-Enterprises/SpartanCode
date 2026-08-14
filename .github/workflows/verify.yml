@@ -128,7 +128,9 @@ jobs:
           rm -rf android/node_modules "$HOME/.gradle" "$HOME/.npm" \
             "$HOME/.cache" "$HOME/.android" "$ANDROID_HOME/.temp" \
             "$ANDROID_HOME/.cache" "$RUNNER_TEMP/android-home" \
-            "$RUNNER_TEMP/android-avd"
+            "$RUNNER_TEMP/android-avd" \
+            "$ANDROID_HOME/platforms/android-30" \
+            "$ANDROID_HOME/build-tools/35.0.0"
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
             -partition-size 2048 \
