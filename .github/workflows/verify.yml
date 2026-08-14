@@ -103,9 +103,13 @@ jobs:
           # The hosted runner has about 5 GB free in its temp volume; the
           # default API 35 userdata image is larger than that. Keep the smoke
           # AVD bounded while leaving enough space for install and launch.
-          avd_config="$ANDROID_AVD_HOME/spartancode-ci.avd/config.ini"
-          sed -i '/^disk\.dataPartition\.size=/d' "$avd_config"
-          printf '%s\n' 'disk.dataPartition.size=2147483648' >> "$avd_config"
+          for avd_config in \
+            "$ANDROID_AVD_HOME/spartancode-ci.avd/config.ini" \
+            "$ANDROID_AVD_HOME/spartancode-ci.avd/hardware-qemu.ini"; do
+            touch "$avd_config"
+            sed -i '/^disk\.dataPartition\.size=/d' "$avd_config"
+            printf '%s\n' 'disk.dataPartition.size=2147483648' >> "$avd_config"
+          done
           cd android
           npx expo prebuild --platform android --no-install
           cd android
