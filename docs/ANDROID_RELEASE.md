@@ -49,4 +49,6 @@ rotate them only through a planned application-signing migration.
 
 The workflow decodes the keystore only into the runner temporary directory,
 passes it to the guarded release script, uploads the signed AAB/APK and release
-evidence as workflow artifacts, and removes the temporary keystore on exit.
+evidence as workflow artifacts, and removes the temporary keystore on exit. The
+release job has a 30-minute bound so stalled toolchain or build failures become
+actionable workflow results.
