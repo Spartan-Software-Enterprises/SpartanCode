@@ -92,11 +92,11 @@ for a native PC/console production pipeline. Engine adapters must report their
 supported host systems, target platforms, SDKs, licenses, headless-build
 support, automated-test support, and hardware requirements.
 
-Primary target profiles:
+Primary target profiles, in order of delivery:
 
 - high-fidelity Windows PC releases;
 - high-fidelity macOS and Linux PC releases;
-- authorized console development and release targets;
+- authorized console development and release targets after the PC track;
 - custom native targets through declared engine/toolchain adapters; and
 - dedicated build, profiling, and certification profiles for each target.
 
@@ -107,11 +107,11 @@ Optional supporting surfaces—not the game quality target—include:
 - optional project review and monitoring surfaces; and
 - server-hosted previews.
 
-The high-end production track targets:
+The premium PC-first production track targets:
 
 - Windows, macOS, and Linux PC releases with high-fidelity rendering;
-- console development and export paths where the user has authorized platform
-  access, SDKs, devkits, and the selected engine supports the target;
+- later console development and export paths where the user has authorized
+  platform access, SDKs, devkits, and the selected engine supports the target;
 - performance-oriented builds with GPU profiling, memory budgets, streaming,
   shader compilation, LOD, asset cooking, crash diagnostics, and platform
   input; and
@@ -485,7 +485,7 @@ target capability report—not a blank browser game.
 Add game templates and desktop project creation,
 asset preview/import, autosave/recovery, prompt-to-change workflow, local
 preview, and export. Exit when the front end can create, edit, save, preview,
-and hand off a serious PC/console project for an authorized native build; a
+and hand off a serious premium PC project for an authorized native build; a
 small browser game is not an acceptance target.
 
 ### Phase 3 — Core production tooling
@@ -501,7 +501,7 @@ Add test templates, Playwright visual baselines, target-profile coverage,
 runtime diagnostics, performance budgets, asset-size checks, and screenshot
 evidence. Exit when release readiness requires defined validation gates.
 
-### Phase 5 — PC/console packaging and evidence
+### Phase 5 — Premium PC packaging and evidence
 
 Add reproducible project builds, archive export/restore, manifests, checksums,
 remote build workers, native desktop packaging, and target-specific release
@@ -510,23 +510,24 @@ workstation or authorized build worker can
 produce a versioned high-end PC target release with the front end recording
 complete evidence.
 
-### Phase 6 — Native and advanced targets
+### Phase 6 — Premium PC production
 
 Validate native PC adapters with target-specific signing and capability checks.
 Establish the high-end PC production track with native-engine adapters,
 GPU/performance profiling, large-world asset cooking, shader/LOD workflows,
-and crash diagnostics. Then evaluate console adapters through authorized
+and crash diagnostics. After the PC production gates pass, evaluate console
+adapters through authorized
 SDK/devkit environments, certification evidence, and engine-specific
 packaging. Browser previews, multiplayer, advanced assets,
 AR/VR, and mature plugin/content ecosystems are supporting or subsequent
 capability tracks, never replacements for the premium PC/console objective.
 
-### Phase 7 — High-end PC and console production
+### Phase 7 — Console expansion after PC release
 
-This phase is the expansion's top-tier production objective. It should support
-project orchestration around engines capable of shipping high-end PC and
-console games, with desktop/workstation and authorized build infrastructure as
-the production surfaces.
+This phase begins only after the premium PC production track is validated. It
+extends the front end to console production around engines capable of shipping
+high-end PC and console games, with authorized build infrastructure as the
+production surface.
 
 Deliverables:
 
@@ -556,8 +557,8 @@ Exit criteria:
 
 Future product approval must separately decide:
 
-1. which approved native engine(s) and PC/console target families are in the
-   first game beta;
+1. which approved native engine(s) and premium PC target families are in the
+   first game beta; console targets are explicitly deferred to a later gate;
 2. whether browser/2D validation is included as an optional support surface;
 3. user-owned, Spartan-managed, or hybrid remote build workers;
 4. whether multiplayer is a separate product phase;
