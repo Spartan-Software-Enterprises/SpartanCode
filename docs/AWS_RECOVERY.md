@@ -34,3 +34,16 @@ the retired termination timer, and bootstraps a clean `origin/main` checkout
 with the synchronization timer. It contains no credentials. The replacement
 uses only the default VPC security group; the retired `spartan-dev-ssh` group
 is not required.
+
+The active replacement is a persistent `t2.large` in `us-east-1c` with a
+512-GiB gp3 root volume, stop and termination protection, and no automatic
+termination timer. Its current public address is managed operationally rather
+than committed as configuration. GitHub credentials are provisioned separately
+on the host for private-repository synchronization; they are never placed in
+user-data or committed to this repository.
+
+AWS account budget monitoring is configured as
+`SpartanCode-Monthly-Cost-Guardrail` with a $50 monthly limit. This is a
+monitoring guardrail, not a billing or credit guarantee: AWS credit balance is
+not exposed by the EC2 CLI, and a budget does not automatically stop compute.
+Check Cost Explorer and the budget before extending the host's use.

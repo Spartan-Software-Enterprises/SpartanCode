@@ -99,8 +99,11 @@ behavior and a corresponding automated or documented verification path.
   available locally.
 - Android Expo configuration and native release automation are present, but a
   signed artifact requires release-owned Android credentials.
-- AWS/KVM validation requires a reachable replacement host; the former host was
-  terminated by its old auto-termination timer and is not treated as available.
+- AWS/KVM validation is available on the persistent replacement host with a
+  512-GiB root volume, default VPC security group only, stop/termination
+  protection, and a verified `origin/main` synchronization timer. Cost
+  monitoring is configured, but AWS credit balance and billing remain
+  external release-environment checks.
 
 ## Release gates still requiring stronger evidence
 

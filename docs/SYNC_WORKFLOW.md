@@ -10,12 +10,14 @@ comes before making the three locations identical.
 | --- | --- | --- |
 | GitHub | Canonical source of truth and durable collaboration history | `origin/main` |
 | Local workspace | Active development checkout | `SpartanCode`, branch `main` |
-| AWS dev server | Remote validation mirror when reachable | Replacement host recorded in the release environment, branch `main` |
+| AWS dev server | Remote validation mirror when reachable | Active replacement host recorded in the release environment, branch `main` |
 
 The AWS host is for development validation. It must not be treated as a second
 source of truth, and it must not receive force pushes or destructive resets.
-The former `54.152.46.218` host is retired and must not be assumed reachable;
-replace the host in operational commands after a new server is provisioned.
+The former `54.152.46.218` host is retired and must not be assumed reachable.
+The active replacement is provisioned in `us-east-1c` with a 512-GiB gp3 root
+volume and is protected from API stop/termination; use the current operational
+host address rather than hard-coding an address in project configuration.
 
 The previous host also contained an idle `spartancode-auto-terminate.timer`
 that could terminate the EC2 instance. Replacement hosts must not install that
