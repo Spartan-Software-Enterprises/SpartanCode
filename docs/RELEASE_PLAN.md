@@ -17,15 +17,14 @@ record each release gate. The runbook is the evidence format for the September
       hosts.
 - [x] Signed marketplace catalog publisher and verification workflow exist.
 - [x] KVM-capable AWS host provisioned with nested virtualization enabled.
-- [ ] Android API 30 emulator boots on the KVM host, installs the debug APK,
-      launches SpartanCode, and captures screenshot/log evidence. Run
-      `scripts/android-kvm-smoke.sh` after the host's `ubuntu` session has KVM
-      group membership.
-- [ ] Desktop Playwright visual smoke runs on the validation host with current
-      screenshots and no renderer errors.
+- [x] Android API 30 emulator boots on the KVM host, installs the x86_64
+      release APK, launches SpartanCode, and captures reviewed screenshot/log
+      evidence with `scripts/android-kvm-smoke.sh`.
+- [x] Desktop Playwright visual and browser smoke runs on the validation host
+      with current screenshots and no renderer errors.
 - [ ] Signed Android release AAB/APK is produced by the release-owned key path
       and independently verified.
-- [ ] Final release manifest, dependency inventory, checksums, and roadmap
+- [x] Final release manifest, dependency inventory, checksums, and roadmap
       audit are generated from the exact release commit.
 - [ ] Product owner completes physical-phone, privacy/consent, and public beta
       acceptance gates documented in `COMPLIANCE.md` and
