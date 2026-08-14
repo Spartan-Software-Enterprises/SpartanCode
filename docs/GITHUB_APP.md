@@ -1,0 +1,49 @@
+# SpartanCode GitHub App integration
+
+SpartanCode can optionally connect to GitHub as an installed GitHub App. The
+desktop/server integration uses short-lived installation access tokens and
+keeps the App private key in the process environment only. Android remains
+standalone and does not require a desktop bridge or a GitHub account.
+
+## Configure an app installation
+
+Register a GitHub App under the owning account or organization, then install it
+on only the repositories SpartanCode should operate on. Start with the minimum
+permissions:
+
+- Repository metadata: read-only (required by GitHub)
+- Contents: read-only for repository browsing and HTTP Git access
+- Issues and pull requests: add only when those workflows are enabled
+- Codespaces: do not add to the installation-token path; Codespaces creation
+  requires a user-authorized token with Codespaces write permission
+
+The optional manifest configuration is in `docs/github-app-manifest.json`. A
+manifest flow can provision a new app, but its callback must be hosted by the
+deployment that receives the temporary conversion code. Never commit the
+private key, webhook secret, installation token, or user token.
+
+Set these variables in the desktop/server environment:
+
+```text
+SPARTANCODE_GITHUB_APP_ID=123456
+SPARTANCODE_GITHUB_APP_INSTALLATION_ID=12345678
+SPARTANCODE_GITHUB_APP_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----"
+```
+
+The settings panel reports whether the installation is configured. Repository
+metadata is available through the desktop API, and future GitHub workflows can
+reuse the same installation-token client without persisting credentials.
+
+## Codespaces
+
+Codespaces is a compatible optional workspace target, not a replacement for
+the local desktop or Android app. The repository includes a dev container
+definition, and a user can open the repository in Codespaces from GitHub. A
+future signed-in GitHub user flow can create, start, stop, and resume a
+Codespace through GitHub's Codespaces API; that flow must use user authorization
+and must display the machine/storage cost before creation.
+
+The app intentionally does not request Codespaces permission for its
+installation token. This keeps repository automation narrow and prevents an
+installed app from creating billable development environments without the
+user's explicit GitHub authorization.

@@ -1,5 +1,10 @@
 # SpartanCode — Your Local-First AI Engineering Workspace
 
+Optional GitHub App integration adds installation-scoped repository access and
+is documented in [docs/GITHUB_APP.md](docs/GITHUB_APP.md). Codespaces is an
+optional user-authorized workspace target; the desktop and Android apps do not
+depend on it.
+
 Turn an idea into a verified software change with a calm, focused command
 center for missions, custom agents, local models, artifacts, and review. The
 Spartan IDE theme keeps the workspace dark, readable, and purpose-built for

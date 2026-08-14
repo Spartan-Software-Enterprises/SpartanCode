@@ -1,0 +1,12 @@
+{
+  "name": "SpartanCode",
+  "url": "https://github.com/Spartan-Software-Enterprises/SpartanCode",
+  "hook_attributes": { "url": "https://example.invalid/github/webhooks" },
+  "redirect_url": "https://example.invalid/github/app/callback",
+  "public": false,
+  "default_permissions": {
+    "contents": "read",
+    "metadata": "read"
+  },
+  "default_events": ["installation", "installation_repositories", "push", "pull_request"]
+}

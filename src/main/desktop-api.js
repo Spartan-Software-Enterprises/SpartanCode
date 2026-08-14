@@ -23,6 +23,7 @@ const {
   fetchMarketplaceIndex,
 } = require("./plugin-marketplace");
 const { exportAuditLog } = require("./audit-export");
+const { createGitHubAppClient } = require("./github-app");
 const {
   estimateServerCost,
   getRouterGuidance,
@@ -40,6 +41,7 @@ function registerDesktopApi({
   const voiceService = createVoiceService();
   const chatService = createChatService(store);
   const runtimeRegistry = createRuntimeRegistry();
+  const githubApp = createGitHubAppClient();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
   ipcMain.handle("runtime:generate", (_event, runtimeId, request) => {
@@ -51,6 +53,8 @@ function registerDesktopApi({
   });
   ipcMain.handle("capabilities:get", () => getCapabilities());
   ipcMain.handle("providers:get", () => getProviderStatus());
+  ipcMain.handle("github-app:status", () => githubApp.status());
+  ipcMain.handle("github-app:repositories", () => githubApp.listRepositories());
   ipcMain.handle("voice:status", () => voiceService.status());
   ipcMain.handle("voice:start", () => voiceService.start());
   ipcMain.handle("mcp:tools", () => [

@@ -48,6 +48,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("runtime:generate", runtimeId, request),
   getCapabilities: () => ipcRenderer.invoke("capabilities:get"),
   getProviderStatus: () => ipcRenderer.invoke("providers:get"),
+  getGitHubAppStatus: () => ipcRenderer.invoke("github-app:status"),
+  listGitHubRepositories: () => ipcRenderer.invoke("github-app:repositories"),
   getVoiceStatus: () => ipcRenderer.invoke("voice:status"),
   startVoice: () => ipcRenderer.invoke("voice:start"),
   getMcpTools: () => ipcRenderer.invoke("mcp:tools"),

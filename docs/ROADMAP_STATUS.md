@@ -58,6 +58,8 @@ behavior and a corresponding automated or documented verification path.
   that provisions and boots an AVD with explicit SDK commands, builds the debug
   native binary, installs it, launches the package, and verifies package
   registration on every push and pull request.
+- Optional GitHub App foundation with installation-token repository access,
+  least-privilege manifest defaults, and a Codespaces-compatible dev container
 - A bounded plugin registry now discovers workspace metadata, enforces explicit
   MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
   plugins, and exposes metadata through isolated IPC without executing plugin
@@ -129,6 +131,8 @@ behavior and a corresponding automated or documented verification path.
 - Physical Android collaboration/gesture acceptance, cross-modal expansion,
   provider-specific OIDC account lifecycle/administration, marketplace artifact
   installation/activation/updates, and a mature external plugin marketplace.
+- GitHub App production registration, hosted manifest callback/webhooks, and
+  user-authorized Codespaces lifecycle remain deployment gates.
 
 These items remain open until their implementation and release-environment
 evidence exist; passing unit tests alone does not close them.

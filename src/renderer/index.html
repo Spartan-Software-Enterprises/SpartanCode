@@ -1603,6 +1603,26 @@
             Clear local mission data
           </button>
         </div>
+        <div class="settings-group-heading">GitHub App & Codespaces</div>
+        <div class="settings-runtime-grid" id="settingsGithubStatus">
+          Loading GitHub integration status…
+        </div>
+        <div class="settings-inline-actions">
+          <button
+            type="button"
+            class="context-button"
+            id="settingsGithubRepositories"
+          >
+            List installed repositories
+          </button>
+        </div>
+        <small
+          id="settingsGithubMessage"
+          style="display: block; color: var(--muted)"
+        >
+          GitHub App access is optional. Codespaces requires a user-authorized
+          GitHub session.
+        </small>
         <div class="settings-actions">
           <button type="button" class="settings-close" id="closeSettings">
             Cancel</button
@@ -1723,6 +1743,12 @@
       const settingsGovernanceStatus = document.getElementById(
         "settingsGovernanceStatus",
       );
+      const settingsGithubStatus = document.getElementById(
+        "settingsGithubStatus",
+      );
+      const settingsGithubMessage = document.getElementById(
+        "settingsGithubMessage",
+      );
       const settingsStatusRow = (label, value) =>
         `<div class="settings-runtime-item"><strong>${escapeHtml(label)}</strong><em>${escapeHtml(value)}</em></div>`;
       const refreshSettingsDiagnostics = async (settings) => {
@@ -1736,6 +1762,7 @@
           plugins,
           tools,
           audit,
+          github,
         ] = await Promise.all([
           window.spartanCode.getRuntimeStatus(),
           window.spartanCode.getCapabilities(),
@@ -1745,6 +1772,7 @@
           window.spartanCode.listPlugins(),
           window.spartanCode.getMcpTools(),
           window.spartanCode.getAuditLog(),
+          window.spartanCode.getGitHubAppStatus(),
         ]);
         settingsWorkspaceSummary.textContent = settings.workspacePath
           ? settings.workspacePath
@@ -1777,6 +1805,18 @@
           settingsStatusRow("MCP tools", `${tools.length} available`),
           settingsStatusRow("Audit history", `${audit.length} events`),
         ].join("");
+        settingsGithubStatus.innerHTML = [
+          settingsStatusRow(
+            "Installation",
+            github.configured ? "Configured" : "Not configured",
+          ),
+          settingsStatusRow(
+            "Repository access",
+            github.capabilities.repositories,
+          ),
+          settingsStatusRow("Codespaces", github.capabilities.codespaces),
+        ].join("");
+        settingsGithubMessage.textContent = github.message;
       };
       const escapeChat = (value) => escapeHtml(value).replace(/\n/g, "<br>");
       const renderChat = (messages) => {
@@ -2210,6 +2250,19 @@
           window.spartanCode
             ?.clearMissions()
             .then(() => showToast("Local mission data cleared"));
+        });
+      document
+        .getElementById("settingsGithubRepositories")
+        .addEventListener("click", async () => {
+          try {
+            const repositories =
+              await window.spartanCode.listGitHubRepositories();
+            settingsGithubMessage.textContent = repositories.length
+              ? `${repositories.length} installed repository${repositories.length === 1 ? "" : "ies"} available.`
+              : "The installation has no visible repositories.";
+          } catch (error) {
+            settingsGithubMessage.textContent = error.message;
+          }
         });
       document
         .getElementById("settingsForm")
