@@ -114,3 +114,46 @@ export function createMobileCollaborationSession(
     updatedAt: now,
   };
 }
+
+export function appendMobileCollaborationEvent(
+  session: MobileCollaborationSession,
+  input: {
+    authorId: string;
+    type: string;
+    payload: Record<string, unknown>;
+    expectedRevision?: number;
+  },
+  now = new Date().toISOString(),
+): MobileCollaborationSession {
+  if (!input.authorId.trim()) throw new Error("Event author is required");
+  if (!input.type.trim()) throw new Error("Event type is required");
+  if (!input.payload || Array.isArray(input.payload))
+    throw new Error("Event payload must be an object");
+  const expectedRevision = input.expectedRevision ?? session.revision;
+  if (expectedRevision !== session.revision)
+    throw new Error("Collaboration revision conflict; refresh the session");
+  const participant = session.participants.find(
+    (item) => item.id === input.authorId,
+  );
+  if (!participant || participant.role === "observer")
+    throw new Error("Only a session owner or member can append events");
+  const revision = session.revision + 1;
+  return {
+    ...session,
+    revision,
+    updatedAt: now,
+    events: [
+      ...session.events,
+      {
+        id: `${session.id}:event:${revision}`,
+        sessionId: session.id,
+        authorId: input.authorId,
+        type: input.type.trim().slice(0, 80),
+        payload: { ...input.payload },
+        baseRevision: session.revision,
+        revision,
+        createdAt: now,
+      },
+    ],
+  };
+}

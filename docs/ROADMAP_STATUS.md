@@ -73,8 +73,9 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
 - Android reads system reduced-motion, font-scale, and screen-reader settings
   without overriding them and surfaces the resulting accessibility state.
 - Android now has a local collaboration session surface with validated
-  persistence and optional bridge publication/remote-session merge; physical
-  cross-device acceptance remains open.
+  persistence, revision-checked local event append, and optional bridge
+  publication/remote-session merge; physical cross-device acceptance remains
+  open.
 - Android now has a typed MLC Chat/PocketPal/llama.cpp native-module registry
   that checks device-compatible licensed models before invocation and reports
   missing modules honestly. The MIT-licensed `@pocketpalai/llama.rn` package is

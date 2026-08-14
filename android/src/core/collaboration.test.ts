@@ -1,4 +1,5 @@
 import {
+  appendMobileCollaborationEvent,
   createMobileCollaborationSession,
   mergeCollaborationSessions,
   normalizeCollaborationSessions,
@@ -34,5 +35,36 @@ describe("standalone Android collaboration sessions", () => {
     expect(
       normalizeCollaborationSessions([remote, { malformed: true }]),
     ).toHaveLength(1);
+  });
+
+  it("appends local events with revision and role protection", () => {
+    const session = createMobileCollaborationSession(
+      "Roadmap",
+      "android-local",
+      "2026-01-01T00:00:00.000Z",
+    );
+    const updated = appendMobileCollaborationEvent(
+      session,
+      {
+        authorId: "android-local",
+        type: "note.added",
+        payload: { text: "Ready" },
+      },
+      "2026-01-01T00:00:01.000Z",
+    );
+    expect(updated.revision).toBe(1);
+    expect(updated.events[0]).toMatchObject({
+      baseRevision: 0,
+      revision: 1,
+      type: "note.added",
+    });
+    expect(() =>
+      appendMobileCollaborationEvent(updated, {
+        authorId: "android-local",
+        type: "note.added",
+        payload: {},
+        expectedRevision: 0,
+      }),
+    ).toThrow(/revision conflict/);
   });
 });

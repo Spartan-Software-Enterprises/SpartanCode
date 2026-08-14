@@ -70,6 +70,7 @@ import {
   platformDeviceProbe,
 } from "./src/core/device-profile";
 import {
+  appendMobileCollaborationEvent,
   createMobileCollaborationSession,
   mergeCollaborationSessions,
   normalizeCollaborationSessions,
@@ -115,6 +116,11 @@ export default function App() {
   const offlineCryptoStatus = useMemo(() => getOfflineCryptoStatus(), []);
   const [recognizing, setRecognizing] = useState(false);
   const [collaborationName, setCollaborationName] = useState("Android roadmap");
+  const [collaborationEventType, setCollaborationEventType] =
+    useState("note.added");
+  const [collaborationEventPayload, setCollaborationEventPayload] = useState(
+    '{"text":"Review ready"}',
+  );
   const [collaborationSessions, setCollaborationSessions] = useState<
     MobileCollaborationSession[]
   >([]);
@@ -359,6 +365,38 @@ export default function App() {
     collaborationSessions,
     endpoint,
     snapshot.offline,
+  ]);
+
+  const appendCollaboration = useCallback(async () => {
+    const session = collaborationSessions[0];
+    if (!session) {
+      setMessage("Start a collaboration session first");
+      return;
+    }
+    try {
+      const payload = JSON.parse(collaborationEventPayload) as Record<
+        string,
+        unknown
+      >;
+      const updated = appendMobileCollaborationEvent(session, {
+        authorId: "android-local",
+        type: collaborationEventType,
+        payload,
+        expectedRevision: session.revision,
+      });
+      const next = [updated, ...collaborationSessions.slice(1)];
+      await writeCollaborationSessions(next);
+      setCollaborationSessions(next);
+      setMessage(`Event appended at revision ${updated.revision}`);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Unable to append event",
+      );
+    }
+  }, [
+    collaborationEventPayload,
+    collaborationEventType,
+    collaborationSessions,
   ]);
 
   const updateMobileSettings = useCallback(
@@ -777,6 +815,31 @@ export default function App() {
             onPress={createCollaboration}
           >
             <Text style={styles.secondaryText}>Start local session</Text>
+          </Pressable>
+          <TextInput
+            accessibilityLabel="Collaboration event type"
+            placeholder="Event type"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={collaborationEventType}
+            onChangeText={setCollaborationEventType}
+          />
+          <TextInput
+            accessibilityLabel="Collaboration event payload JSON"
+            placeholder='{"text":"Review ready"}'
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={collaborationEventPayload}
+            onChangeText={setCollaborationEventPayload}
+            multiline
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Append collaboration event"
+            style={styles.secondary}
+            onPress={appendCollaboration}
+          >
+            <Text style={styles.secondaryText}>Append local event</Text>
           </Pressable>
           {collaborationSessions.length === 0 ? (
             <Text style={styles.message}>No collaboration sessions yet.</Text>
