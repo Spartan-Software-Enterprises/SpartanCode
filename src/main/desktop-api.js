@@ -38,6 +38,7 @@ const {
 const { createWindowsAutomation } = require("./windows-automation");
 const { createGuiAutomation } = require("./gui-automation");
 const { createProcessAutomation } = require("./process-automation");
+const { createProtonAdapter } = require("./proton-adapter");
 const { createPrivacyNetwork } = require("./privacy-network");
 const {
   estimateServerCost,
@@ -75,6 +76,10 @@ function registerDesktopApi({
   const windowsAutomation = createWindowsAutomation();
   const guiAutomation = createGuiAutomation();
   const processAutomation = createProcessAutomation();
+  const protonAdapter = createProtonAdapter({
+    environment: providerEnvironment,
+    secureVault,
+  });
   const privacyNetwork = createPrivacyNetwork();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
@@ -93,6 +98,10 @@ function registerDesktopApi({
   ipcMain.handle("process:status", () => processAutomation.status());
   ipcMain.handle("process:launch", (_event, request) =>
     processAutomation.launch(request),
+  );
+  ipcMain.handle("proton:status", () => protonAdapter.status());
+  ipcMain.handle("proton:request", (_event, request) =>
+    protonAdapter.request(request),
   );
   ipcMain.handle("privacy:status", () => privacyNetwork.status());
   ipcMain.handle("privacy:configure", (_event, request) =>

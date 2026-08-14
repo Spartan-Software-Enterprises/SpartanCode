@@ -52,6 +52,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   runGuiAutomation: (request) => ipcRenderer.invoke("gui:run", request),
   getProcessAutomationStatus: () => ipcRenderer.invoke("process:status"),
   launchProcess: (request) => ipcRenderer.invoke("process:launch", request),
+  getProtonStatus: () => ipcRenderer.invoke("proton:status"),
+  protonRequest: (request) => ipcRenderer.invoke("proton:request", request),
   getPrivacyNetworkStatus: () => ipcRenderer.invoke("privacy:status"),
   configurePrivacyNetwork: (request) =>
     ipcRenderer.invoke("privacy:configure", request),

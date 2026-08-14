@@ -24,7 +24,8 @@ The built-in project-preview browser, Playwright adapter, encrypted local RAG
 memory, persona/wake-word settings, bounded native TTS contract, a Windows
 PowerShell read-only adapter contract, and an explicit Tor/Proton status
 boundary are now implemented foundations. Windows and GUI write-capability
-adapters and Proton service operations remain platform-specific slices. Tor
+adapters remain platform-specific slices. Proton now has a bounded read-only
+adapter that uses an encrypted-vault token and fixed HTTPS API paths. Tor
 browser routing is now available only through an explicit per-request opt-in
 and configured SOCKS proxy. A
 cross-platform process adapter now exposes non-shell launch only through an
