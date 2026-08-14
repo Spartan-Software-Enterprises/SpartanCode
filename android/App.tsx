@@ -128,6 +128,9 @@ export default function App() {
     useState<(typeof projectTargets)[number]>("android");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Offline-first workspace");
+  const [artifactConflicts, setArtifactConflicts] = useState<
+    ArtifactSyncResult["conflicts"]
+  >([]);
   const [remoteProvider, setRemoteProvider] =
     useState<RemoteProvider["id"]>("digitalocean");
   const [routerMethod, setRouterMethod] =
@@ -381,6 +384,7 @@ export default function App() {
         if (!(error instanceof BridgeError && error.status === 404))
           throw error;
       }
+      setArtifactConflicts(artifactSync.conflicts);
       let remoteCollaboration: MobileCollaborationSession[] = [];
       try {
         const response = await authorizedBridgeRequest<unknown>(
@@ -1934,6 +1938,32 @@ export default function App() {
             )}
           </View>
         ))}
+        {artifactConflicts.length > 0 ? (
+          <View style={styles.conflictCard}>
+            <Text style={styles.conflictTitle}>
+              Artifact conflicts need review
+            </Text>
+            <Text style={styles.message}>
+              The phone version was kept without overwriting either side. Review
+              the three-way state before choosing a resolution.
+            </Text>
+            {artifactConflicts.slice(0, 5).map((conflict) => (
+              <View style={styles.conflictRow} key={conflict.id}>
+                <Text style={styles.missionText}>{conflict.id}</Text>
+                <Text style={styles.missionMeta}>
+                  Base: {conflict.base ? "present" : "none"} · Phone:{" "}
+                  {conflict.local ? "present" : "none"} · Bridge:{" "}
+                  {conflict.remote ? "present" : "none"}
+                </Text>
+              </View>
+            ))}
+            {artifactConflicts.length > 5 ? (
+              <Text style={styles.message}>
+                Showing 5 of {artifactConflicts.length} conflicts.
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
 
         <View style={styles.sectionRow}>
           <Text style={styles.section}>Audit activity</Text>
@@ -2090,6 +2120,20 @@ const styles = StyleSheet.create({
     width: 8,
   },
   missionBody: { flex: 1 },
+  conflictCard: {
+    backgroundColor: "#241619",
+    borderColor: "#ff3b4f",
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 10,
+    padding: 15,
+  },
+  conflictTitle: { color: "#ff9aa5", fontSize: 15, fontWeight: "800" },
+  conflictRow: {
+    borderTopColor: "#5a2d34",
+    borderTopWidth: 1,
+    paddingTop: 9,
+  },
   missionText: { color: "#f1f1f2", fontSize: 15, lineHeight: 21 },
   missionMeta: {
     color: "#a5a7ab",

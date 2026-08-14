@@ -19,6 +19,9 @@ current phone snapshot and remote snapshot for reconciliation, and stores the
 merged result locally. A bridge that predates the sync route remains
 snapshot-compatible; the client falls back to the remote snapshot rather than
 silently treating an unavailable merge route as a successful local merge.
+When conflicts exist, Android displays the affected IDs and the presence of
+base, phone, and bridge versions while retaining the phone working copy; it
+does not silently select a winner.
 
 This is conflict-aware synchronization logic, not silent continuous syncing.
 Proton Drive remains an encrypted backup/restore transport and does not receive

@@ -117,8 +117,9 @@ current Implemented/Partial/Open counts.
   three-way merge contract. Android persists the last remote base across
   refreshes, reconciles its phone snapshot, and falls back safely for older
   bridges. One-sided edits apply automatically; divergent edits are returned
-  as explicit conflicts for review, while Proton Drive remains encrypted
-  backup/restore rather than a plaintext sync transport.
+  as explicit conflicts with base/phone/bridge visibility for review, while
+  Proton Drive remains encrypted backup/restore rather than a plaintext sync
+  transport.
   Physical cross-device acceptance and a continuous transport remain open;
   see [ARTIFACT_SYNC.md](ARTIFACT_SYNC.md).
 - Signed marketplace plugins now support verified staging, metadata-only
