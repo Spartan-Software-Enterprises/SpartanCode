@@ -13,7 +13,7 @@ sudo rm -f /etc/systemd/system/spartancode-auto-terminate.timer \
 sudo systemctl daemon-reload
 
 repo_dir="${SPARTANCODE_REPO_DIR:-$HOME/workspaces/SpartanCode}"
-origin_url="${SPARTANCODE_ORIGIN_URL:-https://github.com/Spartan-Software-Enterprises/SpartanCode.git}"
+origin_url="${SPARTANCODE_ORIGIN_URL:-git@github.com:Spartan-Software-Enterprises/SpartanCode.git}"
 mkdir -p "$(dirname "$repo_dir")"
 if [ ! -d "$repo_dir/.git" ]; then
   git clone --branch main "$origin_url" "$repo_dir"

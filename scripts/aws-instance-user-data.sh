@@ -31,10 +31,10 @@ install -d -o ubuntu -g ubuntu /home/ubuntu/workspaces
 loginctl enable-linger ubuntu || true
 if [ ! -d /home/ubuntu/workspaces/SpartanCode/.git ]; then
   runuser -u ubuntu -- git clone --branch main \
-    https://github.com/Spartan-Software-Enterprises/SpartanCode.git \
+    git@github.com:Spartan-Software-Enterprises/SpartanCode.git \
     /home/ubuntu/workspaces/SpartanCode
 fi
 runuser -u ubuntu -- env HOME=/home/ubuntu \
   SPARTANCODE_REPO_DIR=/home/ubuntu/workspaces/SpartanCode \
-  SPARTANCODE_ORIGIN_URL=https://github.com/Spartan-Software-Enterprises/SpartanCode.git \
+  SPARTANCODE_ORIGIN_URL=git@github.com:Spartan-Software-Enterprises/SpartanCode.git \
   bash -lc 'bash /home/ubuntu/workspaces/SpartanCode/scripts/aws-dev-bootstrap.sh'
