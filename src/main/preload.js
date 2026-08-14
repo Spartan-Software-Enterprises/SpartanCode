@@ -48,6 +48,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   runBrowserAutomation: (request) => ipcRenderer.invoke("browser:run", request),
   getSystemAutomationStatus: () => ipcRenderer.invoke("system:status"),
   runSystemAutomation: (request) => ipcRenderer.invoke("system:run", request),
+  getGuiAutomationStatus: () => ipcRenderer.invoke("gui:status"),
+  runGuiAutomation: (request) => ipcRenderer.invoke("gui:run", request),
   getPrivacyNetworkStatus: () => ipcRenderer.invoke("privacy:status"),
   configurePrivacyNetwork: (request) =>
     ipcRenderer.invoke("privacy:configure", request),

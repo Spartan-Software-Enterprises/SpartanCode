@@ -24,6 +24,9 @@ behavior and a corresponding automated or documented verification path.
 - A Windows system-automation contract now reports platform availability and
   supports bounded read-only PowerShell inspection through fixed executable
   arguments; write-capability and GUI adapters remain explicitly gated work.
+- A cross-platform GUI automation status contract reports Windows UI Automation
+  and PyAutoGUI availability without enabling arbitrary screen control; actions
+  remain review-required until a capability-specific audited adapter exists.
 - A privacy-network adapter reports Tor/Proton configuration without exposing
   credentials and refuses to silently reroute traffic.
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped

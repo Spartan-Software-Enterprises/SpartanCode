@@ -35,6 +35,7 @@ const {
   loadSkill,
 } = require("./skill-registry");
 const { createWindowsAutomation } = require("./windows-automation");
+const { createGuiAutomation } = require("./gui-automation");
 const { createPrivacyNetwork } = require("./privacy-network");
 const {
   estimateServerCost,
@@ -69,6 +70,7 @@ function registerDesktopApi({
       }),
   });
   const windowsAutomation = createWindowsAutomation();
+  const guiAutomation = createGuiAutomation();
   const privacyNetwork = createPrivacyNetwork();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
@@ -79,6 +81,10 @@ function registerDesktopApi({
   ipcMain.handle("system:status", () => windowsAutomation.status());
   ipcMain.handle("system:run", (_event, request) =>
     windowsAutomation.execute(request),
+  );
+  ipcMain.handle("gui:status", () => guiAutomation.status());
+  ipcMain.handle("gui:run", (_event, request) =>
+    guiAutomation.execute(request),
   );
   ipcMain.handle("privacy:status", () => privacyNetwork.status());
   ipcMain.handle("privacy:configure", (_event, request) =>
