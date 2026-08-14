@@ -127,7 +127,8 @@ jobs:
             "$RUNNER_TEMP/android-avd" \
             "$ANDROID_HOME/platforms/android-30" \
             "$ANDROID_HOME/build-tools/35.0.0" "$HOME/.m2" \
-            android/android/.gradle
+            android/android/.gradle "$ANDROID_HOME/ndk" \
+            "$ANDROID_HOME/cmake"
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
             -partition-size 2048 \
