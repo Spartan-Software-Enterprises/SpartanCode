@@ -67,6 +67,9 @@ jobs:
       - name: Start bounded API 35 emulator
         run: |
           set -euo pipefail
+          export ANDROID_SDK_HOME="${RUNNER_TEMP}/android-home"
+          export ANDROID_AVD_HOME="${RUNNER_TEMP}/android-avd"
+          mkdir -p "$ANDROID_SDK_HOME" "$ANDROID_AVD_HOME"
           sdkmanager "emulator" "system-images;android-35;default;x86_64"
           echo no | avdmanager create avd \
             --name spartancode-ci \
