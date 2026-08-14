@@ -58,3 +58,31 @@ test("adapter validation rejects duplicate identifiers", () => {
     /Adapter ids must be unique/,
   );
 });
+
+test("adapter manifest accepts the declarative JetBrains importer", () => {
+  const manifest = normalizeAdapterManifest({
+    ...base,
+    id: "jetbrains-project",
+    kind: "connector",
+    name: "JetBrains project importer",
+    status: "available",
+    hosts: ["windows", "macos", "linux"],
+    targets: { intellij: "available", rider: "available", clion: "available" },
+    operations: ["inspect", "import"],
+    requirements: ["jetbrains-project-directory"],
+    execution: {
+      mode: "declarative",
+      shell: false,
+      network: false,
+      credentials: false,
+    },
+    testCoverage: [
+      "xml-metadata",
+      "redaction",
+      "symlink-rejection",
+      "size-bounds",
+    ],
+  });
+  assert.equal(manifest.execution.network, false);
+  assert.equal(manifest.targets.rider, "available");
+});

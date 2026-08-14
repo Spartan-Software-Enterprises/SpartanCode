@@ -83,7 +83,11 @@ security model:
    `src/main/vscode-project-importer.js` and exposed through the approved
    workspace API. It summarizes JSONC settings, tasks, and launch metadata;
    it never returns command arguments or secret values and never executes
-   tasks. Add read-only importers for JetBrains, Visual Studio,
+   tasks. The bounded read-only JetBrains importer is implemented in
+   `src/main/jetbrains-project-importer.js`; it summarizes shared `.idea`
+   settings, run-configuration names/types, modules, and build-system markers
+   without executing IDEs, plugins, run configurations, or build tools. Add
+   read-only importers for Visual Studio,
    Eclipse, Xcode/SPM, Neovim/Vim, Emacs, Sublime, and Zed formats.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
    major agent APIs, and remote workers.

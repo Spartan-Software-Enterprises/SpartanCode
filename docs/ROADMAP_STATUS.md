@@ -250,9 +250,10 @@ current Implemented/Partial/Open counts.
   and developer-service connectors. Adapter implementation and ecosystem
   governance remain partial. A bounded shared adapter-manifest validator now
   provides normalized host, target, operation, permission, execution-boundary,
-  provenance, and test-coverage declarations. The first tested read-only
-  ecosystem importer is now the VS Code project importer; the remaining
-  ecosystem importers and governance remain next. See
+  provenance, and test-coverage declarations. Tested read-only importers now
+  cover VS Code JSONC and JetBrains `.idea` project metadata, including
+  bounded summaries, redaction, symlink rejection, and no-execution guarantees;
+  the remaining ecosystem importers and governance remain next. See
   `docs/EXTENSION_CONNECTOR_COMPATIBILITY.md`.
 - Desktop audit export now emits bounded, credential-redacted, SHA-256-verified
   governance bundles through isolated IPC.

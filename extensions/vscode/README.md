@@ -42,3 +42,7 @@ The desktop host also provides a bounded, read-only importer for a selected
 project's `.vscode/settings.json`, `tasks.json`, and `launch.json`. It accepts
 JSONC, returns metadata summaries only, redacts command and argument values,
 and does not execute imported tasks or launch configurations.
+
+The desktop host also exposes a separate read-only JetBrains importer for
+`.idea` metadata, shared run configurations, modules, and build-system markers.
+It does not execute JetBrains plugins, run configurations, or build tools.

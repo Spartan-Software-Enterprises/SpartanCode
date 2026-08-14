@@ -30,6 +30,7 @@ const {
   resolveInsideWorkspace,
 } = require("./workspace-tools");
 const { importVscodeProject } = require("./vscode-project-importer");
+const { importJetbrainsProject } = require("./jetbrains-project-importer");
 const { writeDevContainerConfig } = require("./devcontainer");
 const { createModelCache } = require("./model-cache");
 const {
@@ -442,6 +443,14 @@ function registerDesktopApi({
       projectPath || ".",
     );
     return importVscodeProject(approvedProject);
+  });
+  ipcMain.handle("jetbrains:project-import", (_event, projectPath) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    const approvedProject = resolveInsideWorkspace(
+      workspacePath,
+      projectPath || ".",
+    );
+    return importJetbrainsProject(approvedProject);
   });
   ipcMain.handle("devcontainer:generate", (_event, projectPath, options) => {
     const workspacePath = store.snapshot().settings.workspacePath;

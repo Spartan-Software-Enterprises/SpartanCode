@@ -30,7 +30,9 @@ A future user should be able to:
 - edit code, scenes, configuration, dialogue, and assets from the integrated
   desktop/workstation front end;
 - preview the game in SpartanCode's built-in browser;
-- test touch, keyboard, mouse, controller, orientation, and responsive layouts;
+- test keyboard, mouse, controller, and accessibility behavior for premium PC;
+  touch, orientation, and responsive-layout checks are optional target-specific
+  coverage for web or touch surfaces;
 - save, export, restore, and hand off the project without exposing secrets;
 - select target platforms independently from the device used for authoring;
 - build only where the required toolchain is available; and
@@ -318,8 +320,8 @@ keyboard / touch / mouse / gamepad / accessibility switch
         → device adapter → named action → simulation or UI command
 ```
 
-Required input behavior includes rebindable actions, device profiles, virtual
-touch controls, gamepad mapping, keyboard navigation, focus-visible behavior,
+Required PC input behavior includes rebindable actions, device profiles,
+gamepad mapping, keyboard navigation, focus-visible behavior,
 dead zones, sensitivity settings, and clear input capture when menus or text
 fields are active.
 
@@ -515,12 +517,9 @@ complete evidence.
 Validate native PC adapters with target-specific signing and capability checks.
 Establish the high-end PC production track with native-engine adapters,
 GPU/performance profiling, large-world asset cooking, shader/LOD workflows,
-and crash diagnostics. After the PC production gates pass, evaluate console
-adapters through authorized
-SDK/devkit environments, certification evidence, and engine-specific
-packaging. Browser previews, multiplayer, advanced assets,
-AR/VR, and mature plugin/content ecosystems are supporting or subsequent
-capability tracks, never replacements for the premium PC/console objective.
+and crash diagnostics. Browser previews, multiplayer, advanced assets, AR/VR,
+and mature plugin/content ecosystems are supporting or subsequent capability
+tracks, never replacements for the premium PC production objective.
 
 ### Phase 7 — Console expansion after PC release
 
@@ -531,9 +530,8 @@ production surface.
 
 Deliverables:
 
-- front-end adapters for approved native engines and creation-tool workflows;
-- PC graphics capability detection, profiling, shader/build caching, asset
-  cooking, streaming, memory budgets, and crash diagnostics;
+- console-focused front-end adapters for approved native engines and
+  creation-tool workflows;
 - console target manifests, SDK/toolchain checks, devkit connectivity where
   authorized, packaging/signing boundaries, and certification checklists;
 - remote build workers for toolchains unavailable on the active workstation;
@@ -544,8 +542,8 @@ Deliverables:
 
 Exit criteria:
 
-- A project can declare a high-end PC or console target and receive a truthful
-  capability report before work begins.
+- A project can declare a console target and receive a truthful capability
+  report before work begins, after the premium PC release gates pass.
 - The selected engine can be built through its official supported pipeline in
   an authorized environment.
 - Performance, packaging, device, security, licensing, and certification gates
