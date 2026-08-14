@@ -117,7 +117,8 @@ jobs:
           cd ../..
           # The APK is complete; reclaim disposable build/dependency caches so
           # the hosted runner can allocate the emulator userdata image.
-          rm -rf android/node_modules "$HOME/.gradle/caches" "$HOME/.npm"
+          rm -rf android/node_modules "$HOME/.gradle" "$HOME/.npm" \
+            "$HOME/.cache" "$RUNNER_TEMP/android-home" "$RUNNER_TEMP/android-avd"
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
             -partition-size 2048 \
