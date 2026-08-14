@@ -3,6 +3,8 @@
 `origin/main` is the canonical source of truth. This status is evidence-based:
 an item is marked implemented only where the repository contains both the
 behavior and a corresponding automated or documented verification path.
+The complete reconciliation against the exported 35-feature source roadmap is
+in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
 
 ## Implemented foundation
 
