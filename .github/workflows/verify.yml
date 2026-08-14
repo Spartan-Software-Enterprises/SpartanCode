@@ -117,6 +117,13 @@ jobs:
           cd ../..
           # The APK is complete; reclaim disposable build/dependency caches so
           # the hosted runner can allocate the emulator userdata image.
+          mkdir -p "$RUNNER_TEMP/spartancode-apk"
+          cp android/android/app/build/outputs/apk/debug/app-debug.apk \
+            "$RUNNER_TEMP/spartancode-apk/app-debug.apk"
+          rm -rf android/android/.cxx android/android/build
+          mkdir -p android/android/app/build/outputs/apk/debug
+          cp "$RUNNER_TEMP/spartancode-apk/app-debug.apk" \
+            android/android/app/build/outputs/apk/debug/app-debug.apk
           rm -rf android/node_modules "$HOME/.gradle" "$HOME/.npm" \
             "$HOME/.cache" "$RUNNER_TEMP/android-home" "$RUNNER_TEMP/android-avd"
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
