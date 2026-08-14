@@ -18,3 +18,6 @@ intentionally an explicit preference rather than a claim that the assistant
 can reliably determine a person's emotional state. Any future
 inference feature would require separate consent, retention, privacy, and
 physical-device validation before it could be enabled.
+
+Android also persists the four settings scopes (global, project, agent, and
+session) and resolves them in the same precedence order as the desktop store.

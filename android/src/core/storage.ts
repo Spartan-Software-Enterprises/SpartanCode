@@ -31,6 +31,7 @@ const SNAPSHOT_QUARANTINE_KEY = "spartancode.mobile.snapshot.quarantine.v1";
 const QUEUE_QUARANTINE_KEY = "spartancode.mobile.queue.quarantine.v1";
 const BIOMETRIC_SETTING_KEY = "spartancode.mobile.biometric-unlock.v1";
 const MOBILE_SETTINGS_KEY = "spartancode.mobile.settings.v1";
+const MOBILE_SETTINGS_LAYERS_KEY = "spartancode.mobile.settings-layers.v1";
 const COLLABORATION_KEY = "spartancode.mobile.collaboration.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
 
@@ -46,6 +47,19 @@ export type MobileSettings = {
     "calm" | "focused" | "frustrated" | "uncertain" | "excited" | "tired";
 };
 
+export type MobileSettingsLayers = {
+  global: Partial<MobileSettings>;
+  project: Record<string, Partial<MobileSettings>>;
+  agent: Record<string, Partial<MobileSettings>>;
+  session: Record<string, Partial<MobileSettings>>;
+};
+
+export type MobileSettingsContext = {
+  projectId?: string;
+  agentId?: string;
+  sessionId?: string;
+};
+
 const defaultMobileSettings: MobileSettings = {
   executionMode: "guided",
   quantization: "Q4_K_M",
@@ -56,6 +70,92 @@ const defaultMobileSettings: MobileSettings = {
   emotionMode: "explicit",
   interactionSignal: "calm",
 };
+
+const emptyMobileSettingsLayers = (): MobileSettingsLayers => ({
+  global: {},
+  project: {},
+  agent: {},
+  session: {},
+});
+
+function normalizeMobileSettings(
+  parsed: Partial<MobileSettings>,
+): MobileSettings {
+  return {
+    ...defaultMobileSettings,
+    executionMode: parsed.executionMode === "yolo" ? "yolo" : "guided",
+    quantization:
+      parsed.quantization === "Q4_0" || parsed.quantization === "Q3_K_S"
+        ? parsed.quantization
+        : "Q4_K_M",
+    voiceEnabled: parsed.voiceEnabled === true,
+    autoSync: parsed.autoSync !== false,
+    personaName:
+      typeof parsed.personaName === "string" && parsed.personaName.trim()
+        ? parsed.personaName.trim().slice(0, 48)
+        : "Leo",
+    wakeWord:
+      typeof parsed.wakeWord === "string" && parsed.wakeWord.trim()
+        ? parsed.wakeWord.trim().slice(0, 48)
+        : "Leo",
+    emotionMode: parsed.emotionMode === "off" ? "off" : "explicit",
+    interactionSignal:
+      parsed.interactionSignal === "focused" ||
+      parsed.interactionSignal === "frustrated" ||
+      parsed.interactionSignal === "uncertain" ||
+      parsed.interactionSignal === "excited" ||
+      parsed.interactionSignal === "tired"
+        ? parsed.interactionSignal
+        : "calm",
+  };
+}
+
+function normalizeMobileSettingsOverride(
+  parsed: Partial<MobileSettings>,
+): Partial<MobileSettings> {
+  const normalized = normalizeMobileSettings(parsed);
+  const allowed = new Set<keyof MobileSettings>([
+    "executionMode",
+    "quantization",
+    "voiceEnabled",
+    "autoSync",
+    "personaName",
+    "wakeWord",
+    "emotionMode",
+    "interactionSignal",
+  ]);
+  return Object.fromEntries(
+    Object.keys(parsed)
+      .filter((key): key is keyof MobileSettings =>
+        allowed.has(key as keyof MobileSettings),
+      )
+      .map((key) => [key, normalized[key]]),
+  ) as Partial<MobileSettings>;
+}
+
+function normalizeMobileSettingsLayers(value: unknown): MobileSettingsLayers {
+  if (!value || typeof value !== "object") return emptyMobileSettingsLayers();
+  const parsed = value as Partial<MobileSettingsLayers>;
+  const normalizeMap = (map: unknown) => {
+    if (!map || typeof map !== "object") return {};
+    return Object.fromEntries(
+      Object.entries(map).map(([key, settings]) => [
+        key.slice(0, 160),
+        normalizeMobileSettingsOverride(
+          (settings || {}) as Partial<MobileSettings>,
+        ),
+      ]),
+    );
+  };
+  return {
+    global: normalizeMobileSettingsOverride(
+      (parsed.global || {}) as Partial<MobileSettings>,
+    ),
+    project: normalizeMap(parsed.project),
+    agent: normalizeMap(parsed.agent),
+    session: normalizeMap(parsed.session),
+  };
+}
 
 function emptySnapshot(): MobileSnapshot {
   return {
@@ -205,33 +305,7 @@ export async function readMobileSettings(): Promise<MobileSettings> {
   try {
     const raw = await AsyncStorage.getItem(MOBILE_SETTINGS_KEY);
     const parsed = raw ? (JSON.parse(raw) as Partial<MobileSettings>) : {};
-    return {
-      ...defaultMobileSettings,
-      executionMode: parsed.executionMode === "yolo" ? "yolo" : "guided",
-      quantization:
-        parsed.quantization === "Q4_0" || parsed.quantization === "Q3_K_S"
-          ? parsed.quantization
-          : "Q4_K_M",
-      voiceEnabled: parsed.voiceEnabled === true,
-      autoSync: parsed.autoSync !== false,
-      personaName:
-        typeof parsed.personaName === "string" && parsed.personaName.trim()
-          ? parsed.personaName.trim().slice(0, 48)
-          : "Leo",
-      wakeWord:
-        typeof parsed.wakeWord === "string" && parsed.wakeWord.trim()
-          ? parsed.wakeWord.trim().slice(0, 48)
-          : "Leo",
-      emotionMode: parsed.emotionMode === "off" ? "off" : "explicit",
-      interactionSignal:
-        parsed.interactionSignal === "focused" ||
-        parsed.interactionSignal === "frustrated" ||
-        parsed.interactionSignal === "uncertain" ||
-        parsed.interactionSignal === "excited" ||
-        parsed.interactionSignal === "tired"
-          ? parsed.interactionSignal
-          : "calm",
-    };
+    return normalizeMobileSettings(parsed);
   } catch {
     return { ...defaultMobileSettings };
   }
@@ -239,6 +313,57 @@ export async function readMobileSettings(): Promise<MobileSettings> {
 
 export async function writeMobileSettings(settings: MobileSettings) {
   await AsyncStorage.setItem(MOBILE_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+export async function readMobileSettingsLayers(): Promise<MobileSettingsLayers> {
+  try {
+    const raw = await AsyncStorage.getItem(MOBILE_SETTINGS_LAYERS_KEY);
+    return normalizeMobileSettingsLayers(raw ? JSON.parse(raw) : null);
+  } catch {
+    return emptyMobileSettingsLayers();
+  }
+}
+
+export async function writeMobileSettingsLayers(layers: MobileSettingsLayers) {
+  await AsyncStorage.setItem(
+    MOBILE_SETTINGS_LAYERS_KEY,
+    JSON.stringify(normalizeMobileSettingsLayers(layers)),
+  );
+}
+
+export async function updateMobileScopedSettings(
+  scope: keyof MobileSettingsLayers,
+  id: string,
+  update: Partial<MobileSettings>,
+) {
+  if (!["global", "project", "agent", "session"].includes(scope))
+    throw new Error("Unknown mobile settings scope");
+  const layers = await readMobileSettingsLayers();
+  if (scope === "global") layers.global = { ...layers.global, ...update };
+  else {
+    const key = id.trim().slice(0, 160);
+    if (!key) throw new Error("Settings scope id is required");
+    layers[scope][key] = { ...(layers[scope][key] || {}), ...update };
+  }
+  await writeMobileSettingsLayers(layers);
+  return layers;
+}
+
+export function resolveMobileSettings(
+  base: MobileSettings,
+  layers: MobileSettingsLayers,
+  context: MobileSettingsContext = {},
+) {
+  const result = normalizeMobileSettings({ ...base, ...layers.global });
+  for (const [scope, id] of [
+    ["project", context.projectId],
+    ["agent", context.agentId],
+    ["session", context.sessionId],
+  ] as const) {
+    if (id && layers[scope][id])
+      Object.assign(result, normalizeMobileSettingsOverride(layers[scope][id]));
+  }
+  return normalizeMobileSettings(result);
 }
 
 export async function readQueuedOperations(): Promise<QueuedOperation[]> {

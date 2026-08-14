@@ -5,11 +5,15 @@ import {
   readSnapshot,
   readBiometricSetting,
   readMobileSettings,
+  readMobileSettingsLayers,
+  resolveMobileSettings,
   readQueuedOperations,
   removeQueuedOperation,
   updateQueuedOperation,
   writeBiometricSetting,
   writeMobileSettings,
+  writeMobileSettingsLayers,
+  updateMobileScopedSettings,
   writeCollaborationSessions,
 } from "./storage";
 import { createMobileCollaborationSession } from "./collaboration";
@@ -175,5 +179,34 @@ describe("mobile settings", () => {
       emotionMode: "off",
       interactionSignal: "frustrated",
     });
+  });
+
+  it("resolves persisted global, project, agent, and session overrides", async () => {
+    const base = await readMobileSettings();
+    await updateMobileScopedSettings("global", "default", {
+      interactionSignal: "focused",
+    });
+    await updateMobileScopedSettings("project", "project-a", {
+      emotionMode: "off",
+    });
+    await updateMobileScopedSettings("agent", "leo", {
+      personaName: "Commander Leo",
+    });
+    await updateMobileScopedSettings("session", "session-1", {
+      interactionSignal: "uncertain",
+    });
+    const layers = await readMobileSettingsLayers();
+    expect(
+      resolveMobileSettings(base, layers, {
+        projectId: "project-a",
+        agentId: "leo",
+        sessionId: "session-1",
+      }),
+    ).toMatchObject({
+      emotionMode: "off",
+      personaName: "Commander Leo",
+      interactionSignal: "uncertain",
+    });
+    await writeMobileSettingsLayers(layers);
   });
 });
