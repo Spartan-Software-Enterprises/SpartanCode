@@ -1,5 +1,25 @@
 const { withAppBuildGradle } = require('@expo/config-plugins');
 
+function createReleaseSigningBlock() {
+  return `signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            if (!keystorePropertiesFile.exists()) {
+                throw new GradleException('Release signing requires keystore.properties; refusing debug fallback')
+            }
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }`;
+}
+
 /** Keep release signing configuration in generated native projects. */
 module.exports = function withReleaseSigning(config) {
   return withAppBuildGradle(config, (mod) => {
@@ -26,27 +46,7 @@ android {`,
             keyPassword 'android'
         }
     }`;
-    const releaseSigning = `signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
-        }
-        release {
-            if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-            } else {
-                storeFile file('debug.keystore')
-                storePassword 'android'
-                keyAlias 'androiddebugkey'
-                keyPassword 'android'
-            }
-        }
-    }`;
+    const releaseSigning = createReleaseSigningBlock();
 
     if (contents.includes(debugSigning)) {
       contents = contents.replace(debugSigning, releaseSigning);
@@ -59,3 +59,5 @@ android {`,
     return mod;
   });
 };
+
+module.exports.createReleaseSigningBlock = createReleaseSigningBlock;
