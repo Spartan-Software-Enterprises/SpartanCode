@@ -75,12 +75,20 @@ function listRuntimeAdapters({
     const executableName = descriptor.executables?.find((name) =>
       executableResolver(name, environment),
     );
+    const executable = executableName
+      ? executableResolver(executableName, environment)
+      : null;
     return {
       ...descriptor,
       module: moduleName || null,
-      executable: executableName
-        ? executableResolver(executableName, environment)
-        : null,
+      executable,
+      provenance: moduleName
+        ? "node-module"
+        : executableName
+          ? environment.SPARTANCODE_LLAMA_CLI
+            ? "configured-path"
+            : "system-path"
+          : null,
       status: moduleName || executableName ? "available" : "unavailable",
     };
   });

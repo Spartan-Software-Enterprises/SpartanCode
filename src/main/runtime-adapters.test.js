@@ -14,6 +14,25 @@ test("runtime discovery reports unavailable optional runtimes honestly", () => {
   });
   assert.equal(adapters.length, 4);
   assert.ok(adapters.every((adapter) => adapter.status === "unavailable"));
+  assert.ok(adapters.every((adapter) => adapter.provenance === null));
+});
+
+test("runtime discovery reports executable provenance", () => {
+  const adapters = listRuntimeAdapters({
+    resolver: () => {
+      throw new Error("module missing");
+    },
+    executableResolver: () => "/opt/llama-cli",
+  });
+  assert.equal(adapters[0].provenance, "system-path");
+  const configured = listRuntimeAdapters({
+    resolver: () => {
+      throw new Error("module missing");
+    },
+    executableResolver: () => "/opt/llama-cli",
+    environment: { SPARTANCODE_LLAMA_CLI: "/opt/llama-cli" },
+  });
+  assert.equal(configured[0].provenance, "configured-path");
 });
 
 test("runtime registry invokes an installed adapter through the shared contract", async () => {

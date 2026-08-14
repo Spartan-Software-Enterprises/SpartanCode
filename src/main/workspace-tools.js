@@ -1,17 +1,38 @@
 const fs = require("fs");
 const path = require("path");
 
+function verifyWorkspace(workspacePath) {
+  if (!workspacePath)
+    return { verified: false, reason: "No workspace selected" };
+  try {
+    const root = path.resolve(workspacePath);
+    const stat = fs.statSync(root);
+    if (!stat.isDirectory())
+      return { verified: false, reason: "Workspace root is not a directory" };
+    const canonicalRoot = fs.realpathSync(root);
+    return {
+      verified: true,
+      root,
+      canonicalRoot,
+      symlinkedRoot: root !== canonicalRoot,
+    };
+  } catch {
+    return { verified: false, reason: "Workspace root is unavailable" };
+  }
+}
+
 function resolveInsideWorkspace(workspacePath, requestedPath = ".") {
   if (!workspacePath) throw new Error("No workspace selected");
-  const root = path.resolve(workspacePath);
+  const verification = verifyWorkspace(workspacePath);
+  if (!verification.verified) throw new Error(verification.reason);
+  const { root, canonicalRoot } = verification;
   const target = path.resolve(root, requestedPath);
   if (target !== root && !target.startsWith(`${root}${path.sep}`))
     throw new Error("Path escapes the approved workspace");
-  const resolvedRoot = fs.realpathSync(root);
   const resolvedTarget = fs.realpathSync(target);
   if (
-    resolvedTarget !== resolvedRoot &&
-    !resolvedTarget.startsWith(`${resolvedRoot}${path.sep}`)
+    resolvedTarget !== canonicalRoot &&
+    !resolvedTarget.startsWith(`${canonicalRoot}${path.sep}`)
   )
     throw new Error("Path escapes the approved workspace through a symlink");
   return target;
@@ -34,6 +55,7 @@ function readWorkspaceFile(workspacePath, requestedPath) {
 }
 
 module.exports = {
+  verifyWorkspace,
   resolveInsideWorkspace,
   listWorkspaceFiles,
   readWorkspaceFile,

@@ -91,7 +91,9 @@ behavior and a corresponding automated or documented verification path.
 - A tested runtime adapter contract and desktop IPC boundary for llama.cpp,
   MLC Chat, PocketPal, and WebLLM. Installed runtimes are invoked only when
   they expose the explicit `generate` contract; unavailable runtimes report a
-  typed result instead of being presented as ready.
+  typed result instead of being presented as ready. Runtime listings now also
+  expose whether an adapter came from a node module, system path, or explicit
+  configured path.
 - Reproducible release-evidence generation now records the Git commit,
   SHA-256 hashes for scanned artifacts, and a lockfile-derived third-party
   component inventory for desktop and Android release workflows.
@@ -158,6 +160,8 @@ behavior and a corresponding automated or documented verification path.
   bounded, tokenized `execFile` launches; the current standard security review
   recorded no reportable findings, with delegated-worker coverage explicitly
   documented as unavailable in this environment.
+- Workspace verification now records the canonical root and rejects missing,
+  non-directory, path-escape, and symlink-escape targets before file access.
 - Dependency review is documented in [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md):
   desktop production dependencies are clean, while Android has 18 transitive
   Expo/React Native toolchain findings that require a compatibility-tested

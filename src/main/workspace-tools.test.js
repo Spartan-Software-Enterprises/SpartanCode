@@ -7,7 +7,28 @@ const {
   listWorkspaceFiles,
   readWorkspaceFile,
   resolveInsideWorkspace,
+  verifyWorkspace,
 } = require("./workspace-tools");
+
+test("workspace verification records the canonical sandbox root", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-workspace-"),
+  );
+  try {
+    assert.deepEqual(verifyWorkspace(directory), {
+      verified: true,
+      root: directory,
+      canonicalRoot: fs.realpathSync(directory),
+      symlinkedRoot: false,
+    });
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+  assert.equal(
+    verifyWorkspace(path.join(directory, "missing")).verified,
+    false,
+  );
+});
 
 test("workspace tools stay inside the approved root", () => {
   const directory = fs.mkdtempSync(
