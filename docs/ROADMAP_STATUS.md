@@ -31,6 +31,9 @@ behavior and a corresponding automated or documented verification path.
   length limits, and truthful missing-runtime status through isolated IPC.
 - A privacy-network adapter reports Tor/Proton configuration without exposing
   credentials and refuses to silently reroute traffic.
+- Playwright browser requests can opt into a configured Tor SOCKS proxy; direct
+  browser traffic remains the default and invalid proxy configuration fails
+  closed.
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped
   Electron, renderer, and Android guidance; desktop Settings opens its official
   GitHub App login flow without storing CodeRabbit credentials.
