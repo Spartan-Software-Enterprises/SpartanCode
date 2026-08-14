@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ -z "${SPARTANCODE_REMOTE_HOST:-}" ]; then
+  remote_profile="${SPARTANCODE_REMOTE_PROFILE:-/data/data/com.termux/files/home/.config/spartancode/remote.env}"
+  if [ -r "$remote_profile" ]; then
+    # This file contains only the active host, user, and private-key path.
+    # Explicitly exported variables remain authoritative when present.
+    . "$remote_profile"
+  fi
+fi
+
 remote_host="${SPARTANCODE_REMOTE_HOST:-}"
 remote_dir="${SPARTANCODE_REMOTE_DIR:-/home/ubuntu/workspaces/SpartanCode}"
 remote_user="${SPARTANCODE_REMOTE_USER:-ubuntu}"

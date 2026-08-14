@@ -41,6 +41,11 @@ git status --short
 git pull --ff-only origin main
 ```
 
+`scripts/verify-sync.sh` automatically loads the device-local profile at
+`/data/data/com.termux/files/home/.config/spartancode/remote.env` when
+`SPARTANCODE_REMOTE_HOST` is not already exported. Explicit environment values
+remain authoritative, and the profile itself is never committed.
+
 If the worktree is not clean, preserve the local changes in a commit or a
 clearly named backup branch before pulling. Do not use `git reset --hard` or
 discard changes to make synchronization convenient.
