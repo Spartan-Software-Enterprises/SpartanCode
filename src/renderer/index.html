@@ -1583,6 +1583,49 @@
             the policy bypass in the mission activity log.
           </small>
         </div>
+        <details class="settings-advanced">
+          <summary>Scoped overrides</summary>
+          <p>
+            Keep global defaults simple, then override the model or execution
+            mode for one project, agent, or session.
+          </p>
+          <div class="setting-group">
+            <label for="settingsScope">Settings scope</label>
+            <select id="settingsScope">
+              <option value="global">Global</option>
+              <option value="project">Project</option>
+              <option value="agent">Agent</option>
+              <option value="session">Session</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopeId">Scope identifier</label>
+            <input id="settingsScopeId" maxlength="160" placeholder="default" />
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedModel">Scoped model override</label>
+            <input
+              id="settingsScopedModel"
+              maxlength="160"
+              placeholder="Leave unchanged"
+            />
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedExecution">Scoped execution mode</label>
+            <select id="settingsScopedExecution">
+              <option value="">Leave unchanged</option>
+              <option value="guided">Guided</option>
+              <option value="yolo">YOLO</option>
+            </select>
+          </div>
+          <button type="button" class="context-button" id="settingsScopedSave">
+            Save scoped override
+          </button>
+          <small
+            id="settingsScopedMessage"
+            style="display: block; color: var(--muted)"
+          ></small>
+        </details>
         <div class="toggle-row">
           <span
             ><strong>Voice command input</strong
@@ -1925,6 +1968,17 @@
       );
       const settingsSecureMessage = document.getElementById(
         "settingsSecureMessage",
+      );
+      const settingsScope = document.getElementById("settingsScope");
+      const settingsScopeId = document.getElementById("settingsScopeId");
+      const settingsScopedModel = document.getElementById(
+        "settingsScopedModel",
+      );
+      const settingsScopedExecution = document.getElementById(
+        "settingsScopedExecution",
+      );
+      const settingsScopedMessage = document.getElementById(
+        "settingsScopedMessage",
       );
       const settingsStatusRow = (label, value) =>
         `<div class="settings-runtime-item"><strong>${escapeHtml(label)}</strong><em>${escapeHtml(value)}</em></div>`;
@@ -2579,6 +2633,28 @@
             );
           } catch (error) {
             settingsSecureMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("settingsScopedSave")
+        .addEventListener("click", async () => {
+          const scope = settingsScope.value;
+          const id = settingsScopeId.value.trim() || "default";
+          const update = {};
+          if (settingsScopedModel.value.trim())
+            update.model = settingsScopedModel.value.trim();
+          if (settingsScopedExecution.value)
+            update.executionMode = settingsScopedExecution.value;
+          if (!Object.keys(update).length) {
+            settingsScopedMessage.textContent =
+              "Choose at least one override before saving.";
+            return;
+          }
+          try {
+            await window.spartanCode.updateScopedSettings(scope, id, update);
+            settingsScopedMessage.textContent = `${scope} override saved for ${id}.`;
+          } catch (error) {
+            settingsScopedMessage.textContent = error.message;
           }
         });
       document
