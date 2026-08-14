@@ -151,6 +151,7 @@ export default function App() {
   >("project");
   const [settingsScopeId, setSettingsScopeId] = useState("");
   const [settingsScopeMessage, setSettingsScopeMessage] = useState("");
+  const [settingsPreviewMessage, setSettingsPreviewMessage] = useState("");
   const [remoteGitStatus, setRemoteGitStatus] = useState("");
   const [remoteGitDiff, setRemoteGitDiff] = useState("");
   const [remoteGitCommitMessage, setRemoteGitCommitMessage] = useState("");
@@ -559,6 +560,23 @@ export default function App() {
     });
     setMobileSettings(resolved);
     setSettingsScopeMessage(`${settingsScope} settings loaded for ${id}.`);
+  }, [mobileSettings, settingsScope, settingsScopeId]);
+
+  const previewScopedMobileSettings = useCallback(async () => {
+    const id = settingsScope === "global" ? "default" : settingsScopeId.trim();
+    if (settingsScope !== "global" && !id) {
+      setSettingsPreviewMessage(`Enter a ${settingsScope} identifier first.`);
+      return;
+    }
+    const layers = await readMobileSettingsLayers();
+    const resolved = resolveMobileSettings(mobileSettings, layers, {
+      projectId: settingsScope === "project" ? id : undefined,
+      agentId: settingsScope === "agent" ? id : undefined,
+      sessionId: settingsScope === "session" ? id : undefined,
+    });
+    setSettingsPreviewMessage(
+      `${settingsScope} effective settings · ${resolved.model} · ${resolved.executionMode} · ${resolved.protocol} · ${resolved.provider}`,
+    );
   }, [mobileSettings, settingsScope, settingsScopeId]);
 
   const runRemoteGit = useCallback(
@@ -1541,6 +1559,17 @@ export default function App() {
               <Text style={styles.smallActionText}>Load scope</Text>
             </Pressable>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Preview effective scoped settings"
+            style={styles.secondary}
+            onPress={() => void previewScopedMobileSettings()}
+          >
+            <Text style={styles.secondaryText}>Preview effective settings</Text>
+          </Pressable>
+          {settingsPreviewMessage ? (
+            <Text style={styles.message}>{settingsPreviewMessage}</Text>
+          ) : null}
           <Text style={styles.message}>{settingsScopeMessage}</Text>
           <Text style={styles.missionText}>Remote Git (optional bridge)</Text>
           <Text style={styles.message}>

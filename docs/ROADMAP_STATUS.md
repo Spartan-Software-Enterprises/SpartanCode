@@ -119,6 +119,9 @@ current Implemented/Partial/Open counts.
 - Signed marketplace plugins now support verified staging, metadata-only
   activation, and matching deactivation that retains the opaque artifact.
   Executable artifact loading remains intentionally gated.
+- Android scoped settings now include a non-mutating effective-value preview,
+  matching the desktop hierarchy workflow; platform-specific physical
+  acceptance and complete field parity remain open.
 - The authenticated MCP Bridge exposes bounded Git status, redacted diff,
   stage, and explicit commit operations with separate read/write scopes and
   idempotent mutation handling for remote clients.
