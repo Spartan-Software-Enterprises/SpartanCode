@@ -39,6 +39,10 @@ const PROJECTS_KEY = "spartancode.mobile.projects.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
 
 export type MobileSettings = {
+  model: string;
+  protocol: "MCP Lite" | "MCP Bridge" | "Full MCP";
+  provider: string;
+  memoryEnabled: boolean;
   executionMode: "guided" | "yolo";
   quantization: "Q4_K_M" | "Q4_0" | "Q3_K_S";
   voiceEnabled: boolean;
@@ -64,6 +68,10 @@ export type MobileSettingsContext = {
 };
 
 const defaultMobileSettings: MobileSettings = {
+  model: "Qwen3-1.7B",
+  protocol: "MCP Lite",
+  provider: "local",
+  memoryEnabled: true,
   executionMode: "guided",
   quantization: "Q4_K_M",
   voiceEnabled: false,
@@ -86,6 +94,19 @@ function normalizeMobileSettings(
 ): MobileSettings {
   return {
     ...defaultMobileSettings,
+    model:
+      typeof parsed.model === "string" && parsed.model.trim()
+        ? parsed.model.trim().slice(0, 160)
+        : "Qwen3-1.7B",
+    protocol:
+      parsed.protocol === "MCP Bridge" || parsed.protocol === "Full MCP"
+        ? parsed.protocol
+        : "MCP Lite",
+    provider:
+      typeof parsed.provider === "string" && parsed.provider.trim()
+        ? parsed.provider.trim().slice(0, 48)
+        : "local",
+    memoryEnabled: parsed.memoryEnabled !== false,
     executionMode: parsed.executionMode === "yolo" ? "yolo" : "guided",
     quantization:
       parsed.quantization === "Q4_0" || parsed.quantization === "Q3_K_S"
@@ -118,6 +139,10 @@ function normalizeMobileSettingsOverride(
 ): Partial<MobileSettings> {
   const normalized = normalizeMobileSettings(parsed);
   const allowed = new Set<keyof MobileSettings>([
+    "model",
+    "protocol",
+    "provider",
+    "memoryEnabled",
     "executionMode",
     "quantization",
     "voiceEnabled",

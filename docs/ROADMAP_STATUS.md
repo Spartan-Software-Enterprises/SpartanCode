@@ -142,9 +142,13 @@ current Implemented/Partial/Open counts.
 - GitHub verification now also includes a bounded API 30 Android emulator job
   that provisions and boots an AVD with explicit SDK commands, builds the debug
   native binary, installs it, launches the package, and verifies package
-  registration on every push and pull request. SDK installation, emulator
+  registration on pull requests and manual full-verification dispatches. SDK installation, emulator
   startup, and package verification are individually bounded for diagnosable
   failure evidence.
+- CI minute protection keeps the expensive visual and emulator jobs on pull
+  requests and manual full-verification dispatches; ordinary `main` pushes run
+  the fast desktop and Android static gates. Documentation and screenshot-only
+  changes do not start the verification workflow.
 - Optional GitHub App foundation with installation-token repository access,
   least-privilege manifest defaults, and a Codespaces-compatible dev container
 - Desktop secure local vault with OS-backed key wrapping, AES-256-GCM records,

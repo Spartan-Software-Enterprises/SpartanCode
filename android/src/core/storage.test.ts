@@ -150,6 +150,10 @@ describe("mobile settings", () => {
 
   it("persists safe execution, model, voice, and sync preferences", async () => {
     expect(await readMobileSettings()).toMatchObject({
+      model: "Qwen3-1.7B",
+      protocol: "MCP Lite",
+      provider: "local",
+      memoryEnabled: true,
       executionMode: "guided",
       quantization: "Q4_K_M",
       voiceEnabled: false,
@@ -160,6 +164,10 @@ describe("mobile settings", () => {
       interactionSignal: "calm",
     });
     await writeMobileSettings({
+      model: "Phi-4-mini",
+      protocol: "MCP Bridge",
+      provider: "openai",
+      memoryEnabled: false,
       executionMode: "yolo",
       quantization: "Q4_0",
       voiceEnabled: true,
@@ -170,6 +178,10 @@ describe("mobile settings", () => {
       interactionSignal: "frustrated",
     });
     expect(await readMobileSettings()).toEqual({
+      model: "Phi-4-mini",
+      protocol: "MCP Bridge",
+      provider: "openai",
+      memoryEnabled: false,
       executionMode: "yolo",
       quantization: "Q4_0",
       voiceEnabled: true,

@@ -1,8 +1,14 @@
 name: SpartanCode verification
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - "android/ABOUT.md"
+      - "android/screenshots/**"
   pull_request:
     branches: [main]
 
@@ -28,6 +34,7 @@ jobs:
       - run: npm run build
 
   desktop-visual:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -72,6 +79,7 @@ jobs:
           path: dist/android-verification.json
 
   android-emulator-smoke:
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

@@ -128,6 +128,10 @@ export default function App() {
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [mobileSettings, setMobileSettings] = useState<MobileSettings>({
+    model: "Qwen3-1.7B",
+    protocol: "MCP Lite",
+    provider: "local",
+    memoryEnabled: true,
     executionMode: "guided",
     quantization: "Q4_K_M",
     voiceEnabled: false,
@@ -1242,6 +1246,92 @@ export default function App() {
             Approval state, audit activity, and validation remain visible in
             both modes.
           </Text>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>Default local model</Text>
+              <Text style={styles.missionMeta}>{mobileSettings.model}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change default local model"
+              style={styles.smallAction}
+              onPress={() => {
+                const options = ["Qwen3-1.7B", "Phi-4-mini", "Llama-3.2-3B"];
+                const next =
+                  options[
+                    (options.indexOf(mobileSettings.model) + 1) % options.length
+                  ];
+                void updateMobileSettings({ model: next });
+              }}
+            >
+              <Text style={styles.smallActionText}>Change</Text>
+            </Pressable>
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>Agent protocol</Text>
+              <Text style={styles.missionMeta}>{mobileSettings.protocol}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change agent protocol"
+              style={styles.smallAction}
+              onPress={() => {
+                const options: MobileSettings["protocol"][] = [
+                  "MCP Lite",
+                  "MCP Bridge",
+                  "Full MCP",
+                ];
+                const next =
+                  options[
+                    (options.indexOf(mobileSettings.protocol) + 1) %
+                      options.length
+                  ];
+                void updateMobileSettings({ protocol: next });
+              }}
+            >
+              <Text style={styles.smallActionText}>Change</Text>
+            </Pressable>
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>API provider</Text>
+              <Text style={styles.missionMeta}>{mobileSettings.provider}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change API provider"
+              style={styles.smallAction}
+              onPress={() => {
+                const options = ["local", "openai", "anthropic", "gemini"];
+                const next =
+                  options[
+                    (options.indexOf(mobileSettings.provider) + 1) %
+                      options.length
+                  ];
+                void updateMobileSettings({ provider: next });
+              }}
+            >
+              <Text style={styles.smallActionText}>Change</Text>
+            </Pressable>
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>Encrypted local memory</Text>
+              <Text style={styles.missionMeta}>
+                {mobileSettings.memoryEnabled ? "Enabled" : "Disabled"}
+              </Text>
+            </View>
+            <Switch
+              accessibilityLabel="Enable encrypted local memory"
+              value={mobileSettings.memoryEnabled}
+              onValueChange={(enabled) =>
+                void updateMobileSettings({ memoryEnabled: enabled })
+              }
+              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+              thumbColor="#f1f1f2"
+            />
+          </View>
           <View style={styles.toggleRow}>
             <View style={styles.missionBody}>
               <Text style={styles.missionText}>Local model quantization</Text>
