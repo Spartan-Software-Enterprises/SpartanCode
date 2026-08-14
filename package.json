@@ -13,7 +13,7 @@
     "roadmap:audit": "node scripts/roadmap-audit.js",
     "skills:sync": "node scripts/sync-external-skills.js",
     "plugin:validate": "node scripts/plugin-validator.js",
-    "check": "node --check src/main/main.js && node --check src/main/preload.js && node --check src/main/desktop-api.js",
+    "check": "node --check src/main/main.js && node --check src/main/preload.js && node --check src/main/desktop-api.js && node scripts/check-renderer-syntax.js",
     "release:manifest": "node scripts/release-manifest.js --output dist/release-evidence",
     "format:check": "prettier --check \"src/**/*.js\" \"src/**/*.html\"",
     "test": "npm run check && node --test src/main/*.test.js scripts/*.test.js && npm run format:check"

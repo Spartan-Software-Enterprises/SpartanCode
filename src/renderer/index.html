@@ -3059,12 +3059,18 @@
         .addEventListener("click", async () => {
           const message = document.getElementById("collaborationMessage");
           try {
-            const session = await window.spartanCode.createCollaborationSession({
-              name:
-                document.getElementById("collaborationSessionName").value.trim() ||
-                "Untitled session",
-              owner: document.getElementById("collaborationParticipant").value.trim() || "Leo",
-            });
+            const session = await window.spartanCode.createCollaborationSession(
+              {
+                name:
+                  document
+                    .getElementById("collaborationSessionName")
+                    .value.trim() || "Untitled session",
+                owner:
+                  document
+                    .getElementById("collaborationParticipant")
+                    .value.trim() || "Leo",
+              },
+            );
             await refreshCollaborationSessions();
             message.textContent = `Created ${session.name} at revision ${session.revision}.`;
           } catch (error) {
@@ -3085,8 +3091,9 @@
               session.id,
               {
                 name:
-                  document.getElementById("collaborationParticipant").value.trim() ||
-                  "Leo",
+                  document
+                    .getElementById("collaborationParticipant")
+                    .value.trim() || "Leo",
                 role: document.getElementById("collaborationRole").value,
               },
             );
@@ -3107,18 +3114,21 @@
           }
           try {
             const payloadText =
-              document.getElementById("collaborationEventPayload").value.trim() ||
-              "{}";
+              document
+                .getElementById("collaborationEventPayload")
+                .value.trim() || "{}";
             const eventPayload = JSON.parse(payloadText);
             const updated = await window.spartanCode.appendCollaborationEvent(
               session.id,
               {
                 type:
-                  document.getElementById("collaborationEventType").value.trim() ||
-                  "note.added",
+                  document
+                    .getElementById("collaborationEventType")
+                    .value.trim() || "note.added",
                 actor:
-                  document.getElementById("collaborationParticipant").value.trim() ||
-                  "Leo",
+                  document
+                    .getElementById("collaborationParticipant")
+                    .value.trim() || "Leo",
                 payload: eventPayload,
               },
               { expectedRevision: session.revision },
@@ -3131,7 +3141,6 @@
         });
       document
         .getElementById("settingsExportAudit")
-        .addEventListener("click", async () => {
         .addEventListener("click", async () => {
           const bundle = await window.spartanCode?.exportAuditLog();
           if (!bundle) return;
@@ -3187,7 +3196,8 @@
         try {
           const status = await window.spartanCode.getCodespacesStatus();
           if (!status.tokenConfigured) {
-            message.textContent = "Save a user-authorized token to manage Codespaces.";
+            message.textContent =
+              "Save a user-authorized token to manage Codespaces.";
             renderCodespaces([]);
             return;
           }
@@ -3204,10 +3214,12 @@
           const token = document.getElementById("githubUserToken").value;
           const message = document.getElementById("codespacesMessage");
           try {
-            if (!token.trim()) throw new Error("Enter a user-authorized token first");
+            if (!token.trim())
+              throw new Error("Enter a user-authorized token first");
             await window.spartanCode.saveSecureKey("GITHUB_USER_TOKEN", token);
             document.getElementById("githubUserToken").value = "";
-            message.textContent = "User token saved to encrypted local storage.";
+            message.textContent =
+              "User token saved to encrypted local storage.";
           } catch (error) {
             message.textContent = error.message;
           }
@@ -3224,7 +3236,9 @@
               .getElementById("codespaceRepositoryId")
               .value.trim();
             const ref = document.getElementById("codespaceRef").value.trim();
-            const machine = document.getElementById("codespaceMachine").value.trim();
+            const machine = document
+              .getElementById("codespaceMachine")
+              .value.trim();
             await window.spartanCode.createCodespace({
               repositoryId,
               ...(ref ? { ref } : {}),
@@ -3434,7 +3448,7 @@
               document.getElementById("apiProviderSelect").value || "local",
             memoryEnabled: document.getElementById("memoryEnabled").checked,
             personaName: document.getElementById("personaName").value,
-              wakeWord: document.getElementById("wakeWord").value,
+            wakeWord: document.getElementById("wakeWord").value,
             emotionMode: document.getElementById("emotionMode").value,
             interactionSignal:
               document.getElementById("interactionSignal").value,
