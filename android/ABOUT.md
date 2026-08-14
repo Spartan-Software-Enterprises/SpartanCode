@@ -52,6 +52,8 @@ The Android companion keeps high-value controls reachable on a phone:
 - model, storage, biometric, and runtime readiness diagnostics;
 - persisted app settings for guided/YOLO execution preference, local model
   quantization, voice input, and automatic sync on resume;
+- configurable local Leo persona name and wake word for consistent assistant
+  identity across the mobile experience;
 - workspace-safe bridge token cleanup, connection controls, remote planning,
   router guidance, and offline audit visibility;
 - app-private local project state with Android Keystore-backed bridge secrets;
