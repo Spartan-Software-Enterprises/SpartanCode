@@ -81,6 +81,10 @@ import {
   licensedMobileModels,
   listCompatibleModels,
 } from "./src/core/model-catalog";
+import {
+  searchHuggingFaceModels,
+  type HuggingFaceSearchResult,
+} from "./src/core/huggingface-catalog";
 import { createLocalPlanningEvidence } from "./src/core/local-mission";
 import {
   accessibilityDiagnostics,
@@ -147,6 +151,11 @@ export default function App() {
   const [hfModelLicense, setHfModelLicense] = useState("");
   const [hfModelUncensored, setHfModelUncensored] = useState(false);
   const [hfModelDistilled, setHfModelDistilled] = useState(false);
+  const [hfSearch, setHfSearch] = useState("");
+  const [hfSearchResults, setHfSearchResults] = useState<
+    readonly HuggingFaceSearchResult[]
+  >([]);
+  const [hfSearching, setHfSearching] = useState(false);
   const [feedbackKind, setFeedbackKind] =
     useState<MobileFeedback["kind"]>("bug");
   const [feedbackSummary, setFeedbackSummary] = useState("");
@@ -366,6 +375,33 @@ export default function App() {
     hfModelLicense,
     hfModelUncensored,
   ]);
+
+  const searchHuggingFace = useCallback(async () => {
+    setHfSearching(true);
+    try {
+      const results = await searchHuggingFaceModels(hfSearch);
+      setHfSearchResults(results);
+      setMessage(`${results.length} Hugging Face models found`);
+    } catch (error) {
+      setHfSearchResults([]);
+      setMessage(
+        error instanceof Error ? error.message : "Hugging Face search failed",
+      );
+    } finally {
+      setHfSearching(false);
+    }
+  }, [hfSearch]);
+
+  const selectHuggingFaceModel = useCallback(
+    (result: HuggingFaceSearchResult) => {
+      setHfModelId(result.model.id);
+      setHfModelLicense(result.model.license);
+      setHfModelUncensored(result.model.uncensored === true);
+      setHfModelDistilled(result.model.distilled === true);
+      setMessage(`${result.id} selected`);
+    },
+    [],
+  );
 
   const saveFeedback = useCallback(async () => {
     try {
@@ -1249,6 +1285,45 @@ export default function App() {
             checksum verification when a checksum is supplied.
           </Text>
           <Text style={styles.missionText}>Add a Hugging Face model</Text>
+          <TextInput
+            accessibilityLabel="Search Hugging Face models"
+            autoCapitalize="none"
+            onChangeText={setHfSearch}
+            placeholder="Search all community models"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={hfSearch}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Search Hugging Face models"
+            disabled={hfSearching}
+            style={styles.secondary}
+            onPress={() => void searchHuggingFace()}
+          >
+            <Text style={styles.secondaryText}>
+              {hfSearching ? "Searching…" : "Search Hugging Face"}
+            </Text>
+          </Pressable>
+          {hfSearchResults.map((result) => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Select ${result.id}`}
+              key={result.id}
+              onPress={() => selectHuggingFaceModel(result)}
+              style={styles.agentRow}
+            >
+              <View style={styles.missionBody}>
+                <Text style={styles.missionText}>{result.id}</Text>
+                <Text style={styles.missionMeta}>
+                  {result.model.license} · {result.downloads} downloads ·{" "}
+                  {result.model.uncensored ? "uncensored · " : ""}
+                  {result.model.distilled ? "distilled" : "community"}
+                </Text>
+              </View>
+              <Text style={styles.agentMode}>SELECT</Text>
+            </Pressable>
+          ))}
           <TextInput
             accessibilityLabel="Hugging Face model ID"
             autoCapitalize="none"

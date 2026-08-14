@@ -120,7 +120,9 @@ current Implemented/Partial/Open counts.
   verification/cleanup, and deletion. Android also accepts explicitly
   selected Hugging Face community metadata, preserving declared licenses and
   uncensored/distilled flags without applying the built-in license filter; the
-  phone UI can save and reload that metadata offline.
+  phone UI can search the bounded Hugging Face API, select results, and save
+  and reload that metadata offline. Search is HTTPS-only, result-bounded, and
+  fails closed on malformed or unavailable responses.
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, bounded desktop/Android home-server setup plans, AWS
   bootstrap/recovery scripts, and local/GitHub synchronization procedures.
