@@ -94,10 +94,10 @@ jobs:
           if [ -e /dev/kvm ]; then
             sudo chmod 666 /dev/kvm
           fi
-          timeout 900s sdkmanager "emulator" "system-images;android-30;google_apis;x86"
+          timeout 900s sdkmanager "emulator" "system-images;android-30;google_apis;x86_64"
           echo no | avdmanager create avd \
             --name spartancode-ci \
-            --package "system-images;android-30;google_apis;x86" \
+            --package "system-images;android-30;google_apis;x86_64" \
             --device pixel_2 \
             --force
           # The hosted runner has about 5 GB free in its temp volume; the
@@ -109,7 +109,7 @@ jobs:
           cd android
           npx expo prebuild --platform android --no-install
           cd android
-          ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86 --no-daemon
+          ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
           cd ../..
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
