@@ -162,9 +162,10 @@ tablet/landscape; offline cold start; reconnect and token expiry; bridge outage;
 snapshot migration/corruption; TalkBack and large text; reduced motion; low
 storage; interrupted sync/download; and process restart during an operation.
 
-The former AWS KVM host was terminated by its auto-termination timer and is no
-longer available. No emulator install, process-liveness, or API-level smoke
-check is claimed until a replacement host or local Android SDK produces those
-artifacts. TypeScript, Jest, formatting, Expo configuration, and desktop
-packaging are verified locally. Physical-device, tablet, TalkBack, emulator,
-and production-signing checks remain release-environment gates.
+The persistent AWS replacement host is available and has produced a successful
+API 35 native debug build after installing the Android SDK, NDK, CMake, and
+Java toolchain. It is a `t2.large` without `/dev/kvm`; default, Google APIs, and
+smaller software-only AVDs were attempted, but Android framework/package
+services did not become reliable under TCG. The pinned GitHub Actions emulator
+job remains the KVM-capable API-level smoke evidence. Physical-device, tablet,
+TalkBack, and production-signing checks remain release-environment gates.
