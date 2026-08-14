@@ -61,6 +61,19 @@ async function main() {
         path: path.join(outputDir, "desktop-settings-governance.png"),
         fullPage: true,
       });
+      for (const [label, filename] of [
+        ["Collaboration sessions", "desktop-settings-collaboration.png"],
+        ["Signed plugin marketplace", "desktop-settings-marketplace.png"],
+      ]) {
+        const section = page.locator("#settingsForm details", {
+          hasText: label,
+        });
+        await section.locator("summary").click();
+        await page.screenshot({
+          path: path.join(outputDir, filename),
+          fullPage: true,
+        });
+      }
       await page.locator("#settingsForm").evaluate((element) => {
         element.scrollTop = 0;
       });
