@@ -87,16 +87,12 @@ jobs:
           emulator_pid=$!
           cleanup() { kill "$emulator_pid" 2>/dev/null || true; }
           trap cleanup EXIT
-          for attempt in $(seq 1 300); do
-            if ! kill -0 "$emulator_pid" 2>/dev/null; then
-              cat "${RUNNER_TEMP}/spartancode-emulator.log"
-              exit 1
-            fi
-            if [ "$(adb get-state 2>/dev/null || true)" = "device" ] &&
-              [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)" = "1" ]; then
-              break
-            fi
-            if [ "$attempt" -eq 300 ]; then
+          adb start-server
+          timeout 300s adb -s emulator-5554 wait-for-device
+          for attempt in $(seq 1 120); do
+            boot_completed="$(timeout 5s adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
+            if [ "$boot_completed" = "1" ]; then break; fi
+            if [ "$attempt" -eq 120 ]; then
               cat "${RUNNER_TEMP}/spartancode-emulator.log"
               exit 1
             fi
