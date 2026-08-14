@@ -68,6 +68,7 @@ timeout 120s adb install -r "$apk_path"
 timeout 30s adb shell monkey -p com.spartansoftware.spartancode 1
 timeout 30s adb shell dumpsys package com.spartansoftware.spartancode |
   grep -q com.spartansoftware.spartancode
+sleep 5
 adb exec-out screencap -p >"$screen_path"
 file "$screen_path"
 echo "KVM emulator smoke passed"
