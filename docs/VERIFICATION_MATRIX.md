@@ -26,4 +26,6 @@ download, emulator startup, and package verification phases are bounded
 separately so a failed environment gate produces actionable evidence.
 Physical TalkBack/gesture checks, additional API-level coverage, and signed
 artifacts remain separate release-environment evidence and must be attached
-when available.
+when available. AWS Dev release verification has produced signed AAB and APK
+artifacts with the release-owned key; the private keystore remains outside the
+repository.

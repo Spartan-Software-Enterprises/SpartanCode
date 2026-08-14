@@ -30,6 +30,13 @@ The generated files are ignored build outputs and must be attached to the
 release alongside the signed artifacts. The current repository intentionally
 does not contain a keystore, signing secret, or signed production artifact.
 
+The release environment now has a dedicated `spartancode-upload` 4096-bit RSA
+key, stored outside the repository and mirrored through the four GitHub Actions
+secrets below. It was validated on the AWS Dev build host by producing both a
+release AAB and APK; `apksigner` verified the APK with Android Signature Scheme
+v2. Keep the private keystore and passwords in the release secret store and
+rotate them only through a planned application-signing migration.
+
 ## GitHub Actions release path
 
 `.github/workflows/android-release.yml` runs only for a manual dispatch or a

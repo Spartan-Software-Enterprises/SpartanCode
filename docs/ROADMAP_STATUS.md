@@ -202,8 +202,10 @@ current Implemented/Partial/Open counts.
   environment; Android emulator smoke checks are delegated to the pinned
   GitHub Actions API 30 job because no Android SDK/emulator is currently
   available locally.
-- Android Expo configuration and native release automation are present, but a
-  signed artifact requires release-owned Android credentials.
+- Android Expo configuration and native release automation are present. A
+  dedicated release key is configured in the GitHub Actions secret store and
+  was validated on AWS by producing signed AAB/APK artifacts; the private
+  keystore remains outside the repository.
 - AWS validation is available on the persistent replacement host with a
   512-GiB root volume, default VPC security group only, stop/termination
   protection, a verified `origin/main` synchronization timer, installed Java/
@@ -225,9 +227,8 @@ current Implemented/Partial/Open counts.
   low-storage/interrupted-download/process-restart acceptance, and tablet
   hardware validation.
 - Signed production AAB/APK and legal/privacy review remain release-environment
-  gates. The generator and CI handoff are implemented and locally validated;
-  the workflow still requires real release secrets and its signed artifacts
-  must be reviewed for the target distribution.
+  gates. The release key and signing workflow are verified; distribution review
+  and legal/privacy approval are still required.
 - Physical Android collaboration/gesture acceptance, cross-modal expansion,
   provider-specific OIDC account lifecycle/administration, marketplace artifact
   installation/activation/updates, and a mature external plugin marketplace.
