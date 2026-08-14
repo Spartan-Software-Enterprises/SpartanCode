@@ -30,15 +30,18 @@ function createMissionStore(filePath) {
     try {
       const parsed = JSON.parse(fs.readFileSync(candidatePath, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
-        throw new Error("Workspace state must be a JSON object");
+        return null;
       return parsed;
     } catch (error) {
       if (error.code === "ENOENT") return null;
-      return null;
+      if (error instanceof SyntaxError) return null;
+      throw error;
     }
   };
-  state = readState(filePath) || readState(backupPath) || emptyState();
-  if (!readState(filePath) && readState(backupPath)) {
+  const primaryState = readState(filePath);
+  const backupState = readState(backupPath);
+  state = primaryState || backupState || emptyState();
+  if (!primaryState && backupState) {
     fs.copyFileSync(backupPath, filePath);
   }
 
