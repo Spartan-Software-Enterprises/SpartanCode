@@ -94,6 +94,10 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, AWS bootstrap/recovery scripts, and local/GitHub synchronization
   procedures.
+- Mosh now has a tested client lifecycle contract with explicit connecting,
+  ready, error, ended, stop, and server-requirement states. The host still
+  must provide `mosh-server` and reachable UDP ports before a real session can
+  be accepted.
 - Antigravity-compatible workspace custom-agent discovery for Researcher,
   Implementer, Verifier, and Sync Guardian roles.
 - A tested runtime adapter contract and desktop IPC boundary for llama.cpp,

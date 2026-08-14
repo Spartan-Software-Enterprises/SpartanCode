@@ -1,5 +1,5 @@
 const { Client } = require("ssh2");
-const { spawnSync } = require("node:child_process");
+const { spawn, spawnSync } = require("node:child_process");
 
 function commandAvailable(command, runner = spawnSync) {
   const result = runner(command, [], { stdio: "ignore" });
@@ -31,6 +31,72 @@ function buildMoshArgs(config = {}) {
   return config.port && config.port !== 22
     ? [`--ssh=ssh -p ${Number(config.port)}`, "--", target]
     : ["--", target];
+}
+
+function createMoshSession(config = {}, { spawnProcess = spawn } = {}) {
+  const validation = validateRemoteConfig({ ...config, transport: "mosh" });
+  if (!validation.valid)
+    throw new Error(
+      `Invalid Mosh configuration: ${[...validation.missing, ...validation.invalid].join(", ")}`,
+    );
+  const args = buildMoshArgs(config);
+  let child = null;
+  let state = "idle";
+  let error = null;
+  const listeners = new Set();
+  const emit = () => listeners.forEach((listener) => listener(snapshot()));
+  const snapshot = () => ({
+    transport: "mosh",
+    state,
+    host: config.host,
+    username: config.username,
+    port: config.port || 22,
+    args: [...args],
+    error,
+    serverRequirement:
+      "The remote host must provide mosh-server and reachable UDP ports.",
+  });
+  const session = {
+    start() {
+      if (state !== "idle" && state !== "ended" && state !== "error")
+        return snapshot();
+      error = null;
+      state = "connecting";
+      child = spawnProcess("mosh", args, { stdio: "pipe" });
+      child.once("spawn", () => {
+        state = "ready";
+        emit();
+      });
+      child.once("error", (value) => {
+        error = String(value?.message || value);
+        state = "error";
+        emit();
+      });
+      child.once("close", (code, signal) => {
+        if (state === "ended") return;
+        if (state !== "error") state = "ended";
+        error = code || signal ? `Mosh exited (${code ?? signal})` : null;
+        emit();
+      });
+      emit();
+      return snapshot();
+    },
+    stop() {
+      if (!child || state === "ended") return snapshot();
+      state = "ended";
+      child.kill();
+      emit();
+      return snapshot();
+    },
+    onChange(listener) {
+      if (typeof listener !== "function")
+        throw new Error("Listener is required");
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    snapshot,
+  };
+  return session;
 }
 
 function createRemoteConnection(config) {
@@ -96,6 +162,7 @@ function validateRemoteConfig(config = {}) {
 module.exports = {
   buildMoshArgs,
   commandAvailable,
+  createMoshSession,
   createRemoteConnection,
   getTransportStatus,
   validateRemoteConfig,
