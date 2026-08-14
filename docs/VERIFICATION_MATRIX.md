@@ -13,7 +13,7 @@ Run it from the repository root:
 node android/scripts/verify-matrix.js --output dist/android-verification.json
 ```
 
-GitHub Actions runs the same baseline and a bounded API 35 Android emulator
+GitHub Actions runs the same baseline and a bounded API 30 Android emulator
 smoke job on every push and pull request. The smoke job provisions the AVD with
 the Android SDK tools, starts it headlessly with explicit boot bounds, builds
 the debug native binary, installs it, launches the application, and verifies the

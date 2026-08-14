@@ -107,7 +107,7 @@ behavior and a corresponding automated or documented verification path.
 - GitHub verification now includes a pinned Electron/Playwright visual job that
   exercises every desktop navigation view and the mission composer, uploads
   screenshot evidence, and fails on renderer errors.
-- GitHub verification now also includes a bounded API 35 Android emulator job
+- GitHub verification now also includes a bounded API 30 Android emulator job
   that provisions and boots an AVD with explicit SDK commands, builds the debug
   native binary, installs it, launches the package, and verifies package
   registration on every push and pull request.
@@ -172,7 +172,7 @@ behavior and a corresponding automated or documented verification path.
 
 - Linux desktop packaging has been exercised in the local validation
   environment; Android emulator smoke checks are delegated to the pinned
-  GitHub Actions API 35 job because no Android SDK/emulator is currently
+  GitHub Actions API 30 job because no Android SDK/emulator is currently
   available locally.
 - Android Expo configuration and native release automation are present, but a
   signed artifact requires release-owned Android credentials.
