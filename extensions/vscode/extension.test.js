@@ -3,6 +3,8 @@ const test = require("node:test");
 const {
   bridgeRequestOptions,
   boundedSelection,
+  boundedNote,
+  collaborationEventsRoute,
   snapshotPath,
   summarizeSnapshot,
 } = require("./extension");
@@ -43,4 +45,14 @@ test("snapshot summaries expose active work and pending approvals", () => {
     }),
     { missions: 3, activeMissions: 1, pendingApprovals: 1, artifacts: 1 },
   );
+});
+
+test("collaboration commands bound notes and encode session routes", () => {
+  assert.equal(boundedNote("  hello  "), "hello");
+  assert.equal(boundedNote("x".repeat(5_000)).length, 4_000);
+  assert.equal(
+    collaborationEventsRoute("session with spaces"),
+    "/v1/collaboration/sessions/session%20with%20spaces/events",
+  );
+  assert.throws(() => collaborationEventsRoute(""), /invalid/);
 });

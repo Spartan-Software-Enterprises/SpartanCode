@@ -13,6 +13,10 @@ Commands:
   approvals, and artifact counts from the authenticated snapshot route.
 - `SpartanCode: Start Mission From Selection` queues the selected text through
   the bridge’s normal mission and approval policy.
+- `SpartanCode: List Collaboration Sessions` reads authenticated session
+  summaries through the bridge.
+- `SpartanCode: Append Collaboration Note` appends a revision-checked note as
+  a joined participant; conflicts remain visible as bridge errors.
 
 Set `spartancode.bridgeUrl` to the trusted local/private bridge URL. Full
 editor parity, live collaboration UI, and marketplace distribution remain

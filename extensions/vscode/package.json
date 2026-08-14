@@ -41,6 +41,14 @@
       {
         "command": "spartancode.startMissionFromSelection",
         "title": "SpartanCode: Start Mission From Selection"
+      },
+      {
+        "command": "spartancode.listCollaborationSessions",
+        "title": "SpartanCode: List Collaboration Sessions"
+      },
+      {
+        "command": "spartancode.appendCollaborationNote",
+        "title": "SpartanCode: Append Collaboration Note"
       }
     ]
   }

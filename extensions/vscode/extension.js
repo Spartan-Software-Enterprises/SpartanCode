@@ -100,6 +100,19 @@ function summarizeSnapshot(snapshot = {}) {
   };
 }
 
+function collaborationEventsRoute(sessionId) {
+  const id = String(sessionId || "").trim();
+  if (!id || id.length > 120)
+    throw new Error("Collaboration session id is invalid");
+  return `/v1/collaboration/sessions/${encodeURIComponent(id)}/events`;
+}
+
+function boundedNote(value) {
+  return String(value || "")
+    .trim()
+    .slice(0, 4_000);
+}
+
 async function activate(context) {
   const vscode = require("vscode");
   const output = vscode.window.createOutputChannel("SpartanCode");
@@ -196,12 +209,91 @@ async function activate(context) {
       vscode.window.showInformationMessage(`SpartanCode: ${message}`);
     }),
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "spartancode.listCollaborationSessions",
+      async () => {
+        const result = await requestBridge(
+          bridgeUrl(),
+          "/v1/collaboration/sessions",
+          await token(),
+        );
+        const sessions = Array.isArray(result.sessions) ? result.sessions : [];
+        const message = sessions.length
+          ? sessions
+              .map(
+                (session) => `${session.name} · revision ${session.revision}`,
+              )
+              .join("\n")
+          : "No collaboration sessions available.";
+        output.appendLine(`Collaboration sessions:\n${message}`);
+        vscode.window.showInformationMessage(message);
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "spartancode.appendCollaborationNote",
+      async () => {
+        const result = await requestBridge(
+          bridgeUrl(),
+          "/v1/collaboration/sessions",
+          await token(),
+        );
+        const sessions = Array.isArray(result.sessions) ? result.sessions : [];
+        if (!sessions.length)
+          throw new Error("No collaboration sessions are available.");
+        const choice = await vscode.window.showQuickPick(
+          sessions.map((session) => ({
+            label: session.name,
+            description: `revision ${session.revision}`,
+            session,
+          })),
+          { placeHolder: "Choose a collaboration session" },
+        );
+        if (!choice) return;
+        const note = boundedNote(
+          await vscode.window.showInputBox({
+            prompt: "Collaboration note",
+            ignoreFocusOut: true,
+          }),
+        );
+        if (!note) throw new Error("Collaboration note is empty");
+        const authorId = boundedNote(
+          await vscode.window.showInputBox({
+            prompt: "Joined participant ID",
+            value: "vscode",
+          }),
+        );
+        if (!authorId) throw new Error("Participant ID is required");
+        await requestBridge(
+          bridgeUrl(),
+          collaborationEventsRoute(choice.session.id),
+          await token(),
+          "POST",
+          {
+            event: {
+              authorId,
+              type: "vscode.note",
+              payload: { text: note },
+            },
+            options: { expectedRevision: choice.session.revision },
+          },
+        );
+        vscode.window.showInformationMessage("Collaboration note appended.");
+      },
+    ),
+  );
 }
 
 module.exports = {
   activate,
   bridgeRequestOptions,
   boundedSelection,
+  boundedNote,
+  collaborationEventsRoute,
   snapshotPath,
   summarizeSnapshot,
 };
