@@ -15,6 +15,7 @@ node android/scripts/verify-matrix.js --output dist/android-verification.json
 node scripts/verify-android-evidence.js --report dist/android-verification.json
 node scripts/release-index.js \
   --android-verification dist/android-verification.json \
+  --visual-result release-evidence/desktop-visual/result.json \
   --output dist/release-index.json
 ```
 

@@ -22,6 +22,15 @@ test("release index preserves incomplete gates and binds Android evidence to the
         "Committed visual assets",
       ].map((label) => ({ label, status: "pass" })),
     },
+    visualResult: {
+      commit,
+      views: ["home", "projects", "agents", "artifacts", "settings"],
+      screenshots: Array.from(
+        { length: 11 },
+        (_, index) => `screen-${index}.png`,
+      ),
+      errors: [],
+    },
   });
   assert.equal(index.releaseCommit, commit);
   assert.equal(index.status, "INCOMPLETE");
@@ -31,6 +40,10 @@ test("release index preserves incomplete gates and binds Android evidence to the
   );
   assert.equal(
     index.gates.find((gate) => gate.name === "Android baseline").status,
+    "PASS",
+  );
+  assert.equal(
+    index.gates.find((gate) => gate.name === "Desktop visual smoke").status,
     "PASS",
   );
   assert.equal(

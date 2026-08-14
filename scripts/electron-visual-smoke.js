@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { _electron: electron } = require("playwright");
+const { execFileSync } = require("node:child_process");
 
 const outputDir =
   process.env.SPARTANCODE_VISUAL_OUTPUT || "/tmp/spartancode-visual";
@@ -132,6 +133,15 @@ async function main() {
   await page.locator("#closePreview").click();
 
   const result = {
+    commit: (() => {
+      try {
+        return execFileSync("git", ["rev-parse", "HEAD"], {
+          encoding: "utf8",
+        }).trim();
+      } catch {
+        return "unknown";
+      }
+    })(),
     title,
     identity,
     views,

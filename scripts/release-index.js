@@ -71,7 +71,28 @@ function androidGate(verification) {
   );
 }
 
-function buildIndex({ verification, target }) {
+function visualGate(visualResult) {
+  if (!visualResult)
+    return gate("SKIP", "Visual smoke result was not supplied");
+  if (visualResult.commit !== commit())
+    return gate("FAIL", "Visual smoke result is tied to a different commit");
+  if (!Array.isArray(visualResult.views) || visualResult.views.length < 5)
+    return gate("FAIL", "Visual smoke result is missing required views");
+  if (
+    !Array.isArray(visualResult.screenshots) ||
+    visualResult.screenshots.length < 11
+  )
+    return gate("FAIL", "Visual smoke result is missing required screenshots");
+  if (Array.isArray(visualResult.errors) && visualResult.errors.length)
+    return gate("FAIL", "Visual smoke reported renderer errors");
+  return gate(
+    "PASS",
+    "Visual smoke passed with navigation and menu evidence",
+    visualResult.screenshots,
+  );
+}
+
+function buildIndex({ verification, visualResult, target }) {
   const android = androidGate(verification);
   const checks = {
     "Canonical source": gate(
@@ -79,10 +100,7 @@ function buildIndex({ verification, target }) {
       "Run scripts/verify-sync.sh for synchronized source evidence",
     ),
     "Desktop baseline": gate("SKIP", "Run npm test in the release environment"),
-    "Desktop visual smoke": gate(
-      "SKIP",
-      "Run the Playwright visual smoke suite and review screenshots",
-    ),
+    "Desktop visual smoke": visualGate(visualResult),
     "Android baseline": android,
     "KVM emulator": gate(
       "SKIP",
@@ -122,6 +140,7 @@ function buildIndex({ verification, target }) {
 
 function main(argv = process.argv.slice(2)) {
   const verificationPath = argument(argv, "--android-verification", null);
+  const visualPath = argument(argv, "--visual-result", null);
   const output = path.resolve(
     argument(argv, "--output", path.join(root, "dist", "release-index.json")),
   );
@@ -132,7 +151,10 @@ function main(argv = process.argv.slice(2)) {
       fs.readFileSync(path.resolve(verificationPath), "utf8"),
     );
   }
-  const index = buildIndex({ verification, target });
+  const visualResult = visualPath
+    ? JSON.parse(fs.readFileSync(path.resolve(visualPath), "utf8"))
+    : null;
+  const index = buildIndex({ verification, visualResult, target });
   fs.mkdirSync(path.dirname(output), { recursive: true });
   fs.writeFileSync(output, `${JSON.stringify(index, null, 2)}\n`);
   console.log(

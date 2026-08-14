@@ -139,6 +139,10 @@ current Implemented/Partial/Open counts.
 - Desktop runtime requests can now resolve a ready, verified cached model by
   model ID into the existing local GGUF runtime boundary; unavailable or
   metadata-only entries fail closed instead of being treated as runnable.
+- The Playwright Electron visual smoke suite now records its commit, views,
+  warnings, renderer errors, and screenshot inventory in `result.json`; the
+  release-index generator can promote that gate to `PASS` only when the result
+  matches the release commit and contains the required evidence.
 - `scripts/release-index.js` now generates a commit-bound machine-readable beta
   gate index, preserves `PASS`/`SKIP`/`FAIL` states, and fails closed when
   Android verification evidence belongs to another commit. External release

@@ -102,6 +102,7 @@ Generate the machine-readable index from the current commit with:
 ```sh
 node scripts/release-index.js \
   --android-verification dist/android-verification.json \
+  --visual-result release-evidence/desktop-visual/result.json \
   --target "SpartanCode beta" \
   --output release-evidence/release-index.json
 ```
