@@ -222,6 +222,13 @@ Future game-development planning is documented under
 [`docs/future-development/`](docs/future-development/) and does not change the
 current implementation scope.
 
+Major coding-program extension and connector compatibility is specified in
+[`docs/EXTENSION_CONNECTOR_COMPATIBILITY.md`](docs/EXTENSION_CONNECTOR_COMPATIBILITY.md).
+The compatibility layer covers VS Code-compatible tools, JetBrains/Android
+Studio, Visual Studio, Eclipse, Xcode, Neovim/Vim, Emacs, Sublime, Zed,
+terminal coding agents, and developer-service connectors with explicit
+capability and runtime boundaries.
+
 Android bundles the same core roles and remains fully usable without the desktop
 application, an MCP Bridge, or network access. A bridge is an optional route
 for remote execution and synchronization only; local planning, queueing,

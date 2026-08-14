@@ -94,6 +94,45 @@ function verifyMarketplaceIndex(index, publicKey) {
   return validated;
 }
 
+function marketplaceEntryKey(manifest) {
+  return [
+    manifest.id,
+    manifest.version,
+    manifest.sourceUrl,
+    manifest.artifactSha256,
+  ].join("|");
+}
+
+function createMarketplaceTrustRegistry() {
+  const entries = new Map();
+  return {
+    remember(index) {
+      if (!index || !Array.isArray(index.plugins))
+        throw new Error("A verified marketplace index is required");
+      for (const plugin of index.plugins) {
+        entries.set(marketplaceEntryKey(plugin), canonicalize(plugin));
+      }
+      return index;
+    },
+    resolve(manifest) {
+      const validated = validateMarketplaceIndex({
+        schemaVersion: 1,
+        issuer: "ipc-entry",
+        plugins: [manifest],
+      }).plugins[0];
+      const trusted = entries.get(marketplaceEntryKey(validated));
+      if (!trusted || trusted !== canonicalize(validated))
+        throw new Error(
+          "Marketplace plugin must come from a previously verified index",
+        );
+      return validated;
+    },
+    clear() {
+      entries.clear();
+    },
+  };
+}
+
 async function fetchMarketplaceIndex(
   url,
   { fetchImpl = globalThis.fetch, publicKey } = {},
@@ -294,6 +333,7 @@ module.exports = {
   MAX_ENTRIES,
   MAX_ARTIFACT_BYTES,
   canonicalize,
+  createMarketplaceTrustRegistry,
   downloadMarketplaceArtifact,
   activateMarketplacePlugin,
   deactivateMarketplacePlugin,

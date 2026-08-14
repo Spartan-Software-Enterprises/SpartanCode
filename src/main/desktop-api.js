@@ -44,6 +44,7 @@ const {
   activateMarketplacePlugin,
   deactivateMarketplacePlugin,
   fetchMarketplaceIndex,
+  createMarketplaceTrustRegistry,
 } = require("./plugin-marketplace");
 const { createMarketplacePluginRunner } = require("./plugin-runner");
 const { exportAuditLog } = require("./audit-export");
@@ -112,6 +113,7 @@ function registerDesktopApi({
     protonPassProvider,
   });
   const privacyNetwork = createPrivacyNetwork();
+  const marketplaceTrust = createMarketplaceTrustRegistry();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
   ipcMain.handle("browser:status", () => browserAutomation.status());
@@ -365,32 +367,36 @@ function registerDesktopApi({
   ipcMain.handle("plugins:list", () =>
     listPlugins(store.snapshot().settings.workspacePath),
   );
-  ipcMain.handle("plugins:marketplace", (_event, url, publicKey) => {
+  ipcMain.handle("plugins:marketplace", async (_event, url, publicKey) => {
     if (typeof url !== "string" || url.length > 2048)
       throw new Error("Marketplace URL is required and must be bounded");
     if (typeof publicKey !== "string" || publicKey.length > 16 * 1024)
       throw new Error(
         "Marketplace verification key is required and must be bounded",
       );
-    return fetchMarketplaceIndex(url, { publicKey });
+    const index = await fetchMarketplaceIndex(url, { publicKey });
+    marketplaceTrust.remember(index);
+    return index;
   });
   ipcMain.handle("plugins:download", (_event, manifest) => {
     if (!marketplaceDir) throw new Error("Marketplace staging is unavailable");
-    return downloadMarketplaceArtifact(manifest, {
+    return downloadMarketplaceArtifact(marketplaceTrust.resolve(manifest), {
       destinationDir: marketplaceDir,
     });
   });
   ipcMain.handle("plugins:activate", (_event, manifest) => {
     if (!marketplaceDir) throw new Error("Marketplace staging is unavailable");
     const workspacePath = store.snapshot().settings.workspacePath;
-    return activateMarketplacePlugin(manifest, {
+    return activateMarketplacePlugin(marketplaceTrust.resolve(manifest), {
       stagingDir: marketplaceDir,
       workspacePath,
     });
   });
   ipcMain.handle("plugins:deactivate", (_event, manifest) => {
     const workspacePath = store.snapshot().settings.workspacePath;
-    return deactivateMarketplacePlugin(manifest, { workspacePath });
+    return deactivateMarketplacePlugin(marketplaceTrust.resolve(manifest), {
+      workspacePath,
+    });
   });
   ipcMain.handle("plugins:run", (_event, manifest, input) => {
     if (!marketplaceDir) throw new Error("Marketplace staging is unavailable");
@@ -398,7 +404,7 @@ function registerDesktopApi({
     return createMarketplacePluginRunner({
       stagingDir: marketplaceDir,
       workspacePath,
-    }).run(manifest, input);
+    }).run(marketplaceTrust.resolve(manifest), input);
   });
   ipcMain.handle("models:list", (_event, options) =>
     listAvailableModels(options),

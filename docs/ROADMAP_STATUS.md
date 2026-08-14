@@ -227,9 +227,17 @@ current Implemented/Partial/Open counts.
 - Desktop can fetch a bounded, HTTPS-only, Ed25519-signed marketplace index
   through isolated IPC. Entries require explicit license, safe capabilities,
   source URL, and artifact SHA-256 fields. A selected entry can be downloaded
-  into a bounded SHA-256-verified staging cache; extraction, activation, update
-  replacement, and execution remain review gates. The index contract is
-  documented in `docs/PLUGIN_MARKETPLACE.md`.
+  into a bounded SHA-256-verified staging cache; the main process binds
+  download, activation, deactivation, and execution to the exact normalized
+  entry from the verified index. Extraction, update replacement, and
+  execution remain review gates. The index contract is documented in
+  `docs/PLUGIN_MARKETPLACE.md`.
+- Major coding-program extension and connector compatibility is now specified
+  for VS Code-compatible tools, JetBrains/Android Studio, Visual Studio,
+  Eclipse, Xcode, Neovim/Vim, Emacs, Sublime, Zed, terminal coding agents,
+  and developer-service connectors. Adapter implementation and ecosystem
+  governance remain partial; see
+  `docs/EXTENSION_CONNECTOR_COMPATIBILITY.md`.
 - Desktop audit export now emits bounded, credential-redacted, SHA-256-verified
   governance bundles through isolated IPC.
 - The authenticated MCP Bridge also exposes the same redacted audit bundle for

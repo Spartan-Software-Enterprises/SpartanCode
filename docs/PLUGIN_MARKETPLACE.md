@@ -42,3 +42,11 @@ matching workspace manifest and dedicated child process. The runner uses Node's 
 addons and child processes, uses no shell, passes a sanitized environment,
 caps JSON input/output, and terminates after 15 seconds. Human review and
 explicit activation remain required for executable behavior.
+
+The desktop main process retains the exact normalized entries from the most
+recently verified index. Download, activation, deactivation, and execution
+IPC calls must match one of those entries byte-for-byte after normalization;
+renderer-supplied or modified manifests are rejected. Verification is scoped
+to the current process session, so a restart requires fetching and verifying
+the index again. This provenance binding is part of the security contract and
+must be covered by negative tests before marketplace changes are released.

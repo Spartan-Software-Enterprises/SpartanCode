@@ -6,6 +6,7 @@ const path = require("node:path");
 const test = require("node:test");
 const {
   canonicalize,
+  createMarketplaceTrustRegistry,
   downloadMarketplaceArtifact,
   activateMarketplacePlugin,
   deactivateMarketplacePlugin,
@@ -79,6 +80,30 @@ test("marketplace indexes verify an Ed25519 signature and preserve metadata only
     },
   );
   assert.equal(fetched.plugins[0].id, "review-persona");
+});
+
+test("marketplace trust registry rejects renderer-authored or modified entries", () => {
+  const { privateKey } = crypto.generateKeyPairSync("ed25519");
+  const index = signedIndex(privateKey);
+  const registry = createMarketplaceTrustRegistry();
+  registry.remember(
+    verifyMarketplaceIndex(index, crypto.createPublicKey(privateKey)),
+  );
+  const trusted = registry.resolve(index.plugins[0]);
+  assert.equal(trusted.id, "review-persona");
+  assert.throws(
+    () =>
+      registry.resolve({
+        ...index.plugins[0],
+        description: "renderer-authored replacement",
+      }),
+    /previously verified index/,
+  );
+  assert.throws(
+    () =>
+      registry.resolve({ ...index.plugins[0], artifactSha256: "b".repeat(64) }),
+    /previously verified index/,
+  );
 });
 
 test("marketplace rejects tampering, non-HTTPS fetches, and oversized indexes", async () => {
