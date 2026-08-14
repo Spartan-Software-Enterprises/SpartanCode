@@ -107,7 +107,9 @@ current Implemented/Partial/Open counts.
   acceptance remains open.
 - Explicitly licensed mobile model catalog, compatibility filtering, HTTPS
   resumable downloads, safe Range fallback, low-storage preflight, checksum
-  verification/cleanup, and deletion.
+  verification/cleanup, and deletion. Android also accepts explicitly
+  selected Hugging Face community metadata, preserving declared licenses and
+  uncensored/distilled flags without applying the built-in license filter.
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, bounded desktop/Android home-server setup plans, AWS
   bootstrap/recovery scripts, and local/GitHub synchronization procedures.
