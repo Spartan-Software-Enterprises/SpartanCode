@@ -45,7 +45,7 @@ async function main() {
         .locator("#settingsGovernanceStatus .settings-runtime-item")
         .first()
         .waitFor();
-      await page.locator(".settings-card").evaluate((element) => {
+      await page.locator("#settingsForm").evaluate((element) => {
         element.scrollTop = 0;
       });
     }
@@ -54,14 +54,14 @@ async function main() {
       fullPage: true,
     });
     if (view === "settings") {
-      await page.locator(".settings-card").evaluate((element) => {
+      await page.locator("#settingsForm").evaluate((element) => {
         element.scrollTop = element.scrollHeight;
       });
       await page.screenshot({
         path: path.join(outputDir, "desktop-settings-governance.png"),
         fullPage: true,
       });
-      await page.locator(".settings-card").evaluate((element) => {
+      await page.locator("#settingsForm").evaluate((element) => {
         element.scrollTop = 0;
       });
     }
