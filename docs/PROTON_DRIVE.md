@@ -17,6 +17,9 @@ release evidence.
   Proton password or session token into the app.
 - Uploads are bounded to 64 MiB, remote paths reject traversal, and workspace
   backup IPC accepts only the selected workspace context.
+- Restore downloads into a temporary directory, verifies the authenticated
+  AES-256-GCM envelope, and writes only to a new destination inside the
+  selected workspace; existing files are never overwritten.
 
 ## Setup
 
@@ -33,10 +36,10 @@ vault.
 
 ## Scope and release status
 
-The current integration is an explicit encrypted backup primitive, not
+The current integration is an explicit encrypted backup/restore primitive, not
 continuous bidirectional synchronization or a Proton Drive file browser.
-Restore and conflict-aware synchronization remain separate roadmap work and
-must preserve the same local-encryption and user-initiation boundaries.
+Conflict-aware synchronization remains separate roadmap work and must preserve
+the same local-encryption and user-initiation boundaries.
 
 Proton’s JavaScript Drive SDK is currently a preview intended primarily for
 first-party clients, so SpartanCode uses the official CLI boundary until the

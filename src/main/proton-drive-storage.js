@@ -68,6 +68,48 @@ function encryptBackup(bytes, remotePath, secureVault) {
   );
 }
 
+function decryptBackup(envelopeBytes, remotePath, secureVault) {
+  if (
+    !Buffer.isBuffer(envelopeBytes) ||
+    envelopeBytes.length > MAX_BACKUP_BYTES
+  )
+    throw new Error("Proton Drive backup envelope is invalid or too large");
+  const safeRemotePath = validateRemotePath(remotePath);
+  let envelope;
+  try {
+    envelope = JSON.parse(envelopeBytes.toString("utf8"));
+  } catch {
+    throw new Error("Proton Drive backup envelope is not valid JSON");
+  }
+  if (
+    envelope?.schemaVersion !== 1 ||
+    envelope.algorithm !== "AES-256-GCM" ||
+    envelope.remotePath !== safeRemotePath ||
+    typeof envelope.iv !== "string" ||
+    typeof envelope.tag !== "string" ||
+    typeof envelope.ciphertext !== "string"
+  )
+    throw new Error("Proton Drive backup envelope metadata is invalid");
+  try {
+    const decipher = crypto.createDecipheriv(
+      "aes-256-gcm",
+      readBackupKey(secureVault),
+      Buffer.from(envelope.iv, "base64url"),
+    );
+    decipher.setAAD(Buffer.from(safeRemotePath, "utf8"));
+    decipher.setAuthTag(Buffer.from(envelope.tag, "base64url"));
+    const bytes = Buffer.concat([
+      decipher.update(Buffer.from(envelope.ciphertext, "base64url")),
+      decipher.final(),
+    ]);
+    if (bytes.length > MAX_BACKUP_BYTES)
+      throw new Error("Proton Drive restored content is too large");
+    return bytes;
+  } catch {
+    throw new Error("Proton Drive backup integrity verification failed");
+  }
+}
+
 function createProtonDriveStorage({
   environment = process.env,
   secureVault,
@@ -163,12 +205,57 @@ function createProtonDriveStorage({
         fs.rmSync(temporaryDir, { recursive: true, force: true });
       }
     },
+    async restoreFile(remotePath, destinationPath) {
+      const safeRemotePath = validateRemotePath(remotePath);
+      if (
+        typeof destinationPath !== "string" ||
+        !path.isAbsolute(destinationPath)
+      )
+        throw new Error("Proton Drive restore destination must be absolute");
+      if (fs.existsSync(destinationPath))
+        throw new Error(
+          "Restore destination already exists; refusing to overwrite",
+        );
+      const temporaryDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), "spartancode-proton-drive-restore-"),
+      );
+      const downloadedPath = path.join(
+        temporaryDir,
+        path.basename(safeRemotePath),
+      );
+      try {
+        await run([
+          "filesystem",
+          "download",
+          safeRemotePath,
+          temporaryDir,
+          "--json",
+        ]);
+        validateLocalFile(downloadedPath);
+        const restored = decryptBackup(
+          fs.readFileSync(downloadedPath),
+          safeRemotePath,
+          secureVault,
+        );
+        fs.mkdirSync(path.dirname(destinationPath), {
+          recursive: true,
+          mode: 0o700,
+        });
+        const temporaryPath = `${destinationPath}.${process.pid}.tmp`;
+        fs.writeFileSync(temporaryPath, restored, { mode: 0o600 });
+        fs.renameSync(temporaryPath, destinationPath);
+        return { ok: true, destinationPath, bytes: restored.length };
+      } finally {
+        fs.rmSync(temporaryDir, { recursive: true, force: true });
+      }
+    },
   };
 }
 
 module.exports = {
   BACKUP_KEY_NAME,
   MAX_BACKUP_BYTES,
+  decryptBackup,
   encryptBackup,
   validateRemotePath,
   createProtonDriveStorage,

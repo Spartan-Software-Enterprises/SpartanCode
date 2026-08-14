@@ -147,6 +147,25 @@ function registerDesktopApi({
       "spartancode-workspace.spartancode.enc",
     );
   });
+  ipcMain.handle(
+    "proton-drive:restore",
+    (_event, remotePath, destinationPath) => {
+      const workspacePath = store.snapshot().settings.workspacePath;
+      if (!workspacePath)
+        throw new Error("Choose a workspace before restoring");
+      if (
+        typeof destinationPath !== "string" ||
+        !path.isAbsolute(destinationPath)
+      )
+        throw new Error("Restore destination must be an absolute path");
+      const relative = path.relative(workspacePath, destinationPath);
+      if (relative.startsWith("..") || path.isAbsolute(relative))
+        throw new Error(
+          "Restore destination must remain inside the selected workspace",
+        );
+      return protonDriveStorage.restoreFile(remotePath, destinationPath);
+    },
+  );
   ipcMain.handle("privacy:status", () => privacyNetwork.status());
   ipcMain.handle("privacy:configure", (_event, request) =>
     privacyNetwork.configure(request),
