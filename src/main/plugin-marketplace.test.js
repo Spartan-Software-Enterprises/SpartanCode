@@ -60,6 +60,26 @@ test("marketplace indexes require HTTPS, bounded metadata, and valid licenses", 
       }),
     /HTTPS/,
   );
+  assert.throws(
+    () =>
+      validateMarketplaceIndex({
+        schemaVersion: 1,
+        issuer: "publisher",
+        plugins: [
+          {
+            id: "credentialed",
+            name: "Credentialed",
+            version: "1.0.0",
+            description: "x",
+            license: "MIT",
+            capabilities: ["template"],
+            sourceUrl: "https://user:password@plugins.example/plugin.tgz",
+            artifactSha256: "a".repeat(64),
+          },
+        ],
+      }),
+    /must not contain credentials/,
+  );
 });
 
 test("marketplace indexes verify an Ed25519 signature and preserve metadata only", async () => {

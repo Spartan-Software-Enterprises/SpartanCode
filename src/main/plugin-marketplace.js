@@ -48,6 +48,8 @@ function validateMarketplaceIndex(index) {
     }
     if (sourceUrl.protocol !== "https:")
       throw new Error("Marketplace plugin source must use HTTPS");
+    if (sourceUrl.username || sourceUrl.password)
+      throw new Error("Marketplace plugin source must not contain credentials");
     if (!SHA256.test(manifest.artifactSha256))
       throw new Error(
         "Marketplace plugin artifactSha256 must be a SHA-256 digest",
