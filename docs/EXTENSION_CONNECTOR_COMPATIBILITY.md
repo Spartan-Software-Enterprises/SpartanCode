@@ -79,7 +79,11 @@ security model:
 1. The shared versioned adapter manifest and capability-report contract is now
    implemented as a bounded declarative validator in
    `src/main/adapter-manifest.js` with negative tests for unsafe declarations.
-2. Add read-only importers for VS Code/compatible, JetBrains, Visual Studio,
+2. The bounded read-only VS Code importer is implemented in
+   `src/main/vscode-project-importer.js` and exposed through the approved
+   workspace API. It summarizes JSONC settings, tasks, and launch metadata;
+   it never returns command arguments or secret values and never executes
+   tasks. Add read-only importers for JetBrains, Visual Studio,
    Eclipse, Xcode/SPM, Neovim/Vim, Emacs, Sublime, and Zed formats.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
    major agent APIs, and remote workers.

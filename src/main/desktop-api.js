@@ -24,7 +24,12 @@ const { createVoiceOutput } = require("./voice-output");
 const { createChatService } = require("./chat-service");
 const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
-const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
+const {
+  listWorkspaceFiles,
+  readWorkspaceFile,
+  resolveInsideWorkspace,
+} = require("./workspace-tools");
+const { importVscodeProject } = require("./vscode-project-importer");
 const { writeDevContainerConfig } = require("./devcontainer");
 const { createModelCache } = require("./model-cache");
 const {
@@ -430,6 +435,14 @@ function registerDesktopApi({
     return readWorkspaceFile(workspacePath, requestedPath);
   });
   ipcMain.handle("workspace:snapshot", () => store.snapshot());
+  ipcMain.handle("vscode:project-import", (_event, projectPath) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    const approvedProject = resolveInsideWorkspace(
+      workspacePath,
+      projectPath || ".",
+    );
+    return importVscodeProject(approvedProject);
+  });
   ipcMain.handle("devcontainer:generate", (_event, projectPath, options) => {
     const workspacePath = store.snapshot().settings.workspacePath;
     return writeDevContainerConfig(

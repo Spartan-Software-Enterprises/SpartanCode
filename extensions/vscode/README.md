@@ -37,3 +37,8 @@ SecretStorage; response bodies and persisted snapshots are bounded. Set
 editor parity, live collaboration UI, and marketplace distribution remain
 future work; the extension does not claim those capabilities. Git commands
 remain optional and do not replace the standalone desktop or Android workflow.
+
+The desktop host also provides a bounded, read-only importer for a selected
+project's `.vscode/settings.json`, `tasks.json`, and `launch.json`. It accepts
+JSONC, returns metadata summaries only, redacts command and argument values,
+and does not execute imported tasks or launch configurations.

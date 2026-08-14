@@ -171,6 +171,10 @@ current Implemented/Partial/Open counts.
   envelope with status counts, requires a SecretStorage token for every bridge
   request, bounds bridge responses, and surfaces the current remote revision
   when collaboration note writes lose an optimistic-concurrency race.
+- The desktop host now exposes a bounded, approved-workspace VS Code project
+  importer. It parses JSONC settings, tasks, and launch files into metadata
+  summaries, omits command/argument values and secret values, rejects oversized
+  or symlinked configuration, and never executes imported tasks.
 - Mosh now has a tested client lifecycle contract with explicit connecting,
   ready, error, ended, stop, and server-requirement states. The host still
   must provide `mosh-server` and reachable UDP ports before a real session can
@@ -238,8 +242,9 @@ current Implemented/Partial/Open counts.
   and developer-service connectors. Adapter implementation and ecosystem
   governance remain partial. A bounded shared adapter-manifest validator now
   provides normalized host, target, operation, permission, execution-boundary,
-  provenance, and test-coverage declarations; read-only ecosystem importers
-  remain next. See
+  provenance, and test-coverage declarations. The first tested read-only
+  ecosystem importer is now the VS Code project importer; the remaining
+  ecosystem importers and governance remain next. See
   `docs/EXTENSION_CONNECTOR_COMPATIBILITY.md`.
 - Desktop audit export now emits bounded, credential-redacted, SHA-256-verified
   governance bundles through isolated IPC.
