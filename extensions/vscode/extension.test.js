@@ -4,6 +4,7 @@ const {
   bridgeRequestOptions,
   boundedSelection,
   snapshotPath,
+  summarizeSnapshot,
 } = require("./extension");
 
 test("VS Code bridge requests are authenticated and bounded", () => {
@@ -26,5 +27,20 @@ test("selection and snapshot paths are bounded and workspace-local", () => {
   assert.equal(
     snapshotPath("/workspace"),
     "/workspace/.spartancode/vscode-snapshot.json",
+  );
+});
+
+test("snapshot summaries expose active work and pending approvals", () => {
+  assert.deepEqual(
+    summarizeSnapshot({
+      missions: [
+        { status: "planning" },
+        { status: "complete" },
+        { status: "failed" },
+      ],
+      approvals: [{ status: "pending" }, { status: "resolved" }],
+      artifacts: [{ id: "a1" }],
+    }),
+    { missions: 3, activeMissions: 1, pendingApprovals: 1, artifacts: 1 },
   );
 });

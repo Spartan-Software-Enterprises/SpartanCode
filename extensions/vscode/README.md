@@ -9,6 +9,8 @@ Commands:
 - `SpartanCode: Set Bridge Token` stores the token in VS Code SecretStorage.
 - `SpartanCode: Sync Workspace Snapshot` writes a bounded bridge snapshot to
   `.spartancode/vscode-snapshot.json` with restrictive file permissions.
+- `SpartanCode: Show Workspace Status` displays active missions, pending
+  approvals, and artifact counts from the authenticated snapshot route.
 - `SpartanCode: Start Mission From Selection` queues the selected text through
   the bridge’s normal mission and approval policy.
 

@@ -84,6 +84,22 @@ function snapshotPath(workspaceFolder) {
   return path.join(workspaceFolder, ".spartancode", "vscode-snapshot.json");
 }
 
+function summarizeSnapshot(snapshot = {}) {
+  const missions = Array.isArray(snapshot.missions) ? snapshot.missions : [];
+  const approvals = Array.isArray(snapshot.approvals) ? snapshot.approvals : [];
+  const artifacts = Array.isArray(snapshot.artifacts) ? snapshot.artifacts : [];
+  return {
+    missions: missions.length,
+    activeMissions: missions.filter(
+      (mission) => !["complete", "failed"].includes(mission.status),
+    ).length,
+    pendingApprovals: approvals.filter(
+      (approval) => approval.status === "pending",
+    ).length,
+    artifacts: artifacts.length,
+  };
+}
+
 async function activate(context) {
   const vscode = require("vscode");
   const output = vscode.window.createOutputChannel("SpartanCode");
@@ -165,6 +181,21 @@ async function activate(context) {
       },
     ),
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("spartancode.showStatus", async () => {
+      const snapshot = await requestBridge(
+        bridgeUrl(),
+        "/v1/snapshot",
+        await token(),
+      );
+      const summary = summarizeSnapshot(snapshot);
+      const message = `${summary.activeMissions} active mission${summary.activeMissions === 1 ? "" : "s"} · ${summary.pendingApprovals} pending approval${summary.pendingApprovals === 1 ? "" : "s"} · ${summary.artifacts} artifact${summary.artifacts === 1 ? "" : "s"}`;
+      status.text = `$(pulse) ${message}`;
+      output.appendLine(`Workspace status: ${message}`);
+      vscode.window.showInformationMessage(`SpartanCode: ${message}`);
+    }),
+  );
 }
 
 module.exports = {
@@ -172,4 +203,5 @@ module.exports = {
   bridgeRequestOptions,
   boundedSelection,
   snapshotPath,
+  summarizeSnapshot,
 };

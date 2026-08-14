@@ -35,6 +35,10 @@
         "title": "SpartanCode: Sync Workspace Snapshot"
       },
       {
+        "command": "spartancode.showStatus",
+        "title": "SpartanCode: Show Workspace Status"
+      },
+      {
         "command": "spartancode.startMissionFromSelection",
         "title": "SpartanCode: Start Mission From Selection"
       }
