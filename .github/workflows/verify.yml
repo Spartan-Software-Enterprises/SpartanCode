@@ -121,16 +121,13 @@ jobs:
           mv android/android/app/build/outputs/apk/debug/app-debug.apk \
             "$RUNNER_TEMP/spartancode-apk/app-debug.apk"
           rm -rf android/android/.cxx android/android/build
-          mkdir -p android/android/app/build/outputs/apk/debug
-          mv "$RUNNER_TEMP/spartancode-apk/app-debug.apk" \
-            android/android/app/build/outputs/apk/debug/app-debug.apk
-          rmdir "$RUNNER_TEMP/spartancode-apk"
           rm -rf android/node_modules "$HOME/.gradle" "$HOME/.npm" \
             "$HOME/.cache" "$HOME/.android" "$ANDROID_HOME/.temp" \
             "$ANDROID_HOME/.cache" "$RUNNER_TEMP/android-home" \
             "$RUNNER_TEMP/android-avd" \
             "$ANDROID_HOME/platforms/android-30" \
-            "$ANDROID_HOME/build-tools/35.0.0"
+            "$ANDROID_HOME/build-tools/35.0.0" "$HOME/.m2" \
+            android/android/.gradle
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
             -partition-size 2048 \
@@ -156,6 +153,10 @@ jobs:
             fi
             sleep 1
           done
+          mkdir -p android/android/app/build/outputs/apk/debug
+          mv "$RUNNER_TEMP/spartancode-apk/app-debug.apk" \
+            android/android/app/build/outputs/apk/debug/app-debug.apk
+          rmdir "$RUNNER_TEMP/spartancode-apk"
           adb install -r android/android/app/build/outputs/apk/debug/app-debug.apk
           adb shell monkey -p com.spartansoftware.spartancode 1
           adb shell dumpsys package com.spartansoftware.spartancode | grep -q 'com.spartansoftware.spartancode'
