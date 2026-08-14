@@ -17,6 +17,8 @@ const emptyState = () => ({
     defaultAgent: "leo",
     apiProvider: "local",
     memoryEnabled: true,
+    personaName: "Leo",
+    wakeWord: "Leo",
   },
   connections: [],
   auditLog: [],
@@ -48,6 +50,8 @@ function createMissionStore(filePath) {
     "defaultAgent",
     "apiProvider",
     "memoryEnabled",
+    "personaName",
+    "wakeWord",
   ]);
   const createId = (prefix) => `${prefix}-${Date.now()}-${sequence++}`;
   const collaboration = createCollaborationStore({
@@ -217,6 +221,13 @@ function createMissionStore(filePath) {
         !["guided", "yolo"].includes(safeUpdate.executionMode)
       )
         delete safeUpdate.executionMode;
+      for (const key of ["personaName", "wakeWord"]) {
+        if (safeUpdate[key] !== undefined) {
+          const value = String(safeUpdate[key]).trim().slice(0, 48);
+          if (!value) delete safeUpdate[key];
+          else safeUpdate[key] = value;
+        }
+      }
       state.settings = { ...state.settings, ...safeUpdate };
       persist();
       return state.settings;

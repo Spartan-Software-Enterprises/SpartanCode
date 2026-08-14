@@ -1591,6 +1591,21 @@
             ></span
           ><input type="checkbox" id="voiceToggle" />
         </div>
+        <details class="settings-advanced">
+          <summary>Persona and wake word</summary>
+          <div class="setting-group">
+            <label for="personaName">Assistant name</label>
+            <input id="personaName" maxlength="48" placeholder="Leo" />
+          </div>
+          <div class="setting-group">
+            <label for="wakeWord">Wake word</label>
+            <input id="wakeWord" maxlength="48" placeholder="Leo" />
+          </div>
+          <small style="display: block; color: var(--muted)">
+            These preferences configure the assistant identity; voice runtime
+            availability is reported separately.
+          </small>
+        </details>
         <div class="setting-group">
           <label for="connectionName">Remote connection profile</label
           ><input id="connectionName" placeholder="Home Server" />
@@ -2242,6 +2257,10 @@
                 document.getElementById("executionModeSelect").value =
                   settings.executionMode || "guided";
                 voiceToggle.checked = Boolean(settings.voiceEnabled);
+                document.getElementById("personaName").value =
+                  settings.personaName || "Leo";
+                document.getElementById("wakeWord").value =
+                  settings.wakeWord || "Leo";
                 document.getElementById("memoryEnabled").checked =
                   settings.memoryEnabled !== false;
                 const connection = connections?.[0];
@@ -2586,6 +2605,8 @@
             apiProvider:
               document.getElementById("apiProviderSelect").value || "local",
             memoryEnabled: document.getElementById("memoryEnabled").checked,
+            personaName: document.getElementById("personaName").value,
+            wakeWord: document.getElementById("wakeWord").value,
           });
           const connection =
             profile.name && profile.host

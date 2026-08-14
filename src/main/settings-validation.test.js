@@ -18,3 +18,17 @@ test("settings updates ignore unknown keys", () => {
   assert.equal(settings.apiKey, undefined);
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("settings preserve bounded persona and wake-word preferences", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-persona-settings-"),
+  );
+  const store = createMissionStore(path.join(directory, "workspace.json"));
+  const settings = store.updateSettings({
+    personaName: "  Commander Leo  ",
+    wakeWord: "  Hey Spartan  ",
+  });
+  assert.equal(settings.personaName, "Commander Leo");
+  assert.equal(settings.wakeWord, "Hey Spartan");
+  fs.rmSync(directory, { recursive: true, force: true });
+});
