@@ -7,21 +7,29 @@ This is a future expansion of SpartanCode, not a change to its current product
 identity. SpartanCode must continue creating and supporting ordinary apps and
 programs for Android, iOS, Windows, macOS, Linux, web, servers, and custom
 operating-system targets. Game development will be an additive project profile
-using the same mobile-first, local-first, optional-remote architecture, with a
-serious native-engine track for high-end PC and console production.
+using a native-production-first, multi-surface architecture with local and
+optional remote execution. The expansion is a front end and orchestration
+layer for the game-development ecosystem: it should integrate major game
+engines and creation tools rather
+than replace them, with serious native-engine support for high-end PC and
+console production.
 
 ## Product vision
 
 The eventual game workspace should let a user create, edit, preview, test,
-package, and release a game from a phone. Desktop, server, GitHub, Codespaces,
-and remote build workers are optional accelerators, never prerequisites for
-creating or saving a project locally.
+package, and release a premium game through a workstation, build server, or
+authorized devkit workflow. Desktop and server tooling are primary production
+surfaces; Android and other mobile clients are optional companion surfaces for
+planning, review, monitoring, and bounded project authoring. GitHub, Codespaces,
+and remote build workers are integrated production backends where appropriate.
 
 A future user should be able to:
 
-- create a blank or template game project from Android;
+- create a blank or template game project from the desktop or another supported
+  front end, with optional mobile project initiation;
 - describe gameplay goals to Leo and receive a bounded implementation plan;
-- edit code, scenes, configuration, dialogue, and assets from mobile;
+- edit code, scenes, configuration, dialogue, and assets from the integrated
+  desktop/workstation front end;
 - preview the game in SpartanCode's built-in browser;
 - test touch, keyboard, mouse, controller, orientation, and responsive layouts;
 - save, export, restore, and hand off the project without exposing secrets;
@@ -29,10 +37,19 @@ A future user should be able to:
 - build only where the required toolchain is available; and
 - receive honest, target-specific release evidence and limitations.
 
+SpartanCode is the user's game-production command center. A project may use
+one engine or a coordinated toolchain of engines, DCC tools, asset tools,
+audio tools, middleware, build systems, source-control services, and platform
+SDKs. SpartanCode should present their project state and workflows through one
+consistent front end while preserving each tool's official project format,
+editor, build pipeline, licensing, and platform authority.
+
 ## Initial scope and non-goals
 
-The game expansion is not intended to make low-end or inexpensive 2D Android
-games. Its product target is premium, high-fidelity PC and console production.
+The game expansion is not intended to make low-end or inexpensive 2D or
+Android games. Android game production is not an initial target. Its product
+target is premium, high-fidelity PC production first, followed by authorized
+console production.
 Browser/2D tooling may be used only as an optional planning, simulation, UI,
 or rapid-validation surface; it is not the definition of the game product,
 its quality bar, or its release target. The roadmap must build toward native
@@ -77,20 +94,22 @@ for a native PC/console production pipeline. Engine adapters must report their
 supported host systems, target platforms, SDKs, licenses, headless-build
 support, automated-test support, and hardware requirements.
 
-Initial target profiles:
+Primary target profiles:
 
-- web desktop;
-- web mobile;
-- Progressive Web App;
-- Android package or wrapper;
-- Windows desktop;
-- macOS desktop;
-- Linux desktop;
-- server-hosted browser game;
-- iOS where the required macOS/Xcode environment is available; and
-- custom targets through declared user build commands.
+- high-fidelity Windows PC releases;
+- high-fidelity macOS and Linux PC releases;
+- authorized console development and release targets;
+- custom native targets through declared engine/toolchain adapters; and
+- dedicated build, profiling, and certification profiles for each target.
 
-The high-end production track additionally targets:
+Optional supporting surfaces—not the game quality target—include:
+
+- desktop or mobile browser previews;
+- Progressive Web App previews;
+- Android/iOS companion controls and project review only; and
+- server-hosted previews.
+
+The high-end production track targets:
 
 - Windows, macOS, and Linux PC releases with high-fidelity rendering;
 - console development and export paths where the user has authorized platform
@@ -106,9 +125,10 @@ to a generic desktop binary. Each console target requires its own capability
 declaration, authorized SDK/toolchain, devkit or approved test environment,
 platform security rules, and certification checklist.
 
-Authoring device and release target are independent. A phone-only user may
-create a Windows or Linux project; a later build worker may be required to
-compile it. Unsupported targets must be shown as unavailable rather than
+Authoring device and release target are independent. A mobile user may review
+or initiate a Windows, Linux, or console project, but premium target builds
+require the appropriate workstation, build worker, SDK, devkit, and engine
+toolchain. Unsupported targets must be shown as unavailable rather than
 silently skipped or represented as verified.
 
 ## Proposed project contract
@@ -196,7 +216,7 @@ code editor, scene/entity inspection, JSON/configuration editing, asset import
 and preview, prompt-driven changes, undo/redo, local autosave, preview/build
 controls, logs, test results, and touch-friendly game testing.
 
-The phone-only path must cover touch controls, orientation, safe areas,
+The optional mobile path must cover touch controls, orientation, safe areas,
 viewport scaling, constrained performance, audio interruption,
 background/foreground transitions, offline behavior, and installable PWA
 behavior. Keyboard, mouse, controller, and larger-screen testing may use an
@@ -261,7 +281,7 @@ Future game-specific Dev Container presets should extend SpartanCode's current
 user-project generator with profiles such as `game-2d-phaser`, `game-3d-three`,
 `game-3d-react-three-fiber`, `game-web-full`, `game-mobile-android`, and
 `game-cross-platform`. Containers remain optional and must not be required for
-Android-only authoring.
+Android companion authoring and review.
 
 Common optional capabilities include Node LTS, TypeScript/Vite, Playwright,
 Chromium, image/audio inspection, Git LFS guidance, Android SDK/emulator,
@@ -330,13 +350,13 @@ requirements, and Dev Container preset. Optional browser/2D validation is
 allowed for early feedback, but the exit criterion is a truthful premium
 target capability report—not a blank browser game.
 
-### Phase 2 — Mobile authoring
+### Phase 2 — Multi-surface front end
 
-Add game templates, mobile project creation, touch-oriented editing, asset
-preview/import, autosave/recovery, prompt-to-change workflow, local preview,
-and export. Exit when a phone-only user can create, edit, save, preview, and
-hand off a serious PC/console project for an authorized native build; a small
-browser game is not an acceptance target.
+Add game templates, desktop and optional mobile project creation,
+asset preview/import, autosave/recovery, prompt-to-change workflow, local
+preview, and export. Exit when the front end can create, edit, save, preview,
+and hand off a serious PC/console project for an authorized native build; a
+small browser game is not an acceptance target.
 
 ### Phase 3 — Core production tooling
 
@@ -347,47 +367,50 @@ engine project can be meaningfully customized with target-aware diagnostics.
 
 ### Phase 4 — Quality foundation
 
-Add test templates, Playwright visual baselines, mobile viewport coverage,
-runtime diagnostics, performance budgets, bundle-size checks, and screenshot
+Add test templates, Playwright visual baselines, target-profile coverage,
+runtime diagnostics, performance budgets, asset-size checks, and screenshot
 evidence. Exit when release readiness requires defined validation gates.
 
-### Phase 5 — Web/PWA and packaging
+### Phase 5 — PC/console packaging and evidence
 
-Add reproducible web/PWA builds, project archive export/restore, manifests,
-checksums, optional remote build workers, Android wrapper evaluation, and
-desktop wrapper evaluation. Exit when a phone-only user can produce a versioned
-deployable web release.
+Add reproducible project builds, archive export/restore, manifests, checksums,
+remote build workers, native desktop packaging, and target-specific release
+evidence. Browser previews and mobile companion evaluation remain optional
+support surfaces. Exit when a workstation or authorized build worker can
+produce a versioned high-end PC target release with the front end recording
+complete evidence.
 
 ### Phase 6 — Native and advanced targets
 
-Validate Android, desktop, and optional iOS adapters with target-specific
-signing and capability checks. Establish the high-end PC production track with
-native-engine adapters, GPU/performance profiling, large-world asset cooking,
-shader/LOD workflows, and crash diagnostics. Then evaluate console adapters
-through authorized SDK/devkit environments, certification evidence, and
-engine-specific packaging. Three.js, React Three Fiber, external-engine
-orchestration, multiplayer, advanced assets, AR/VR, and mature plugin/content
-ecosystems remain subsequent capability tracks.
+Validate native PC adapters with target-specific signing and capability checks.
+Establish the high-end PC production track with native-engine adapters,
+GPU/performance profiling, large-world asset cooking, shader/LOD workflows,
+and crash diagnostics. Then evaluate console adapters through authorized
+SDK/devkit environments, certification evidence, and engine-specific
+packaging. Browser previews, mobile companions, multiplayer, advanced assets,
+AR/VR, and mature plugin/content ecosystems are supporting or subsequent
+capability tracks, never replacements for the premium PC/console objective.
 
 ### Phase 7 — High-end PC and console production
 
 This phase is the expansion's top-tier production objective, not an Android
-variant. It should support project orchestration around engines capable of
-shipping high-end PC and console games, while preserving SpartanCode's
-mobile-first planning and review surfaces.
+game variant. It should support project orchestration around engines capable of
+shipping high-end PC and console games, with the desktop/workstation and
+authorized build infrastructure as primary production surfaces. Mobile
+planning and review are optional companion surfaces.
 
 Deliverables:
 
-- engine adapters for approved native engines and external projects;
+- front-end adapters for approved native engines and creation-tool workflows;
 - PC graphics capability detection, profiling, shader/build caching, asset
   cooking, streaming, memory budgets, and crash diagnostics;
 - console target manifests, SDK/toolchain checks, devkit connectivity where
   authorized, packaging/signing boundaries, and certification checklists;
-- remote build workers for toolchains unavailable on the user's phone;
+- remote build workers for toolchains unavailable on the active workstation;
 - deterministic build evidence, symbol/archive handling, test reports, and
   target-specific release artifacts; and
-- a clear split between source editing/planning from mobile and privileged
-  native/console compilation or publishing on authorized infrastructure.
+- a clear split between the SpartanCode front end and privileged native/console
+  compilation or publishing on authorized infrastructure.
 
 Exit criteria:
 
