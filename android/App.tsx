@@ -106,6 +106,8 @@ export default function App() {
     quantization: "Q4_K_M",
     voiceEnabled: false,
     autoSync: true,
+    personaName: "Leo",
+    wakeWord: "Leo",
   });
   const [recognizing, setRecognizing] = useState(false);
   const [collaborationName, setCollaborationName] = useState("Android roadmap");
@@ -941,6 +943,44 @@ export default function App() {
               thumbColor="#f2f5ff"
             />
           </View>
+          <Text style={styles.missionText}>Persona and wake word</Text>
+          <TextInput
+            accessibilityLabel="Assistant name"
+            maxLength={48}
+            onChangeText={(value) =>
+              setMobileSettings((current) => ({
+                ...current,
+                personaName: value,
+              }))
+            }
+            onEndEditing={() =>
+              void updateMobileSettings({
+                personaName: mobileSettings.personaName,
+              })
+            }
+            placeholder="Assistant name"
+            placeholderTextColor="#52617f"
+            style={styles.input}
+            value={mobileSettings.personaName}
+          />
+          <TextInput
+            accessibilityLabel="Wake word"
+            maxLength={48}
+            onChangeText={(value) =>
+              setMobileSettings((current) => ({ ...current, wakeWord: value }))
+            }
+            onEndEditing={() =>
+              void updateMobileSettings({ wakeWord: mobileSettings.wakeWord })
+            }
+            placeholder="Wake word"
+            placeholderTextColor="#52617f"
+            style={styles.input}
+            value={mobileSettings.wakeWord}
+          />
+          <Text style={styles.message}>
+            Identity preferences are stored locally; speech runtime availability
+            is reported separately.
+          </Text>
           <View style={styles.toggleRow}>
             <Text style={styles.message}>Sync automatically on resume</Text>
             <Switch

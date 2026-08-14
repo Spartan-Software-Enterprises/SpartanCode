@@ -144,18 +144,24 @@ describe("mobile settings", () => {
       quantization: "Q4_K_M",
       voiceEnabled: false,
       autoSync: true,
+      personaName: "Leo",
+      wakeWord: "Leo",
     });
     await writeMobileSettings({
       executionMode: "yolo",
       quantization: "Q4_0",
       voiceEnabled: true,
       autoSync: false,
+      personaName: "Commander Leo",
+      wakeWord: "Hey Spartan",
     });
     expect(await readMobileSettings()).toEqual({
       executionMode: "yolo",
       quantization: "Q4_0",
       voiceEnabled: true,
       autoSync: false,
+      personaName: "Commander Leo",
+      wakeWord: "Hey Spartan",
     });
   });
 });

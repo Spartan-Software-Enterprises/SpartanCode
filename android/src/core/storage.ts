@@ -33,6 +33,8 @@ export type MobileSettings = {
   quantization: "Q4_K_M" | "Q4_0" | "Q3_K_S";
   voiceEnabled: boolean;
   autoSync: boolean;
+  personaName: string;
+  wakeWord: string;
 };
 
 const defaultMobileSettings: MobileSettings = {
@@ -40,6 +42,8 @@ const defaultMobileSettings: MobileSettings = {
   quantization: "Q4_K_M",
   voiceEnabled: false,
   autoSync: true,
+  personaName: "Leo",
+  wakeWord: "Leo",
 };
 
 function emptySnapshot(): MobileSnapshot {
@@ -175,6 +179,14 @@ export async function readMobileSettings(): Promise<MobileSettings> {
           : "Q4_K_M",
       voiceEnabled: parsed.voiceEnabled === true,
       autoSync: parsed.autoSync !== false,
+      personaName:
+        typeof parsed.personaName === "string" && parsed.personaName.trim()
+          ? parsed.personaName.trim().slice(0, 48)
+          : "Leo",
+      wakeWord:
+        typeof parsed.wakeWord === "string" && parsed.wakeWord.trim()
+          ? parsed.wakeWord.trim().slice(0, 48)
+          : "Leo",
     };
   } catch {
     return { ...defaultMobileSettings };
