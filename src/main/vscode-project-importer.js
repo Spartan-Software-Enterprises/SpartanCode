@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const MAX_FILE_BYTES = 256 * 1024;
-const FILES = ["settings.json", "tasks.json", "launch.json"];
+const FILES = ["settings.json", "tasks.json", "launch.json", "extensions.json"];
 
 function stripJsonComments(source) {
   let output = "";
@@ -100,6 +100,29 @@ function summarizeLaunch(value) {
   };
 }
 
+function summarizeExtensions(value) {
+  if (!value || Array.isArray(value) || typeof value !== "object")
+    throw new Error("VS Code extensions must be an object");
+  const summarize = (key) => {
+    const entries = value[key] === undefined ? [] : value[key];
+    if (!Array.isArray(entries))
+      throw new Error(`VS Code extensions ${key} must be an array`);
+    return entries
+      .filter((entry) => typeof entry === "string")
+      .slice(0, 200)
+      .map((entry) => entry.trim().slice(0, 256))
+      .filter(Boolean);
+  };
+  const recommendations = summarize("recommendations");
+  const unwantedRecommendations = summarize("unwantedRecommendations");
+  return {
+    recommendationCount: recommendations.length,
+    recommendations,
+    unwantedRecommendationCount: unwantedRecommendations.length,
+    unwantedRecommendations,
+  };
+}
+
 function importVscodeProject(
   projectPath,
   { readFileImpl = fs.readFileSync } = {},
@@ -142,7 +165,9 @@ function importVscodeProject(
           ? summarizeSettings(parsed)
           : fileName === "tasks.json"
             ? summarizeTasks(parsed)
-            : summarizeLaunch(parsed),
+            : fileName === "launch.json"
+              ? summarizeLaunch(parsed)
+              : summarizeExtensions(parsed),
     };
   }
   return result;

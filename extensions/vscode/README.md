@@ -39,9 +39,11 @@ future work; the extension does not claim those capabilities. Git commands
 remain optional and do not replace the standalone desktop or Android workflow.
 
 The desktop host also provides a bounded, read-only importer for a selected
-project's `.vscode/settings.json`, `tasks.json`, and `launch.json`. It accepts
-JSONC, returns metadata summaries only, redacts command and argument values,
-and does not execute imported tasks or launch configurations.
+project's `.vscode/settings.json`, `tasks.json`, `launch.json`, and
+`extensions.json`. It accepts JSONC, returns metadata summaries only, redacts
+command and argument values, reports extension recommendations without
+installing or activating them, and does not execute imported tasks or launch
+configurations.
 
 The desktop host also exposes a separate read-only JetBrains importer for
 `.idea` metadata, shared run configurations, modules, and build-system markers.

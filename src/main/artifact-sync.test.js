@@ -44,3 +44,13 @@ test("artifact sync handles independent additions and bounded input", () => {
     /at most 500/,
   );
 });
+
+test("artifact sync rejects duplicate ids instead of silently discarding an artifact", () => {
+  assert.throws(
+    () =>
+      mergeArtifactSets({
+        local: [artifact("first"), { ...artifact("second"), name: "Other" }],
+      }),
+    /Artifact ids must be unique: artifact-1/,
+  );
+});

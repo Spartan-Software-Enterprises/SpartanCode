@@ -3,7 +3,7 @@ const MAX_ARTIFACTS = 500;
 function normalizeArtifacts(value) {
   if (!Array.isArray(value) || value.length > MAX_ARTIFACTS)
     throw new Error(`Artifact set must contain at most ${MAX_ARTIFACTS} items`);
-  return value.filter(
+  const artifacts = value.filter(
     (artifact) =>
       artifact &&
       typeof artifact === "object" &&
@@ -11,6 +11,13 @@ function normalizeArtifacts(value) {
       artifact.id.length > 0 &&
       artifact.id.length <= 160,
   );
+  const ids = new Set();
+  for (const artifact of artifacts) {
+    if (ids.has(artifact.id))
+      throw new Error(`Artifact ids must be unique: ${artifact.id}`);
+    ids.add(artifact.id);
+  }
+  return artifacts;
 }
 
 function fingerprint(artifact) {

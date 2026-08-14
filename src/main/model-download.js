@@ -3,6 +3,43 @@ const fs = require("node:fs");
 
 const MAX_MODEL_BYTES = 2 * 1024 * 1024 * 1024;
 
+async function readBoundedResponse(response, maxBytes) {
+  const contentLength = response.headers?.get?.("content-length");
+  if (contentLength !== null && contentLength !== undefined) {
+    const declaredBytes = Number(contentLength);
+    if (
+      !Number.isSafeInteger(declaredBytes) ||
+      declaredBytes < 0 ||
+      declaredBytes > maxBytes
+    )
+      throw new Error("Model download exceeds the size limit");
+  }
+  if (response.body?.getReader) {
+    const reader = response.body.getReader();
+    const chunks = [];
+    let total = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = Buffer.from(value);
+        total += chunk.length;
+        if (total > maxBytes)
+          throw new Error("Model download exceeds the size limit");
+        chunks.push(chunk);
+      }
+    } catch (error) {
+      await reader.cancel().catch(() => undefined);
+      throw error;
+    }
+    return Buffer.concat(chunks, total);
+  }
+  const bytes = Buffer.from(await response.arrayBuffer());
+  if (bytes.length > maxBytes)
+    throw new Error("Model download exceeds the size limit");
+  return bytes;
+}
+
 function assertDigest(expectedSha256) {
   if (
     typeof expectedSha256 !== "string" ||
@@ -39,8 +76,11 @@ async function downloadVerifiedModel({
       throw new Error(
         `Model download failed (${response?.status || "no response"})`,
       );
-    const bytes = Buffer.from(await response.arrayBuffer());
     const usePartial = partialBytes > 0 && response.status === 206;
+    const bytes = await readBoundedResponse(
+      response,
+      MAX_MODEL_BYTES - (usePartial ? partialBytes : 0),
+    );
     const combined = usePartial
       ? Buffer.concat([fs.readFileSync(partialPath), bytes])
       : bytes;

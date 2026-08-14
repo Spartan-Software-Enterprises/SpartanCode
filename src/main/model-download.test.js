@@ -95,3 +95,65 @@ test("cleans up a checksum mismatch and rejects malformed digests before transpo
   );
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+test("bounds streamed responses before buffering or finalizing", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-download-"));
+  const partialPath = path.join(root, "model.part");
+  const finalPath = path.join(root, "model.gguf");
+  const oversizedChunk = new Uint8Array(2 * 1024 * 1024 + 1);
+  let cancelled = false;
+  await assert.rejects(
+    downloadVerifiedModel({
+      url: "https://example.test/oversized-model",
+      expectedSha256: digest(Buffer.from("unused")),
+      partialPath,
+      finalPath,
+      transport: async () => ({
+        status: 200,
+        body: {
+          getReader() {
+            return {
+              async read() {
+                return { done: false, value: oversizedChunk };
+              },
+              async cancel() {
+                cancelled = true;
+              },
+            };
+          },
+        },
+      }),
+    }),
+    /exceeds the size limit/,
+  );
+  assert.equal(cancelled, true);
+  assert.equal(fs.existsSync(finalPath), false);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test("rejects an oversized declared response before reading its body", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-download-"));
+  const partialPath = path.join(root, "model.part");
+  const finalPath = path.join(root, "model.gguf");
+  let read = false;
+  await assert.rejects(
+    downloadVerifiedModel({
+      url: "https://example.test/declared-oversized-model",
+      expectedSha256: digest(Buffer.from("unused")),
+      partialPath,
+      finalPath,
+      transport: async () => ({
+        status: 200,
+        headers: { get: () => String(2 * 1024 * 1024 * 1024 + 1) },
+        arrayBuffer: async () => {
+          read = true;
+          return Buffer.from("must not read");
+        },
+      }),
+    }),
+    /exceeds the size limit/,
+  );
+  assert.equal(read, false);
+  assert.equal(fs.existsSync(finalPath), false);
+  fs.rmSync(root, { recursive: true, force: true });
+});

@@ -16,6 +16,11 @@ npm test
 cd android && npm run typecheck && npm test
 ```
 
+For Termux sessions, use the persistent tmux-backed `codex` launcher and the
+reconnect procedure in [TERMUX_CODEX_RECOVERY.md](TERMUX_CODEX_RECOVERY.md).
+This protects the live agent session from a Termux activity or PTY restart;
+it does not replace Git commits or the verification gates below.
+
 If a checkout already exists, use the start-of-session procedure in
 [SYNC_WORKFLOW.md](SYNC_WORKFLOW.md). A new agent must inspect `git status`
 before pulling and preserve any divergence.

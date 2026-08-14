@@ -31,6 +31,11 @@ test("imports bounded VS Code JSONC summaries without exposing values or executi
     '{"version":"0.2.0","configurations":[{"name":"App","type":"node","request":"launch","args":["secret"]}]}',
     "utf8",
   );
+  fs.writeFileSync(
+    path.join(root, ".vscode/extensions.json"),
+    '{"recommendations":["ms-vscode.vscode-typescript-next", "  ", 42], // metadata only\n "unwantedRecommendations":["unsafe.publisher-extension"]}',
+    "utf8",
+  );
   const result = importVscodeProject(root);
   assert.equal(result.execution, "read-only");
   assert.equal(result.credentials, false);
@@ -43,6 +48,13 @@ test("imports bounded VS Code JSONC summaries without exposing values or executi
   assert.equal(
     result.files["launch.json"].summary.configurations[0].args,
     undefined,
+  );
+  assert.deepEqual(result.files["extensions.json"].summary.recommendations, [
+    "ms-vscode.vscode-typescript-next",
+  ]);
+  assert.deepEqual(
+    result.files["extensions.json"].summary.unwantedRecommendations,
+    ["unsafe.publisher-extension"],
   );
   fs.rmSync(root, { recursive: true, force: true });
 });
@@ -59,6 +71,13 @@ test("reports missing VS Code files and rejects oversized configuration", () => 
     "x".repeat(MAX_FILE_BYTES + 1),
   );
   assert.throws(() => importVscodeProject(root), /exceeds the size limit/);
+  fs.rmSync(path.join(root, ".vscode"), { recursive: true, force: true });
+  fs.mkdirSync(path.join(root, ".vscode"));
+  fs.writeFileSync(
+    path.join(root, ".vscode/extensions.json"),
+    '{"recommendations":"execute-me"}',
+  );
+  assert.throws(() => importVscodeProject(root), /must be an array/);
   assert.throws(() => importVscodeProject("relative"), /must be absolute/);
   fs.rmSync(root, { recursive: true, force: true });
 });

@@ -81,9 +81,10 @@ security model:
    `src/main/adapter-manifest.js` with negative tests for unsafe declarations.
 2. The bounded read-only VS Code importer is implemented in
    `src/main/vscode-project-importer.js` and exposed through the approved
-   workspace API. It summarizes JSONC settings, tasks, and launch metadata;
-   it never returns command arguments or secret values and never executes
-   tasks. The bounded read-only JetBrains importer is implemented in
+   workspace API. It summarizes JSONC settings, tasks, launch metadata, and
+   extension recommendation metadata from `.vscode/extensions.json`; it never
+   returns command arguments or secret values and never executes tasks or
+   extensions. The bounded read-only JetBrains importer is implemented in
    `src/main/jetbrains-project-importer.js`; it summarizes shared `.idea`
    settings, run-configuration names/types, modules, and build-system markers
    without executing IDEs, plugins, run configurations, or build tools. Add
