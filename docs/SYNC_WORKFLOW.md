@@ -41,8 +41,8 @@ git status --short
 git pull --ff-only origin main
 ```
 
-`scripts/verify-sync.sh` automatically loads the device-local profile at
-`/data/data/com.termux/files/home/.config/spartancode/remote.env` when
+`scripts/verify-sync.sh` automatically loads the local profile at
+`${XDG_CONFIG_HOME:-$HOME/.config}/spartancode/remote.env` when
 `SPARTANCODE_REMOTE_HOST` is not already exported. Explicit environment values
 remain authoritative, and the profile itself is never committed.
 
