@@ -1,5 +1,22 @@
-const { exec } = require("child_process");
+const { execFile } = require("child_process");
 const { classifyCommand } = require("./policy-engine");
+
+const SAFE_TOKEN = /^[A-Za-z0-9_./:@%+=,-]+$/;
+
+function parseCommand(command) {
+  const normalized = String(command || "").trim();
+  if (
+    !normalized ||
+    normalized.length > 400 ||
+    /[;&|`$()<>\\\n\r]/.test(normalized)
+  ) {
+    return null;
+  }
+  const tokens = normalized.split(/\s+/);
+  return tokens.every((token) => SAFE_TOKEN.test(token))
+    ? { executable: tokens[0], args: tokens.slice(1) }
+    : null;
+}
 
 function executePlan(steps) {
   return new Promise((resolve, reject) => {
@@ -24,11 +41,27 @@ function executePlan(steps) {
         executeStep();
         return;
       }
-      exec(step.command, (error, stdout, stderr) => {
-        results.push({ step: step.name, error, stdout, stderr });
+      const parsed = parseCommand(step.command);
+      if (!parsed) {
+        results.push({
+          step: step.name,
+          blocked: true,
+          reason: "command is not a safe tokenized invocation",
+        });
         index++;
         executeStep();
-      });
+        return;
+      }
+      execFile(
+        parsed.executable,
+        parsed.args,
+        { timeout: 120000 },
+        (error, stdout, stderr) => {
+          results.push({ step: step.name, error, stdout, stderr });
+          index++;
+          executeStep();
+        },
+      );
     }
 
     executeStep();
@@ -78,3 +111,4 @@ async function orchestrate(steps) {
 
 module.exports = { orchestrate, approveCommand };
 module.exports.validatePlan = validatePlan;
+module.exports.parseCommand = parseCommand;
