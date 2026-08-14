@@ -115,6 +115,9 @@ jobs:
           cd android
           ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
           cd ../..
+          # The APK is complete; reclaim disposable build/dependency caches so
+          # the hosted runner can allocate the emulator userdata image.
+          rm -rf android/node_modules "$HOME/.gradle/caches" "$HOME/.npm"
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
             -partition-size 2048 \
