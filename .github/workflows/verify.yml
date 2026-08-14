@@ -145,8 +145,10 @@ jobs:
           }
           for attempt in $(seq 1 180); do
             boot_completed="$(timeout 5s adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
-            boot_animation="$(timeout 5s adb -s emulator-5554 shell getprop init.svc.bootanim 2>/dev/null | tr -d '\r' || true)"
-            if [ "$boot_completed" = "1" ] || { [ "$boot_animation" = "stopped" ] && adb -s emulator-5554 shell pm path android >/dev/null 2>&1; }; then break; fi
+            if [ "$boot_completed" = "1" ] && \
+              adb -s emulator-5554 shell pm list packages >/dev/null 2>&1; then
+              break
+            fi
             if [ "$attempt" -eq 180 ]; then
               cat "${RUNNER_TEMP}/spartancode-emulator.log"
               exit 1
