@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("vscode:project-import", projectPath),
   importJetbrainsProject: (projectPath) =>
     ipcRenderer.invoke("jetbrains:project-import", projectPath),
+  importVisualStudioProject: (projectPath) =>
+    ipcRenderer.invoke("visual-studio:project-import", projectPath),
   generateDevContainer: (projectPath, options) =>
     ipcRenderer.invoke("devcontainer:generate", projectPath, options),
   listCollaborationSessions: () => ipcRenderer.invoke("collaboration:list"),

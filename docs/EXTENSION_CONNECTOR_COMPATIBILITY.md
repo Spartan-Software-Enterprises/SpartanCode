@@ -87,7 +87,10 @@ security model:
    `src/main/jetbrains-project-importer.js`; it summarizes shared `.idea`
    settings, run-configuration names/types, modules, and build-system markers
    without executing IDEs, plugins, run configurations, or build tools. Add
-   read-only importers for Visual Studio,
+   read-only Visual Studio importing is implemented in
+   `src/main/visual-studio-project-importer.js`; it summarizes solution/project
+   metadata without executing Visual Studio, MSBuild, debuggers, or VSIX files.
+   Add read-only importers for
    Eclipse, Xcode/SPM, Neovim/Vim, Emacs, Sublime, and Zed formats.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
    major agent APIs, and remote workers.

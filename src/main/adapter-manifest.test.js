@@ -86,3 +86,26 @@ test("adapter manifest accepts the declarative JetBrains importer", () => {
   assert.equal(manifest.execution.network, false);
   assert.equal(manifest.targets.rider, "available");
 });
+
+test("adapter manifest accepts the declarative Visual Studio importer", () => {
+  const manifest = normalizeAdapterManifest({
+    ...base,
+    id: "visual-studio-project",
+    kind: "connector",
+    name: "Visual Studio project importer",
+    status: "available",
+    hosts: ["windows", "linux", "macos"],
+    targets: { "visual-studio": "available", msbuild: "unsupported" },
+    operations: ["inspect", "import"],
+    requirements: ["visual-studio-project-directory"],
+    execution: {
+      mode: "declarative",
+      shell: false,
+      network: false,
+      credentials: false,
+    },
+    testCoverage: ["solution-metadata", "xml-redaction", "symlink-rejection"],
+  });
+  assert.equal(manifest.execution.shell, false);
+  assert.equal(manifest.targets["visual-studio"], "available");
+});
