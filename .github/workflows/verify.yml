@@ -100,7 +100,12 @@ jobs:
             --package "system-images;android-35;default;x86_64" \
             --device pixel_2 \
             --force
-          timeout 600s "${ANDROID_HOME}/emulator/emulator" \
+          cd android
+          npx expo prebuild --platform android --no-install
+          cd android
+          ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
+          cd ../..
+          timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
             -no-window -no-audio -no-boot-anim -no-snapshot \
             -gpu swiftshader_indirect \
@@ -114,21 +119,17 @@ jobs:
             cat "${RUNNER_TEMP}/spartancode-emulator.log" || true
             exit 1
           }
-          for attempt in $(seq 1 120); do
+          for attempt in $(seq 1 180); do
             boot_completed="$(timeout 5s adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
             boot_animation="$(timeout 5s adb -s emulator-5554 shell getprop init.svc.bootanim 2>/dev/null | tr -d '\r' || true)"
             if [ "$boot_completed" = "1" ] || { [ "$boot_animation" = "stopped" ] && adb -s emulator-5554 shell pm path android >/dev/null 2>&1; }; then break; fi
-            if [ "$attempt" -eq 120 ]; then
+            if [ "$attempt" -eq 180 ]; then
               cat "${RUNNER_TEMP}/spartancode-emulator.log"
               exit 1
             fi
             sleep 1
           done
-          cd android
-          npx expo prebuild --platform android --no-install
-          cd android
-          ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
-          adb install -r app/build/outputs/apk/debug/app-debug.apk
+          adb install -r android/android/app/build/outputs/apk/debug/app-debug.apk
           adb shell monkey -p com.spartansoftware.spartancode 1
           adb shell dumpsys package com.spartansoftware.spartancode | grep -q 'com.spartansoftware.spartancode'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
