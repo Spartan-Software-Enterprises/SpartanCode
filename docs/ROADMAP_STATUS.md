@@ -153,10 +153,9 @@ behavior and a corresponding automated or documented verification path.
   fail closed, bridge mission requests reuse the desktop approval policy, and
   Android bridge mutations/queued synchronization honor the biometric gate.
   GitHub Actions in the release and verification workflows are pinned to
-  reviewed immutable commit SHAs. Remaining security hardening includes
-  remaining release-hardening work is limited to provider-specific runtime
-  provenance attestations and physical/device-environment evidence rather than
-  being represented as complete.
+  reviewed immutable commit SHAs. Remaining release hardening is limited to
+  provider-specific runtime provenance attestations and physical/device-
+  environment evidence rather than being represented as complete.
 - The legacy mission-plan executor now rejects shell metacharacters and uses
   bounded, tokenized `execFile` launches; the current standard security review
   recorded no reportable findings, with delegated-worker coverage explicitly
