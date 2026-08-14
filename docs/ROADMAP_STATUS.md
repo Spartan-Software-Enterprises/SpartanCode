@@ -140,7 +140,10 @@ current Implemented/Partial/Open counts.
   matching deactivation, and an opt-in Node runtime boundary that requires
   matching activated metadata, Node permissions, no shell/addons/child
   processes, bounded I/O, and timeout termination. Declarative plugins remain
-  non-executable; community distribution and governance remain open.
+  non-executable. A dependency-free publisher helper now validates manifests,
+  generates Ed25519 keys, and signs canonical catalogs without overwriting
+  existing key/index files; hosted distribution and community governance remain
+  open. See [PLUGIN_AUTHORING.md](PLUGIN_AUTHORING.md).
 - Desktop and Android now share a documented normalized settings contract for
   global/project/agent/session scopes, including `apiProvider` and `autoSync`.
   Both clients use deterministic default-then-identified precedence and ignore
