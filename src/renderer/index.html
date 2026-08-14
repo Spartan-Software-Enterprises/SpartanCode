@@ -1909,6 +1909,16 @@
             Loading OS-backed secure storage status…
           </div>
           <div class="setting-group">
+            <label for="secureProviderSelect">API provider key</label>
+            <select id="secureProviderSelect">
+              <option value="">Choose an API provider</option>
+            </select>
+            <small style="display: block; color: var(--muted)">
+              Choosing a provider fills its key name without exposing or
+              transmitting the secret.
+            </small>
+          </div>
+          <div class="setting-group">
             <label for="secureKeyName">Key name</label>
             <input
               id="secureKeyName"
@@ -2454,6 +2464,7 @@
               window.spartanCode.listConnections(),
               window.spartanCode.listCachedModels(),
               window.spartanCode.listRemoteProviders(),
+              window.spartanCode.getProviderStatus(),
             ]).then(
               ([
                 settings,
@@ -2462,6 +2473,7 @@
                 connections,
                 cachedModels,
                 providers,
+                apiProviders,
               ]) => {
                 models.forEach((model) =>
                   discoveredModels.set(model.id, model),
@@ -2492,6 +2504,15 @@
                     .join("");
                 document.getElementById("apiProviderSelect").value =
                   settings.apiProvider || "local";
+                document.getElementById("secureProviderSelect").innerHTML = [
+                  '<option value="">Choose an API provider</option>',
+                  ...apiProviders
+                    .filter((provider) => provider.keyName)
+                    .map(
+                      (provider) =>
+                        `<option value="${provider.keyName}">${provider.name} · ${provider.status}</option>`,
+                    ),
+                ].join("");
                 quantizationSelect.value = settings.quantization || "Q4_K_M";
                 protocolSelect.value = settings.protocol;
                 document.getElementById("executionModeSelect").value =
@@ -2848,6 +2869,12 @@
             document.getElementById("settingsCodeRabbitMessage").textContent =
               error.message;
           }
+        });
+      document
+        .getElementById("secureProviderSelect")
+        .addEventListener("change", (event) => {
+          if (event.target.value)
+            document.getElementById("secureKeyName").value = event.target.value;
         });
       document
         .getElementById("settingsSecureSave")
