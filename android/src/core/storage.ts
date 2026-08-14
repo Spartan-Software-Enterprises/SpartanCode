@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import type {
   ConnectionProfile,
+  Artifact,
   MobileSnapshot,
   QueuedOperation,
 } from "./types";
@@ -36,6 +37,7 @@ const MOBILE_SETTINGS_KEY = "spartancode.mobile.settings.v1";
 const MOBILE_SETTINGS_LAYERS_KEY = "spartancode.mobile.settings-layers.v1";
 const COLLABORATION_KEY = "spartancode.mobile.collaboration.v1";
 const PROJECTS_KEY = "spartancode.mobile.projects.v1";
+const ARTIFACT_SYNC_BASE_KEY = "spartancode.mobile.artifact-sync-base.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
 
 export type MobileSettings = {
@@ -295,6 +297,23 @@ export async function writeSnapshot(snapshot: MobileSnapshot) {
     if (getOfflineCryptoStatus().enabled) throw error;
     await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
   }
+}
+
+export async function readArtifactSyncBase(): Promise<Artifact[]> {
+  try {
+    const raw = await AsyncStorage.getItem(ARTIFACT_SYNC_BASE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter(isArtifact) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function writeArtifactSyncBase(artifacts: Artifact[]) {
+  await AsyncStorage.setItem(
+    ARTIFACT_SYNC_BASE_KEY,
+    JSON.stringify(artifacts.filter(isArtifact).slice(0, 500)),
+  );
 }
 
 export async function readCollaborationSessions(): Promise<

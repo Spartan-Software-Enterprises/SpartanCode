@@ -2,7 +2,16 @@ import {
   bridgeRequest,
   normalizeBridgeEndpoint,
   normalizeBridgeSnapshot,
+  syncArtifactSets,
 } from "./bridge";
+
+const artifact = {
+  id: "a1",
+  name: "README",
+  type: "document",
+  status: "draft",
+  createdAt: "2026-08-13T00:00:00.000Z",
+};
 
 describe("MCP Bridge snapshots", () => {
   it("normalizes secure endpoints and allows local development", () => {
@@ -78,5 +87,40 @@ describe("MCP Bridge snapshots", () => {
         signal: controller.signal,
       }),
     ).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("validates and returns the bridge artifact merge contract", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          merged: [artifact],
+          conflicts: [],
+          requiresReview: false,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    ) as jest.Mock;
+    await expect(
+      syncArtifactSets("http://localhost:8787", [], [artifact], [artifact]),
+    ).resolves.toEqual({
+      merged: [artifact],
+      conflicts: [],
+      requiresReview: false,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8787/v1/artifacts/sync",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("rejects a malformed artifact merge response", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(JSON.stringify({ merged: [{ id: "bad" }] }), {
+        status: 200,
+      }),
+    ) as jest.Mock;
+    await expect(
+      syncArtifactSets("http://localhost:8787", [], [], []),
+    ).rejects.toThrow("malformed artifact sync data");
   });
 });

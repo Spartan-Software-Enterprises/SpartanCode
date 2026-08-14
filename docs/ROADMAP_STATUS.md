@@ -111,9 +111,11 @@ current Implemented/Partial/Open counts.
   Setup plans remain guidance-only and require the user to review and execute
   commands on a host they control; see [HOME_SERVER_SETUP.md](HOME_SERVER_SETUP.md).
 - Artifact synchronization now has a bounded desktop bridge and Android
-  three-way merge contract. One-sided edits apply automatically; divergent
-  edits are returned as explicit conflicts for review, while Proton Drive
-  remains encrypted backup/restore rather than a plaintext sync transport.
+  three-way merge contract. Android persists the last remote base across
+  refreshes, reconciles its phone snapshot, and falls back safely for older
+  bridges. One-sided edits apply automatically; divergent edits are returned
+  as explicit conflicts for review, while Proton Drive remains encrypted
+  backup/restore rather than a plaintext sync transport.
   Physical cross-device acceptance and a continuous transport remain open;
   see [ARTIFACT_SYNC.md](ARTIFACT_SYNC.md).
 - Signed marketplace plugins now support verified staging, metadata-only

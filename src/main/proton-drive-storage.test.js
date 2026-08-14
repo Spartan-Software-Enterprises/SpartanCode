@@ -46,7 +46,7 @@ test("Proton Drive backup envelope uses the secure vault and hides plaintext", (
     Buffer.from("private workspace evidence"),
   );
   const tamperedEnvelope = JSON.parse(envelope);
-  tamperedEnvelope.ciphertext = `${tamperedEnvelope.ciphertext.slice(0, -1)}${tamperedEnvelope.ciphertext.endsWith("A") ? "B" : "A"}`;
+  tamperedEnvelope.ciphertext = `${tamperedEnvelope.ciphertext.startsWith("A") ? "B" : "A"}${tamperedEnvelope.ciphertext.slice(1)}`;
   const tampered = Buffer.from(`${JSON.stringify(tamperedEnvelope)}\n`);
   assert.throws(
     () =>

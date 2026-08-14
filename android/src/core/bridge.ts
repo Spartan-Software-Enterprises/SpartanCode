@@ -1,4 +1,4 @@
-import type { MobileSnapshot } from "./types";
+import type { Artifact, MobileSnapshot } from "./types";
 import { readBridgeToken } from "./storage";
 import {
   isActivity,
@@ -95,6 +95,40 @@ export async function bridgeRequest<T>(
     );
   }
   return (await response.json()) as T;
+}
+
+export type ArtifactSyncResult = {
+  merged: Artifact[];
+  conflicts: Array<{
+    id: string;
+    base: Artifact | null;
+    local: Artifact | null;
+    remote: Artifact | null;
+  }>;
+  requiresReview: boolean;
+};
+
+export async function syncArtifactSets(
+  endpoint: string,
+  base: Artifact[],
+  local: Artifact[],
+  remote: Artifact[],
+) {
+  const result = await bridgeRequest<unknown>(endpoint, "/v1/artifacts/sync", {
+    method: "POST",
+    body: JSON.stringify({ base, local, remote }),
+  });
+  if (!result || typeof result !== "object")
+    throw new BridgeError("Bridge returned an invalid artifact sync result");
+  const value = result as Partial<ArtifactSyncResult>;
+  if (
+    !Array.isArray(value.merged) ||
+    !value.merged.every(isArtifact) ||
+    !Array.isArray(value.conflicts) ||
+    typeof value.requiresReview !== "boolean"
+  )
+    throw new BridgeError("Bridge returned malformed artifact sync data");
+  return value as ArtifactSyncResult;
 }
 
 export function normalizeBridgeSnapshot(value: unknown): MobileSnapshot {

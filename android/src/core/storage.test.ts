@@ -15,6 +15,8 @@ import {
   writeMobileSettingsLayers,
   updateMobileScopedSettings,
   writeCollaborationSessions,
+  readArtifactSyncBase,
+  writeArtifactSyncBase,
 } from "./storage";
 import { createMobileCollaborationSession } from "./collaboration";
 
@@ -111,6 +113,28 @@ describe("storage recovery", () => {
     expect(
       await AsyncStorage.getItem("spartancode.mobile.snapshot.encrypted.v1"),
     ).not.toContain("Keep me");
+  });
+
+  it("persists only valid artifact sync bases and bounds the collection", async () => {
+    const valid = {
+      id: "a1",
+      name: "README",
+      type: "document",
+      status: "draft",
+      createdAt: "2026-08-13T00:00:00.000Z",
+    };
+    await writeArtifactSyncBase([
+      valid,
+      { malformed: true } as never,
+      ...Array.from({ length: 501 }, (_, index) => ({
+        ...valid,
+        id: `a-${index}`,
+      })),
+    ]);
+    const restored = await readArtifactSyncBase();
+    expect(restored).toHaveLength(500);
+    expect(restored[0]).toEqual(valid);
+    expect(restored.every((item) => item.id)).toBe(true);
   });
 });
 

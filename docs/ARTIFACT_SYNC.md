@@ -13,6 +13,13 @@ user resolves the conflict. Inputs are limited to 500 artifacts and the
 authenticated bridge endpoint is `POST /v1/artifacts/sync` with the
 `artifacts:write` scope.
 
+The Android client participates in this contract during bridge refresh: it
+keeps the last remote artifact set as its bounded local base, submits the
+current phone snapshot and remote snapshot for reconciliation, and stores the
+merged result locally. A bridge that predates the sync route remains
+snapshot-compatible; the client falls back to the remote snapshot rather than
+silently treating an unavailable merge route as a successful local merge.
+
 This is conflict-aware synchronization logic, not silent continuous syncing.
 Proton Drive remains an encrypted backup/restore transport and does not receive
 plaintext artifacts from this merge layer.

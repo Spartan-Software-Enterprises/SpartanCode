@@ -22,10 +22,12 @@ import {
   useWindowDimensions,
 } from "react-native";
 import {
+  type ArtifactSyncResult,
   BridgeError,
   bridgeRequest,
   normalizeBridgeEndpoint,
   normalizeBridgeSnapshot,
+  syncArtifactSets,
 } from "./src/core/bridge";
 import { decodePairingPayload } from "./src/core/pairing";
 import {
@@ -40,6 +42,7 @@ import {
   readBiometricSetting,
   readMobileSettings,
   readMobileSettingsLayers,
+  readArtifactSyncBase,
   resolveMobileSettings,
   updateMobileScopedSettings,
   readCollaborationSessions,
@@ -50,6 +53,7 @@ import {
   writeMobileSettings,
   writeCollaborationSessions,
   writeMobileProjects,
+  writeArtifactSyncBase,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
 import type { MobileSettings } from "./src/core/storage";
@@ -339,6 +343,27 @@ export default function App() {
           "/v1/snapshot",
         ),
       );
+      const current = await readSnapshot();
+      let artifactSync: ArtifactSyncResult = {
+        merged: remote.artifacts ?? [],
+        conflicts: [],
+        requiresReview: false,
+      };
+      try {
+        artifactSync = await syncArtifactSets(
+          normalizedEndpoint,
+          await readArtifactSyncBase(),
+          current.artifacts ?? [],
+          remote.artifacts ?? [],
+        );
+        await writeArtifactSyncBase(remote.artifacts ?? []);
+      } catch (error) {
+        // Older bridges can still provide snapshots without the sync route.
+        // Keep refresh compatible while retaining the remote snapshot as the
+        // safe fallback; other failures must remain visible to the user.
+        if (!(error instanceof BridgeError && error.status === 404))
+          throw error;
+      }
       let remoteCollaboration: MobileCollaborationSession[] = [];
       try {
         const response = await authorizedBridgeRequest<unknown>(
@@ -379,13 +404,13 @@ export default function App() {
           missions: [...pendingLocal, ...remote.missions],
         };
       });
-      const current = await readSnapshot();
       const remoteIds = new Set(remote.missions.map((item) => item.id));
       const pendingLocal = current.missions.filter(
         (item) => item.status === "planning" && !remoteIds.has(item.id),
       );
       const merged = {
         ...remote,
+        artifacts: artifactSync.merged,
         connections: [
           ...remote.connections.filter((item) => item.id !== profile.id),
           profile,
@@ -410,7 +435,11 @@ export default function App() {
         }
       }
       setToken("");
-      setMessage("Connected · synced just now");
+      setMessage(
+        artifactSync.requiresReview
+          ? `Connected · ${artifactSync.conflicts.length} artifact conflict${artifactSync.conflicts.length === 1 ? "" : "s"} requires review`
+          : "Connected · synced just now",
+      );
     } catch (error) {
       setSnapshot((current) => ({ ...current, offline: true }));
       setMessage(error instanceof Error ? error.message : "Connection failed");
