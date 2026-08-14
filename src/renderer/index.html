@@ -1904,6 +1904,58 @@
           style="display: block; color: var(--muted)"
         ></small>
         <details class="settings-advanced">
+          <summary>Signed plugin marketplace</summary>
+          <p>
+            Verify a signed HTTPS index, stage one selected artifact, then
+            explicitly activate only its validated declarative manifest.
+          </p>
+          <div class="setting-group">
+            <label for="marketplaceUrl">Index URL</label>
+            <input
+              id="marketplaceUrl"
+              type="url"
+              placeholder="https://example.invalid/plugins.json"
+            />
+          </div>
+          <div class="setting-group">
+            <label for="marketplacePublicKey">Ed25519 public key</label>
+            <textarea
+              id="marketplacePublicKey"
+              rows="3"
+              placeholder="PEM public key"
+            ></textarea>
+          </div>
+          <button type="button" class="context-button" id="marketplaceFetch">
+            Verify marketplace index
+          </button>
+          <div class="setting-group">
+            <label for="marketplacePluginSelect">Verified plugin</label>
+            <select id="marketplacePluginSelect">
+              <option value="">Verify an index first</option>
+            </select>
+          </div>
+          <div class="settings-inline-actions">
+            <button
+              type="button"
+              class="context-button"
+              id="marketplaceDownload"
+            >
+              Download and stage
+            </button>
+            <button
+              type="button"
+              class="context-button"
+              id="marketplaceActivate"
+            >
+              Activate metadata
+            </button>
+          </div>
+          <small
+            id="marketplaceMessage"
+            style="display: block; color: var(--muted)"
+          ></small>
+        </details>
+        <details class="settings-advanced">
           <summary>Secure local storage</summary>
           <div class="settings-runtime-grid" id="settingsSecureStatus">
             Loading OS-backed secure storage status…
@@ -2091,6 +2143,7 @@
       const prepareModelButton = document.getElementById("prepareModel");
       const modelStatus = document.getElementById("modelStatus");
       let selectedModelMetadata = null;
+      let marketplacePlugins = [];
       const discoveredModels = new Map();
       const chatModal = document.getElementById("chatModal");
       const chatMessages = document.getElementById("chatMessages");
@@ -2868,6 +2921,70 @@
           } catch (error) {
             document.getElementById("settingsCodeRabbitMessage").textContent =
               error.message;
+          }
+        });
+      document
+        .getElementById("marketplaceFetch")
+        .addEventListener("click", async () => {
+          const message = document.getElementById("marketplaceMessage");
+          try {
+            const index = await window.spartanCode.fetchMarketplacePlugins(
+              document.getElementById("marketplaceUrl").value.trim(),
+              document.getElementById("marketplacePublicKey").value.trim(),
+            );
+            marketplacePlugins = index.plugins || [];
+            document.getElementById("marketplacePluginSelect").innerHTML =
+              marketplacePlugins.length
+                ? marketplacePlugins
+                    .map(
+                      (plugin, index) =>
+                        `<option value="${index}">${escapeHtml(plugin.name)} · ${escapeHtml(plugin.version)} · ${escapeHtml(plugin.license)}</option>`,
+                    )
+                    .join("")
+                : '<option value="">No plugins found</option>';
+            message.textContent = `Verified ${marketplacePlugins.length} signed plugin entr${marketplacePlugins.length === 1 ? "y" : "ies"}.`;
+          } catch (error) {
+            message.textContent = error.message;
+          }
+        });
+      const selectedMarketplacePlugin = () => {
+        const index = Number(
+          document.getElementById("marketplacePluginSelect").value,
+        );
+        return Number.isInteger(index) ? marketplacePlugins[index] : null;
+      };
+      document
+        .getElementById("marketplaceDownload")
+        .addEventListener("click", async () => {
+          const plugin = selectedMarketplacePlugin();
+          const message = document.getElementById("marketplaceMessage");
+          if (!plugin) {
+            message.textContent = "Verify an index and select a plugin first.";
+            return;
+          }
+          try {
+            const result =
+              await window.spartanCode.downloadMarketplacePlugin(plugin);
+            message.textContent = `${result.id}@${result.version} staged after SHA-256 verification.`;
+          } catch (error) {
+            message.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("marketplaceActivate")
+        .addEventListener("click", async () => {
+          const plugin = selectedMarketplacePlugin();
+          const message = document.getElementById("marketplaceMessage");
+          if (!plugin) {
+            message.textContent = "Verify an index and select a plugin first.";
+            return;
+          }
+          try {
+            const result =
+              await window.spartanCode.activateMarketplacePlugin(plugin);
+            message.textContent = `${result.id}@${result.version} metadata activated. The artifact remains non-executable.`;
+          } catch (error) {
+            message.textContent = error.message;
           }
         });
       document
