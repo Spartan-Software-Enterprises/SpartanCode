@@ -866,6 +866,12 @@ export default function App() {
 
         <Text style={styles.section}>App settings</Text>
         <View style={styles.card}>
+          <Text style={styles.missionText}>Local storage and security</Text>
+          <Text style={styles.message}>
+            Missions, settings, and offline project state stay in app-private
+            storage. GitHub is optional; bridge tokens use Android Keystore
+            storage and can be protected by biometrics above.
+          </Text>
           <View style={styles.toggleRow}>
             <View style={styles.missionBody}>
               <Text style={styles.missionText}>Execution preference</Text>

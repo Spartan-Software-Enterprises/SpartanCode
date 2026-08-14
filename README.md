@@ -5,6 +5,11 @@ is documented in [docs/GITHUB_APP.md](docs/GITHUB_APP.md). Codespaces is an
 optional user-authorized workspace target; the desktop and Android apps do not
 depend on it.
 
+GitHub is never required: local workspaces, mission history, and offline
+planning remain available on-device. Advanced desktop settings can save
+credentials in OS-backed encrypted storage; Android bridge secrets use the
+platform secure store and optional biometrics.
+
 Turn an idea into a verified software change with a calm, focused command
 center for missions, custom agents, local models, artifacts, and review. The
 Spartan IDE theme keeps the workspace dark, readable, and purpose-built for

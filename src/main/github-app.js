@@ -90,8 +90,16 @@ function createGitHubAppClient({
   fetchImpl = fetch,
   now = Date.now,
 } = {}) {
-  const config = readConfig(environment);
+  let currentEnvironment = environment;
+  let config = readConfig(currentEnvironment);
   let cachedToken = null;
+
+  const refresh = (nextEnvironment = currentEnvironment) => {
+    currentEnvironment = nextEnvironment;
+    config = readConfig(currentEnvironment);
+    cachedToken = null;
+    return status();
+  };
 
   const status = () => ({
     provider: "GitHub App",
@@ -148,6 +156,7 @@ function createGitHubAppClient({
 
   return {
     status,
+    refresh,
     listRepositories: async () => {
       const result = await request("/installation/repositories?per_page=100");
       return Array.isArray(result.repositories)

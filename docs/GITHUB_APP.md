@@ -54,3 +54,13 @@ The app intentionally does not request Codespaces permission for its
 installation token. This keeps repository automation narrow and prevents an
 installed app from creating billable development environments without the
 user's explicit GitHub authorization.
+
+## Local-only users and encryption
+
+GitHub is optional. Desktop workspaces remain ordinary local project folders so
+editors, compilers, and Git can use them directly; mission metadata and secrets
+are kept separately. Desktop secrets saved from Settings use an OS-backed
+wrapped random 256-bit key and AES-256-GCM authenticated records. Android bridge
+secrets use Android Keystore-backed SecureStore and can require device
+biometrics. If the platform cannot provide protected storage, SpartanCode
+refuses to save the secret instead of falling back to plaintext.

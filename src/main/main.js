@@ -1,5 +1,5 @@
 const path = require("path");
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, safeStorage } = require("electron");
 const { registerDesktopApi } = require("./desktop-api");
 const { createMissionStore } = require("./mission-store");
 const { createMissionRunner } = require("./mission-runner");
@@ -7,6 +7,7 @@ const { createModelCache } = require("./model-cache");
 const { createLocalStageExecutor } = require("./stage-executor");
 const { createBridgeServer } = require("./mcp-bridge");
 const { requiresMissionApproval } = require("./policy-engine");
+const { createSecureVault } = require("./secure-vault");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -30,10 +31,39 @@ function createWindow() {
   const store = createMissionStore(
     path.join(app.getPath("userData"), "workspace.json"),
   );
+  const secureVault = createSecureVault({
+    safeStorage,
+    filePath: path.join(app.getPath("userData"), "secure-vault.json"),
+  });
+  const savedSecret = (name) => {
+    try {
+      return secureVault.get(name) || undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  const githubEnvironment = {
+    ...process.env,
+    SPARTANCODE_GITHUB_APP_ID:
+      process.env.SPARTANCODE_GITHUB_APP_ID ||
+      savedSecret("SPARTANCODE_GITHUB_APP_ID"),
+    SPARTANCODE_GITHUB_APP_INSTALLATION_ID:
+      process.env.SPARTANCODE_GITHUB_APP_INSTALLATION_ID ||
+      savedSecret("SPARTANCODE_GITHUB_APP_INSTALLATION_ID"),
+    SPARTANCODE_GITHUB_APP_PRIVATE_KEY:
+      process.env.SPARTANCODE_GITHUB_APP_PRIVATE_KEY ||
+      savedSecret("SPARTANCODE_GITHUB_APP_PRIVATE_KEY"),
+    SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET:
+      process.env.SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET ||
+      savedSecret("SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET"),
+  };
+  const savedBridgeToken =
+    process.env.SPARTANCODE_BRIDGE_TOKEN ||
+    savedSecret("SPARTANCODE_BRIDGE_TOKEN");
   let bridge = null;
   if (process.env.SPARTANCODE_BRIDGE_PORT) {
     const bridgeHost = process.env.SPARTANCODE_BRIDGE_HOST || "127.0.0.1";
-    const hasToken = Boolean(process.env.SPARTANCODE_BRIDGE_TOKEN);
+    const hasToken = Boolean(savedBridgeToken);
     const hasOidc = Boolean(
       process.env.SPARTANCODE_BRIDGE_OIDC_ISSUER &&
       process.env.SPARTANCODE_BRIDGE_OIDC_AUDIENCE,
@@ -46,7 +76,7 @@ function createWindow() {
     }
     bridge = createBridgeServer({
       store,
-      token: process.env.SPARTANCODE_BRIDGE_TOKEN || null,
+      token: savedBridgeToken || null,
       oidc:
         process.env.SPARTANCODE_BRIDGE_OIDC_ISSUER &&
         process.env.SPARTANCODE_BRIDGE_OIDC_AUDIENCE
@@ -58,7 +88,7 @@ function createWindow() {
           : null,
       allowUnauthenticated: isLoopback && !hasToken && !hasOidc,
       githubWebhookSecret:
-        process.env.SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET || null,
+        githubEnvironment.SPARTANCODE_GITHUB_APP_WEBHOOK_SECRET || null,
       requiresMissionApproval: (description) =>
         requiresMissionApproval(
           description,
@@ -81,6 +111,8 @@ function createWindow() {
       path.join(app.getPath("userData"), "models.json"),
     ),
     marketplaceDir: path.join(app.getPath("userData"), "marketplace"),
+    secureVault,
+    githubEnvironment,
   });
 }
 

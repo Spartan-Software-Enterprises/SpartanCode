@@ -54,6 +54,7 @@ The Android companion keeps high-value controls reachable on a phone:
   quantization, voice input, and automatic sync on resume;
 - workspace-safe bridge token cleanup, connection controls, remote planning,
   router guidance, and offline audit visibility;
+- app-private local project state with Android Keystore-backed bridge secrets;
 - artifact and approval review without requiring the desktop app.
 
 ![Android command center](../android/screenshots/command-center.png)

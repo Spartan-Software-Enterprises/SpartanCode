@@ -50,6 +50,11 @@ contextBridge.exposeInMainWorld("spartanCode", {
   getProviderStatus: () => ipcRenderer.invoke("providers:get"),
   getGitHubAppStatus: () => ipcRenderer.invoke("github-app:status"),
   listGitHubRepositories: () => ipcRenderer.invoke("github-app:repositories"),
+  getSecureVaultStatus: () => ipcRenderer.invoke("secure-vault:status"),
+  listSecureKeys: () => ipcRenderer.invoke("secure-vault:list"),
+  saveSecureKey: (name, value) =>
+    ipcRenderer.invoke("secure-vault:set", name, value),
+  deleteSecureKey: (name) => ipcRenderer.invoke("secure-vault:delete", name),
   getVoiceStatus: () => ipcRenderer.invoke("voice:status"),
   startVoice: () => ipcRenderer.invoke("voice:start"),
   getMcpTools: () => ipcRenderer.invoke("mcp:tools"),

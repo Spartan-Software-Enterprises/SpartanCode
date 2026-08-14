@@ -1623,6 +1623,52 @@
           GitHub App access is optional. Codespaces requires a user-authorized
           GitHub session.
         </small>
+        <details class="settings-advanced">
+          <summary>Secure local storage</summary>
+          <div class="settings-runtime-grid" id="settingsSecureStatus">
+            Loading OS-backed secure storage status…
+          </div>
+          <div class="setting-group">
+            <label for="secureKeyName">Key name</label>
+            <input
+              id="secureKeyName"
+              autocomplete="off"
+              placeholder="SPARTANCODE_BRIDGE_TOKEN"
+            />
+          </div>
+          <div class="setting-group">
+            <label for="secureKeyValue">Key value</label>
+            <input
+              id="secureKeyValue"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Stored encrypted on this device"
+            />
+          </div>
+          <div class="settings-inline-actions">
+            <button
+              type="button"
+              class="context-button"
+              id="settingsSecureSave"
+            >
+              Save encrypted key
+            </button>
+            <button
+              type="button"
+              class="context-button"
+              id="settingsSecureDelete"
+            >
+              Delete selected key
+            </button>
+          </div>
+          <small
+            id="settingsSecureMessage"
+            style="display: block; color: var(--muted)"
+          >
+            Keys stay encrypted on this device and are never included in
+            workspace data or exports.
+          </small>
+        </details>
         <div class="settings-actions">
           <button type="button" class="settings-close" id="closeSettings">
             Cancel</button
@@ -1749,6 +1795,12 @@
       const settingsGithubMessage = document.getElementById(
         "settingsGithubMessage",
       );
+      const settingsSecureStatus = document.getElementById(
+        "settingsSecureStatus",
+      );
+      const settingsSecureMessage = document.getElementById(
+        "settingsSecureMessage",
+      );
       const settingsStatusRow = (label, value) =>
         `<div class="settings-runtime-item"><strong>${escapeHtml(label)}</strong><em>${escapeHtml(value)}</em></div>`;
       const refreshSettingsDiagnostics = async (settings) => {
@@ -1763,6 +1815,8 @@
           tools,
           audit,
           github,
+          secureStorage,
+          secureKeys,
         ] = await Promise.all([
           window.spartanCode.getRuntimeStatus(),
           window.spartanCode.getCapabilities(),
@@ -1773,6 +1827,8 @@
           window.spartanCode.getMcpTools(),
           window.spartanCode.getAuditLog(),
           window.spartanCode.getGitHubAppStatus(),
+          window.spartanCode.getSecureVaultStatus(),
+          window.spartanCode.listSecureKeys(),
         ]);
         settingsWorkspaceSummary.textContent = settings.workspacePath
           ? settings.workspacePath
@@ -1817,6 +1873,17 @@
           settingsStatusRow("Codespaces", github.capabilities.codespaces),
         ].join("");
         settingsGithubMessage.textContent = github.message;
+        settingsSecureStatus.innerHTML = [
+          settingsStatusRow("Encryption", secureStorage.provider),
+          settingsStatusRow(
+            "Availability",
+            secureStorage.available ? "Available" : "Unavailable",
+          ),
+          settingsStatusRow("Saved keys", `${secureKeys.length} encrypted`),
+          ...secureKeys.map((item) =>
+            settingsStatusRow(item.name, item.updatedAt),
+          ),
+        ].join("");
       };
       const escapeChat = (value) => escapeHtml(value).replace(/\n/g, "<br>");
       const renderChat = (messages) => {
@@ -2262,6 +2329,38 @@
               : "The installation has no visible repositories.";
           } catch (error) {
             settingsGithubMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("settingsSecureSave")
+        .addEventListener("click", async () => {
+          const name = document.getElementById("secureKeyName").value.trim();
+          const value = document.getElementById("secureKeyValue").value;
+          try {
+            await window.spartanCode.saveSecureKey(name, value);
+            document.getElementById("secureKeyValue").value = "";
+            settingsSecureMessage.textContent = `${name} saved in encrypted local storage.`;
+            await refreshSettingsDiagnostics(
+              await window.spartanCode.getSettings(),
+            );
+          } catch (error) {
+            settingsSecureMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("settingsSecureDelete")
+        .addEventListener("click", async () => {
+          const name = document.getElementById("secureKeyName").value.trim();
+          try {
+            const deleted = await window.spartanCode.deleteSecureKey(name);
+            settingsSecureMessage.textContent = deleted
+              ? `${name} deleted from encrypted local storage.`
+              : `${name} was not found.`;
+            await refreshSettingsDiagnostics(
+              await window.spartanCode.getSettings(),
+            );
+          } catch (error) {
+            settingsSecureMessage.textContent = error.message;
           }
         });
       document

@@ -37,11 +37,13 @@ function registerDesktopApi({
   runMission,
   modelCache,
   marketplaceDir,
+  secureVault,
+  githubEnvironment = process.env,
 }) {
   const voiceService = createVoiceService();
   const chatService = createChatService(store);
   const runtimeRegistry = createRuntimeRegistry();
-  const githubApp = createGitHubAppClient();
+  const githubApp = createGitHubAppClient({ environment: githubEnvironment });
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
   ipcMain.handle("runtime:generate", (_event, runtimeId, request) => {
@@ -55,6 +57,22 @@ function registerDesktopApi({
   ipcMain.handle("providers:get", () => getProviderStatus());
   ipcMain.handle("github-app:status", () => githubApp.status());
   ipcMain.handle("github-app:repositories", () => githubApp.listRepositories());
+  ipcMain.handle("secure-vault:status", () => secureVault.status());
+  ipcMain.handle("secure-vault:list", () => secureVault.list());
+  ipcMain.handle("secure-vault:set", (_event, name, value) => {
+    const result = secureVault.set(name, value);
+    if (typeof name === "string" && name.startsWith("SPARTANCODE_")) {
+      const nextEnvironment = {
+        ...githubEnvironment,
+        [name]: value,
+      };
+      githubApp.refresh(nextEnvironment);
+    }
+    return result;
+  });
+  ipcMain.handle("secure-vault:delete", (_event, name) =>
+    secureVault.delete(name),
+  );
   ipcMain.handle("voice:status", () => voiceService.status());
   ipcMain.handle("voice:start", () => voiceService.start());
   ipcMain.handle("mcp:tools", () => [
