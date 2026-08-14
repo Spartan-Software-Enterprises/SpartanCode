@@ -45,11 +45,26 @@ async function main() {
         .locator("#settingsGovernanceStatus .settings-runtime-item")
         .first()
         .waitFor();
+      await page.locator(".settings-card").evaluate((element) => {
+        element.scrollTop = 0;
+      });
     }
     await page.screenshot({
       path: path.join(outputDir, `desktop-${view}.png`),
       fullPage: true,
     });
+    if (view === "settings") {
+      await page.locator(".settings-card").evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
+      await page.screenshot({
+        path: path.join(outputDir, "desktop-settings-governance.png"),
+        fullPage: true,
+      });
+      await page.locator(".settings-card").evaluate((element) => {
+        element.scrollTop = 0;
+      });
+    }
     const managerClose = page.locator('[aria-label="Close agent manager"]');
     if (await managerClose.isVisible().catch(() => false))
       await managerClose.click({ force: true });
