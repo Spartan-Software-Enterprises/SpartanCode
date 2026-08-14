@@ -99,7 +99,7 @@ security model:
    workspaces, and Swift Package metadata while rejecting signing metadata and
    never invoking Xcode or a simulator. Read-only editor configuration importing
    is implemented in `src/main/editor-config-importer.js` for Neovim/Vim,
-   Emacs, Zed, and Sublime project metadata; it summarizes configuration
+   Emacs, Zed, and Sublime project/workspace metadata; it summarizes configuration
    structure without evaluating scripts. Remaining editor packages remain
    future work.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,

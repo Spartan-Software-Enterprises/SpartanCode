@@ -64,7 +64,7 @@ function configFilesForEditor(projectRoot, editor) {
     .filter(
       (entry) =>
         entry.isFile() &&
-        entry.name.endsWith(".sublime-project") &&
+        /\.sublime-(?:project|workspace)$/.test(entry.name) &&
         entry.name.length <= 160,
     )
     .map((entry) => entry.name)

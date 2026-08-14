@@ -25,10 +25,14 @@ test("imports bounded Neovim, Emacs, Zed, Vim, and Sublime metadata without eval
     path.join(root, "Spartan.sublime-project"),
     '{"folders":[{"path":"."}],"settings":{"secret":"hidden"}}',
   );
+  fs.writeFileSync(
+    path.join(root, "Spartan.sublime-workspace"),
+    '{"folders":[],"buffers":[],"groups":[]}',
+  );
   const result = importEditorConfig(root);
   assert.equal(result.execution, "read-only");
   assert.equal(result.credentials, false);
-  assert.equal(result.files.length, 5);
+  assert.equal(result.files.length, 6);
   assert.equal(JSON.stringify(result).includes("secret-plugin"), false);
   assert.equal(
     result.files.find((file) => file.editor === "zed").summary.keyCount,
@@ -36,6 +40,10 @@ test("imports bounded Neovim, Emacs, Zed, Vim, and Sublime metadata without eval
   );
   assert.equal(
     result.files.find((file) => file.editor === "sublime").summary.keyCount,
+    2,
+  );
+  assert.equal(
+    result.files.filter((file) => file.editor === "sublime").length,
     2,
   );
   fs.rmSync(root, { recursive: true, force: true });
