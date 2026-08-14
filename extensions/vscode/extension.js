@@ -5,6 +5,7 @@ const http = require("node:http");
 const https = require("node:https");
 
 const MAX_BRIDGE_RESPONSE_BYTES = 2 * 1024 * 1024;
+const MAX_BRIDGE_REQUEST_BYTES = 512 * 1024;
 const MAX_SNAPSHOT_BYTES = 2 * 1024 * 1024;
 
 class BridgeRequestError extends Error {
@@ -35,6 +36,11 @@ function bridgeRequestOptions(
   if (typeof token !== "string" || !token.trim() || token.length > 16 * 1024)
     throw new Error("A bounded bridge token from SecretStorage is required");
   const payload = body === undefined ? null : JSON.stringify(body);
+  if (
+    payload !== null &&
+    Buffer.byteLength(payload, "utf8") > MAX_BRIDGE_REQUEST_BYTES
+  )
+    throw new Error("SpartanCode bridge request is too large");
   return {
     url,
     options: {
@@ -501,6 +507,7 @@ async function activate(context) {
 
 module.exports = {
   activate,
+  MAX_BRIDGE_REQUEST_BYTES,
   bridgeRequestOptions,
   boundedSelection,
   boundedNote,

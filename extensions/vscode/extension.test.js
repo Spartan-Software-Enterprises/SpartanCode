@@ -14,6 +14,7 @@ const {
   readSnapshotEnvelope,
   summarizeSnapshot,
   collaborationParticipantsRoute,
+  MAX_BRIDGE_REQUEST_BYTES,
 } = require("./extension");
 
 test("VS Code bridge requests are authenticated and bounded", () => {
@@ -40,6 +41,17 @@ test("VS Code bridge requests are authenticated and bounded", () => {
   assert.throws(
     () => bridgeRequestOptions("http://127.0.0.1:8787", "/v1/snapshot"),
     /SecretStorage/,
+  );
+  assert.throws(
+    () =>
+      bridgeRequestOptions(
+        "http://127.0.0.1:8787",
+        "/v1/snapshot",
+        "secret",
+        "POST",
+        { data: "x".repeat(MAX_BRIDGE_REQUEST_BYTES) },
+      ),
+    /request is too large/,
   );
 });
 
