@@ -118,9 +118,9 @@ jobs:
             printf '%s\n' 'disk.dataPartition.size=2147483648' >> "$avd_config"
           done
           cd android
-          npx expo prebuild --platform android --no-install
+          timeout 300s npx expo prebuild --platform android --no-install
           cd android
-          ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
+          timeout 600s ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
           cd ../..
           # The APK is complete; reclaim disposable build/dependency caches so
           # the hosted runner can allocate the emulator userdata image.
