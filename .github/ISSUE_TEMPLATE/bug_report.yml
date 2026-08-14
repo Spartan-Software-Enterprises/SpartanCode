@@ -1,0 +1,56 @@
+name: Bug report
+description: Report a reproducible SpartanCode problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove credentials, private repository content, and personal data before submitting logs or screenshots.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest reliable sequence that reproduces the issue.
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. Observe...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SpartanCode version or commit
+      placeholder: v0.1.0 or 829d4e0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Windows 11 / Android 14 / Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Paste relevant error text or attach a redacted screenshot. Never include tokens, keys, or private code.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed credentials and private user data.
+          required: true
+        - label: I searched existing issues and found no duplicate.
+          required: true

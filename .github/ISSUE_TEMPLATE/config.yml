@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability report
+    url: https://github.com/Spartan-Software-Enterprises/SpartanCode/security/advisories/new
+    about: Do not report security vulnerabilities in public issues.
+  - name: Documentation and roadmap
+    url: https://github.com/Spartan-Software-Enterprises/SpartanCode/blob/main/docs/ROADMAP_STATUS.md
+    about: Check current capabilities, evidence, and release gates first.
