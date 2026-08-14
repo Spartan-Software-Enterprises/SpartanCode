@@ -101,25 +101,6 @@ The desktop shell uses Electron with a context-isolated preload bridge. Mission
 state is persisted in the Electron user-data directory. Local workspace tools
 are restricted to the selected workspace, including symlink escape protection.
 
-## Source of truth and development synchronization
-
-`origin/main` on GitHub is the canonical SpartanCode source of truth:
-<https://github.com/Spartan-Software-Enterprises/SpartanCode>. The AWS
-development checkout is a validation mirror, not an independent branch. The
-active replacement host must be supplied through the documented operational
-environment; the former `54.152.46.218` checkout is retired.
-
-Before starting work, update local `main` from `origin/main`. Before handing
-off work, commit all intended changes, push `main`, fast-forward the AWS
-checkout, and verify that both checkouts report the same commit. Never force
-push, reset a worktree, or overwrite uncommitted changes to resolve drift.
-The detailed procedure, recovery steps, and verification commands are in
-[`docs/SYNC_WORKFLOW.md`](docs/SYNC_WORKFLOW.md).
-
-All work must finish with a clean local and AWS worktree. If a conflict or
-unexpected change is found, stop and preserve the divergent commit or worktree
-before reconciling it.
-
 ## For builders
 
 SpartanCode is open for thoughtful extension. Start with the development
