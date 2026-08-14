@@ -2,7 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const { _electron: electron } = require("playwright");
 
-const outputDir = process.env.SPARTANCODE_VISUAL_OUTPUT || "/tmp/spartancode-visual";
+const outputDir =
+  process.env.SPARTANCODE_VISUAL_OUTPUT || "/tmp/spartancode-visual";
 fs.mkdirSync(outputDir, { recursive: true });
 
 async function main() {
@@ -21,7 +22,10 @@ async function main() {
   });
 
   await page.waitForSelector(".app");
-  await page.screenshot({ path: path.join(outputDir, "desktop-home.png"), fullPage: true });
+  await page.screenshot({
+    path: path.join(outputDir, "desktop-home.png"),
+    fullPage: true,
+  });
   const title = await page.title();
   const identity = await page.locator(".brand").innerText();
   if (!title.includes("SpartanCode") || !identity.includes("SpartanCode")) {
@@ -32,11 +36,16 @@ async function main() {
   for (const view of views) {
     await page.locator(`[data-view="${view}"]`).click();
     await page.locator(`[data-view="${view}"].active`).waitFor();
-    await page.screenshot({ path: path.join(outputDir, `desktop-${view}.png`), fullPage: true });
+    await page.screenshot({
+      path: path.join(outputDir, `desktop-${view}.png`),
+      fullPage: true,
+    });
     const managerClose = page.locator('[aria-label="Close agent manager"]');
-    if (await managerClose.isVisible().catch(() => false)) await managerClose.click({ force: true });
+    if (await managerClose.isVisible().catch(() => false))
+      await managerClose.click({ force: true });
     const settingsClose = page.locator("#closeSettings");
-    if (await settingsClose.isVisible().catch(() => false)) await settingsClose.click({ force: true });
+    if (await settingsClose.isVisible().catch(() => false))
+      await settingsClose.click({ force: true });
   }
 
   await page.locator('[data-view="home"]').click();
@@ -45,10 +54,31 @@ async function main() {
   if ((await input.inputValue()) !== "Create a visual smoke-test mission") {
     throw new Error("Mission composer did not retain input");
   }
-  await page.screenshot({ path: path.join(outputDir, "desktop-composer-filled.png"), fullPage: true });
+  await page.screenshot({
+    path: path.join(outputDir, "desktop-composer-filled.png"),
+    fullPage: true,
+  });
 
-  const result = { title, identity, views, errors, warnings, screenshots: fs.readdirSync(outputDir).sort() };
-  fs.writeFileSync(path.join(outputDir, "result.json"), JSON.stringify(result, null, 2));
+  await page.locator('.round-button[aria-label="Notifications"]').click();
+  await page.locator("#chatModal.open").waitFor();
+  await page.screenshot({
+    path: path.join(outputDir, "desktop-menu-assistant.png"),
+    fullPage: true,
+  });
+  await page.locator("#closeChat").click();
+
+  const result = {
+    title,
+    identity,
+    views,
+    errors,
+    warnings,
+    screenshots: fs.readdirSync(outputDir).sort(),
+  };
+  fs.writeFileSync(
+    path.join(outputDir, "result.json"),
+    JSON.stringify(result, null, 2),
+  );
   await app.close();
   if (errors.length) throw new Error(`Renderer errors: ${errors.join("; ")}`);
   console.log(JSON.stringify(result, null, 2));
