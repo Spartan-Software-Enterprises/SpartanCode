@@ -8,6 +8,11 @@ import type {
 import type { MobileCollaborationSession } from "./collaboration";
 import { normalizeCollaborationSessions } from "./collaboration";
 import {
+  getOfflineCryptoStatus,
+  readEncryptedOfflineValue,
+  writeEncryptedOfflineValue,
+} from "./secure-offline-store";
+import {
   isActivity,
   isApproval,
   isArtifact,
@@ -18,6 +23,7 @@ import {
 } from "./types";
 
 const SNAPSHOT_KEY = "spartancode.mobile.snapshot.v1";
+const ENCRYPTED_SNAPSHOT_KEY = "spartancode.mobile.snapshot.encrypted.v1";
 const QUEUE_KEY = "spartancode.mobile.queue.v1";
 const BRIDGE_TOKEN_KEY = "spartancode.mobile.bridge-token.v1";
 const BRIDGE_TOKEN_INDEX_KEY = "spartancode.mobile.bridge-token-index.v1";
@@ -56,6 +62,43 @@ function emptySnapshot(): MobileSnapshot {
   };
 }
 
+function normalizeSnapshot(parsed: Partial<MobileSnapshot>): MobileSnapshot {
+  return {
+    ...emptySnapshot(),
+    schemaVersion: CURRENT_SNAPSHOT_VERSION,
+    missions: Array.isArray(parsed.missions)
+      ? parsed.missions.filter(isMission)
+      : [],
+    connections: Array.isArray(parsed.connections)
+      ? parsed.connections.filter(isConnectionProfile)
+      : [],
+    pendingApprovals:
+      typeof parsed.pendingApprovals === "number" &&
+      Number.isInteger(parsed.pendingApprovals) &&
+      parsed.pendingApprovals >= 0
+        ? parsed.pendingApprovals
+        : 0,
+    offline: true,
+    syncedAt:
+      typeof parsed.syncedAt === "string" &&
+      Number.isFinite(Date.parse(parsed.syncedAt))
+        ? parsed.syncedAt
+        : undefined,
+    artifacts: Array.isArray(parsed.artifacts)
+      ? parsed.artifacts.filter(isArtifact)
+      : [],
+    approvals: Array.isArray(parsed.approvals)
+      ? parsed.approvals.filter(isApproval)
+      : [],
+    activity: Array.isArray(parsed.activity)
+      ? parsed.activity.filter(isActivity)
+      : [],
+    auditLog: Array.isArray(parsed.auditLog)
+      ? parsed.auditLog.filter(isAuditEvent)
+      : [],
+  };
+}
+
 function tokenKey(endpoint: string) {
   return `${BRIDGE_TOKEN_KEY}.${new URL(endpoint).origin.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
 }
@@ -86,44 +129,25 @@ async function recoverCorruptValue(sourceKey: string, quarantineKey: string) {
 }
 
 export async function readSnapshot(): Promise<MobileSnapshot> {
+  let encrypted: Partial<MobileSnapshot> | null = null;
+  try {
+    encrypted = await readEncryptedOfflineValue<Partial<MobileSnapshot>>(
+      ENCRYPTED_SNAPSHOT_KEY,
+    );
+  } catch {
+    // A platform without the crypto runtime may still read legacy data so it
+    // can be migrated when encryption becomes available.
+  }
+  if (encrypted) return normalizeSnapshot(encrypted);
   try {
     const raw = await AsyncStorage.getItem(SNAPSHOT_KEY);
     if (!raw) return emptySnapshot();
-    const parsed = JSON.parse(raw) as Partial<MobileSnapshot>;
-    return {
-      ...emptySnapshot(),
-      schemaVersion: CURRENT_SNAPSHOT_VERSION,
-      missions: Array.isArray(parsed.missions)
-        ? parsed.missions.filter(isMission)
-        : [],
-      connections: Array.isArray(parsed.connections)
-        ? parsed.connections.filter(isConnectionProfile)
-        : [],
-      pendingApprovals:
-        typeof parsed.pendingApprovals === "number" &&
-        Number.isInteger(parsed.pendingApprovals) &&
-        parsed.pendingApprovals >= 0
-          ? parsed.pendingApprovals
-          : 0,
-      offline: true,
-      syncedAt:
-        typeof parsed.syncedAt === "string" &&
-        Number.isFinite(Date.parse(parsed.syncedAt))
-          ? parsed.syncedAt
-          : undefined,
-      artifacts: Array.isArray(parsed.artifacts)
-        ? parsed.artifacts.filter(isArtifact)
-        : [],
-      approvals: Array.isArray(parsed.approvals)
-        ? parsed.approvals.filter(isApproval)
-        : [],
-      activity: Array.isArray(parsed.activity)
-        ? parsed.activity.filter(isActivity)
-        : [],
-      auditLog: Array.isArray(parsed.auditLog)
-        ? parsed.auditLog.filter(isAuditEvent)
-        : [],
-    };
+    const normalized = normalizeSnapshot(JSON.parse(raw));
+    if (getOfflineCryptoStatus().enabled) {
+      await writeEncryptedOfflineValue(ENCRYPTED_SNAPSHOT_KEY, normalized);
+      await AsyncStorage.removeItem(SNAPSHOT_KEY);
+    }
+    return normalized;
   } catch {
     await recoverCorruptValue(SNAPSHOT_KEY, SNAPSHOT_QUARANTINE_KEY);
     return emptySnapshot();
@@ -131,7 +155,13 @@ export async function readSnapshot(): Promise<MobileSnapshot> {
 }
 
 export async function writeSnapshot(snapshot: MobileSnapshot) {
-  await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+  try {
+    await writeEncryptedOfflineValue(ENCRYPTED_SNAPSHOT_KEY, snapshot);
+    await AsyncStorage.removeItem(SNAPSHOT_KEY);
+  } catch (error) {
+    if (getOfflineCryptoStatus().enabled) throw error;
+    await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+  }
 }
 
 export async function readCollaborationSessions(): Promise<

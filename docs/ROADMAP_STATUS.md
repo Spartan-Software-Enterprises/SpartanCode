@@ -65,8 +65,9 @@ behavior and a corresponding automated or documented verification path.
   voice-test text and a visible unavailable/error fallback.
 - Android now includes a SecureStore-key-backed AES-256-GCM offline-content
   primitive with tamper detection, bounded payloads, cleanup, and automated
-  tests; migration of all legacy AsyncStorage snapshot data remains a tracked
-  release-hardening step.
+  tests. Legacy plaintext snapshots are migrated and removed on first read;
+  devices that truthfully lack the crypto runtime retain a compatibility path
+  and report the unavailable state in settings.
 - Android reads system reduced-motion, font-scale, and screen-reader settings
   without overriding them and surfaces the resulting accessibility state.
 - Android now has a local collaboration session surface with validated
@@ -153,8 +154,8 @@ behavior and a corresponding automated or documented verification path.
   Android bridge mutations/queued synchronization honor the biometric gate.
   GitHub Actions in the release and verification workflows are pinned to
   reviewed immutable commit SHAs. Remaining security hardening includes
-  optional runtime provenance, sandboxed workspace verification, and encrypted
-  Android offline content; these remain tracked as release hardening rather than
+  remaining release-hardening work is limited to provider-specific runtime
+  provenance attestations and physical/device-environment evidence rather than
   being represented as complete.
 - The legacy mission-plan executor now rejects shell metacharacters and uses
   bounded, tokenized `execFile` launches; the current standard security review

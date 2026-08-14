@@ -3,9 +3,15 @@ jest.mock("@react-native-async-storage/async-storage", () =>
 );
 jest.mock("expo-secure-store", () => ({
   AFTER_FIRST_UNLOCK: "AFTER_FIRST_UNLOCK",
-  getItemAsync: jest.fn(async () => null),
-  setItemAsync: jest.fn(async () => undefined),
+  getItemAsync: jest.fn(
+    async (key) => globalThis.__spartancodeSecureStore?.get(key) ?? null,
+  ),
+  setItemAsync: jest.fn(async (key, value) => {
+    globalThis.__spartancodeSecureStore ??= new Map();
+    globalThis.__spartancodeSecureStore.set(key, value);
+  }),
 }));
+globalThis.__spartancodeSecureStore = new Map();
 jest.mock("expo-speech-recognition", () => ({
   ExpoSpeechRecognitionModule: {
     requestPermissionsAsync: jest.fn(async () => ({ granted: false })),

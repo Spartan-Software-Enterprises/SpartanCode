@@ -101,6 +101,12 @@ describe("storage recovery", () => {
       schemaVersion: 1,
       missions: [{ id: "m1" }],
     });
+    expect(
+      await AsyncStorage.getItem("spartancode.mobile.snapshot.v1"),
+    ).toBeNull();
+    expect(
+      await AsyncStorage.getItem("spartancode.mobile.snapshot.encrypted.v1"),
+    ).not.toContain("Keep me");
   });
 });
 
