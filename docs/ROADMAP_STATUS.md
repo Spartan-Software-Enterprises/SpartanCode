@@ -150,6 +150,10 @@ behavior and a corresponding automated or documented verification path.
   optional runtime provenance, sandboxed workspace verification, and encrypted
   Android offline content; these remain tracked as release hardening rather than
   being represented as complete.
+- The legacy mission-plan executor now rejects shell metacharacters and uses
+  bounded, tokenized `execFile` launches; the current standard security review
+  recorded no reportable findings, with delegated-worker coverage explicitly
+  documented as unavailable in this environment.
 
 ## Implemented but environment-dependent
 
