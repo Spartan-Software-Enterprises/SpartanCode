@@ -64,10 +64,15 @@ for attempt in $(seq 1 240); do
   sleep 1
 done
 
+package_name=com.spartansoftware.spartancode
+# A stale debug/release install may have a different signing certificate.
+# Reset only this disposable emulator package so the smoke gate tests the APK
+# supplied by this invocation instead of failing on signature mismatch.
+timeout 30s adb uninstall "$package_name" >/dev/null 2>&1 || true
 timeout 120s adb install -r "$apk_path"
-timeout 30s adb shell monkey -p com.spartansoftware.spartancode 1
-timeout 30s adb shell dumpsys package com.spartansoftware.spartancode |
-  grep -q com.spartansoftware.spartancode
+timeout 30s adb shell monkey -p "$package_name" 1
+timeout 30s adb shell dumpsys package "$package_name" |
+  grep -q "$package_name"
 sleep 5
 adb exec-out screencap -p >"$screen_path"
 file "$screen_path"
