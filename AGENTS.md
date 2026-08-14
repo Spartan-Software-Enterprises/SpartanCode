@@ -1,7 +1,11 @@
 # SpartanCode continuation guide
 
 This repository is SpartanCode, the local-first AI engineering workspace. Do
-not substitute Spartan IDE, gaming, or another project name.
+not substitute Spartan IDE, gaming, or another project name. Codex and
+OpenCode may hand this project back and forth; follow `OPENCODE.md`,
+`docs/AGENT_HANDOFF.md`, and `docs/PROJECT_OPERATING_RULES.md` so every
+handoff preserves the canonical commit, clean worktrees, test evidence, and
+visible beta blockers.
 
 ## Source of truth
 

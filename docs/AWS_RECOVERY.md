@@ -54,3 +54,9 @@ The active KVM host exposes `/dev/kvm` with `660 root:kvm` permissions. Verify
 this after every restart with `test -e /dev/kvm` and `stat -c '%a %U:%G' /dev/kvm`.
 If the check fails, do not count emulator evidence as passing; use the pinned
 GitHub Actions runner until the host is repaired.
+
+The headless emulator path also requires `xvfb`, `libpulse0`, and the X11/GL
+runtime libraries installed by the KVM host setup. Run
+`scripts/android-kvm-smoke.sh` through an SSH login after the `ubuntu` user has
+joined the `kvm` group. Xvfb is intentional: the current emulator may
+segfault with `-no-window` even when KVM itself is healthy.

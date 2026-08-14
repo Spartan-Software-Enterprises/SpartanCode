@@ -16,6 +16,10 @@ test -r /dev/kvm || {
   echo "KVM device is unavailable or the current user lacks permission" >&2
   exit 2
 }
+command -v xvfb-run >/dev/null || {
+  echo "xvfb-run is required for the headless Linux emulator path" >&2
+  exit 2
+}
 if ! id -nG | tr ' ' '\n' | grep -qx kvm; then
   echo "Current user is not in the kvm group" >&2
   exit 2
@@ -36,8 +40,11 @@ fi
 
 log_path="${SPARTANCODE_EMULATOR_LOG:-$HOME/${avd_name}-emulator.log}"
 screen_path="${SPARTANCODE_EMULATOR_SCREENSHOT:-$HOME/${avd_name}-screen.png}"
-emulator -avd "$avd_name" -no-window -no-audio -no-boot-anim -no-snapshot \
-  -gpu swiftshader_indirect >"$log_path" 2>&1 &
+# The current emulator can segfault with -no-window on minimal Linux hosts.
+# Xvfb provides a deterministic virtual display while retaining KVM acceleration.
+xvfb-run -a -s "-screen 0 1280x800x24" emulator -avd "$avd_name" \
+  -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect -no-metrics \
+  >"$log_path" 2>&1 &
 emulator_pid=$!
 cleanup() { kill "$emulator_pid" 2>/dev/null || true; }
 trap cleanup EXIT
