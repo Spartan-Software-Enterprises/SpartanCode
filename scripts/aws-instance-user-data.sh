@@ -5,7 +5,9 @@ exec > >(tee -a /var/log/spartancode-bootstrap.log) 2>&1
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt-get install -y ca-certificates cloud-guest-utils curl e2fsprogs git nodejs npm xfsprogs
+apt-get install -y ca-certificates cloud-guest-utils curl e2fsprogs git xfsprogs
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt-get install -y nodejs
 
 root_source="$(findmnt -n -o SOURCE /)"
 root_disk="$(lsblk -no PKNAME "$root_source")"
