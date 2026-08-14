@@ -34,10 +34,13 @@ SpartanCode is local-first and standalone by design: Android users do not need
 the desktop app, a bridge, or a network connection to plan, queue, review, and
 track work. Optional remote connectivity is an extension—not a dependency.
 
+![Spartan Software Enterprises](docs/assets/spartan-software-enterprises-logo.jpg)
+
 ![SpartanCode desktop command center](docs/assets/spartancode-workspace.png)
 
 The command center brings missions, agent stages, artifacts, and live status
-into one focused workspace.
+into one focused workspace, using the Spartan Software Enterprises black,
+Spartan-red, and silver visual system.
 
 ## See the workspace in action
 

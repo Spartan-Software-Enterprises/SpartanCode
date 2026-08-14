@@ -781,7 +781,7 @@ export default function App() {
   if (loading)
     return (
       <View style={styles.loading}>
-        <ActivityIndicator color="#72e6c5" />
+        <ActivityIndicator color="#ff3b4f" />
       </View>
     );
 
@@ -1193,8 +1193,8 @@ export default function App() {
                     : "Biometric unlock disabled",
                 );
               }}
-              trackColor={{ false: "#263657", true: "#2d806f" }}
-              thumbColor="#f2f5ff"
+              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+              thumbColor="#f1f1f2"
             />
           </View>
         </View>
@@ -1278,8 +1278,8 @@ export default function App() {
               onValueChange={(enabled) =>
                 void updateMobileSettings({ voiceEnabled: enabled })
               }
-              trackColor={{ false: "#263657", true: "#2d806f" }}
-              thumbColor="#f2f5ff"
+              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+              thumbColor="#f1f1f2"
             />
           </View>
           <Pressable
@@ -1513,8 +1513,8 @@ export default function App() {
               onValueChange={(enabled) =>
                 void updateMobileSettings({ autoSync: enabled })
               }
-              trackColor={{ false: "#263657", true: "#2d806f" }}
-              thumbColor="#f2f5ff"
+              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+              thumbColor="#f1f1f2"
             />
           </View>
         </View>
@@ -1732,10 +1732,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#080d1c" },
+  safe: { flex: 1, backgroundColor: "#090a0c" },
   loading: {
     alignItems: "center",
-    backgroundColor: "#080d1c",
+    backgroundColor: "#090a0c",
     flex: 1,
     justifyContent: "center",
   },
@@ -1746,28 +1746,28 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   eyebrow: {
-    color: "#72e6c5",
+    color: "#ff3b4f",
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1.5,
   },
-  title: { color: "#f2f5ff", fontSize: 28, fontWeight: "800", marginTop: 5 },
+  title: { color: "#f1f1f2", fontSize: 28, fontWeight: "800", marginTop: 5 },
   status: {
-    color: "#72e6c5",
+    color: "#ff3b4f",
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1.2,
     marginTop: 8,
   },
   hero: {
-    backgroundColor: "#111b32",
-    borderColor: "#243252",
+    backgroundColor: "#1c1d21",
+    borderColor: "#3a3d42",
     borderRadius: 22,
     borderWidth: 1,
     padding: 22,
   },
   heroKicker: {
-    color: "#ffbd74",
+    color: "#c7c9cf",
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 1.4,
@@ -1778,41 +1778,41 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: 10,
   },
-  heroCopy: { color: "#9eacc8", fontSize: 15, lineHeight: 22, marginTop: 10 },
-  section: { color: "#e6ebfa", fontSize: 17, fontWeight: "800", marginTop: 4 },
+  heroCopy: { color: "#a5a7ab", fontSize: 15, lineHeight: 22, marginTop: 10 },
+  section: { color: "#f1f1f2", fontSize: 17, fontWeight: "800", marginTop: 4 },
   sectionRow: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  count: { color: "#72e6c5", fontSize: 14, fontWeight: "800" },
+  count: { color: "#ff3b4f", fontSize: 14, fontWeight: "800" },
   card: {
-    backgroundColor: "#11182b",
-    borderColor: "#202d4c",
+    backgroundColor: "#17181b",
+    borderColor: "#3a3d42",
     borderRadius: 18,
     borderWidth: 1,
     gap: 12,
     padding: 14,
   },
   projectCard: {
-    backgroundColor: "#0d1528",
-    borderColor: "#263657",
+    backgroundColor: "#121316",
+    borderColor: "#3a3d42",
     borderRadius: 14,
     borderWidth: 1,
     gap: 8,
     padding: 12,
   },
   checkRow: {
-    borderBottomColor: "#202d4c",
+    borderBottomColor: "#3a3d42",
     borderBottomWidth: 1,
     paddingVertical: 5,
   },
   input: {
-    backgroundColor: "#0a1123",
-    borderColor: "#263657",
+    backgroundColor: "#0e0f12",
+    borderColor: "#3a3d42",
     borderRadius: 12,
     borderWidth: 1,
-    color: "#f2f5ff",
+    color: "#f1f1f2",
     fontSize: 15,
     minHeight: 48,
     paddingHorizontal: 14,
@@ -1820,20 +1820,20 @@ const styles = StyleSheet.create({
   },
   primary: {
     alignItems: "center",
-    backgroundColor: "#72e6c5",
+    backgroundColor: "#ff3b4f",
     borderRadius: 12,
     padding: 14,
   },
-  primaryText: { color: "#07151a", fontSize: 14, fontWeight: "800" },
+  primaryText: { color: "#16090b", fontSize: 14, fontWeight: "800" },
   secondary: {
     alignItems: "center",
-    borderColor: "#72e6c5",
+    borderColor: "#ff3b4f",
     borderRadius: 12,
     borderWidth: 1,
     padding: 13,
   },
-  secondaryText: { color: "#72e6c5", fontSize: 14, fontWeight: "800" },
-  message: { color: "#8392ae", fontSize: 12 },
+  secondaryText: { color: "#ff3b4f", fontSize: 14, fontWeight: "800" },
+  message: { color: "#a5a7ab", fontSize: 12 },
   toggleRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -1841,18 +1841,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   empty: {
-    borderColor: "#202d4c",
+    borderColor: "#3a3d42",
     borderRadius: 18,
     borderStyle: "dashed",
     borderWidth: 1,
     padding: 20,
   },
-  emptyTitle: { color: "#e6ebfa", fontSize: 15, fontWeight: "800" },
-  emptyCopy: { color: "#8392ae", fontSize: 13, lineHeight: 19, marginTop: 5 },
+  emptyTitle: { color: "#f1f1f2", fontSize: 15, fontWeight: "800" },
+  emptyCopy: { color: "#a5a7ab", fontSize: 13, lineHeight: 19, marginTop: 5 },
   mission: {
     alignItems: "flex-start",
-    backgroundColor: "#11182b",
-    borderColor: "#202d4c",
+    backgroundColor: "#17181b",
+    borderColor: "#3a3d42",
     borderRadius: 16,
     borderWidth: 1,
     flexDirection: "row",
@@ -1860,16 +1860,16 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   missionDot: {
-    backgroundColor: "#72e6c5",
+    backgroundColor: "#ff3b4f",
     borderRadius: 8,
     height: 8,
     marginTop: 5,
     width: 8,
   },
   missionBody: { flex: 1 },
-  missionText: { color: "#e6ebfa", fontSize: 15, lineHeight: 21 },
+  missionText: { color: "#f1f1f2", fontSize: 15, lineHeight: 21 },
   missionMeta: {
-    color: "#8392ae",
+    color: "#a5a7ab",
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 1,
@@ -1877,35 +1877,35 @@ const styles = StyleSheet.create({
   },
   agentRow: {
     alignItems: "center",
-    borderBottomColor: "#243252",
+    borderBottomColor: "#3a3d42",
     borderBottomWidth: 1,
     flexDirection: "row",
     gap: 12,
     paddingVertical: 10,
   },
   agentMode: {
-    color: "#72e6c5",
+    color: "#ff3b4f",
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 1,
   },
   actionRow: { flexDirection: "row", gap: 8, marginTop: 10 },
   smallAction: {
-    borderColor: "#72e6c5",
+    borderColor: "#ff3b4f",
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   scopeChip: {
-    borderColor: "#263657",
+    borderColor: "#3a3d42",
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,
     paddingHorizontal: 6,
     paddingVertical: 7,
   },
-  scopeChipActive: { backgroundColor: "#183b3a", borderColor: "#72e6c5" },
-  selectedAction: { borderColor: "#72e6c5", backgroundColor: "#183b3a" },
-  smallActionText: { color: "#72e6c5", fontSize: 11, fontWeight: "800" },
+  scopeChipActive: { backgroundColor: "#43151f", borderColor: "#ff3b4f" },
+  selectedAction: { borderColor: "#ff3b4f", backgroundColor: "#43151f" },
+  smallActionText: { color: "#ff3b4f", fontSize: 11, fontWeight: "800" },
 });

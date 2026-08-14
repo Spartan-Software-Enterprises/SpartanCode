@@ -4,8 +4,10 @@
 
 SpartanCode turns software ideas into visible, reviewable progress. It is a
 local-first command center for missions, agent teams, artifacts, approvals,
-and verification, wrapped in a distinctive dark SpartanCode theme designed to
-keep attention on the work.
+and verification, wrapped in the Spartan Software Enterprises black, red, and
+silver brand system.
+
+![Spartan Software Enterprises](../docs/assets/spartan-software-enterprises-logo.jpg)
 
 ### Built for the way real projects move
 
