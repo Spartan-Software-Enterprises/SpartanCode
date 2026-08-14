@@ -2,6 +2,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 
 const MAX_MODEL_BYTES = 2 * 1024 * 1024 * 1024;
+const MODEL_DOWNLOAD_TIMEOUT_MS = 120_000;
 
 async function readBoundedResponse(response, maxBytes) {
   const contentLength = response.headers?.get?.("content-length");
@@ -69,9 +70,14 @@ async function downloadVerifiedModel({
   if (partialBytes > MAX_MODEL_BYTES)
     throw new Error("Model partial exceeds the size limit");
   const headers = partialBytes ? { Range: `bytes=${partialBytes}-` } : {};
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    MODEL_DOWNLOAD_TIMEOUT_MS,
+  );
   let response;
   try {
-    response = await transport(url, { headers });
+    response = await transport(url, { headers, signal: controller.signal });
     if (!response || ![200, 206].includes(response.status))
       throw new Error(
         `Model download failed (${response?.status || "no response"})`,
@@ -99,10 +105,13 @@ async function downloadVerifiedModel({
       sha256: digest,
       resumed: usePartial,
     };
-  } catch (error) {
-    if (error.message !== "Model checksum verification failed") throw error;
-    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
-module.exports = { MAX_MODEL_BYTES, downloadVerifiedModel };
+module.exports = {
+  MAX_MODEL_BYTES,
+  MODEL_DOWNLOAD_TIMEOUT_MS,
+  downloadVerifiedModel,
+};

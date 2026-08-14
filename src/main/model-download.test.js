@@ -4,7 +4,10 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const test = require("node:test");
-const { downloadVerifiedModel } = require("./model-download");
+const {
+  downloadVerifiedModel,
+  MODEL_DOWNLOAD_TIMEOUT_MS,
+} = require("./model-download");
 
 function digest(bytes) {
   return crypto.createHash("sha256").update(bytes).digest("hex");
@@ -31,6 +34,28 @@ test("resumes partial downloads and finalizes only after checksum verification",
   assert.equal(result.resumed, true);
   assert.deepEqual(fs.readFileSync(finalPath), bytes);
   assert.equal(fs.existsSync(partialPath), false);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test("passes a bounded abort signal to the model transport", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-download-"));
+  const partialPath = path.join(root, "model.part");
+  const finalPath = path.join(root, "model.gguf");
+  let signal;
+  const bytes = Buffer.from("bounded-model");
+  await downloadVerifiedModel({
+    url: "https://example.test/model",
+    expectedSha256: digest(bytes),
+    partialPath,
+    finalPath,
+    transport: async (_url, options) => {
+      signal = options.signal;
+      return { status: 200, arrayBuffer: async () => bytes };
+    },
+  });
+  assert.equal(signal instanceof AbortSignal, true);
+  assert.equal(signal.aborted, false);
+  assert.equal(MODEL_DOWNLOAD_TIMEOUT_MS, 120_000);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
