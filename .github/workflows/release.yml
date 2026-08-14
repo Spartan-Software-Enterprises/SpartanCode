@@ -1,0 +1,134 @@
+name: SpartanCode beta release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to publish
+        required: true
+        type: string
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || env.RELEASE_TAG }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820021 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build Linux AppImage
+        run: npm run dist
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: spartancode-linux-release-${{ env.RELEASE_TAG }}
+          if-no-files-found: error
+          path: |
+            dist/*.AppImage
+            dist/release-evidence/**
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || env.RELEASE_TAG }}
+      - uses: actions/setup-node@49933ca5288caeca8642d1e84afbd3f7d6820021 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: android/package-lock.json
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+      - name: Install Android build toolchain
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - run: npm ci
+      - name: Build signed AAB/APK
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.SPARTANCODE_ANDROID_KEYSTORE_BASE64 }}
+          SPARTANCODE_KEYSTORE_PASSWORD: ${{ secrets.SPARTANCODE_KEYSTORE_PASSWORD }}
+          SPARTANCODE_KEY_ALIAS: ${{ secrets.SPARTANCODE_KEY_ALIAS }}
+          SPARTANCODE_KEY_PASSWORD: ${{ secrets.SPARTANCODE_KEY_PASSWORD }}
+        run: |
+          set -eu
+          : "${ANDROID_KEYSTORE_BASE64:?SPARTANCODE_ANDROID_KEYSTORE_BASE64 is required}"
+          : "${SPARTANCODE_KEYSTORE_PASSWORD:?SPARTANCODE_KEYSTORE_PASSWORD is required}"
+          : "${SPARTANCODE_KEY_ALIAS:?SPARTANCODE_KEY_ALIAS is required}"
+          : "${SPARTANCODE_KEY_PASSWORD:?SPARTANCODE_KEY_PASSWORD is required}"
+          keystore_file="${RUNNER_TEMP}/spartancode-upload.jks"
+          trap 'rm -f "$keystore_file"' EXIT INT TERM
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_file"
+          chmod 600 "$keystore_file"
+          SPARTANCODE_KEYSTORE_FILE="$keystore_file" npm run release:android
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: spartancode-android-release-${{ env.RELEASE_TAG }}
+          if-no-files-found: error
+          path: |
+            android/android/app/build/outputs/**/*.aab
+            android/android/app/build/outputs/**/*.apk
+            android/android/app/build/release-evidence/**
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || env.RELEASE_TAG }}
+      - uses: actions/setup-node@49933ca5288caeca8642d1e84afbd3f7d6820021 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build Windows NSIS installer
+        run: npx electron-builder --win nsis
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: spartancode-windows-release-${{ env.RELEASE_TAG }}
+          if-no-files-found: error
+          path: |
+            dist/*.exe
+
+  publish:
+    needs: [linux, android, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: spartancode-*-release-${{ env.RELEASE_TAG }}
+          path: release-assets
+          merge-multiple: true
+      - name: Publish GitHub Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          mapfile -t assets < <(find release-assets -type f \( -name '*.AppImage' -o -name '*.deb' -o -name '*.exe' -o -name '*.apk' -o -name '*.aab' \) -print)
+          test "${#assets[@]}" -ge 5
+          gh release create "$RELEASE_TAG" "${assets[@]}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "SpartanCode $RELEASE_TAG" \
+            --generate-notes

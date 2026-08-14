@@ -65,12 +65,15 @@
     ],
     "linux": {
       "target": [
+        "AppImage",
+        "deb",
         "dir"
       ],
       "category": "Development"
     },
     "win": {
       "target": [
+        "nsis",
         "dir"
       ]
     },
