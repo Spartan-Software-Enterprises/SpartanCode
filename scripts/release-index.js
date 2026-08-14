@@ -142,6 +142,42 @@ function integrityGate(manifest) {
     !Array.isArray(manifest.controlEvidence)
   )
     return gate("FAIL", "Release manifest is incomplete or malformed");
+  const validArtifacts = manifest.artifacts.every(
+    (artifact) =>
+      artifact &&
+      typeof artifact.path === "string" &&
+      artifact.path.length > 0 &&
+      !path.isAbsolute(artifact.path) &&
+      path.normalize(artifact.path) !== ".." &&
+      !path.normalize(artifact.path).startsWith(`..${path.sep}`) &&
+      Number.isInteger(artifact.bytes) &&
+      artifact.bytes >= 0 &&
+      /^[0-9a-f]{64}$/.test(artifact.sha256 || ""),
+  );
+  const validComponents = manifest.components.every(
+    (component) =>
+      component &&
+      typeof component.name === "string" &&
+      component.name.length > 0 &&
+      typeof component.version === "string" &&
+      component.version.length > 0,
+  );
+  const validControls = manifest.controlEvidence.every(
+    (evidence) =>
+      evidence &&
+      Array.isArray(evidence.sourceFiles) &&
+      evidence.sourceFiles.length > 0 &&
+      evidence.sourceFiles.every(
+        (sourceFile) =>
+          typeof sourceFile === "string" &&
+          sourceFile.length > 0 &&
+          !path.isAbsolute(sourceFile) &&
+          path.normalize(sourceFile) !== ".." &&
+          !path.normalize(sourceFile).startsWith(`..${path.sep}`),
+      ),
+  );
+  if (!validArtifacts || !validComponents || !validControls)
+    return gate("FAIL", "Release manifest contains malformed evidence");
   return gate(
     "PASS",
     "Release manifest inventories artifacts, components, and control evidence",

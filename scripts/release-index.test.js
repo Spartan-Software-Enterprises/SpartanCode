@@ -111,7 +111,7 @@ test("release index accepts a commit-bound integrity manifest", () => {
     releaseManifest: {
       schemaVersion: 1,
       gitCommit: commit,
-      artifacts: [{ path: "dist/example", sha256: "a".repeat(64) }],
+      artifacts: [{ path: "dist/example", bytes: 1, sha256: "a".repeat(64) }],
       components: [{ name: "example", version: "1.0.0" }],
       controlEvidence: [{ id: "example", sourceFiles: ["README.md"] }],
     },
@@ -146,6 +146,27 @@ test("release index accepts commit-bound canonical source evidence", () => {
   );
   assert.equal(canonical.status, "PASS");
   assert.deepEqual(canonical.evidence, [commit]);
+});
+
+test("release index rejects malformed integrity evidence", () => {
+  const commit = execFileSync("git", ["rev-parse", "HEAD"], {
+    encoding: "utf8",
+  }).trim();
+  const index = buildIndex({
+    releaseManifest: {
+      schemaVersion: 1,
+      gitCommit: commit,
+      artifacts: [{ path: "../outside", bytes: -1, sha256: "not-a-hash" }],
+      components: [{ name: "example", version: "1.0.0" }],
+      controlEvidence: [{ sourceFiles: ["/outside"] }],
+    },
+    target: "SpartanCode beta",
+  });
+  assert.equal(
+    index.gates.find((gate) => gate.name === "Integrity bundle").status,
+    "FAIL",
+  );
+  assert.equal(index.status, "FAIL");
 });
 
 test("release index fails closed when Android evidence belongs to another commit", () => {
