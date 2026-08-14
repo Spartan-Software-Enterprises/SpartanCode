@@ -26,6 +26,8 @@ Explore the workspace surfaces:
 | --- | --- | --- |
 | ![Artifact review](docs/assets/desktop-menu-gallery/desktop-artifacts.png) | ![Workspace settings](docs/assets/desktop-menu-gallery/desktop-settings.png) | ![Assistant menu](docs/assets/desktop-menu-gallery/desktop-menu-assistant.png) |
 
+![Settings governance and extensibility](docs/assets/desktop-menu-gallery/desktop-settings-governance.png)
+
 | Mission composer | Android command center | Android mission queue |
 | --- | --- | --- |
 | ![Mission composer](docs/assets/desktop-menu-gallery/desktop-composer-filled.png) | ![Android command center](android/screenshots/command-center.png) | ![Android mission queued](android/screenshots/mission-queued.png) |

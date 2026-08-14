@@ -35,6 +35,8 @@ surface while preserving the Spartan IDE color system.
 
 ![Workspace settings](../docs/assets/desktop-menu-gallery/desktop-settings.png)
 
+![Settings governance and extensibility](../docs/assets/desktop-menu-gallery/desktop-settings-governance.png)
+
 ![Spartan assistant](../docs/assets/desktop-menu-gallery/desktop-menu-assistant.png)
 
 ![Mission composer](../docs/assets/desktop-menu-gallery/desktop-composer-filled.png)
