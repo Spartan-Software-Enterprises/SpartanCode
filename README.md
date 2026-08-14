@@ -218,6 +218,10 @@ The evidence-based implementation and release-gate matrix is in
 biometric, model-license, and release obligations are recorded in
 [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md).
 
+Future game-development planning is documented under
+[`docs/future-development/`](docs/future-development/) and does not change the
+current implementation scope.
+
 Android bundles the same core roles and remains fully usable without the desktop
 application, an MCP Bridge, or network access. A bridge is an optional route
 for remote execution and synchronization only; local planning, queueing,
