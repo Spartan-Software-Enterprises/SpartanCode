@@ -51,6 +51,10 @@ contextBridge.exposeInMainWorld("spartanCode", {
   listApiProviders: () => ipcRenderer.invoke("api:providers"),
   generateWithApiProvider: (providerId, request) =>
     ipcRenderer.invoke("api:generate", providerId, request),
+  openProjectPreview: (url) => ipcRenderer.invoke("preview:open", url),
+  closeProjectPreview: () => ipcRenderer.invoke("preview:close"),
+  getProjectPreviewStatus: () => ipcRenderer.invoke("preview:status"),
+  openCodeRabbitLogin: () => ipcRenderer.invoke("coderabbit:login"),
   getGitHubAppStatus: () => ipcRenderer.invoke("github-app:status"),
   listGitHubRepositories: () => ipcRenderer.invoke("github-app:repositories"),
   getSecureVaultStatus: () => ipcRenderer.invoke("secure-vault:status"),

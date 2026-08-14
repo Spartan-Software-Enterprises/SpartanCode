@@ -1,4 +1,4 @@
-const { ipcMain, dialog } = require("electron");
+const { ipcMain, dialog, shell } = require("electron");
 const { getRuntimeStatus } = require("./runtime-status");
 const { gitStatusAt, gitInitAt, gitAddAt, gitCommitAt } = require("./git");
 const {
@@ -42,6 +42,7 @@ function registerDesktopApi({
   secureVault,
   githubEnvironment = process.env,
   providerEnvironment = process.env,
+  previewWindow = null,
 }) {
   const voiceService = createVoiceService();
   const chatService = createChatService(store);
@@ -63,6 +64,22 @@ function registerDesktopApi({
   ipcMain.handle("api:generate", (_event, providerId, request) =>
     apiGateway.generate(providerId, request),
   );
+  ipcMain.handle("preview:open", (_event, url) => {
+    if (!previewWindow) throw new Error("Project preview is unavailable");
+    return previewWindow.open(url);
+  });
+  ipcMain.handle(
+    "preview:close",
+    () => previewWindow?.close() || { closed: true },
+  );
+  ipcMain.handle(
+    "preview:status",
+    () => previewWindow?.status() || { open: false, url: null },
+  );
+  ipcMain.handle("coderabbit:login", async () => {
+    await shell.openExternal("https://app.coderabbit.ai");
+    return { opened: true, url: "https://app.coderabbit.ai" };
+  });
   ipcMain.handle("github-app:status", () => githubApp.status());
   ipcMain.handle("github-app:repositories", () => githubApp.listRepositories());
   ipcMain.handle("secure-vault:status", () => secureVault.status());

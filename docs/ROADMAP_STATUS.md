@@ -6,6 +6,14 @@ behavior and a corresponding automated or documented verification path.
 
 ## Implemented foundation
 
+- Desktop project previews open loopback HTTP(S) development servers in a
+  native built-in browser window with popup and navigation guards. Playwright
+  visual smoke coverage verifies the preview dialog’s local-only boundary, and
+  Prettier remains enforced in the desktop test gate.
+- CodeRabbit is configured for GitHub-hosted pull-request review with scoped
+  Electron, renderer, and Android guidance; desktop Settings opens its official
+  GitHub App login flow without storing CodeRabbit credentials.
+
 - Desktop Electron shell with isolated preload IPC and workspace path/symlink
   boundaries.
 - Mission Plan/Build/Verify lifecycle, durable artifacts, approvals, audit

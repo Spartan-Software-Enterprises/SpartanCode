@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+early_access: false
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  review_details: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!dist/**"
+    - "!android/android/**"
+    - "!node_modules/**"
+  path_instructions:
+    - path: "src/main/**/*.js"
+      instructions: |
+        Check Electron IPC boundaries, context isolation, input validation,
+        secret redaction, filesystem containment, and safe external navigation.
+    - path: "src/renderer/**/*.{html,js}"
+      instructions: |
+        Check Spartan IDE theme consistency, accessible controls, escaped
+        dynamic content, and renderer error handling.
+    - path: "android/**/*.{ts,tsx}"
+      instructions: |
+        Check standalone Android operation, secure storage, accessibility,
+        offline behavior, and typed boundary validation.
+chat:
+  auto_reply: true

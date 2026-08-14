@@ -1,5 +1,5 @@
 const path = require("path");
-const { app, BrowserWindow, safeStorage } = require("electron");
+const { app, BrowserWindow, safeStorage, shell } = require("electron");
 const { registerDesktopApi } = require("./desktop-api");
 const { createMissionStore } = require("./mission-store");
 const { createMissionRunner } = require("./mission-runner");
@@ -9,6 +9,7 @@ const { createBridgeServer } = require("./mcp-bridge");
 const { requiresMissionApproval } = require("./policy-engine");
 const { createSecureVault } = require("./secure-vault");
 const { apiProviders } = require("./api-providers");
+const { createPreviewWindow } = require("./preview-window");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -32,6 +33,7 @@ function createWindow() {
   const store = createMissionStore(
     path.join(app.getPath("userData"), "workspace.json"),
   );
+  const previewWindow = createPreviewWindow({ BrowserWindow, shell });
   const secureVault = createSecureVault({
     safeStorage,
     filePath: path.join(app.getPath("userData"), "secure-vault.json"),
@@ -120,6 +122,7 @@ function createWindow() {
     secureVault,
     githubEnvironment,
     providerEnvironment,
+    previewWindow,
   });
 }
 

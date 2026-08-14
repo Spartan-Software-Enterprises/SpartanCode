@@ -92,6 +92,20 @@ async function main() {
   });
   await page.locator("#closeChat").click();
 
+  await page.locator("#openPreview").click();
+  await page.locator("#previewModal.open").waitFor();
+  await page.locator("#previewUrl").fill("https://example.com");
+  await page.locator("#previewForm").locator("button[type=submit]").click();
+  const previewMessage = await page.locator("#previewMessage").innerText();
+  if (!previewMessage.includes("local development")) {
+    throw new Error("Preview security guard did not reject a public URL");
+  }
+  await page.screenshot({
+    path: path.join(outputDir, "desktop-preview-dialog.png"),
+    fullPage: true,
+  });
+  await page.locator("#closePreview").click();
+
   const result = {
     title,
     identity,

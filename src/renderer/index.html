@@ -764,6 +764,19 @@
         background: var(--blue);
         color: #fff;
       }
+      .preview-launch {
+        min-height: 38px;
+        padding: 0 13px;
+        color: var(--blue);
+      }
+      .preview-card {
+        width: min(520px, 100%);
+      }
+      .preview-note {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
       .chat-modal {
         position: fixed;
         inset: 0;
@@ -1246,6 +1259,8 @@
           <button class="round-button" aria-label="Create project">＋</button
           ><button class="primary-button" id="newMission">
             ✧ <span>Start a new mission</span></button
+          ><button class="context-button preview-launch" id="openPreview">
+            ▷ <span>Preview</span></button
           ><button class="round-button" aria-label="Notifications">♧</button>
         </header>
         <section class="hero">
@@ -1653,6 +1668,24 @@
           GitHub App access is optional. Codespaces requires a user-authorized
           GitHub session.
         </small>
+        <div class="settings-group-heading">CodeRabbit review</div>
+        <div class="settings-summary">
+          Authentication is handled securely by CodeRabbit’s GitHub App. Open
+          the official sign-in page to connect or manage repository reviews.
+        </div>
+        <div class="settings-inline-actions">
+          <button
+            type="button"
+            class="context-button"
+            id="settingsCodeRabbitLogin"
+          >
+            Log in to CodeRabbit
+          </button>
+        </div>
+        <small
+          id="settingsCodeRabbitMessage"
+          style="display: block; color: var(--muted)"
+        ></small>
         <details class="settings-advanced">
           <summary>Secure local storage</summary>
           <div class="settings-runtime-grid" id="settingsSecureStatus">
@@ -1703,6 +1736,39 @@
           <button type="button" class="settings-close" id="closeSettings">
             Cancel</button
           ><button class="settings-save">Save settings</button>
+        </div>
+      </form>
+    </div>
+    <div
+      class="settings-modal"
+      id="previewModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="previewTitle"
+    >
+      <form class="settings-card preview-card" id="previewForm">
+        <h2 id="previewTitle">Project preview</h2>
+        <p>
+          Open a local development server in SpartanCode’s built-in browser.
+        </p>
+        <div class="setting-group">
+          <label for="previewUrl">Preview URL</label>
+          <input
+            id="previewUrl"
+            type="url"
+            value="http://localhost:3000"
+            placeholder="http://localhost:3000"
+            required
+          />
+        </div>
+        <p class="preview-note" id="previewMessage">
+          Only localhost, 127.0.0.1, and [::1] previews are allowed.
+        </p>
+        <div class="settings-actions">
+          <button type="button" class="settings-close" id="closePreview">
+            Cancel
+          </button>
+          <button class="settings-save" type="submit">Open preview</button>
         </div>
       </form>
     </div>
@@ -1788,6 +1854,9 @@
       const approvalModal = document.getElementById("approvalModal");
       const approvalDetail = document.getElementById("approvalDetail");
       const settingsModal = document.getElementById("settingsModal");
+      const previewModal = document.getElementById("previewModal");
+      const previewUrl = document.getElementById("previewUrl");
+      const previewMessage = document.getElementById("previewMessage");
       const modelSelect = document.getElementById("modelSelect");
       const quantizationSelect = document.getElementById("quantizationSelect");
       const protocolSelect = document.getElementById("protocolSelect");
@@ -2328,6 +2397,37 @@
         .getElementById("denyApproval")
         .addEventListener("click", () => resolveActiveApproval("denied"));
       document
+        .getElementById("openPreview")
+        .addEventListener("click", async () => {
+          const status = await window.spartanCode?.getProjectPreviewStatus();
+          if (status?.open && status.url) {
+            try {
+              await window.spartanCode.openProjectPreview(status.url);
+              showToast("Project preview focused");
+              return;
+            } catch (error) {
+              previewMessage.textContent = error.message;
+            }
+          }
+          previewModal.classList.add("open");
+          previewUrl.focus();
+        });
+      document.getElementById("closePreview").addEventListener("click", () => {
+        previewModal.classList.remove("open");
+      });
+      document
+        .getElementById("previewForm")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+          try {
+            await window.spartanCode.openProjectPreview(previewUrl.value);
+            previewModal.classList.remove("open");
+            showToast("Project preview opened");
+          } catch (error) {
+            previewMessage.textContent = error.message;
+          }
+        });
+      document
         .getElementById("closeSettings")
         .addEventListener("click", () =>
           settingsModal.classList.remove("open"),
@@ -2391,6 +2491,18 @@
               : "The installation has no visible repositories.";
           } catch (error) {
             settingsGithubMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("settingsCodeRabbitLogin")
+        .addEventListener("click", async () => {
+          try {
+            await window.spartanCode.openCodeRabbitLogin();
+            document.getElementById("settingsCodeRabbitMessage").textContent =
+              "CodeRabbit sign-in opened in your browser. Return here when the GitHub App is connected.";
+          } catch (error) {
+            document.getElementById("settingsCodeRabbitMessage").textContent =
+              error.message;
           }
         });
       document

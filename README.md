@@ -15,6 +15,13 @@ center for missions, custom agents, local models, artifacts, and review. The
 Spartan IDE theme keeps the workspace dark, readable, and purpose-built for
 serious engineering on desktop or Android.
 
+Desktop project previews open local development servers in SpartanCode’s
+built-in browser window. The preview surface is loopback-only by default and is
+covered by the Playwright visual smoke suite; Prettier formatting is enforced
+in the desktop test gate. See [project previews](docs/PROJECT_PREVIEWS.md).
+CodeRabbit review configuration and GitHub App login are documented in
+[docs/CODERABBIT.md](docs/CODERABBIT.md).
+
 SpartanCode is local-first and standalone by design: Android users do not need
 the desktop app, a bridge, or a network connection to plan, queue, review, and
 track work. Optional remote connectivity is an extension—not a dependency.
@@ -28,18 +35,18 @@ into one focused workspace.
 
 Explore the workspace surfaces:
 
-| Command center | Projects | Agent manager |
-| --- | --- | --- |
+| Command center                                                       | Projects                                                           | Agent manager                                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------- |
 | ![Command center](docs/assets/desktop-menu-gallery/desktop-home.png) | ![Projects](docs/assets/desktop-menu-gallery/desktop-projects.png) | ![Agent manager](docs/assets/desktop-menu-gallery/desktop-agents.png) |
 
-| Artifact review | Workspace settings | Spartan assistant |
-| --- | --- | --- |
+| Artifact review                                                            | Workspace settings                                                           | Spartan assistant                                                              |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | ![Artifact review](docs/assets/desktop-menu-gallery/desktop-artifacts.png) | ![Workspace settings](docs/assets/desktop-menu-gallery/desktop-settings.png) | ![Assistant menu](docs/assets/desktop-menu-gallery/desktop-menu-assistant.png) |
 
 ![Settings governance and extensibility](docs/assets/desktop-menu-gallery/desktop-settings-governance.png)
 
-| Mission composer | Android command center | Android mission queue |
-| --- | --- | --- |
+| Mission composer                                                                  | Android command center                                            | Android mission queue                                             |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
 | ![Mission composer](docs/assets/desktop-menu-gallery/desktop-composer-filled.png) | ![Android command center](android/screenshots/command-center.png) | ![Android mission queued](android/screenshots/mission-queued.png) |
 
 The Android command center puts offline mission queueing, optional bridge
