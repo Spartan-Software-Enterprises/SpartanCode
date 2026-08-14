@@ -66,6 +66,55 @@ function githubHeaders(token) {
   };
 }
 
+function validateCodespaceInput(input = {}) {
+  const repositoryId = Number(input.repositoryId);
+  const safeRef =
+    input.ref === undefined ||
+    (typeof input.ref === "string" &&
+      input.ref.length <= 255 &&
+      !/[\u0000-\u001f\u007f]/.test(input.ref));
+  const safeMachine =
+    input.machine === undefined ||
+    (typeof input.machine === "string" &&
+      /^[A-Za-z0-9._-]{1,80}$/.test(input.machine));
+  const safeLocation =
+    input.location === undefined ||
+    (typeof input.location === "string" &&
+      /^[A-Za-z0-9._-]{1,80}$/.test(input.location));
+  return {
+    valid:
+      Number.isSafeInteger(repositoryId) &&
+      repositoryId > 0 &&
+      safeRef &&
+      safeMachine &&
+      safeLocation,
+    repositoryId,
+  };
+}
+
+function estimateCodespaceCost({
+  hours = 0,
+  hourlyRate = 0,
+  storageGb = 0,
+  storageRate = 0,
+} = {}) {
+  const values = [hours, hourlyRate, storageGb, storageRate].map(Number);
+  if (
+    values.some(
+      (value) => !Number.isFinite(value) || value < 0 || value > 1_000_000,
+    )
+  )
+    throw new Error("Codespaces cost inputs are invalid or exceed limits");
+  const compute = values[0] * values[1];
+  const storage = values[2] * values[3];
+  return {
+    compute: Math.round(compute * 100) / 100,
+    storage: Math.round(storage * 100) / 100,
+    total: Math.round((compute + storage) * 100) / 100,
+    currency: "USD",
+  };
+}
+
 function verifyGitHubWebhookSignature(payload, signature, secret) {
   if (typeof payload !== "string" && !Buffer.isBuffer(payload)) return false;
   if (
@@ -154,6 +203,85 @@ function createGitHubAppClient({
     return body;
   }
 
+  function createUserAuthorizedCodespacesClient({
+    tokenProvider,
+    userFetchImpl = fetchImpl,
+  } = {}) {
+    if (typeof tokenProvider !== "function")
+      throw new Error("A user-authorized GitHub token provider is required");
+    async function userRequest(path, options = {}) {
+      if (typeof path !== "string" || !path.startsWith("/"))
+        throw new Error("GitHub API path is invalid");
+      const token = await tokenProvider();
+      if (typeof token !== "string" || token.trim().length < 10)
+        throw new Error("A valid user-authorized GitHub token is required");
+      const response = await userFetchImpl(`${API_ORIGIN}${path}`, {
+        ...options,
+        headers: { ...githubHeaders(token.trim()), ...(options.headers || {}) },
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok)
+        throw new Error(
+          `GitHub Codespaces request failed (${response.status})`,
+        );
+      return body;
+    }
+    return {
+      list: async () => {
+        const result = await userRequest("/user/codespaces?per_page=100");
+        return Array.isArray(result.codespaces)
+          ? result.codespaces.map(
+              ({
+                name,
+                display_name,
+                state,
+                repository,
+                machine,
+                location,
+              }) => ({
+                name,
+                display_name,
+                state,
+                repository: repository?.full_name || null,
+                machine: machine?.name || null,
+                location: location || null,
+              }),
+            )
+          : [];
+      },
+      create: async (input) => {
+        const validation = validateCodespaceInput(input);
+        if (!validation.valid)
+          throw new Error("Invalid Codespaces creation request");
+        const body = {
+          repository_id: validation.repositoryId,
+          ...(input.ref === undefined ? {} : { ref: input.ref }),
+          ...(input.machine === undefined ? {} : { machine: input.machine }),
+          ...(input.location === undefined ? {} : { location: input.location }),
+        };
+        return userRequest("/user/codespaces", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      },
+      start: (name) =>
+        userRequest(
+          `/user/codespaces/${encodeURIComponent(String(name))}/start`,
+          { method: "POST" },
+        ),
+      stop: (name) =>
+        userRequest(
+          `/user/codespaces/${encodeURIComponent(String(name))}/stop`,
+          { method: "POST" },
+        ),
+      delete: (name) =>
+        userRequest(`/user/codespaces/${encodeURIComponent(String(name))}`, {
+          method: "DELETE",
+        }),
+    };
+  }
+
   return {
     status,
     refresh,
@@ -180,12 +308,15 @@ function createGitHubAppClient({
         : [];
     },
     request,
+    createUserAuthorizedCodespacesClient,
   };
 }
 
 module.exports = {
   createAppJwt,
   createGitHubAppClient,
+  estimateCodespaceCost,
   readConfig,
   verifyGitHubWebhookSignature,
+  validateCodespaceInput,
 };

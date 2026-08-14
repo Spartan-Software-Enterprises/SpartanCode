@@ -46,9 +46,12 @@ forwarded or persisted.
 Codespaces is a compatible optional workspace target, not a replacement for
 the local desktop or Android app. The repository includes a dev container
 definition, and a user can open the repository in Codespaces from GitHub. A
-future signed-in GitHub user flow can create, start, stop, and resume a
-Codespace through GitHub's Codespaces API; that flow must use user authorization
-and must display the machine/storage cost before creation.
+The desktop integration now includes a non-persistent, user-authorized
+Codespaces client that can list, create, start, stop, and delete Codespaces.
+The token is supplied by the caller and is never stored by this client. Creation
+requests are validated and the UI must display a machine/storage cost estimate
+before creation; a real OAuth callback, GitHub App registration, and production
+billing/permission review remain deployment gates.
 
 The app intentionally does not request Codespaces permission for its
 installation token. This keeps repository automation narrow and prevents an

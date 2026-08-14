@@ -4,7 +4,9 @@ const test = require("node:test");
 const {
   createAppJwt,
   createGitHubAppClient,
+  estimateCodespaceCost,
   readConfig,
+  validateCodespaceInput,
   verifyGitHubWebhookSignature,
 } = require("./github-app");
 
@@ -109,4 +111,77 @@ test("GitHub webhook signatures are verified with timing-safe comparison", () =>
     false,
   );
   assert.equal(verifyGitHubWebhookSignature(payload, digest, secret), false);
+});
+
+test("Codespaces client uses user authorization for lifecycle operations", async () => {
+  const calls = [];
+  const client = createGitHubAppClient({
+    environment: {},
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      return {
+        ok: true,
+        status: 200,
+        json: async () =>
+          url.endsWith("/codespaces?per_page=100")
+            ? {
+                codespaces: [
+                  {
+                    name: "spartan-dev",
+                    display_name: "Spartan Dev",
+                    state: "Available",
+                    repository: { full_name: "org/repo" },
+                    machine: { name: "basicLinux32gb" },
+                    location: "EastUs",
+                  },
+                ],
+              }
+            : { name: "spartan-dev", state: "Starting" },
+      };
+    },
+  });
+  const codespaces = client.createUserAuthorizedCodespacesClient({
+    tokenProvider: async () => "user-authorized-token",
+  });
+  assert.deepEqual(await codespaces.list(), [
+    {
+      name: "spartan-dev",
+      display_name: "Spartan Dev",
+      state: "Available",
+      repository: "org/repo",
+      machine: "basicLinux32gb",
+      location: "EastUs",
+    },
+  ]);
+  await codespaces.create({
+    repositoryId: 42,
+    ref: "main",
+    machine: "basicLinux32gb",
+  });
+  await codespaces.start("spartan-dev");
+  await codespaces.stop("spartan-dev");
+  assert.equal(calls[1].options.method, "POST");
+  assert.equal(
+    calls[1].options.headers.Authorization,
+    "Bearer user-authorized-token",
+  );
+  assert.match(calls[1].options.body, /repository_id/);
+  assert.equal(validateCodespaceInput({ repositoryId: 0 }).valid, false);
+  assert.equal(
+    validateCodespaceInput({ repositoryId: 42, ref: "main" }).valid,
+    true,
+  );
+});
+
+test("Codespaces cost estimates are bounded and explicit", () => {
+  assert.deepEqual(
+    estimateCodespaceCost({
+      hours: 10,
+      hourlyRate: 0.18,
+      storageGb: 5,
+      storageRate: 0.07,
+    }),
+    { compute: 1.8, storage: 0.35, total: 2.15, currency: "USD" },
+  );
+  assert.throws(() => estimateCodespaceCost({ hours: -1 }), /invalid/);
 });
