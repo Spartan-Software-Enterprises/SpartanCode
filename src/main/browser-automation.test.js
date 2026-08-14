@@ -56,3 +56,22 @@ test("browser adapter reports missing Chromium without exposing secrets", () => 
   });
   assert.equal(browser.status().status, "unavailable");
 });
+
+test("browser routing requires explicit Tor configuration and opt-in", () => {
+  assert.throws(
+    () =>
+      normalizeRequest(
+        { url: "https://example.com", routeThroughTor: true },
+        { SPARTANCODE_BROWSER_ALLOWLIST: "example.com" },
+      ),
+    /configured SOCKS proxy/,
+  );
+  const request = normalizeRequest(
+    { url: "https://example.com", routeThroughTor: true },
+    {
+      SPARTANCODE_BROWSER_ALLOWLIST: "example.com",
+      SPARTANCODE_TOR_SOCKS_PROXY: "socks5://127.0.0.1:9050",
+    },
+  );
+  assert.equal(request.torProxy, "socks5://127.0.0.1:9050");
+});

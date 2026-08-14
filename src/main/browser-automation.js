@@ -59,7 +59,22 @@ function normalizeRequest(request, environment = process.env) {
   const selector = request.selector === undefined ? "body" : request.selector;
   if (typeof selector !== "string" || selector.length > 512)
     throw new Error("Browser selector must be at most 512 characters");
-  return { url, action, timeout, selector, allowedHosts };
+  const normalized = { url, action, timeout, selector, allowedHosts };
+  if (request.routeThroughTor === true) {
+    const proxy = String(environment.SPARTANCODE_TOR_SOCKS_PROXY || "").trim();
+    if (!proxy)
+      throw new Error("Explicit Tor routing requires a configured SOCKS proxy");
+    let proxyUrl;
+    try {
+      proxyUrl = new URL(proxy);
+    } catch {
+      throw new Error("Tor proxy must be a valid URL");
+    }
+    if (!["socks5:", "socks5h:", "http:"].includes(proxyUrl.protocol))
+      throw new Error("Tor proxy must use SOCKS5 or HTTP protocol");
+    normalized.torProxy = proxyUrl.toString();
+  }
+  return normalized;
 }
 
 function createBrowserAutomation({
@@ -113,7 +128,10 @@ function createBrowserAutomation({
         };
       let browser;
       try {
-        browser = await loaded.chromium.launch({ headless: true });
+        browser = await loaded.chromium.launch({
+          headless: true,
+          ...(config.torProxy ? { proxy: { server: config.torProxy } } : {}),
+        });
         const context = await browser.newContext({ acceptDownloads: false });
         await context.route("**/*", async (route) => {
           try {
