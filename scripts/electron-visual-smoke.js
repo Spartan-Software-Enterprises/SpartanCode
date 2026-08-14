@@ -39,7 +39,15 @@ async function main() {
   const views = ["home", "projects", "agents", "artifacts", "settings"];
   for (const view of views) {
     await page.locator(`[data-view="${view}"]`).click();
-    await page.locator(`[data-view="${view}"].active`).waitFor();
+    const activeNavItem = page.locator(`[data-view="${view}"].active`);
+    await activeNavItem.waitFor({ state: "attached" });
+    if (
+      !(await activeNavItem.evaluate((element) =>
+        element.classList.contains("active"),
+      ))
+    ) {
+      throw new Error(`Navigation item did not become active: ${view}`);
+    }
     if (view === "settings") {
       await page
         .locator("#settingsRuntimeStatus .settings-runtime-item")
