@@ -24,6 +24,8 @@ behavior and a corresponding automated or documented verification path.
 - A Windows system-automation contract now reports platform availability and
   supports bounded read-only PowerShell inspection through fixed executable
   arguments; write-capability and GUI adapters remain explicitly gated work.
+- A privacy-network adapter reports Tor/Proton configuration without exposing
+  credentials and refuses to silently reroute traffic.
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped
   Electron, renderer, and Android guidance; desktop Settings opens its official
   GitHub App login flow without storing CodeRabbit credentials.
