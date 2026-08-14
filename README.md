@@ -44,11 +44,16 @@ before reconciling it.
 
 ```bash
 npm test
+npm run test:visual
 ```
 
 The suite validates the IPC-facing services, mission lifecycle, policy gates,
 model licensing rules, workspace isolation, persistence, renderer parsing, and
 formatting.
+
+`npm run test:visual` launches the Electron shell through Playwright, checks
+all navigation views and the mission composer interaction, and writes visual
+evidence outside the repository.
 
 The repeatable Android baseline and environment-gap report can be generated
 with:

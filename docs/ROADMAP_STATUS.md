@@ -99,11 +99,14 @@ behavior and a corresponding automated or documented verification path.
   available locally.
 - Android Expo configuration and native release automation are present, but a
   signed artifact requires release-owned Android credentials.
-- AWS/KVM validation is available on the persistent replacement host with a
+- AWS validation is available on the persistent replacement host with a
   512-GiB root volume, default VPC security group only, stop/termination
-  protection, and a verified `origin/main` synchronization timer. Cost
-  monitoring is configured, but AWS credit balance and billing remain
-  external release-environment checks.
+  protection, a verified `origin/main` synchronization timer, installed Java/
+  Android SDK API 35 tooling, and a successful native debug build. This `t2`
+  host exposes no `/dev/kvm`; multiple software-only AVD images were unable to
+  finish Android framework/package-service startup, so emulator install/launch
+  remains an environment gate. Cost monitoring is configured, but AWS credit
+  balance and billing remain external release-environment checks.
 
 ## Release gates still requiring stronger evidence
 

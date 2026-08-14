@@ -47,3 +47,8 @@ AWS account budget monitoring is configured as
 monitoring guardrail, not a billing or credit guarantee: AWS credit balance is
 not exposed by the EC2 CLI, and a budget does not automatically stop compute.
 Check Cost Explorer and the budget before extending the host's use.
+
+The `t2.large` replacement does not expose `/dev/kvm`. Android SDK setup and
+native Gradle builds work there, but reliable emulator install/launch requires
+an environment with hardware virtualization (such as the pinned GitHub
+Actions runner or a separately approved KVM-capable host).

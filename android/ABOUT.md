@@ -52,7 +52,10 @@ minutes.
 Native Android builds, artifact and approval workflows, licensed model
 selection, storage recovery, biometric unlock, offline extension metadata,
 audit rendering, device-readiness diagnostics, and a guarded signed-release
-workflow are now implemented;
+workflow are now implemented. The AWS host produced a successful API 35 native
+debug build; its lack of KVM prevents reliable emulator framework startup, so
+install/launch evidence remains assigned to a KVM-capable CI runner or physical
+device;
 physical-device accessibility and production signing still require the release
 environment described in [`PLAN.md`](PLAN.md). The app remains
 standalone-first: a desktop checkout or MCP Bridge is never required for local
