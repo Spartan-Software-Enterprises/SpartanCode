@@ -83,6 +83,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   deleteSecureKey: (name) => ipcRenderer.invoke("secure-vault:delete", name),
   getVoiceStatus: () => ipcRenderer.invoke("voice:status"),
   startVoice: () => ipcRenderer.invoke("voice:start"),
+  getVoiceOutputStatus: () => ipcRenderer.invoke("voice:output-status"),
+  speak: (text) => ipcRenderer.invoke("voice:speak", text),
   getMcpTools: () => ipcRenderer.invoke("mcp:tools"),
   dispatchMcp: (request) => ipcRenderer.invoke("mcp:dispatch", request),
   listModels: (options) => ipcRenderer.invoke("models:list", options),

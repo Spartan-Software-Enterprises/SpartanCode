@@ -12,6 +12,7 @@ const { classifyCommand, requiresMissionApproval } = require("./policy-engine");
 const { getCapabilities } = require("./capabilities");
 const { getProviderStatus } = require("./provider-status");
 const { createVoiceService } = require("./voice-service");
+const { createVoiceOutput } = require("./voice-output");
 const { createChatService } = require("./chat-service");
 const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
@@ -57,6 +58,7 @@ function registerDesktopApi({
   memoryStore = null,
 }) {
   const voiceService = createVoiceService();
+  const voiceOutput = createVoiceOutput();
   const chatService = createChatService(store);
   const runtimeRegistry = createRuntimeRegistry();
   const githubApp = createGitHubAppClient({ environment: githubEnvironment });
@@ -194,6 +196,8 @@ function registerDesktopApi({
   });
   ipcMain.handle("voice:status", () => voiceService.status());
   ipcMain.handle("voice:start", () => voiceService.start());
+  ipcMain.handle("voice:output-status", () => voiceOutput.status());
+  ipcMain.handle("voice:speak", (_event, text) => voiceOutput.speak(text));
   ipcMain.handle("mcp:tools", () => [
     {
       name: "filesystem",
