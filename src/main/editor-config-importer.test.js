@@ -36,10 +36,14 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
   );
   fs.writeFileSync(path.join(root, "opencode.json"), '{"provider":"secret"}');
   fs.writeFileSync(path.join(root, ".continue/config.json"), '{"models":[]}');
+  fs.mkdirSync(path.join(root, ".clinerules"));
+  fs.writeFileSync(path.join(root, ".clinerules/project.md"), "secret rule");
+  fs.mkdirSync(path.join(root, ".roo/rules"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".roo/rules/project.md"), "secret rule");
   const result = importEditorConfig(root);
   assert.equal(result.execution, "read-only");
   assert.equal(result.credentials, false);
-  assert.equal(result.files.length, 9);
+  assert.equal(result.files.length, 11);
   assert.equal(JSON.stringify(result).includes("secret-plugin"), false);
   assert.equal(
     result.files.find((file) => file.editor === "zed").summary.keyCount,
@@ -55,7 +59,7 @@ test("imports bounded editor and terminal-agent metadata without evaluating conf
   );
   assert.equal(
     result.files.filter((file) => file.editor === "terminal-agents").length,
-    3,
+    5,
   );
   assert.equal(JSON.stringify(result).includes("secret-value"), false);
   fs.rmSync(root, { recursive: true, force: true });

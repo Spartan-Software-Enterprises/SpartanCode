@@ -102,7 +102,8 @@ security model:
    Emacs, Zed, and Sublime project/workspace metadata; it summarizes configuration
    structure without evaluating scripts. A bounded terminal-agent metadata
    importer also covers Aider, OpenCode, Cline, Continue, and Roo configuration
-   presence without returning credentials or executing agent commands. Remaining
+   files and bounded rule directories without returning credentials or executing
+   agent commands. Remaining
    editor packages remain future work.
 3. Add connector adapters for Git hosting, LSP/DAP, build/test tools, MCP,
    major agent APIs, and remote workers.

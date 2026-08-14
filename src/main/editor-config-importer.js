@@ -66,18 +66,33 @@ function readConfig(filePath, relative, editor, readFileImpl) {
 }
 
 function configFilesForEditor(projectRoot, editor) {
-  if (editor !== "sublime") return CONFIG_FILES[editor] || [];
-  return fs
-    .readdirSync(projectRoot, { withFileTypes: true })
-    .filter(
-      (entry) =>
-        entry.isFile() &&
-        /\.sublime-(?:project|workspace)$/.test(entry.name) &&
-        entry.name.length <= 160,
-    )
-    .map((entry) => entry.name)
-    .sort()
-    .slice(0, MAX_FILES);
+  if (editor === "sublime")
+    return fs
+      .readdirSync(projectRoot, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isFile() &&
+          /\.sublime-(?:project|workspace)$/.test(entry.name) &&
+          entry.name.length <= 160,
+      )
+      .map((entry) => entry.name)
+      .sort()
+      .slice(0, MAX_FILES);
+  if (editor !== "terminal-agents") return CONFIG_FILES[editor] || [];
+  const files = [];
+  for (const relative of CONFIG_FILES[editor]) {
+    const absolute = path.join(projectRoot, relative);
+    if (!fs.existsSync(absolute)) continue;
+    if (!fs.statSync(absolute).isDirectory()) {
+      files.push(relative);
+      continue;
+    }
+    for (const entry of fs.readdirSync(absolute, { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.length <= 160)
+        files.push(path.join(relative, entry.name));
+    }
+  }
+  return files.sort().slice(0, MAX_FILES);
 }
 
 function importEditorConfig(
