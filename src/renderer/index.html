@@ -1724,6 +1724,46 @@
               placeholder="Leave unchanged"
             />
           </div>
+          <div class="settings-group-heading">Preview effective settings</div>
+          <p>
+            Check the final values for a project, agent, and session before
+            starting work.
+          </p>
+          <div class="setting-group">
+            <label for="settingsPreviewProject">Project identifier</label>
+            <input
+              id="settingsPreviewProject"
+              maxlength="160"
+              placeholder="Optional project id"
+            />
+          </div>
+          <div class="setting-group">
+            <label for="settingsPreviewAgent">Agent identifier</label>
+            <input
+              id="settingsPreviewAgent"
+              maxlength="160"
+              placeholder="Optional agent id"
+            />
+          </div>
+          <div class="setting-group">
+            <label for="settingsPreviewSession">Session identifier</label>
+            <input
+              id="settingsPreviewSession"
+              maxlength="160"
+              placeholder="Optional session id"
+            />
+          </div>
+          <button
+            type="button"
+            class="context-button"
+            id="settingsResolvePreview"
+          >
+            Preview effective settings
+          </button>
+          <small
+            id="settingsResolvedMessage"
+            style="display: block; color: var(--muted)"
+          ></small>
           <button type="button" class="context-button" id="settingsScopedSave">
             Save scoped override
           </button>
@@ -2106,6 +2146,18 @@
       );
       const settingsScopedWakeWord = document.getElementById(
         "settingsScopedWakeWord",
+      );
+      const settingsPreviewProject = document.getElementById(
+        "settingsPreviewProject",
+      );
+      const settingsPreviewAgent = document.getElementById(
+        "settingsPreviewAgent",
+      );
+      const settingsPreviewSession = document.getElementById(
+        "settingsPreviewSession",
+      );
+      const settingsResolvedMessage = document.getElementById(
+        "settingsResolvedMessage",
       );
       const settingsScopedMessage = document.getElementById(
         "settingsScopedMessage",
@@ -2846,6 +2898,27 @@
             settingsScopedMessage.textContent = `${scope} override saved for ${id}.`;
           } catch (error) {
             settingsScopedMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("settingsResolvePreview")
+        .addEventListener("click", async () => {
+          try {
+            const resolved = await window.spartanCode.resolveSettings({
+              projectId: settingsPreviewProject.value.trim() || undefined,
+              agentId: settingsPreviewAgent.value.trim() || undefined,
+              sessionId: settingsPreviewSession.value.trim() || undefined,
+            });
+            settingsResolvedMessage.textContent = [
+              `Model: ${resolved.model}`,
+              `execution: ${resolved.executionMode}`,
+              `agent: ${resolved.defaultAgent}`,
+              `provider: ${resolved.apiProvider}`,
+              `voice: ${resolved.voiceEnabled ? "on" : "off"}`,
+              `memory: ${resolved.memoryEnabled ? "on" : "off"}`,
+            ].join(" · ");
+          } catch (error) {
+            settingsResolvedMessage.textContent = error.message;
           }
         });
       document
