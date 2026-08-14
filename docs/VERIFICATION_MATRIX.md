@@ -20,7 +20,10 @@ the Android SDK tools, starts it headlessly with explicit boot bounds, builds
 the debug native binary, installs it, launches the application, and verifies the
 package is registered.
 The same workflow also runs the Electron Playwright visual smoke suite under
-Xvfb and uploads its screenshots as CI evidence.
+Xvfb and uploads its screenshots as CI evidence. Visual launch, interaction,
+navigation, and process execution are explicitly bounded; the Android SDK
+download, emulator startup, and package verification phases are bounded
+separately so a failed environment gate produces actionable evidence.
 Physical TalkBack/gesture checks, additional API-level coverage, and signed
 artifacts remain separate release-environment evidence and must be attached
 when available.
