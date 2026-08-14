@@ -77,9 +77,10 @@ current Implemented/Partial/Open counts.
   activity entry, and audit event. The release checklist is explicit about
   target-specific compilation and does not claim an unavailable compiler ran on
   the phone.
-- Android settings now persist Leo persona and wake-word preferences alongside
-  execution, quantization, voice-input, and sync controls with bounded local
-  values.
+- Android settings now persist the Leo default-agent preference, persona and
+  wake-word preferences alongside execution, quantization, voice-input, and
+  sync controls with bounded local values; the default agent participates in
+  the same scoped settings hierarchy.
 - Android Settings now exposes compact global/project/agent/session scope
   controls that save and load the same deterministic override hierarchy without
   requiring a desktop or bridge.

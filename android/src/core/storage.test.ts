@@ -175,6 +175,7 @@ describe("mobile settings", () => {
   it("persists safe execution, model, voice, and sync preferences", async () => {
     expect(await readMobileSettings()).toMatchObject({
       model: "Qwen3-1.7B",
+      defaultAgent: "leo",
       protocol: "MCP Lite",
       provider: "local",
       memoryEnabled: true,
@@ -189,6 +190,7 @@ describe("mobile settings", () => {
     });
     await writeMobileSettings({
       model: "Phi-4-mini",
+      defaultAgent: "researcher",
       protocol: "MCP Bridge",
       provider: "openai",
       memoryEnabled: false,
@@ -203,6 +205,7 @@ describe("mobile settings", () => {
     });
     expect(await readMobileSettings()).toEqual({
       model: "Phi-4-mini",
+      defaultAgent: "researcher",
       protocol: "MCP Bridge",
       provider: "openai",
       memoryEnabled: false,

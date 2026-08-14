@@ -58,7 +58,7 @@ import {
 import type { MobileSnapshot } from "./src/core/types";
 import type { MobileSettings } from "./src/core/storage";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
-import { availableAgents } from "./src/core/agents";
+import { availableAgents, bundledAgents } from "./src/core/agents";
 import {
   buildSetupPlan,
   estimateRemoteCost,
@@ -139,6 +139,7 @@ export default function App() {
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [mobileSettings, setMobileSettings] = useState<MobileSettings>({
     model: "Qwen3-1.7B",
+    defaultAgent: "leo",
     protocol: "MCP Lite",
     provider: "local",
     memoryEnabled: true,
@@ -1330,6 +1331,30 @@ export default function App() {
                     (options.indexOf(mobileSettings.model) + 1) % options.length
                   ];
                 void updateMobileSettings({ model: next });
+              }}
+            >
+              <Text style={styles.smallActionText}>Change</Text>
+            </Pressable>
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.missionBody}>
+              <Text style={styles.missionText}>Default agent</Text>
+              <Text style={styles.missionMeta}>
+                {mobileSettings.defaultAgent}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change default agent"
+              style={styles.smallAction}
+              onPress={() => {
+                const index = bundledAgents.findIndex(
+                  (agent) => agent.name === mobileSettings.defaultAgent,
+                );
+                const next =
+                  bundledAgents[(index + 1) % bundledAgents.length]?.name ||
+                  "leo";
+                void updateMobileSettings({ defaultAgent: next });
               }}
             >
               <Text style={styles.smallActionText}>Change</Text>

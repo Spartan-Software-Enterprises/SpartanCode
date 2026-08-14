@@ -42,6 +42,7 @@ const CURRENT_SNAPSHOT_VERSION = 1;
 
 export type MobileSettings = {
   model: string;
+  defaultAgent: string;
   protocol: "MCP Lite" | "MCP Bridge" | "Full MCP";
   provider: string;
   memoryEnabled: boolean;
@@ -71,6 +72,7 @@ export type MobileSettingsContext = {
 
 const defaultMobileSettings: MobileSettings = {
   model: "Qwen3-1.7B",
+  defaultAgent: "leo",
   protocol: "MCP Lite",
   provider: "local",
   memoryEnabled: true,
@@ -100,6 +102,17 @@ function normalizeMobileSettings(
       typeof parsed.model === "string" && parsed.model.trim()
         ? parsed.model.trim().slice(0, 160)
         : "Qwen3-1.7B",
+    defaultAgent:
+      typeof parsed.defaultAgent === "string" &&
+      [
+        "leo",
+        "researcher",
+        "implementer",
+        "verifier",
+        "sync-guardian",
+      ].includes(parsed.defaultAgent)
+        ? parsed.defaultAgent
+        : "leo",
     protocol:
       parsed.protocol === "MCP Bridge" || parsed.protocol === "Full MCP"
         ? parsed.protocol
@@ -142,6 +155,7 @@ function normalizeMobileSettingsOverride(
   const normalized = normalizeMobileSettings(parsed);
   const allowed = new Set<keyof MobileSettings>([
     "model",
+    "defaultAgent",
     "protocol",
     "provider",
     "memoryEnabled",
