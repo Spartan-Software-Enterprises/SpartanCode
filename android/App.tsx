@@ -1,4 +1,5 @@
 import { StatusBar } from "expo-status-bar";
+import * as Speech from "expo-speech";
 import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
@@ -77,6 +78,7 @@ import type { MobileCollaborationSession } from "./src/core/collaboration";
 import { approvalGestureDecision } from "./src/core/gesture";
 import { createMobileRuntimeRegistry } from "./src/core/local-runtime";
 import { loadLlamaRnRuntime } from "./src/core/llama-rn-runtime";
+import { normalizeSpeechText } from "./src/core/voice";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -943,6 +945,28 @@ export default function App() {
               thumbColor="#f2f5ff"
             />
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Test voice output"
+            style={styles.secondary}
+            onPress={() => {
+              const name = mobileSettings.personaName.trim() || "Leo";
+              try {
+                const speechText = normalizeSpeechText(
+                  `Hello from ${name}. SpartanCode voice output is ready.`,
+                );
+                if (!speechText) throw new Error("Speech text is empty");
+                Speech.speak(speechText, { language: "en-US", rate: 0.95 });
+                setMessage("Voice output started");
+              } catch (error) {
+                setMessage(
+                  `Voice output unavailable: ${error instanceof Error ? error.message : String(error)}`,
+                );
+              }
+            }}
+          >
+            <Text style={styles.secondaryText}>Test voice output</Text>
+          </Pressable>
           <Text style={styles.missionText}>Persona and wake word</Text>
           <TextInput
             accessibilityLabel="Assistant name"

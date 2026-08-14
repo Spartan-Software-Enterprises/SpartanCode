@@ -54,6 +54,7 @@ The Android companion keeps high-value controls reachable on a phone:
   quantization, voice input, and automatic sync on resume;
 - configurable local Leo persona name and wake word for consistent assistant
   identity across the mobile experience;
+- native voice output testing through the optional Expo Speech adapter;
 - workspace-safe bridge token cleanup, connection controls, remote planning,
   router guidance, and offline audit visibility;
 - app-private local project state with Android Keystore-backed bridge secrets;
