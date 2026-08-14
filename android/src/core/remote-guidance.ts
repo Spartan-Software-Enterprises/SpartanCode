@@ -39,6 +39,46 @@ export const routerGuidance = {
   },
 } as const;
 
+export const serverTemplates = [
+  {
+    id: "ubuntu-agent-server",
+    label: "Ubuntu agent server",
+    platform: "ubuntu",
+    verification: ["node --version", "git --version"],
+  },
+  {
+    id: "raspberry-pi-agent",
+    label: "Raspberry Pi home server",
+    platform: "raspberry-pi",
+    verification: ["uname -m", "free -h"],
+  },
+] as const;
+
+export function buildSetupPlan(
+  templateId: (typeof serverTemplates)[number]["id"],
+  routerMethod: keyof typeof routerGuidance = "tailscale",
+) {
+  const template = serverTemplates.find((item) => item.id === templateId);
+  if (!template) throw new Error("Unknown server template");
+  const router = routerGuidance[routerMethod];
+  return {
+    ...template,
+    exposure: router.exposure,
+    router: router.label,
+    steps: [
+      "Review the host and credentials before making changes.",
+      "Install Git, Node.js, and the SpartanCode bridge using the host's package manager.",
+      ...router.steps
+        .split(".")
+        .filter(Boolean)
+        .map((step) => `${step}.`),
+    ],
+    verification: [...template.verification],
+    requiresExplicitApproval: true,
+    provisioning: "guidance-only",
+  };
+}
+
 export function estimateRemoteCost(
   providerId: RemoteProvider["id"],
   hours = 730,

@@ -106,8 +106,10 @@ current Implemented/Partial/Open counts.
   resumable downloads, safe Range fallback, low-storage preflight, checksum
   verification/cleanup, and deletion.
 - Remote provider cost estimates, home-server/router guidance, connection
-  profiles, AWS bootstrap/recovery scripts, and local/GitHub synchronization
-  procedures.
+  profiles, bounded desktop/Android home-server setup plans, AWS
+  bootstrap/recovery scripts, and local/GitHub synchronization procedures.
+  Setup plans remain guidance-only and require the user to review and execute
+  commands on a host they control; see [HOME_SERVER_SETUP.md](HOME_SERVER_SETUP.md).
 - The authenticated MCP Bridge exposes bounded Git status, redacted diff,
   stage, and explicit commit operations with separate read/write scopes and
   idempotent mutation handling for remote clients.

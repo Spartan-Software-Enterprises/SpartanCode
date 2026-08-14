@@ -45,6 +45,8 @@ contextBridge.exposeInMainWorld("spartanCode", {
   listConnections: () => ipcRenderer.invoke("connections:list"),
   listRemoteProviders: () => ipcRenderer.invoke("remote:providers"),
   listServerTemplates: () => ipcRenderer.invoke("remote:templates"),
+  buildServerSetupPlan: (templateId, routerMethod) =>
+    ipcRenderer.invoke("remote:setup-plan", templateId, routerMethod),
   estimateRemoteCost: (provider, plan, hours) =>
     ipcRenderer.invoke("remote:estimate-cost", provider, plan, hours),
   getRouterGuidance: (method) =>

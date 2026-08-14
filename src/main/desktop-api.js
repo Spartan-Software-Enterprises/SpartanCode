@@ -59,6 +59,7 @@ const { createProtonDriveStorage } = require("./proton-drive-storage");
 const { createPrivacyNetwork } = require("./privacy-network");
 const {
   estimateServerCost,
+  buildServerSetupPlan,
   getRouterGuidance,
   listServerProviders,
   listServerTemplates,
@@ -457,6 +458,9 @@ function registerDesktopApi({
   ipcMain.handle("connections:list", () => store.snapshot().connections);
   ipcMain.handle("remote:providers", () => listServerProviders());
   ipcMain.handle("remote:templates", () => listServerTemplates());
+  ipcMain.handle("remote:setup-plan", (_event, templateId, routerMethod) =>
+    buildServerSetupPlan(templateId, routerMethod),
+  );
   ipcMain.handle("remote:estimate-cost", (_event, provider, plan, hours) =>
     estimateServerCost(provider, plan, hours),
   );

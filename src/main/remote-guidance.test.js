@@ -2,6 +2,7 @@ const assert = require("assert");
 const test = require("node:test");
 const {
   estimateServerCost,
+  buildServerSetupPlan,
   getRouterGuidance,
   listServerProviders,
   listServerTemplates,
@@ -35,4 +36,12 @@ test("home server templates include verification commands", () => {
   assert.ok(
     listServerTemplates().every((template) => template.verification.length > 0),
   );
+});
+
+test("home server setup plans are bounded and require explicit approval", () => {
+  const plan = buildServerSetupPlan("ubuntu-agent-server", "tailscale");
+  assert.equal(plan.exposure, "private");
+  assert.equal(plan.requiresExplicitApproval, true);
+  assert.ok(plan.commands.every((command) => !/[;&|`$]/.test(command)));
+  assert.throws(() => buildServerSetupPlan("unknown"), /Unknown server/);
 });

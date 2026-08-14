@@ -124,7 +124,41 @@ function listServerTemplates() {
   }));
 }
 
+function buildServerSetupPlan(templateId, routerMethod = "tailscale") {
+  const template = serverTemplates.find((item) => item.id === templateId);
+  if (!template) throw new Error("Unknown server template");
+  const router = getRouterGuidance(routerMethod);
+  const commands = [
+    "sudo apt-get update",
+    "sudo apt-get install -y curl git",
+    "git --version",
+    "node --version",
+    "mkdir -p ~/.config/spartancode",
+    "systemctl --user list-unit-files spartancode-bridge.service",
+  ];
+  return {
+    template: template.id,
+    name: template.name,
+    platform: template.platform,
+    exposure: router.exposure,
+    router: router.method,
+    prerequisites: [
+      "A user-controlled host with SSH access",
+      "A Proton/GitHub/API credential only when the user explicitly configures it",
+      "A token-protected bridge bound to loopback or a private tailnet",
+    ],
+    commands,
+    verification: [...template.verification],
+    warnings: [
+      "Review every command before execution.",
+      "This plan does not create accounts, install a service unit, open router ports, or silently change firewall rules.",
+    ],
+    requiresExplicitApproval: true,
+  };
+}
+
 module.exports = {
+  buildServerSetupPlan,
   estimateServerCost,
   getRouterGuidance,
   listServerProviders,

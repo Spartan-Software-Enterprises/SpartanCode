@@ -56,9 +56,11 @@ import type { MobileSettings } from "./src/core/storage";
 import { chooseWorkloadRoute, workloadLabel } from "./src/core/runtime";
 import { availableAgents } from "./src/core/agents";
 import {
+  buildSetupPlan,
   estimateRemoteCost,
   remoteProviders,
   routerGuidance,
+  serverTemplates,
 } from "./src/core/remote-guidance";
 import type { RemoteProvider } from "./src/core/remote-guidance";
 import { authorizeSecretAccess } from "./src/core/biometric";
@@ -126,6 +128,9 @@ export default function App() {
   const [routerMethod, setRouterMethod] =
     useState<keyof typeof routerGuidance>("tailscale");
   const [remotePlanMessage, setRemotePlanMessage] = useState("");
+  const [serverTemplate, setServerTemplate] = useState<
+    (typeof serverTemplates)[number]["id"]
+  >(serverTemplates[0].id);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [mobileSettings, setMobileSettings] = useState<MobileSettings>({
     model: "Qwen3-1.7B",
@@ -1669,6 +1674,35 @@ export default function App() {
             {routerGuidance[routerMethod].exposure.toUpperCase()} ·{" "}
             {routerGuidance[routerMethod].steps}
           </Text>
+          <View style={styles.actionRow}>
+            {serverTemplates.map((template) => (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Select ${template.label} setup plan`}
+                key={template.id}
+                style={[
+                  styles.smallAction,
+                  serverTemplate === template.id && styles.selectedAction,
+                ]}
+                onPress={() => setServerTemplate(template.id)}
+              >
+                <Text style={styles.smallActionText}>{template.platform}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Generate home server setup plan"
+            style={styles.secondary}
+            onPress={() => {
+              const plan = buildSetupPlan(serverTemplate, routerMethod);
+              setRemotePlanMessage(
+                `${plan.label}: ${plan.steps.join(" ")} Verify with ${plan.verification.join(", ")}. Nothing is provisioned automatically.`,
+              );
+            }}
+          >
+            <Text style={styles.secondaryText}>Generate setup plan</Text>
+          </Pressable>
           {remotePlanMessage ? (
             <Text style={styles.message}>{remotePlanMessage}</Text>
           ) : null}

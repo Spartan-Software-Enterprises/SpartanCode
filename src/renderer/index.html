@@ -1868,6 +1868,17 @@
             style="display: block; color: var(--muted)"
           ></small>
         </div>
+        <div class="setting-group">
+          <label for="remoteTemplate">Home-server setup assistant</label>
+          <select id="remoteTemplate"></select>
+          <button type="button" class="context-button" id="generateSetupPlan">
+            Generate reviewable setup plan
+          </button>
+          <small
+            id="setupPlanStatus"
+            style="display: block; color: var(--muted); white-space: pre-wrap"
+          ></small>
+        </div>
         <div class="settings-group-heading">Governance & extensibility</div>
         <div class="settings-runtime-grid" id="settingsGovernanceStatus">
           Loading agents, plugins, tools, and audit status…
@@ -2726,6 +2737,7 @@
               window.spartanCode.listConnections(),
               window.spartanCode.listCachedModels(),
               window.spartanCode.listRemoteProviders(),
+              window.spartanCode.listServerTemplates(),
               window.spartanCode.getProviderStatus(),
             ]).then(
               ([
@@ -2735,6 +2747,7 @@
                 connections,
                 cachedModels,
                 providers,
+                serverTemplates,
                 apiProviders,
               ]) => {
                 models.forEach((model) =>
@@ -2814,6 +2827,13 @@
                       `<option value="${plan.id}">${plan.label}</option>`,
                   )
                   .join("");
+                document.getElementById("remoteTemplate").innerHTML =
+                  serverTemplates
+                    .map(
+                      (template) =>
+                        `<option value="${template.id}">${template.name} · ${template.platform}</option>`,
+                    )
+                    .join("");
                 modelStatus.textContent = cachedModels.some(
                   (cached) => cached.id === settings.model,
                 )
@@ -3652,6 +3672,23 @@
             })
             .catch((error) => {
               document.getElementById("routerStatus").textContent =
+                error.message;
+            });
+        });
+      document
+        .getElementById("generateSetupPlan")
+        .addEventListener("click", () => {
+          window.spartanCode
+            ?.buildServerSetupPlan(
+              document.getElementById("remoteTemplate").value,
+              document.getElementById("routerMethod").value,
+            )
+            .then((plan) => {
+              document.getElementById("setupPlanStatus").textContent =
+                `${plan.name} · ${plan.exposure} exposure\nReview before running:\n${plan.commands.map((command) => `• ${command}`).join("\n")}\nVerify:\n${plan.verification.map((command) => `• ${command}`).join("\n")}\n${plan.warnings.join(" ")}`;
+            })
+            .catch((error) => {
+              document.getElementById("setupPlanStatus").textContent =
                 error.message;
             });
         });
