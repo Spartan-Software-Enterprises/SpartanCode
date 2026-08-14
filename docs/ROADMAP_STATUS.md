@@ -51,9 +51,10 @@ behavior and a corresponding automated or documented verification path.
 - A clean-checkout GitHub Actions workflow and local Android verification
   matrix now run the repeatable TypeScript/Jest/format/Expo baseline and record
   Android SDK/emulator, signing, and AWS environment gaps as explicit skips.
-- GitHub verification now also includes a pinned Android emulator job that
-  builds the debug native binary, installs it on API 35, launches the package,
-  and verifies package registration on every push and pull request.
+- GitHub verification now also includes a bounded API 35 Android emulator job
+  that provisions and boots an AVD with explicit SDK commands, builds the debug
+  native binary, installs it, launches the package, and verifies package
+  registration on every push and pull request.
 - A bounded plugin registry now discovers workspace metadata, enforces explicit
   MIT/Apache-2.0 licensing and safe capability identifiers, preserves bundled
   plugins, and exposes metadata through isolated IPC without executing plugin

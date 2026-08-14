@@ -64,20 +64,48 @@ jobs:
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - run: npm ci
         working-directory: android
-      - uses: ReactiveCircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808 # v2
+      - name: Start bounded API 35 emulator
+        run: |
+          set -euo pipefail
+          sdkmanager "emulator" "system-images;android-35;default;x86_64"
+          echo no | avdmanager create avd \
+            --name spartancode-ci \
+            --package "system-images;android-35;default;x86_64" \
+            --device pixel_2 \
+            --force
+          "${ANDROID_HOME}/emulator/emulator" \
+            -avd spartancode-ci \
+            -no-window -no-audio -no-boot-anim -no-snapshot \
+            -gpu swiftshader_indirect \
+            > "${RUNNER_TEMP}/spartancode-emulator.log" 2>&1 &
+          emulator_pid=$!
+          cleanup() { kill "$emulator_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          for attempt in $(seq 1 300); do
+            if ! kill -0 "$emulator_pid" 2>/dev/null; then
+              cat "${RUNNER_TEMP}/spartancode-emulator.log"
+              exit 1
+            fi
+            if [ "$(adb get-state 2>/dev/null || true)" = "device" ] &&
+              [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)" = "1" ]; then
+              break
+            fi
+            if [ "$attempt" -eq 300 ]; then
+              cat "${RUNNER_TEMP}/spartancode-emulator.log"
+              exit 1
+            fi
+            sleep 1
+          done
+          cd android
+          npx expo prebuild --platform android --no-install
+          cd android
+          ./gradlew :app:assembleDebug --no-daemon
+          adb install -r app/build/outputs/apk/debug/app-debug.apk
+          adb shell monkey -p com.spartansoftware.spartancode 1
+          adb shell dumpsys package com.spartansoftware.spartancode | grep -q 'com.spartansoftware.spartancode'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
         with:
-          api-level: 35
-          target: aosp_atd
-          arch: x86_64
-          profile: pixel_2
-          emulator-boot-timeout: 300
-          emulator-options: "-no-window -no-audio -no-boot-anim -no-snapshot"
-          disable-animations: true
-          script: |
-            cd android
-            npx expo prebuild --platform android --no-install
-            cd android
-            ./gradlew :app:assembleDebug
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
-            adb shell monkey -p com.spartansoftware.spartancode 1
-            adb shell dumpsys package com.spartansoftware.spartancode | grep -q 'com.spartansoftware.spartancode'
+          name: android-emulator-log
+          if-no-files-found: ignore
+          path: ${{ runner.temp }}/spartancode-emulator.log
