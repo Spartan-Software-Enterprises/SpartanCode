@@ -2,6 +2,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("spartanCode", {
   getSnapshot: () => ipcRenderer.invoke("workspace:snapshot"),
+  generateDevContainer: (projectPath, options) =>
+    ipcRenderer.invoke("devcontainer:generate", projectPath, options),
   listCollaborationSessions: () => ipcRenderer.invoke("collaboration:list"),
   createCollaborationSession: (input) =>
     ipcRenderer.invoke("collaboration:create", input),

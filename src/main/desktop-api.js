@@ -25,6 +25,7 @@ const { createChatService } = require("./chat-service");
 const { createExecutionPlan } = require("./agent-plan");
 const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
+const { writeDevContainerConfig } = require("./devcontainer");
 const { createModelCache } = require("./model-cache");
 const {
   getEmotionAwarenessStatus,
@@ -423,6 +424,14 @@ function registerDesktopApi({
     return readWorkspaceFile(workspacePath, requestedPath);
   });
   ipcMain.handle("workspace:snapshot", () => store.snapshot());
+  ipcMain.handle("devcontainer:generate", (_event, projectPath, options) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    return writeDevContainerConfig(
+      workspacePath,
+      projectPath || ".",
+      options || {},
+    );
+  });
   ipcMain.handle("collaboration:list", () => store.collaborationList());
   ipcMain.handle("collaboration:create", (_event, input) =>
     store.collaborationCreate(input || {}),

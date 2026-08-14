@@ -62,6 +62,11 @@ current Implemented/Partial/Open counts.
 
 - Desktop Electron shell with isolated preload IPC and workspace path/symlink
   boundaries.
+- User projects can generate a local `.devcontainer/devcontainer.json` through
+  the bounded desktop API. Node, Python, Android, and universal presets are
+  supported without uploading source or creating a Codespace; paths stay inside
+  the approved workspace and existing definitions are protected from accidental
+  overwrite. See [DEV_CONTAINERS.md](DEV_CONTAINERS.md).
 - Mission Plan/Build/Verify lifecycle, durable artifacts, approvals, audit
   activity, and guided/YOLO execution modes.
 - MCP Lite core tools and an optional token-protected MCP Bridge adapter.
