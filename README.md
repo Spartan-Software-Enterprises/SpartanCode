@@ -33,6 +33,8 @@ and encrypted RAG memory—is documented in
 External Antigravity and cybersecurity skill sources are integrated through a
 pinned, review-gated registry; see [docs/EXTERNAL_SKILLS.md](docs/EXTERNAL_SKILLS.md).
 Encrypted local memory is documented in [docs/LOCAL_MEMORY.md](docs/LOCAL_MEMORY.md).
+Optional Proton Drive encrypted workspace backups are documented in
+[docs/PROTON_DRIVE.md](docs/PROTON_DRIVE.md).
 
 SpartanCode is local-first and standalone by design: Android users do not need
 the desktop app, a bridge, or a network connection to plan, queue, review, and

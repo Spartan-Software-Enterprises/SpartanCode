@@ -55,6 +55,7 @@ const { createWindowsAutomation } = require("./windows-automation");
 const { createGuiAutomation } = require("./gui-automation");
 const { createProcessAutomation } = require("./process-automation");
 const { createProtonAdapter } = require("./proton-adapter");
+const { createProtonDriveStorage } = require("./proton-drive-storage");
 const { createPrivacyNetwork } = require("./privacy-network");
 const {
   estimateServerCost,
@@ -96,6 +97,10 @@ function registerDesktopApi({
     environment: providerEnvironment,
     secureVault,
   });
+  const protonDriveStorage = createProtonDriveStorage({
+    environment: providerEnvironment,
+    secureVault,
+  });
   const privacyNetwork = createPrivacyNetwork();
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
@@ -119,6 +124,29 @@ function registerDesktopApi({
   ipcMain.handle("proton:request", (_event, request) =>
     protonAdapter.request(request),
   );
+  ipcMain.handle("proton-drive:status", () => protonDriveStorage.status());
+  ipcMain.handle("proton-drive:version", () => protonDriveStorage.version());
+  ipcMain.handle("proton-drive:backup", (_event, sourcePath, remoteParent) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    if (!workspacePath) throw new Error("Choose a workspace before backing up");
+    if (typeof sourcePath !== "string" || !path.isAbsolute(sourcePath))
+      throw new Error("Backup source must be an absolute path");
+    const relative = path.relative(workspacePath, sourcePath);
+    if (relative.startsWith("..") || path.isAbsolute(relative))
+      throw new Error(
+        "Backup source must remain inside the selected workspace",
+      );
+    return protonDriveStorage.backupFile(sourcePath, remoteParent);
+  });
+  ipcMain.handle("proton-drive:backup-workspace", (_event, remoteParent) => {
+    const workspacePath = store.snapshot().settings.workspacePath;
+    if (!workspacePath) throw new Error("Choose a workspace before backing up");
+    return protonDriveStorage.backupBytes(
+      Buffer.from(JSON.stringify(store.snapshot()), "utf8"),
+      remoteParent,
+      "spartancode-workspace.spartancode.enc",
+    );
+  });
   ipcMain.handle("privacy:status", () => privacyNetwork.status());
   ipcMain.handle("privacy:configure", (_event, request) =>
     privacyNetwork.configure(request),

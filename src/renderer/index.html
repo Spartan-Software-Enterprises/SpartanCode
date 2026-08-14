@@ -2159,6 +2159,45 @@
             workspace data or exports.
           </small>
         </details>
+        <details class="settings-advanced">
+          <summary>Proton Drive secure backup</summary>
+          <p>
+            Proton Drive is optional. SpartanCode encrypts the workspace
+            snapshot locally with AES-256-GCM before the official Proton Drive
+            CLI uploads it; Android-only workflows remain independent.
+          </p>
+          <div class="settings-runtime-grid" id="settingsProtonDriveStatus">
+            Loading Proton Drive status…
+          </div>
+          <div class="setting-group">
+            <label for="protonDriveRemoteParent">Remote folder</label>
+            <input
+              id="protonDriveRemoteParent"
+              value="/SpartanCode/backups"
+              maxlength="512"
+              placeholder="/SpartanCode/backups"
+            />
+          </div>
+          <div class="settings-inline-actions">
+            <button
+              type="button"
+              class="context-button"
+              id="protonDriveVersion"
+            >
+              Check CLI
+            </button>
+            <button type="button" class="context-button" id="protonDriveBackup">
+              Back up workspace snapshot
+            </button>
+          </div>
+          <small
+            id="settingsProtonDriveMessage"
+            style="display: block; color: var(--muted)"
+          >
+            Sign in once with <code>proton-drive auth login</code>; the official
+            CLI keeps its session in the operating system secret store.
+          </small>
+        </details>
         <div class="settings-actions">
           <button type="button" class="settings-close" id="closeSettings">
             Cancel</button
@@ -2331,6 +2370,12 @@
       const settingsSecureMessage = document.getElementById(
         "settingsSecureMessage",
       );
+      const settingsProtonDriveStatus = document.getElementById(
+        "settingsProtonDriveStatus",
+      );
+      const settingsProtonDriveMessage = document.getElementById(
+        "settingsProtonDriveMessage",
+      );
       const settingsScope = document.getElementById("settingsScope");
       const settingsScopeId = document.getElementById("settingsScopeId");
       const settingsScopedModel = document.getElementById(
@@ -2396,6 +2441,7 @@
           github,
           secureStorage,
           secureKeys,
+          protonDrive,
         ] = await Promise.all([
           window.spartanCode.getRuntimeStatus(),
           window.spartanCode.getCapabilities(),
@@ -2410,6 +2456,7 @@
           window.spartanCode.getGitHubAppStatus(),
           window.spartanCode.getSecureVaultStatus(),
           window.spartanCode.listSecureKeys(),
+          window.spartanCode.getProtonDriveStatus(),
         ]);
         settingsWorkspaceSummary.textContent = settings.workspacePath
           ? settings.workspacePath
@@ -2475,6 +2522,19 @@
             settingsStatusRow(item.name, item.updatedAt),
           ),
         ].join("");
+        settingsProtonDriveStatus.innerHTML = [
+          settingsStatusRow("Provider", protonDrive.provider),
+          settingsStatusRow(
+            "CLI",
+            protonDrive.configured ? protonDrive.cli : "Not configured",
+          ),
+          settingsStatusRow(
+            "Availability",
+            protonDrive.available ? "Configured" : "Unavailable",
+          ),
+          settingsStatusRow("Encryption", protonDrive.encryption),
+        ].join("");
+        settingsProtonDriveMessage.textContent = protonDrive.message;
       };
       const escapeChat = (value) => escapeHtml(value).replace(/\n/g, "<br>");
       const renderChat = (messages) => {
@@ -3362,6 +3422,32 @@
             );
           } catch (error) {
             settingsSecureMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("protonDriveVersion")
+        .addEventListener("click", async () => {
+          try {
+            const result = await window.spartanCode.getProtonDriveVersion();
+            settingsProtonDriveMessage.textContent = `Proton Drive CLI: ${result.output}`;
+          } catch (error) {
+            settingsProtonDriveMessage.textContent = error.message;
+          }
+        });
+      document
+        .getElementById("protonDriveBackup")
+        .addEventListener("click", async () => {
+          try {
+            const remoteParent = document
+              .getElementById("protonDriveRemoteParent")
+              .value.trim();
+            const result =
+              await window.spartanCode.backupWorkspaceToProtonDrive(
+                remoteParent,
+              );
+            settingsProtonDriveMessage.textContent = `Encrypted workspace snapshot uploaded to ${result.remotePath}.`;
+          } catch (error) {
+            settingsProtonDriveMessage.textContent = error.message;
           }
         });
       document

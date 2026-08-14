@@ -35,6 +35,10 @@ current Implemented/Partial/Open counts.
   length limits, and truthful missing-runtime status through isolated IPC.
 - A privacy-network adapter reports Tor/Proton configuration without exposing
   credentials and refuses to silently reroute traffic.
+- Optional Proton Drive secure backup now invokes the official CLI through a
+  fixed non-shell boundary and encrypts workspace snapshots with an
+  OS-vault-backed AES-256-GCM envelope before upload; continuous sync and
+  restore remain separate release gates. See [PROTON_DRIVE.md](PROTON_DRIVE.md).
 - Playwright browser requests can opt into a configured Tor SOCKS proxy; direct
   browser traffic remains the default and invalid proxy configuration fails
   closed.
