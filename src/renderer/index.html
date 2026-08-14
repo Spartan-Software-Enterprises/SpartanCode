@@ -1790,9 +1790,28 @@
             <label for="wakeWord">Wake word</label>
             <input id="wakeWord" maxlength="48" placeholder="Leo" />
           </div>
+          <div class="setting-group">
+            <label for="emotionMode">Adaptive interaction</label>
+            <select id="emotionMode">
+              <option value="explicit">Explicit signal only</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="interactionSignal">Current interaction signal</label>
+            <select id="interactionSignal">
+              <option value="calm">Calm</option>
+              <option value="focused">Focused</option>
+              <option value="frustrated">Frustrated</option>
+              <option value="uncertain">Uncertain</option>
+              <option value="excited">Excited</option>
+              <option value="tired">Tired</option>
+            </select>
+          </div>
           <small style="display: block; color: var(--muted)">
             These preferences configure the assistant identity; voice runtime
-            availability is reported separately.
+            availability is reported separately. Signals are user-selected;
+            camera, voice-emotion, and biometric inference are not used.
           </small>
         </details>
         <div class="setting-group">
@@ -2656,6 +2675,10 @@
                   settings.personaName || "Leo";
                 document.getElementById("wakeWord").value =
                   settings.wakeWord || "Leo";
+                document.getElementById("emotionMode").value =
+                  settings.emotionMode || "explicit";
+                document.getElementById("interactionSignal").value =
+                  settings.interactionSignal || "calm";
                 document.getElementById("memoryEnabled").checked =
                   settings.memoryEnabled !== false;
                 const connection = connections?.[0];
@@ -3297,7 +3320,10 @@
               document.getElementById("apiProviderSelect").value || "local",
             memoryEnabled: document.getElementById("memoryEnabled").checked,
             personaName: document.getElementById("personaName").value,
-            wakeWord: document.getElementById("wakeWord").value,
+              wakeWord: document.getElementById("wakeWord").value,
+            emotionMode: document.getElementById("emotionMode").value,
+            interactionSignal:
+              document.getElementById("interactionSignal").value,
           });
           const connection =
             profile.name && profile.host

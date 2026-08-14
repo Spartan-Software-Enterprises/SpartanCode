@@ -28,6 +28,9 @@ contextBridge.exposeInMainWorld("spartanCode", {
   activateMarketplacePlugin: (manifest) =>
     ipcRenderer.invoke("plugins:activate", manifest),
   getSettings: () => ipcRenderer.invoke("settings:get"),
+  getEmotionAwarenessStatus: () => ipcRenderer.invoke("interaction:status"),
+  resolveInteractionStyle: (input) =>
+    ipcRenderer.invoke("interaction:style", input),
   resolveSettings: (context) => ipcRenderer.invoke("settings:resolve", context),
   updateSettings: (update) => ipcRenderer.invoke("settings:update", update),
   updateScopedSettings: (scope, id, update) =>

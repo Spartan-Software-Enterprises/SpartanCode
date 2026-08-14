@@ -20,6 +20,8 @@ const emptyState = () => ({
     memoryEnabled: true,
     personaName: "Leo",
     wakeWord: "Leo",
+    emotionMode: "explicit",
+    interactionSignal: "calm",
   },
   settingsScopes: { global: {}, project: {}, agent: {}, session: {} },
   connections: [],
@@ -54,6 +56,8 @@ function createMissionStore(filePath) {
     "memoryEnabled",
     "personaName",
     "wakeWord",
+    "emotionMode",
+    "interactionSignal",
   ]);
   if (!state.settingsScopes || typeof state.settingsScopes !== "object")
     state.settingsScopes = { global: {}, project: {}, agent: {}, session: {} };
@@ -232,6 +236,23 @@ function createMissionStore(filePath) {
         !["guided", "yolo"].includes(safeUpdate.executionMode)
       )
         delete safeUpdate.executionMode;
+      if (
+        safeUpdate.emotionMode !== undefined &&
+        !["off", "explicit"].includes(safeUpdate.emotionMode)
+      )
+        delete safeUpdate.emotionMode;
+      if (
+        safeUpdate.interactionSignal !== undefined &&
+        ![
+          "calm",
+          "focused",
+          "frustrated",
+          "uncertain",
+          "excited",
+          "tired",
+        ].includes(safeUpdate.interactionSignal)
+      )
+        delete safeUpdate.interactionSignal;
       for (const key of ["personaName", "wakeWord"]) {
         if (safeUpdate[key] !== undefined) {
           const value = String(safeUpdate[key]).trim().slice(0, 48);

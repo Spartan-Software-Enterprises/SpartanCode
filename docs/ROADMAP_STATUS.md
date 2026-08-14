@@ -39,6 +39,10 @@ in [ROADMAP_MATRIX.md](ROADMAP_MATRIX.md).
 - CodeRabbit is configured for GitHub-hosted pull-request review with scoped
   Electron, renderer, and Android guidance; desktop Settings opens its official
   GitHub App login flow without storing CodeRabbit credentials.
+- Interaction personalization accepts only an explicit user-selected signal
+  (calm, focused, frustrated, uncertain, excited, or tired) and resolves it to
+  bounded tone guidance. Emotion inference from cameras, voice, or biometrics
+  is disabled by contract and is never presented as available.
 
 ## Next capability expansion
 

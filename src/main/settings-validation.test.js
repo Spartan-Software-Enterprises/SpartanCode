@@ -32,3 +32,23 @@ test("settings preserve bounded persona and wake-word preferences", () => {
   assert.equal(settings.wakeWord, "Hey Spartan");
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("settings accept only explicit interaction personalization values", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-interaction-settings-"),
+  );
+  const store = createMissionStore(path.join(directory, "workspace.json"));
+  const settings = store.updateSettings({
+    emotionMode: "explicit",
+    interactionSignal: "frustrated",
+  });
+  assert.equal(settings.emotionMode, "explicit");
+  assert.equal(settings.interactionSignal, "frustrated");
+  const unchanged = store.updateSettings({
+    emotionMode: "camera-inference",
+    interactionSignal: "angry",
+  });
+  assert.equal(unchanged.emotionMode, "explicit");
+  assert.equal(unchanged.interactionSignal, "frustrated");
+  fs.rmSync(directory, { recursive: true, force: true });
+});

@@ -27,6 +27,10 @@ const { createCoreMcpRegistry } = require("./mcp-lite");
 const { listWorkspaceFiles, readWorkspaceFile } = require("./workspace-tools");
 const { createModelCache } = require("./model-cache");
 const {
+  getEmotionAwarenessStatus,
+  resolveInteractionStyle,
+} = require("./emotion-awareness");
+const {
   getTransportStatus,
   validateRemoteConfig,
 } = require("./remote-connection");
@@ -357,6 +361,13 @@ function registerDesktopApi({
     }),
   );
   ipcMain.handle("settings:get", () => store.snapshot().settings);
+  ipcMain.handle("interaction:status", () => getEmotionAwarenessStatus());
+  ipcMain.handle("interaction:style", (_event, input) =>
+    resolveInteractionStyle({
+      mode: store.snapshot().settings.emotionMode,
+      signal: input?.signal || store.snapshot().settings.interactionSignal,
+    }),
+  );
   ipcMain.handle("settings:resolve", (_event, context) =>
     store.resolveSettings(context || {}),
   );
