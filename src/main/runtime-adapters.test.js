@@ -3,7 +3,23 @@ const test = require("node:test");
 const {
   createRuntimeRegistry,
   listRuntimeAdapters,
+  resolveCachedModelRequest,
 } = require("./runtime-adapters");
+
+test("runtime requests can resolve a verified cached model artifact by id", () => {
+  const resolved = resolveCachedModelRequest(
+    { modelId: "org/model", prompt: "hello" },
+    [{ id: "org/model", status: "ready", artifactPath: "/models/model.gguf" }],
+    (filePath) => filePath === "/models/model.gguf",
+  );
+  assert.equal(resolved.modelPath, "/models/model.gguf");
+  const unavailable = resolveCachedModelRequest(
+    { modelId: "missing", prompt: "hello" },
+    [],
+    () => false,
+  );
+  assert.equal(unavailable.modelPath, "");
+});
 
 test("runtime discovery reports unavailable optional runtimes honestly", () => {
   const adapters = listRuntimeAdapters({

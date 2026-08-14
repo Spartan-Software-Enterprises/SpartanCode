@@ -48,7 +48,10 @@ const {
   probeRemoteConnection,
 } = require("./remote-connection");
 const { listBundledAgents, loadCustomAgents } = require("./custom-agents");
-const { createRuntimeRegistry } = require("./runtime-adapters");
+const {
+  createRuntimeRegistry,
+  resolveCachedModelRequest,
+} = require("./runtime-adapters");
 const { listPlugins } = require("./plugin-registry");
 const {
   downloadMarketplaceArtifact,
@@ -247,7 +250,10 @@ function registerDesktopApi({
       throw new Error("Runtime id is required");
     if (!request || typeof request !== "object")
       throw new Error("Runtime request must be an object");
-    return runtimeRegistry.generate(runtimeId, request);
+    return runtimeRegistry.generate(
+      runtimeId,
+      resolveCachedModelRequest(request, modelCache?.list() || []),
+    );
   });
   ipcMain.handle("capabilities:get", () => getCapabilities());
   ipcMain.handle("providers:get", () => getProviderStatus(providerEnvironment));

@@ -141,6 +141,25 @@ function llamaCliRequest(request, fileExists = fs.existsSync) {
   };
 }
 
+function resolveCachedModelRequest(
+  request,
+  cachedModels = [],
+  fileExists = fs.existsSync,
+) {
+  if (!request || typeof request !== "object") return request;
+  if (request.modelPath || typeof request.modelId !== "string") return request;
+  const cached = cachedModels.find(
+    (model) => model.id === request.modelId && model.status === "ready",
+  );
+  if (
+    !cached ||
+    typeof cached.artifactPath !== "string" ||
+    !fileExists(cached.artifactPath)
+  )
+    return { ...request, modelPath: "" };
+  return { ...request, modelPath: cached.artifactPath };
+}
+
 function createRuntimeRegistry({
   resolver = require.resolve,
   loader = require,
@@ -213,5 +232,6 @@ module.exports = {
   listRuntimeAdapters,
   runtimeDescriptors,
   llamaCliRequest,
+  resolveCachedModelRequest,
   resolveExecutable,
 };

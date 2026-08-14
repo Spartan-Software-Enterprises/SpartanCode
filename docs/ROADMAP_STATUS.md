@@ -136,6 +136,9 @@ current Implemented/Partial/Open counts.
   resumable `Range` support, safe fallback when a server returns `200`, bounded
   artifact size, SHA-256 verification before finalization, and cleanup on
   mismatch. Runtime loading and physical storage acceptance remain open.
+- Desktop runtime requests can now resolve a ready, verified cached model by
+  model ID into the existing local GGUF runtime boundary; unavailable or
+  metadata-only entries fail closed instead of being treated as runnable.
 - `scripts/release-index.js` now generates a commit-bound machine-readable beta
   gate index, preserves `PASS`/`SKIP`/`FAIL` states, and fails closed when
   Android verification evidence belongs to another commit. External release
