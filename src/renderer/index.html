@@ -1118,6 +1118,53 @@
       .settings-card input {
         background: #0a1123;
       }
+      .settings-group-heading {
+        margin: 22px 0 9px;
+        color: var(--blue);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .settings-summary {
+        padding: 10px 12px;
+        overflow-wrap: anywhere;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: #0a1123;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .settings-inline-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 9px;
+      }
+      .settings-runtime-grid {
+        display: grid;
+        gap: 6px;
+        margin: 9px 0 13px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .settings-runtime-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #0d162a;
+      }
+      .settings-runtime-item strong {
+        color: var(--ink);
+      }
+      .settings-runtime-item em {
+        color: var(--blue);
+        font-style: normal;
+        text-align: right;
+      }
       @media (max-width: 1120px) {
         body {
           min-width: 760px;
@@ -1424,6 +1471,23 @@
           Configure the local-first runtime and agent transport for this
           workspace.
         </p>
+        <div class="settings-group-heading">Workspace</div>
+        <div class="settings-summary" id="settingsWorkspaceSummary">
+          No workspace selected
+        </div>
+        <div class="settings-inline-actions">
+          <button
+            type="button"
+            class="context-button"
+            id="settingsChooseWorkspace"
+          >
+            Choose workspace
+          </button>
+          <button type="button" class="context-button" id="settingsGitStatus">
+            Check Git status
+          </button>
+        </div>
+        <div class="settings-group-heading">Intelligence & runtime</div>
         <div class="setting-group">
           <label for="modelSelect">Default local model</label
           ><select id="modelSelect"></select>
@@ -1434,6 +1498,9 @@
             id="modelStatus"
             style="display: block; color: var(--muted)"
           ></small>
+        </div>
+        <div class="settings-runtime-grid" id="settingsRuntimeStatus">
+          Loading runtime, provider, and capability status…
         </div>
         <div class="setting-group">
           <label for="quantizationSelect">Quantization</label
@@ -1519,6 +1586,22 @@
             id="routerStatus"
             style="display: block; color: var(--muted)"
           ></small>
+        </div>
+        <div class="settings-group-heading">Governance & extensibility</div>
+        <div class="settings-runtime-grid" id="settingsGovernanceStatus">
+          Loading agents, plugins, tools, and audit status…
+        </div>
+        <div class="settings-inline-actions">
+          <button type="button" class="context-button" id="settingsExportAudit">
+            Export audit bundle
+          </button>
+          <button
+            type="button"
+            class="context-button"
+            id="settingsClearHistory"
+          >
+            Clear local mission data
+          </button>
         </div>
         <div class="settings-actions">
           <button type="button" class="settings-close" id="closeSettings">
@@ -1630,6 +1713,70 @@
         toast.textContent = message;
         toast.classList.add("show");
         window.setTimeout(() => toast.classList.remove("show"), 2600);
+      };
+      const settingsWorkspaceSummary = document.getElementById(
+        "settingsWorkspaceSummary",
+      );
+      const settingsRuntimeStatus = document.getElementById(
+        "settingsRuntimeStatus",
+      );
+      const settingsGovernanceStatus = document.getElementById(
+        "settingsGovernanceStatus",
+      );
+      const settingsStatusRow = (label, value) =>
+        `<div class="settings-runtime-item"><strong>${escapeHtml(label)}</strong><em>${escapeHtml(value)}</em></div>`;
+      const refreshSettingsDiagnostics = async (settings) => {
+        if (!window.spartanCode) return;
+        const [
+          runtime,
+          capabilities,
+          providers,
+          voice,
+          agents,
+          plugins,
+          tools,
+          audit,
+        ] = await Promise.all([
+          window.spartanCode.getRuntimeStatus(),
+          window.spartanCode.getCapabilities(),
+          window.spartanCode.getProviderStatus(),
+          window.spartanCode.getVoiceStatus(),
+          window.spartanCode.listAgents(),
+          window.spartanCode.listPlugins(),
+          window.spartanCode.getMcpTools(),
+          window.spartanCode.getAuditLog(),
+        ]);
+        settingsWorkspaceSummary.textContent = settings.workspacePath
+          ? settings.workspacePath
+          : "No workspace selected — local planning is still available.";
+        settingsRuntimeStatus.innerHTML = [
+          settingsStatusRow("Runtime mode", runtime.mode),
+          ...runtime.runtimes.map((item) =>
+            settingsStatusRow(
+              item.id,
+              item.status === "available" ? "Available" : "Unavailable",
+            ),
+          ),
+          ...providers.map((provider) =>
+            settingsStatusRow(
+              provider.name,
+              `${provider.status} · ${provider.detail}`,
+            ),
+          ),
+          settingsStatusRow(
+            "Voice input",
+            voice.available ? "Available" : "Unavailable",
+          ),
+          ...Object.entries(capabilities).map(([id, item]) =>
+            settingsStatusRow(`${id} capability`, item.status),
+          ),
+        ].join("");
+        settingsGovernanceStatus.innerHTML = [
+          settingsStatusRow("Custom agents", `${agents.length} discovered`),
+          settingsStatusRow("Plugins", `${plugins.length} validated`),
+          settingsStatusRow("MCP tools", `${tools.length} available`),
+          settingsStatusRow("Audit history", `${audit.length} events`),
+        ].join("");
       };
       const escapeChat = (value) => escapeHtml(value).replace(/\n/g, "<br>");
       const renderChat = (messages) => {
@@ -1863,6 +2010,9 @@
                 )
                   ? "Model metadata is ready for the local runtime."
                   : "Model is not prepared on this device yet.";
+                refreshSettingsDiagnostics(settings).catch((error) => {
+                  settingsRuntimeStatus.textContent = `Unable to load runtime status: ${error.message}`;
+                });
                 settingsModal.classList.add("open");
               },
             );
@@ -2013,6 +2163,54 @@
         .addEventListener("click", () =>
           settingsModal.classList.remove("open"),
         );
+      document
+        .getElementById("settingsChooseWorkspace")
+        .addEventListener("click", () => {
+          window.spartanCode?.chooseWorkspace().then((workspacePath) => {
+            if (!workspacePath) return;
+            settingsWorkspaceSummary.textContent = workspacePath;
+            showToast("Workspace connected");
+          });
+        });
+      document
+        .getElementById("settingsGitStatus")
+        .addEventListener("click", () => {
+          window.spartanCode
+            ?.getGitStatus()
+            .then((result) =>
+              showToast(
+                result.available ? "Git workspace is ready" : result.message,
+              ),
+            );
+        });
+      document
+        .getElementById("settingsExportAudit")
+        .addEventListener("click", async () => {
+          const bundle = await window.spartanCode?.exportAuditLog();
+          if (!bundle) return;
+          const blob = new Blob([JSON.stringify(bundle, null, 2)], {
+            type: "application/json",
+          });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `spartancode-audit-${Date.now()}.json`;
+          link.click();
+          URL.revokeObjectURL(link.href);
+          showToast(`Audit bundle exported · ${bundle.eventCount} events`);
+        });
+      document
+        .getElementById("settingsClearHistory")
+        .addEventListener("click", () => {
+          if (
+            !window.confirm(
+              "Clear local missions, artifacts, approvals, and activity?",
+            )
+          )
+            return;
+          window.spartanCode
+            ?.clearMissions()
+            .then(() => showToast("Local mission data cleared"));
+        });
       document
         .getElementById("settingsForm")
         .addEventListener("submit", (event) => {

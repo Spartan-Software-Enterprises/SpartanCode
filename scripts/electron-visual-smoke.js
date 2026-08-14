@@ -36,6 +36,16 @@ async function main() {
   for (const view of views) {
     await page.locator(`[data-view="${view}"]`).click();
     await page.locator(`[data-view="${view}"].active`).waitFor();
+    if (view === "settings") {
+      await page
+        .locator("#settingsRuntimeStatus .settings-runtime-item")
+        .first()
+        .waitFor();
+      await page
+        .locator("#settingsGovernanceStatus .settings-runtime-item")
+        .first()
+        .waitFor();
+    }
     await page.screenshot({
       path: path.join(outputDir, `desktop-${view}.png`),
       fullPage: true,
