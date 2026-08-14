@@ -5,6 +5,7 @@ import {
 } from "./model-catalog";
 
 export const MODEL_DOWNLOAD_TIMEOUT_MS = 120_000;
+export const MAX_MODEL_BYTES = 2 * 1024 * 1024 * 1024;
 
 export type DownloadStore = {
   readPartial: (
@@ -40,6 +41,7 @@ export type DownloadTransport = (
 ) => Promise<{
   ok: boolean;
   status: number;
+  headers?: { get?: (name: string) => string | null };
   arrayBuffer: () => Promise<ArrayBuffer>;
 }>;
 
@@ -101,6 +103,14 @@ export async function downloadModel(
     });
     if (!response.ok || (response.status !== 200 && response.status !== 206))
       throw new Error(`Model download failed (${response.status})`);
+    const declaredLength = Number(
+      response.headers?.get?.("content-length") ?? "",
+    );
+    if (
+      Number.isFinite(declaredLength) &&
+      (declaredLength < 0 || declaredLength > MAX_MODEL_BYTES)
+    )
+      throw new Error("Model download exceeds the size limit");
     const received = new Uint8Array(await response.arrayBuffer());
     // A server may ignore Range and return the complete object with 200. Never
     // append a partial prefix to that complete response.
@@ -108,6 +118,8 @@ export async function downloadModel(
       partial.length && response.status === 206
         ? append(partial, received)
         : received;
+    if (bytes.length > MAX_MODEL_BYTES)
+      throw new Error("Model download exceeds the size limit");
     await store.writePartial(request.modelId, request.quantization, bytes);
     if (request.expectedSha256) {
       const actual = await sha256(bytes);

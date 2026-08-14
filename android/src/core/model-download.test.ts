@@ -1,5 +1,6 @@
 import {
   downloadModel,
+  MAX_MODEL_BYTES,
   MODEL_DOWNLOAD_TIMEOUT_MS,
   type DownloadStore,
 } from "./model-download";
@@ -90,6 +91,33 @@ describe("licensed resumable model downloads", () => {
     expect(signal).toBeInstanceOf(AbortSignal);
     expect(signal?.aborted).toBe(false);
     expect(MODEL_DOWNLOAD_TIMEOUT_MS).toBe(120_000);
+  });
+
+  it("rejects oversized declared responses before persistence", async () => {
+    const memory = memoryStore();
+    let read = false;
+    await expect(
+      downloadModel(
+        {
+          modelId: "Qwen3-1.7B",
+          quantization: "Q4_K_M",
+          url: "https://models.example/qwen.gguf",
+        },
+        memory.store,
+        async () => ({
+          ok: true,
+          status: 200,
+          headers: { get: () => String(MAX_MODEL_BYTES + 1) },
+          arrayBuffer: async () => {
+            read = true;
+            return new ArrayBuffer(0);
+          },
+        }),
+        async () => "",
+      ),
+    ).rejects.toThrow("size limit");
+    expect(read).toBe(false);
+    expect(memory.finalized).toHaveLength(0);
   });
 
   it("rejects non-HTTPS or unlicensed requests before transport", async () => {
