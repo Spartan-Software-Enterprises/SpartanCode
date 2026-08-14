@@ -11,14 +11,12 @@ track work. Optional remote connectivity is an extension—not a dependency.
 
 ![SpartanCode desktop command center](docs/assets/spartancode-workspace.png)
 
-This interface capture was produced by the Playwright Electron visual smoke
-test on the AWS development host and covers the home command center, mission
-composer, agent stages, artifacts, and live status surfaces.
+The command center brings missions, agent stages, artifacts, and live status
+into one focused workspace.
 
 ## See the workspace in action
 
-Every primary menu and documented desktop surface is captured from the verified
-Playwright visual run:
+Explore the workspace surfaces:
 
 | Command center | Projects | Agent manager |
 | --- | --- | --- |
@@ -80,31 +78,12 @@ All work must finish with a clean local and AWS worktree. If a conflict or
 unexpected change is found, stop and preserve the divergent commit or worktree
 before reconciling it.
 
-## Verification
+## For builders
 
-```bash
-npm test
-npm run test:visual
-```
-
-The suite validates the IPC-facing services, mission lifecycle, policy gates,
-model licensing rules, workspace isolation, persistence, renderer parsing, and
-formatting.
-
-`npm run test:visual` launches the Electron shell through Playwright, checks
-all navigation views and the mission composer interaction, and writes visual
-evidence outside the repository.
-
-The repeatable Android baseline and environment-gap report can be generated
-with:
-
-```bash
-node android/scripts/verify-matrix.js --output dist/android-verification.json
-```
-
-The same baseline runs in `.github/workflows/verify.yml`. Device, signing, and
-remote-host checks are recorded as explicit skips until their release
-environment is supplied.
+SpartanCode is open for thoughtful extension. Start with the development
+commands below, then see [`docs/ROADMAP_STATUS.md`](docs/ROADMAP_STATUS.md) and
+[`docs/VERIFICATION_MATRIX.md`](docs/VERIFICATION_MATRIX.md) for engineering
+records and delivery details.
 
 ## Production build
 

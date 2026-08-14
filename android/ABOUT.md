@@ -22,9 +22,8 @@ keep attention on the work.
 
 ## Interface gallery
 
-The following images are committed evidence from the Playwright visual smoke
-run on the AWS development server. They show every primary desktop menu and
-the assistant surface while preserving the Spartan IDE color system.
+The following gallery shows every primary desktop menu and the assistant
+surface while preserving the Spartan IDE color system.
 
 ![Command center](../docs/assets/desktop-menu-gallery/desktop-home.png)
 
@@ -67,14 +66,6 @@ profiles and audit exports, and exposes only explicitly licensed model
 metadata. YOLO mode is available for trusted isolated workspaces, but it does
 not remove validation, isolation, credential redaction, or audit history.
 
-## Verification status
-
-The desktop application has automated unit, integration, build, and Playwright
-visual coverage. Android has typecheck, Jest, formatting, native build, and
-release-signing verification. Emulator launch evidence is assigned to the
-KVM-capable CI runner or a physical device; the AWS development host is used
-for native builds and server-side verification.
-
-See [`PLAN.md`](PLAN.md), [`docs/ROADMAP_STATUS.md`](../docs/ROADMAP_STATUS.md),
-and [`docs/VERIFICATION_MATRIX.md`](../docs/VERIFICATION_MATRIX.md) for the
-maintained delivery and release records.
+For the maintained delivery contract and engineering records, see
+[`PLAN.md`](PLAN.md), [`docs/ROADMAP_STATUS.md`](../docs/ROADMAP_STATUS.md),
+and [`docs/VERIFICATION_MATRIX.md`](../docs/VERIFICATION_MATRIX.md).
