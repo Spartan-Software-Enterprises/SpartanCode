@@ -47,12 +47,14 @@ import {
   updateMobileScopedSettings,
   readCollaborationSessions,
   readMobileProjects,
+  readCommunityModels,
   saveBridgeToken,
   writeSnapshot,
   writeBiometricSetting,
   writeMobileSettings,
   writeCollaborationSessions,
   writeMobileProjects,
+  writeCommunityModels,
   writeArtifactSyncBase,
 } from "./src/core/storage";
 import type { MobileSnapshot } from "./src/core/types";
@@ -69,7 +71,11 @@ import {
 import type { RemoteProvider } from "./src/core/remote-guidance";
 import { authorizeSecretAccess } from "./src/core/biometric";
 import { listExtensions } from "./src/core/extensions";
-import { listCompatibleModels } from "./src/core/model-catalog";
+import {
+  createHuggingFaceModel,
+  licensedMobileModels,
+  listCompatibleModels,
+} from "./src/core/model-catalog";
 import { createLocalPlanningEvidence } from "./src/core/local-mission";
 import {
   accessibilityDiagnostics,
@@ -128,6 +134,13 @@ export default function App() {
     useState<(typeof projectTargets)[number]>("android");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Offline-first workspace");
+  const [communityModels, setCommunityModels] = useState<
+    Awaited<ReturnType<typeof readCommunityModels>>
+  >([]);
+  const [hfModelId, setHfModelId] = useState("");
+  const [hfModelLicense, setHfModelLicense] = useState("");
+  const [hfModelUncensored, setHfModelUncensored] = useState(false);
+  const [hfModelDistilled, setHfModelDistilled] = useState(false);
   const [artifactConflicts, setArtifactConflicts] = useState<
     ArtifactSyncResult["conflicts"]
   >([]);
@@ -226,8 +239,12 @@ export default function App() {
     [biometricEnabled],
   );
   const compatibleModels = useMemo(
-    () => listCompatibleModels(deviceProfile),
-    [deviceProfile],
+    () =>
+      listCompatibleModels(deviceProfile, [
+        ...licensedMobileModels,
+        ...communityModels,
+      ]),
+    [communityModels, deviceProfile],
   );
   const nativeRuntimeStatuses = useMemo(
     () =>
@@ -278,6 +295,7 @@ export default function App() {
       readBiometricSetting(),
       readCollaborationSessions(),
       readMobileProjects(),
+      readCommunityModels(),
       readMobileSettings(),
     ])
       .then(
@@ -286,17 +304,53 @@ export default function App() {
           savedBiometric,
           savedCollaboration,
           savedProjects,
+          savedCommunityModels,
           savedSettings,
         ]) => {
           setSnapshot(savedSnapshot);
           setBiometricEnabled(savedBiometric);
           setCollaborationSessions(savedCollaboration);
           setProjects(savedProjects);
+          setCommunityModels(savedCommunityModels);
           setMobileSettings(savedSettings);
         },
       )
       .finally(() => setLoading(false));
   }, []);
+
+  const addCommunityModel = useCallback(async () => {
+    try {
+      const model = createHuggingFaceModel({
+        id: hfModelId,
+        license: hfModelLicense,
+        uncensored: hfModelUncensored,
+        distilled: hfModelDistilled,
+      });
+      const next = [
+        model,
+        ...communityModels.filter((item) => item.id !== model.id),
+      ].slice(0, 100);
+      await writeCommunityModels(next);
+      setCommunityModels(next);
+      setHfModelId("");
+      setHfModelLicense("");
+      setHfModelUncensored(false);
+      setHfModelDistilled(false);
+      setMessage(`${model.id} added from Hugging Face`);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Community model metadata is invalid",
+      );
+    }
+  }, [
+    communityModels,
+    hfModelDistilled,
+    hfModelId,
+    hfModelLicense,
+    hfModelUncensored,
+  ]);
 
   const createProject = useCallback(async () => {
     try {
@@ -1107,7 +1161,9 @@ export default function App() {
                     MB minimum
                   </Text>
                 </View>
-                <Text style={styles.agentMode}>LICENSED</Text>
+                <Text style={styles.agentMode}>
+                  {model.source === "huggingface" ? "COMMUNITY" : "LICENSED"}
+                </Text>
               </View>
             ))
           ) : (
@@ -1117,9 +1173,56 @@ export default function App() {
             </Text>
           )}
           <Text style={styles.message}>
-            Downloads require HTTPS, an explicit MIT or Apache-2.0 license, and
+            Built-ins require MIT or Apache-2.0. Explicitly selected Hugging
+            Face models retain their declared license and require HTTPS plus
             checksum verification when a checksum is supplied.
           </Text>
+          <Text style={styles.missionText}>Add a Hugging Face model</Text>
+          <TextInput
+            accessibilityLabel="Hugging Face model ID"
+            autoCapitalize="none"
+            onChangeText={setHfModelId}
+            placeholder="owner/model"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={hfModelId}
+          />
+          <TextInput
+            accessibilityLabel="Hugging Face model license"
+            onChangeText={setHfModelLicense}
+            placeholder="Declared license"
+            placeholderTextColor="#70809b"
+            style={styles.input}
+            value={hfModelLicense}
+          />
+          <View style={styles.toggleRow}>
+            <Text style={styles.message}>Uncensored model</Text>
+            <Switch
+              accessibilityLabel="Mark Hugging Face model as uncensored"
+              value={hfModelUncensored}
+              onValueChange={setHfModelUncensored}
+              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+              thumbColor="#f1f1f2"
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <Text style={styles.message}>Distilled model</Text>
+            <Switch
+              accessibilityLabel="Mark Hugging Face model as distilled"
+              value={hfModelDistilled}
+              onValueChange={setHfModelDistilled}
+              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+              thumbColor="#f1f1f2"
+            />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Add Hugging Face model"
+            style={styles.secondary}
+            onPress={() => void addCommunityModel()}
+          >
+            <Text style={styles.secondaryText}>Save community metadata</Text>
+          </Pressable>
         </View>
 
         <Text style={styles.section}>Offline extensions</Text>

@@ -109,7 +109,8 @@ current Implemented/Partial/Open counts.
   resumable downloads, safe Range fallback, low-storage preflight, checksum
   verification/cleanup, and deletion. Android also accepts explicitly
   selected Hugging Face community metadata, preserving declared licenses and
-  uncensored/distilled flags without applying the built-in license filter.
+  uncensored/distilled flags without applying the built-in license filter; the
+  phone UI can save and reload that metadata offline.
 - Remote provider cost estimates, home-server/router guidance, connection
   profiles, bounded desktop/Android home-server setup plans, AWS
   bootstrap/recovery scripts, and local/GitHub synchronization procedures.

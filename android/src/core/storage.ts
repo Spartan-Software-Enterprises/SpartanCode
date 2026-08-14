@@ -8,6 +8,7 @@ import type {
 } from "./types";
 import type { MobileCollaborationSession } from "./collaboration";
 import type { MobileProject } from "./project-release";
+import { createHuggingFaceModel, type MobileModel } from "./model-catalog";
 import { normalizeProject } from "./project-release";
 import { normalizeCollaborationSessions } from "./collaboration";
 import {
@@ -38,6 +39,7 @@ const MOBILE_SETTINGS_LAYERS_KEY = "spartancode.mobile.settings-layers.v1";
 const COLLABORATION_KEY = "spartancode.mobile.collaboration.v1";
 const PROJECTS_KEY = "spartancode.mobile.projects.v1";
 const ARTIFACT_SYNC_BASE_KEY = "spartancode.mobile.artifact-sync-base.v1";
+const COMMUNITY_MODELS_KEY = "spartancode.mobile.community-models.v1";
 const CURRENT_SNAPSHOT_VERSION = 1;
 
 export type MobileSettings = {
@@ -367,6 +369,33 @@ export async function readMobileProjects(): Promise<MobileProject[]> {
 
 export async function writeMobileProjects(projects: MobileProject[]) {
   await AsyncStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+}
+
+export async function readCommunityModels(): Promise<MobileModel[]> {
+  try {
+    const raw = await AsyncStorage.getItem(COMMUNITY_MODELS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((item) => {
+      try {
+        const model = createHuggingFaceModel(item);
+        return [model];
+      } catch {
+        return [];
+      }
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function writeCommunityModels(models: MobileModel[]) {
+  await AsyncStorage.setItem(
+    COMMUNITY_MODELS_KEY,
+    JSON.stringify(
+      models.filter((model) => model.source === "huggingface").slice(0, 100),
+    ),
+  );
 }
 
 export async function readBiometricSetting() {

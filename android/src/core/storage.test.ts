@@ -17,6 +17,8 @@ import {
   writeCollaborationSessions,
   readArtifactSyncBase,
   writeArtifactSyncBase,
+  readCommunityModels,
+  writeCommunityModels,
 } from "./storage";
 import { createMobileCollaborationSession } from "./collaboration";
 
@@ -135,6 +137,40 @@ describe("storage recovery", () => {
     expect(restored).toHaveLength(500);
     expect(restored[0]).toEqual(valid);
     expect(restored.every((item) => item.id)).toBe(true);
+  });
+
+  it("persists bounded Hugging Face community model metadata", async () => {
+    await writeCommunityModels([
+      {
+        id: "community/model",
+        provider: "Community",
+        license: "other",
+        quantizations: ["Q4_0"],
+        minimumMemoryMb: 4096,
+        requiresAccelerator: false,
+        source: "huggingface",
+        communityModel: true,
+        uncensored: true,
+        distilled: true,
+      },
+      {
+        id: "builtin",
+        provider: "Built-in",
+        license: "MIT",
+        quantizations: ["Q4_K_M"],
+        minimumMemoryMb: 512,
+        requiresAccelerator: false,
+        source: "builtin",
+      },
+    ]);
+    expect(await readCommunityModels()).toEqual([
+      expect.objectContaining({
+        id: "community/model",
+        license: "other",
+        uncensored: true,
+        distilled: true,
+      }),
+    ]);
   });
 });
 
