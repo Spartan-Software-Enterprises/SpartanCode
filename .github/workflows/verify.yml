@@ -82,10 +82,10 @@ jobs:
       - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
       - run: |
           yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager "platform-tools" "platforms;android-30" "build-tools;35.0.0"
       - run: npm ci
         working-directory: android
-      - name: Start bounded API 35 emulator
+      - name: Start bounded API 30 emulator
         run: |
           set -euo pipefail
           export ANDROID_SDK_HOME="${RUNNER_TEMP}/android-home"
@@ -94,10 +94,10 @@ jobs:
           if [ -e /dev/kvm ]; then
             sudo chmod 666 /dev/kvm
           fi
-          timeout 900s sdkmanager "emulator" "system-images;android-35;default;x86_64"
+          timeout 900s sdkmanager "emulator" "system-images;android-30;default;x86"
           echo no | avdmanager create avd \
             --name spartancode-ci \
-            --package "system-images;android-35;default;x86_64" \
+            --package "system-images;android-30;default;x86" \
             --device pixel_2 \
             --force
           # The hosted runner has about 5 GB free in its temp volume; the
@@ -109,7 +109,7 @@ jobs:
           cd android
           npx expo prebuild --platform android --no-install
           cd android
-          ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
+          ./gradlew :app:assembleDebug -PreactNativeArchitectures=x86 --no-daemon
           cd ../..
           timeout 900s "${ANDROID_HOME}/emulator/emulator" \
             -avd spartancode-ci \
