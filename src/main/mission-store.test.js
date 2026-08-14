@@ -37,3 +37,46 @@ test("mission store persists missions, activities, and artifacts", () => {
 
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("mission store recovers from malformed primary state using its last good backup", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-"));
+  const filePath = path.join(directory, "workspace.json");
+  const store = createMissionStore(filePath);
+  const mission = store.addMission("Keep the workspace recoverable");
+  store.updateMission(mission.id, { status: "complete" });
+  store.addActivity({ agent: "Verify agent", message: "Backup created" });
+
+  fs.copyFileSync(filePath, `${filePath}.bak`);
+  fs.writeFileSync(filePath, '{"missions":');
+
+  const recovered = createMissionStore(filePath).snapshot();
+  assert.equal(
+    recovered.missions[0].description,
+    "Keep the workspace recoverable",
+  );
+  assert.equal(recovered.missions[0].status, "complete");
+  assert.equal(recovered.activity[0].message, "Backup created");
+  assert.doesNotThrow(() => JSON.parse(fs.readFileSync(filePath, "utf8")));
+
+  fs.rmSync(directory, { recursive: true, force: true });
+});
+
+test("mission store writes a valid replacement and keeps the previous state as backup", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "spartancode-"));
+  const filePath = path.join(directory, "workspace.json");
+  const store = createMissionStore(filePath);
+  store.addMission("First durable state");
+  store.addMission("Second durable state");
+
+  const current = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  const backup = JSON.parse(fs.readFileSync(`${filePath}.bak`, "utf8"));
+  assert.equal(current.missions.length, 2);
+  assert.equal(backup.missions.length, 1);
+  assert.equal(backup.missions[0].description, "First durable state");
+  assert.equal(
+    fs.readdirSync(directory).some((name) => name.endsWith(".tmp")),
+    false,
+  );
+
+  fs.rmSync(directory, { recursive: true, force: true });
+});

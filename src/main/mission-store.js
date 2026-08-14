@@ -25,15 +25,33 @@ function createMissionStore(filePath) {
   let state = emptyState();
   let sequence = 0;
 
-  try {
-    state = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
+  const backupPath = `${filePath}.bak`;
+  const readState = (candidatePath) => {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(candidatePath, "utf8"));
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+        throw new Error("Workspace state must be a JSON object");
+      return parsed;
+    } catch (error) {
+      if (error.code === "ENOENT") return null;
+      return null;
+    }
+  };
+  state = readState(filePath) || readState(backupPath) || emptyState();
+  if (!readState(filePath) && readState(backupPath)) {
+    fs.copyFileSync(backupPath, filePath);
   }
 
   const persist = () => {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(state, null, 2));
+    const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+    fs.writeFileSync(temporaryPath, JSON.stringify(state, null, 2));
+    try {
+      fs.copyFileSync(filePath, backupPath);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    fs.renameSync(temporaryPath, filePath);
   };
   const allowedSettings = new Set([
     ...Object.keys(DEFAULT_SETTINGS),
