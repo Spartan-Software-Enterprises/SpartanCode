@@ -5,6 +5,37 @@ const os = require("os");
 const path = require("path");
 const { execFileSync } = require("child_process");
 
+const CONTROL_EVIDENCE = [
+  {
+    id: "oidc-sso-validation",
+    claim:
+      "Configured OIDC tokens are checked for RS256, issuer, audience, expiry, and scope claims.",
+    sourceFiles: ["src/main/oidc.js", "src/main/mcp-bridge.js"],
+    releaseGate: "source-control-evidence",
+  },
+  {
+    id: "scoped-bridge-authorization",
+    claim:
+      "Bridge routes map authenticated identities to read and mutation scopes.",
+    sourceFiles: ["src/main/mcp-bridge.js"],
+    releaseGate: "source-control-evidence",
+  },
+  {
+    id: "redacted-audit-export",
+    claim:
+      "Audit exports are bounded, credential-key redacted, and protected by a SHA-256 digest.",
+    sourceFiles: ["src/main/audit-export.js", "src/main/desktop-api.js"],
+    releaseGate: "source-control-evidence",
+  },
+  {
+    id: "compliance-release-gates",
+    claim:
+      "Retention, deletion, privacy, consent, provider administration, and physical release checks remain explicit gates.",
+    sourceFiles: ["docs/COMPLIANCE.md", "docs/ROADMAP_STATUS.md"],
+    releaseGate: "maintainer-or-legal-review-required",
+  },
+];
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
@@ -51,6 +82,17 @@ function checksum(filePath) {
     .digest("hex");
 }
 
+function controlEvidence(rootDir) {
+  return CONTROL_EVIDENCE.filter((entry) =>
+    entry.sourceFiles.every((sourceFile) =>
+      fs.existsSync(path.join(rootDir, sourceFile)),
+    ),
+  ).map((entry) => ({
+    ...entry,
+    sourceFiles: entry.sourceFiles.slice(),
+  }));
+}
+
 function currentCommit(rootDir) {
   try {
     return execFileSync("git", ["-C", rootDir, "rev-parse", "HEAD"], {
@@ -89,6 +131,7 @@ function createReleaseManifest({ rootDir, scanDirectories = [] } = {}) {
     gitCommit: currentCommit(rootDir),
     artifacts,
     components: uniqueComponents,
+    controlEvidence: controlEvidence(rootDir),
   };
 }
 

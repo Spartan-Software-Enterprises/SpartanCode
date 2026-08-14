@@ -61,3 +61,35 @@ test("scoped settings persist across workspace reloads", () => {
   );
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("global scoped writes update the canonical settings view", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-global-scope-"),
+  );
+  const filePath = path.join(directory, "workspace.json");
+  const store = createMissionStore(filePath);
+  store.updateScopedSettings("global", "default", {
+    autoSync: false,
+    apiProvider: "anthropic",
+  });
+  assert.equal(store.snapshot().settings.autoSync, false);
+  assert.equal(store.snapshot().settings.apiProvider, "anthropic");
+  assert.equal(
+    createMissionStore(filePath).snapshot().settings.autoSync,
+    false,
+  );
+  fs.rmSync(directory, { recursive: true, force: true });
+});
+
+test("settings resolution applies default layers before trimmed identifiers", () => {
+  const hierarchy = createSettingsHierarchy({
+    baseSettings: { model: "base", executionMode: "guided" },
+    allowedKeys: new Set(["model", "executionMode"]),
+  });
+  hierarchy.set("project", " default ", { executionMode: "yolo" });
+  hierarchy.set("project", "project-a", { model: "project" });
+  assert.deepEqual(hierarchy.resolve({ projectId: " project-a " }), {
+    model: "project",
+    executionMode: "yolo",
+  });
+});

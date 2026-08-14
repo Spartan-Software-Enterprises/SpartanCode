@@ -43,6 +43,7 @@ const {
   deactivateMarketplacePlugin,
   fetchMarketplaceIndex,
 } = require("./plugin-marketplace");
+const { createMarketplacePluginRunner } = require("./plugin-runner");
 const { exportAuditLog } = require("./audit-export");
 const { createGitHubAppClient } = require("./github-app");
 const { createApiGateway } = require("./api-providers");
@@ -388,6 +389,14 @@ function registerDesktopApi({
   ipcMain.handle("plugins:deactivate", (_event, manifest) => {
     const workspacePath = store.snapshot().settings.workspacePath;
     return deactivateMarketplacePlugin(manifest, { workspacePath });
+  });
+  ipcMain.handle("plugins:run", (_event, manifest, input) => {
+    if (!marketplaceDir) throw new Error("Marketplace staging is unavailable");
+    const workspacePath = store.snapshot().settings.workspacePath;
+    return createMarketplacePluginRunner({
+      stagingDir: marketplaceDir,
+      workspacePath,
+    }).run(manifest, input);
   });
   ipcMain.handle("models:list", (_event, options) =>
     listAvailableModels(options),

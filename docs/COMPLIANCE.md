@@ -30,6 +30,29 @@ legal advice; a commercial release should be reviewed for its target markets.
   redaction and a SHA-256 integrity digest. The digest proves export integrity;
   it does not replace retention, access-control, or legal-review obligations.
 
+## Evidence map for roadmap item 35
+
+The repository can substantiate the following implementation boundaries from
+source and automated coverage:
+
+- `src/main/oidc.js` validates configured RS256 OIDC tokens, including issuer,
+  audience, expiry, not-before, signing-key selection, and scope extraction.
+- `src/main/mcp-bridge.js` authenticates bridge requests and maps routes to
+  snapshot, audit, event, collaboration, mission, approval, and artifact
+  scopes. Non-authenticated requests are rejected when authentication is
+  configured.
+- `src/main/audit-export.js` bounds exported events, redacts credential-named
+  fields, and includes a SHA-256 digest that can detect later modification.
+- `scripts/release-manifest.js` records these source-control evidence entries
+  alongside artifact hashes and lockfile component metadata. These entries are
+  an implementation inventory, not a certification, penetration-test result,
+  or production approval.
+
+The remaining item-35 gates are intentionally not represented as complete:
+provider-specific SSO account provisioning and lifecycle administration,
+deployment configuration and key rotation operations, jurisdiction-specific
+privacy/retention/deletion decisions, and release-owner or legal review.
+
 ## Model and dependency policy
 
 - Built-in mobile distribution entries remain limited to explicitly reviewed

@@ -1,28 +1,19 @@
 const fs = require("fs");
 const path = require("path");
 const { createCollaborationStore } = require("./collaboration");
-const { createSettingsHierarchy } = require("./settings-hierarchy");
+const {
+  DEFAULT_SETTINGS,
+  createSettingsHierarchy,
+  normalizeSettings,
+  normalizeSettingsOverride,
+} = require("./settings-hierarchy");
 
 const emptyState = () => ({
   missions: [],
   artifacts: [],
   activity: [],
   approvals: [],
-  settings: {
-    model: "Qwen3-1.7B",
-    quantization: "Q4_K_M",
-    protocol: "MCP Lite",
-    workspacePath: null,
-    voiceEnabled: false,
-    executionMode: "guided",
-    defaultAgent: "leo",
-    apiProvider: "local",
-    memoryEnabled: true,
-    personaName: "Leo",
-    wakeWord: "Leo",
-    emotionMode: "explicit",
-    interactionSignal: "calm",
-  },
+  settings: { ...DEFAULT_SETTINGS, workspacePath: null },
   settingsScopes: { global: {}, project: {}, agent: {}, session: {} },
   connections: [],
   auditLog: [],
@@ -45,20 +36,16 @@ function createMissionStore(filePath) {
     fs.writeFileSync(filePath, JSON.stringify(state, null, 2));
   };
   const allowedSettings = new Set([
-    "model",
-    "quantization",
-    "protocol",
+    ...Object.keys(DEFAULT_SETTINGS),
     "workspacePath",
-    "voiceEnabled",
-    "executionMode",
-    "defaultAgent",
-    "apiProvider",
-    "memoryEnabled",
-    "personaName",
-    "wakeWord",
-    "emotionMode",
-    "interactionSignal",
   ]);
+  state.settings = {
+    ...normalizeSettings(state.settings),
+    workspacePath:
+      typeof state.settings?.workspacePath === "string"
+        ? state.settings.workspacePath
+        : null,
+  };
   if (!state.settingsScopes || typeof state.settingsScopes !== "object")
     state.settingsScopes = { global: {}, project: {}, agent: {}, session: {} };
   const settingsHierarchy = createSettingsHierarchy({
@@ -227,39 +214,15 @@ function createMissionStore(filePath) {
     },
     updateSettings(update) {
       const safeUpdate = Object.fromEntries(
-        Object.entries(update || {}).filter(([key]) =>
+        Object.entries(normalizeSettingsOverride(update)).filter(([key]) =>
           allowedSettings.has(key),
         ),
       );
-      if (
-        safeUpdate.executionMode !== undefined &&
-        !["guided", "yolo"].includes(safeUpdate.executionMode)
-      )
-        delete safeUpdate.executionMode;
-      if (
-        safeUpdate.emotionMode !== undefined &&
-        !["off", "explicit"].includes(safeUpdate.emotionMode)
-      )
-        delete safeUpdate.emotionMode;
-      if (
-        safeUpdate.interactionSignal !== undefined &&
-        ![
-          "calm",
-          "focused",
-          "frustrated",
-          "uncertain",
-          "excited",
-          "tired",
-        ].includes(safeUpdate.interactionSignal)
-      )
-        delete safeUpdate.interactionSignal;
-      for (const key of ["personaName", "wakeWord"]) {
-        if (safeUpdate[key] !== undefined) {
-          const value = String(safeUpdate[key]).trim().slice(0, 48);
-          if (!value) delete safeUpdate[key];
-          else safeUpdate[key] = value;
-        }
-      }
+      if (Object.prototype.hasOwnProperty.call(update || {}, "workspacePath"))
+        safeUpdate.workspacePath =
+          typeof update.workspacePath === "string"
+            ? update.workspacePath
+            : null;
       state.settings = { ...state.settings, ...safeUpdate };
       settingsHierarchy.set("global", "default", safeUpdate);
       persist();
@@ -267,6 +230,7 @@ function createMissionStore(filePath) {
     },
     updateScopedSettings(scope, id, update) {
       const values = settingsHierarchy.set(scope, id, update);
+      if (scope === "global") state.settings = { ...state.settings, ...values };
       state.settingsScopes = settingsHierarchy.snapshot();
       persist();
       return values;

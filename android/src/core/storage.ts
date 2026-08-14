@@ -52,7 +52,7 @@ export type MobileSettings = {
   model: string;
   defaultAgent: string;
   protocol: "MCP Lite" | "MCP Bridge" | "Full MCP";
-  provider: string;
+  apiProvider: string;
   memoryEnabled: boolean;
   executionMode: "guided" | "yolo";
   quantization: "Q4_K_M" | "Q4_0" | "Q3_K_S";
@@ -82,7 +82,7 @@ const defaultMobileSettings: MobileSettings = {
   model: "Qwen3-1.7B",
   defaultAgent: "leo",
   protocol: "MCP Lite",
-  provider: "local",
+  apiProvider: "local",
   memoryEnabled: true,
   executionMode: "guided",
   quantization: "Q4_K_M",
@@ -104,6 +104,12 @@ const emptyMobileSettingsLayers = (): MobileSettingsLayers => ({
 function normalizeMobileSettings(
   parsed: Partial<MobileSettings>,
 ): MobileSettings {
+  const legacyProvider = (
+    parsed as Partial<MobileSettings> & {
+      provider?: unknown;
+    }
+  ).provider;
+  const apiProvider = parsed.apiProvider ?? legacyProvider;
   return {
     ...defaultMobileSettings,
     model:
@@ -125,9 +131,9 @@ function normalizeMobileSettings(
       parsed.protocol === "MCP Bridge" || parsed.protocol === "Full MCP"
         ? parsed.protocol
         : "MCP Lite",
-    provider:
-      typeof parsed.provider === "string" && parsed.provider.trim()
-        ? parsed.provider.trim().slice(0, 48)
+    apiProvider:
+      typeof apiProvider === "string" && apiProvider.trim()
+        ? apiProvider.trim().slice(0, 48)
         : "local",
     memoryEnabled: parsed.memoryEnabled !== false,
     executionMode: parsed.executionMode === "yolo" ? "yolo" : "guided",
@@ -160,12 +166,15 @@ function normalizeMobileSettings(
 function normalizeMobileSettingsOverride(
   parsed: Partial<MobileSettings>,
 ): Partial<MobileSettings> {
-  const normalized = normalizeMobileSettings(parsed);
+  const source = { ...(parsed as Record<string, unknown>) };
+  if (source.apiProvider === undefined && typeof source.provider === "string")
+    source.apiProvider = source.provider;
+  const normalized = normalizeMobileSettings(source);
   const allowed = new Set<keyof MobileSettings>([
     "model",
     "defaultAgent",
     "protocol",
-    "provider",
+    "apiProvider",
     "memoryEnabled",
     "executionMode",
     "quantization",
@@ -177,7 +186,7 @@ function normalizeMobileSettingsOverride(
     "interactionSignal",
   ]);
   return Object.fromEntries(
-    Object.keys(parsed)
+    Object.keys(source)
       .filter((key): key is keyof MobileSettings =>
         allowed.has(key as keyof MobileSettings),
       )
@@ -447,7 +456,10 @@ export async function readMobileSettings(): Promise<MobileSettings> {
 }
 
 export async function writeMobileSettings(settings: MobileSettings) {
-  await AsyncStorage.setItem(MOBILE_SETTINGS_KEY, JSON.stringify(settings));
+  await AsyncStorage.setItem(
+    MOBILE_SETTINGS_KEY,
+    JSON.stringify(normalizeMobileSettings(settings)),
+  );
 }
 
 export async function readMobileSettingsLayers(): Promise<MobileSettingsLayers> {
@@ -489,14 +501,21 @@ export function resolveMobileSettings(
   layers: MobileSettingsLayers,
   context: MobileSettingsContext = {},
 ) {
-  const result = normalizeMobileSettings({ ...base, ...layers.global });
+  const result = normalizeMobileSettings(base);
+  const merge = (scope: keyof MobileSettingsLayers, id?: string) => {
+    const key = (id || "").trim().slice(0, 160);
+    if (!key) return;
+    const layer = scope === "global" ? layers.global : layers[scope][key];
+    if (layer) Object.assign(result, normalizeMobileSettingsOverride(layer));
+  };
+  merge("global", "default");
   for (const [scope, id] of [
     ["project", context.projectId],
     ["agent", context.agentId],
     ["session", context.sessionId],
   ] as const) {
-    if (id && layers[scope][id])
-      Object.assign(result, normalizeMobileSettingsOverride(layers[scope][id]));
+    merge(scope, "default");
+    merge(scope, id);
   }
   return normalizeMobileSettings(result);
 }

@@ -18,7 +18,10 @@ project, writes signing properties with restrictive permissions, builds both
 the release AAB and APK, generates `release-manifest.json` and
 `THIRD_PARTY_NOTICES.txt` with SHA-256 artifact hashes and lockfile component
 metadata, and removes the temporary properties file on exit. The keystore
-itself remains outside the repository.
+itself remains outside the repository. The manifest also records a
+source-backed SSO/audit/compliance control inventory. That inventory is an
+implementation evidence map, not a production approval, certification, or
+legal review.
 
 Desktop release evidence can be generated after packaging with:
 

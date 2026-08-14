@@ -52,3 +52,33 @@ test("settings accept only explicit interaction personalization values", () => {
   assert.equal(unchanged.interactionSignal, "frustrated");
   fs.rmSync(directory, { recursive: true, force: true });
 });
+
+test("scoped settings use the same normalization as global settings", () => {
+  const directory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "spartancode-scoped-normalization-"),
+  );
+  const store = createMissionStore(path.join(directory, "workspace.json"));
+  store.updateScopedSettings("project", "project-a", {
+    apiProvider: "  openai  ",
+    executionMode: "invalid",
+    personaName: "  Scoped Leo  ",
+    autoSync: false,
+  });
+  assert.equal(
+    store.resolveSettings({ projectId: "project-a" }).apiProvider,
+    "openai",
+  );
+  assert.equal(
+    store.resolveSettings({ projectId: "project-a" }).executionMode,
+    "guided",
+  );
+  assert.equal(
+    store.resolveSettings({ projectId: "project-a" }).personaName,
+    "Scoped Leo",
+  );
+  assert.equal(
+    store.resolveSettings({ projectId: "project-a" }).autoSync,
+    false,
+  );
+  fs.rmSync(directory, { recursive: true, force: true });
+});

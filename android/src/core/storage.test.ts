@@ -231,7 +231,7 @@ describe("mobile settings", () => {
       model: "Qwen3-1.7B",
       defaultAgent: "leo",
       protocol: "MCP Lite",
-      provider: "local",
+      apiProvider: "local",
       memoryEnabled: true,
       executionMode: "guided",
       quantization: "Q4_K_M",
@@ -246,7 +246,7 @@ describe("mobile settings", () => {
       model: "Phi-4-mini",
       defaultAgent: "researcher",
       protocol: "MCP Bridge",
-      provider: "openai",
+      apiProvider: "openai",
       memoryEnabled: false,
       executionMode: "yolo",
       quantization: "Q4_0",
@@ -261,7 +261,7 @@ describe("mobile settings", () => {
       model: "Phi-4-mini",
       defaultAgent: "researcher",
       protocol: "MCP Bridge",
-      provider: "openai",
+      apiProvider: "openai",
       memoryEnabled: false,
       executionMode: "yolo",
       quantization: "Q4_0",
@@ -301,5 +301,52 @@ describe("mobile settings", () => {
       interactionSignal: "uncertain",
     });
     await writeMobileSettingsLayers(layers);
+  });
+
+  it("migrates the legacy provider field to the parity apiProvider field", async () => {
+    await AsyncStorage.setItem(
+      "spartancode.mobile.settings.v1",
+      JSON.stringify({ provider: "anthropic" }),
+    );
+    expect((await readMobileSettings()).apiProvider).toBe("anthropic");
+    await writeMobileSettings({
+      ...(await readMobileSettings()),
+      apiProvider: "gemini",
+    });
+    const saved = await AsyncStorage.getItem("spartancode.mobile.settings.v1");
+    expect(JSON.parse(saved || "{}")).not.toHaveProperty("provider");
+  });
+
+  it("matches desktop precedence for default and identified scope layers", async () => {
+    const base = await readMobileSettings();
+    await updateMobileScopedSettings("global", " default ", {
+      apiProvider: "global-api",
+    });
+    await updateMobileScopedSettings("project", "default", {
+      executionMode: "yolo",
+    });
+    await updateMobileScopedSettings("project", "project-a", {
+      model: "project-model",
+    });
+    await updateMobileScopedSettings("agent", "default", {
+      voiceEnabled: true,
+    });
+    await updateMobileScopedSettings("session", "session-1", {
+      interactionSignal: "focused",
+    });
+    const layers = await readMobileSettingsLayers();
+    expect(
+      resolveMobileSettings(base, layers, {
+        projectId: " project-a ",
+        agentId: "missing-agent",
+        sessionId: "session-1",
+      }),
+    ).toMatchObject({
+      apiProvider: "global-api",
+      executionMode: "yolo",
+      model: "project-model",
+      voiceEnabled: true,
+      interactionSignal: "focused",
+    });
   });
 });

@@ -167,7 +167,7 @@ export default function App() {
     model: "Qwen3-1.7B",
     defaultAgent: "leo",
     protocol: "MCP Lite",
-    provider: "local",
+    apiProvider: "local",
     memoryEnabled: true,
     executionMode: "guided",
     quantization: "Q4_K_M",
@@ -735,7 +735,7 @@ export default function App() {
       sessionId: settingsScope === "session" ? id : undefined,
     });
     setSettingsPreviewMessage(
-      `${settingsScope} effective settings · ${resolved.model} · ${resolved.executionMode} · ${resolved.protocol} · ${resolved.provider}`,
+      `${settingsScope} effective settings · ${resolved.model} · ${resolved.executionMode} · ${resolved.protocol} · ${resolved.apiProvider}`,
     );
   }, [mobileSettings, settingsScope, settingsScopeId]);
 
@@ -1552,7 +1552,9 @@ export default function App() {
           <View style={styles.toggleRow}>
             <View style={styles.missionBody}>
               <Text style={styles.missionText}>API provider</Text>
-              <Text style={styles.missionMeta}>{mobileSettings.provider}</Text>
+              <Text style={styles.missionMeta}>
+                {mobileSettings.apiProvider}
+              </Text>
             </View>
             <Pressable
               accessibilityRole="button"
@@ -1562,10 +1564,10 @@ export default function App() {
                 const options = ["local", "openai", "anthropic", "gemini"];
                 const next =
                   options[
-                    (options.indexOf(mobileSettings.provider) + 1) %
+                    (options.indexOf(mobileSettings.apiProvider) + 1) %
                       options.length
                   ];
-                void updateMobileSettings({ provider: next });
+                void updateMobileSettings({ apiProvider: next });
               }}
             >
               <Text style={styles.smallActionText}>Change</Text>

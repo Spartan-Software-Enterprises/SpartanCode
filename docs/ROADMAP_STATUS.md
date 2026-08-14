@@ -85,6 +85,11 @@ current Implemented/Partial/Open counts.
 - Android Settings now exposes compact global/project/agent/session scope
   controls that save and load the same deterministic override hierarchy without
   requiring a desktop or bridge.
+- Desktop and Android now share the same normalized settings vocabulary,
+  including `apiProvider`, voice, memory, persona, wake-word, and explicit
+  interaction preferences. Scope resolution applies `default` layers before
+  identified layers at each level, trims bounded identifiers, and migrates the
+  Android legacy `provider` field without persisting the old name.
 - Android now includes an optional Expo Speech output adapter with bounded
   voice-test text and a visible unavailable/error fallback.
 - Android now includes a SecureStore-key-backed AES-256-GCM offline-content
@@ -106,6 +111,10 @@ current Implemented/Partial/Open counts.
 - Android pending approvals support tested horizontal swipe decisions in
   addition to accessible labeled controls; physical gesture/accessibility
   acceptance remains open.
+- Local Android physical-device testing is documented through authorized ADB,
+  including biometric, accessibility, permission, storage, restart, and
+  network-transition evidence; this environment currently has no attached ADB
+  device, so those checks remain release-environment gates.
 - Explicitly licensed mobile model catalog, compatibility filtering, HTTPS
   resumable downloads, safe Range fallback, low-storage preflight, checksum
   verification/cleanup, and deletion. Android also accepts explicitly
@@ -127,12 +136,17 @@ current Implemented/Partial/Open counts.
   Android now has a bounded continuous polling loop with failure backoff and
   overlap prevention. Physical cross-device acceptance remains open;
   see [ARTIFACT_SYNC.md](ARTIFACT_SYNC.md).
-- Signed marketplace plugins now support verified staging, metadata-only
-  activation, and matching deactivation that retains the opaque artifact.
-  Executable artifact loading remains intentionally gated.
-- Android scoped settings now include a non-mutating effective-value preview,
-  matching the desktop hierarchy workflow; platform-specific physical
-  acceptance and complete field parity remain open.
+- Signed marketplace plugins now support verified staging, explicit activation,
+  matching deactivation, and an opt-in Node runtime boundary that requires
+  matching activated metadata, Node permissions, no shell/addons/child
+  processes, bounded I/O, and timeout termination. Declarative plugins remain
+  non-executable; community distribution and governance remain open.
+- Desktop and Android now share a documented normalized settings contract for
+  global/project/agent/session scopes, including `apiProvider` and `autoSync`.
+  Both clients use deterministic default-then-identified precedence and ignore
+  invalid scoped overrides; Android migrates the legacy `provider` field. The
+  Android effective-value preview remains available, while physical acceptance
+  is still an environment gate. See [SETTINGS_HIERARCHY.md](SETTINGS_HIERARCHY.md).
 - The authenticated MCP Bridge exposes bounded Git status, redacted diff,
   stage, and explicit commit operations with separate read/write scopes and
   idempotent mutation handling for remote clients.
@@ -143,6 +157,10 @@ current Implemented/Partial/Open counts.
 - The VS Code extension now exposes authenticated, SecretStorage-backed Git
   status, redacted diff, stage, and explicit commit commands with bounded
   output and commit messages.
+- VS Code synchronization now persists a bounded, revision-aware snapshot
+  envelope with status counts, requires a SecretStorage token for every bridge
+  request, bounds bridge responses, and surfaces the current remote revision
+  when collaboration note writes lose an optimistic-concurrency race.
 - Mosh now has a tested client lifecycle contract with explicit connecting,
   ready, error, ended, stop, and server-requirement states. The host still
   must provide `mosh-server` and reachable UDP ports before a real session can

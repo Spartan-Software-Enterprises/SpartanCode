@@ -8,6 +8,7 @@ const MAX_ENTRIES = 100;
 const MAX_ARTIFACT_BYTES = 50 * 1024 * 1024;
 const FETCH_TIMEOUT_MS = 30_000;
 const SHA256 = /^[a-f0-9]{64}$/i;
+const ENTRYPOINT = /^[A-Za-z0-9._-]{1,96}$/;
 
 function canonicalize(value) {
   if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
@@ -57,6 +58,12 @@ function validateMarketplaceIndex(index) {
       artifactSha256: manifest.artifactSha256.toLowerCase(),
       publisher:
         typeof manifest.publisher === "string" ? manifest.publisher.trim() : "",
+      runtime: manifest.runtime === "node" ? "node" : null,
+      entrypoint:
+        typeof manifest.entrypoint === "string" &&
+        ENTRYPOINT.test(manifest.entrypoint)
+          ? manifest.entrypoint
+          : null,
     };
   });
   const ids = new Set();
@@ -232,6 +239,8 @@ function activateMarketplacePlugin(
     capabilities: validated.capabilities,
     source: "marketplace",
     publisher: validated.publisher,
+    runtime: validated.runtime,
+    entrypoint: validated.entrypoint,
     artifactSha256: validated.artifactSha256,
     activatedAt: now,
   };

@@ -29,3 +29,11 @@ artifacts remain separate release-environment evidence and must be attached
 when available. AWS Dev release verification has produced signed AAB and APK
 artifacts with the release-owned key; the private keystore remains outside the
 repository.
+
+Physical Android/iOS hardware gates use the optional workflow in
+[AWS_DEVICE_FARM.md](AWS_DEVICE_FARM.md). EC2 emulator results do not count as
+biometric, NPU, camera, AR/VR, or physical-network acceptance.
+
+The local Android phone can provide physical Android evidence through
+[LOCAL_DEVICE_TESTING.md](LOCAL_DEVICE_TESTING.md); an attached authorized ADB
+device is required before those checks count as passed.

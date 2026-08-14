@@ -1586,6 +1586,15 @@
           </span>
           <input type="checkbox" id="memoryEnabled" />
         </div>
+        <div class="toggle-row">
+          <span>
+            <strong>Sync automatically on resume</strong><br />
+            <small style="color: var(--muted)"
+              >Keep bridge refresh behavior consistent with Android.</small
+            >
+          </span>
+          <input type="checkbox" id="autoSyncEnabled" />
+        </div>
         <div class="setting-group">
           <label for="quantizationSelect">Quantization</label
           ><select id="quantizationSelect">
@@ -1723,6 +1732,28 @@
               maxlength="48"
               placeholder="Leave unchanged"
             />
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedEmotion"
+              >Scoped interaction personalization</label
+            >
+            <select id="settingsScopedEmotion">
+              <option value="">Leave unchanged</option>
+              <option value="explicit">Explicit signal</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="settingsScopedSignal">Scoped interaction signal</label>
+            <select id="settingsScopedSignal">
+              <option value="">Leave unchanged</option>
+              <option>calm</option>
+              <option>focused</option>
+              <option>frustrated</option>
+              <option>uncertain</option>
+              <option>excited</option>
+              <option>tired</option>
+            </select>
           </div>
           <div class="settings-group-heading">Preview effective settings</div>
           <p>
@@ -2108,6 +2139,9 @@
             >
               Activate metadata
             </button>
+            <button type="button" class="context-button" id="marketplaceRun">
+              Run signed Node plugin
+            </button>
             <button
               type="button"
               class="context-button"
@@ -2457,6 +2491,12 @@
       );
       const settingsScopedWakeWord = document.getElementById(
         "settingsScopedWakeWord",
+      );
+      const settingsScopedEmotion = document.getElementById(
+        "settingsScopedEmotion",
+      );
+      const settingsScopedSignal = document.getElementById(
+        "settingsScopedSignal",
       );
       const settingsPreviewProject = document.getElementById(
         "settingsPreviewProject",
@@ -2854,6 +2894,8 @@
                   settings.interactionSignal || "calm";
                 document.getElementById("memoryEnabled").checked =
                   settings.memoryEnabled !== false;
+                document.getElementById("autoSyncEnabled").checked =
+                  settings.autoSync !== false;
                 const connection = connections?.[0];
                 document.getElementById("connectionName").value =
                   connection?.name || "";
@@ -3475,6 +3517,27 @@
           }
         });
       document
+        .getElementById("marketplaceRun")
+        .addEventListener("click", async () => {
+          const plugin = selectedMarketplacePlugin();
+          const message = document.getElementById("marketplaceMessage");
+          if (!plugin) {
+            message.textContent = "Verify an index and select a plugin first.";
+            return;
+          }
+          try {
+            const result = await window.spartanCode.runMarketplacePlugin(
+              plugin,
+              { action: "run" },
+            );
+            message.textContent = result.ok
+              ? `Plugin completed: ${result.stdout || "no output"}`
+              : `Plugin exited with code ${result.code}: ${result.stderr || "no error output"}`;
+          } catch (error) {
+            message.textContent = error.message;
+          }
+        });
+      document
         .getElementById("secureProviderSelect")
         .addEventListener("change", (event) => {
           if (event.target.value)
@@ -3574,6 +3637,10 @@
             update.personaName = settingsScopedPersona.value.trim();
           if (settingsScopedWakeWord.value.trim())
             update.wakeWord = settingsScopedWakeWord.value.trim();
+          if (settingsScopedEmotion.value)
+            update.emotionMode = settingsScopedEmotion.value;
+          if (settingsScopedSignal.value)
+            update.interactionSignal = settingsScopedSignal.value;
           if (!Object.keys(update).length) {
             settingsScopedMessage.textContent =
               "Choose at least one override before saving.";
@@ -3602,6 +3669,8 @@
               `provider: ${resolved.apiProvider}`,
               `voice: ${resolved.voiceEnabled ? "on" : "off"}`,
               `memory: ${resolved.memoryEnabled ? "on" : "off"}`,
+              `personalization: ${resolved.emotionMode}`,
+              `signal: ${resolved.interactionSignal}`,
             ].join(" · ");
           } catch (error) {
             settingsResolvedMessage.textContent = error.message;
@@ -3631,6 +3700,7 @@
             apiProvider:
               document.getElementById("apiProviderSelect").value || "local",
             memoryEnabled: document.getElementById("memoryEnabled").checked,
+            autoSync: document.getElementById("autoSyncEnabled").checked,
             personaName: document.getElementById("personaName").value,
             wakeWord: document.getElementById("wakeWord").value,
             emotionMode: document.getElementById("emotionMode").value,
