@@ -1,4 +1,8 @@
-import { downloadModel, type DownloadStore } from "./model-download";
+import {
+  downloadModel,
+  MODEL_DOWNLOAD_TIMEOUT_MS,
+  type DownloadStore,
+} from "./model-download";
 
 function memoryStore() {
   let partial: Uint8Array<ArrayBufferLike> = new Uint8Array();
@@ -61,6 +65,31 @@ describe("licensed resumable model downloads", () => {
     expect(headers.Range).toBe("bytes=2-");
     expect(result.bytes).toBe(4);
     expect([...memory.finalized]).toEqual([1, 2, 3, 4]);
+  });
+
+  it("passes a bounded abort signal to the model transport", async () => {
+    const memory = memoryStore();
+    let signal: AbortSignal | undefined;
+    await downloadModel(
+      {
+        modelId: "Qwen3-1.7B",
+        quantization: "Q4_K_M",
+        url: "https://models.example/qwen.gguf",
+      },
+      memory.store,
+      async (_url, init) => {
+        signal = init.signal;
+        return {
+          ok: true,
+          status: 200,
+          arrayBuffer: async () => new Uint8Array([1]).buffer,
+        };
+      },
+      async () => "",
+    );
+    expect(signal).toBeInstanceOf(AbortSignal);
+    expect(signal?.aborted).toBe(false);
+    expect(MODEL_DOWNLOAD_TIMEOUT_MS).toBe(120_000);
   });
 
   it("rejects non-HTTPS or unlicensed requests before transport", async () => {

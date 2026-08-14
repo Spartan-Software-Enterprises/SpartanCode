@@ -4,6 +4,8 @@ import {
   type MobileModel,
 } from "./model-catalog";
 
+export const MODEL_DOWNLOAD_TIMEOUT_MS = 120_000;
+
 export type DownloadStore = {
   readPartial: (
     modelId: string,
@@ -34,7 +36,7 @@ export type DownloadRequest = {
 
 export type DownloadTransport = (
   url: string,
-  init: { headers: Record<string, string> },
+  init: { headers: Record<string, string>; signal: AbortSignal },
 ) => Promise<{
   ok: boolean;
   status: number;
@@ -87,32 +89,42 @@ export async function downloadModel(
     request.modelId,
     request.quantization,
   );
-  const response = await transport(request.url, {
-    headers: partial.length ? { Range: `bytes=${partial.length}-` } : {},
-  });
-  if (!response.ok || (response.status !== 200 && response.status !== 206))
-    throw new Error(`Model download failed (${response.status})`);
-  const received = new Uint8Array(await response.arrayBuffer());
-  // A server may ignore Range and return the complete object with 200. Never
-  // append a partial prefix to that complete response.
-  const bytes =
-    partial.length && response.status === 206
-      ? append(partial, received)
-      : received;
-  await store.writePartial(request.modelId, request.quantization, bytes);
-  if (request.expectedSha256) {
-    const actual = await sha256(bytes);
-    if (actual.toLowerCase() !== request.expectedSha256.toLowerCase()) {
-      await store.clearPartial(request.modelId, request.quantization);
-      throw new Error("Model checksum verification failed");
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    MODEL_DOWNLOAD_TIMEOUT_MS,
+  );
+  try {
+    const response = await transport(request.url, {
+      headers: partial.length ? { Range: `bytes=${partial.length}-` } : {},
+      signal: controller.signal,
+    });
+    if (!response.ok || (response.status !== 200 && response.status !== 206))
+      throw new Error(`Model download failed (${response.status})`);
+    const received = new Uint8Array(await response.arrayBuffer());
+    // A server may ignore Range and return the complete object with 200. Never
+    // append a partial prefix to that complete response.
+    const bytes =
+      partial.length && response.status === 206
+        ? append(partial, received)
+        : received;
+    await store.writePartial(request.modelId, request.quantization, bytes);
+    if (request.expectedSha256) {
+      const actual = await sha256(bytes);
+      if (actual.toLowerCase() !== request.expectedSha256.toLowerCase()) {
+        await store.clearPartial(request.modelId, request.quantization);
+        throw new Error("Model checksum verification failed");
+      }
     }
+    await store.finalize(request.modelId, request.quantization, bytes);
+    return {
+      modelId: request.modelId,
+      quantization: request.quantization,
+      bytes: bytes.length,
+    };
+  } finally {
+    clearTimeout(timeout);
   }
-  await store.finalize(request.modelId, request.quantization, bytes);
-  return {
-    modelId: request.modelId,
-    quantization: request.quantization,
-    bytes: bytes.length,
-  };
 }
 
 export function deleteModel(
