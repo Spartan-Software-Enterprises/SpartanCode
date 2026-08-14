@@ -154,7 +154,7 @@ jobs:
           for attempt in $(seq 1 180); do
             boot_completed="$(timeout 5s adb -s emulator-5554 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
             if [ "$boot_completed" = "1" ] && \
-              adb -s emulator-5554 shell pm list packages >/dev/null 2>&1; then
+              timeout 10s adb -s emulator-5554 shell pm list packages >/dev/null 2>&1; then
               break
             fi
             if [ "$attempt" -eq 180 ]; then
@@ -167,9 +167,9 @@ jobs:
           mv "$RUNNER_TEMP/spartancode-apk/app-debug.apk" \
             android/android/app/build/outputs/apk/debug/app-debug.apk
           rmdir "$RUNNER_TEMP/spartancode-apk"
-          adb install -r android/android/app/build/outputs/apk/debug/app-debug.apk
-          adb shell monkey -p com.spartansoftware.spartancode 1
-          adb shell dumpsys package com.spartansoftware.spartancode | grep -q 'com.spartansoftware.spartancode'
+          timeout 120s adb install -r android/android/app/build/outputs/apk/debug/app-debug.apk
+          timeout 30s adb shell monkey -p com.spartansoftware.spartancode 1
+          timeout 30s adb shell dumpsys package com.spartansoftware.spartancode | grep -q 'com.spartansoftware.spartancode'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
