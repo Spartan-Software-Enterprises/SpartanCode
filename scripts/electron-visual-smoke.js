@@ -35,6 +35,8 @@ async function main() {
     await page.screenshot({ path: path.join(outputDir, `desktop-${view}.png`), fullPage: true });
     const managerClose = page.locator('[aria-label="Close agent manager"]');
     if (await managerClose.isVisible().catch(() => false)) await managerClose.click({ force: true });
+    const settingsClose = page.locator("#closeSettings");
+    if (await settingsClose.isVisible().catch(() => false)) await settingsClose.click({ force: true });
   }
 
   await page.locator('[data-view="home"]').click();
@@ -44,11 +46,6 @@ async function main() {
     throw new Error("Mission composer did not retain input");
   }
   await page.screenshot({ path: path.join(outputDir, "desktop-composer-filled.png"), fullPage: true });
-
-  await page.locator("#settingsButton").click().catch(() => {});
-  if (await page.locator("#settingsPanel").count()) {
-    await page.screenshot({ path: path.join(outputDir, "desktop-settings-panel.png"), fullPage: true });
-  }
 
   const result = { title, identity, views, errors, warnings, screenshots: fs.readdirSync(outputDir).sort() };
   fs.writeFileSync(path.join(outputDir, "result.json"), JSON.stringify(result, null, 2));
