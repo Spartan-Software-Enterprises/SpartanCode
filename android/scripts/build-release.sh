@@ -31,7 +31,11 @@ keyPassword=$SPARTANCODE_KEY_PASSWORD
 EOF
 
 cd "$native_dir"
-./gradlew bundleRelease assembleRelease
+gradle_arch_args=""
+if [ -n "${SPARTANCODE_ANDROID_ARCHITECTURES:-}" ]; then
+  gradle_arch_args="-PreactNativeArchitectures=$SPARTANCODE_ANDROID_ARCHITECTURES"
+fi
+./gradlew bundleRelease assembleRelease $gradle_arch_args
 node ../../scripts/release-manifest.js \
   --output "$native_dir/app/build/release-evidence" \
   --scan "$native_dir/app/build/outputs"

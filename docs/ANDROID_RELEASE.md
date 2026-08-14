@@ -13,6 +13,10 @@ export SPARTANCODE_KEY_PASSWORD='from-your-secret-store'
 ./scripts/build-release.sh
 ```
 
+For a constrained emulator validation build, set
+`SPARTANCODE_ANDROID_ARCHITECTURES=x86_64`; production release builds should
+omit it so all configured device architectures are produced.
+
 The script validates the absolute keystore path, generates the native Expo
 project, writes signing properties with restrictive permissions, builds both
 the release AAB and APK, generates `release-manifest.json` and
