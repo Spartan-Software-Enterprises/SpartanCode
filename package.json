@@ -9,6 +9,7 @@
     "build": "npm run test && electron-builder --linux --dir && npm run release:manifest",
     "dist": "npm run test && electron-builder --linux",
     "test:visual": "node scripts/electron-visual-smoke.js",
+    "test:browser": "node scripts/browser-live-smoke.js",
     "check": "node --check src/main/main.js && node --check src/main/preload.js && node --check src/main/desktop-api.js",
     "release:manifest": "node scripts/release-manifest.js --output dist/release-evidence",
     "format:check": "prettier --check \"src/**/*.js\" \"src/**/*.html\"",
