@@ -26,7 +26,10 @@ contextBridge.exposeInMainWorld("spartanCode", {
   downloadMarketplacePlugin: (manifest) =>
     ipcRenderer.invoke("plugins:download", manifest),
   getSettings: () => ipcRenderer.invoke("settings:get"),
+  resolveSettings: (context) => ipcRenderer.invoke("settings:resolve", context),
   updateSettings: (update) => ipcRenderer.invoke("settings:update", update),
+  updateScopedSettings: (scope, id, update) =>
+    ipcRenderer.invoke("settings:update-scoped", scope, id, update),
   chooseWorkspace: () => ipcRenderer.invoke("workspace:choose"),
   getGitStatus: () => ipcRenderer.invoke("git:status"),
   gitInit: () => ipcRenderer.invoke("git:init"),

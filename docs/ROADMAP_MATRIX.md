@@ -15,7 +15,7 @@ should be presented as complete.
 | 4 | Plan/execute/verify orchestrator | Implemented | Mission/orchestrator lifecycle tests |
 | 5 | Hugging Face model discovery/download | Partial | Catalog, metadata, filtering, and bounded download exist; runtime/model availability remains environment-dependent |
 | 6 | SQLite artifact store | Implemented | `src/main/artifact-store.js` and SQLite schema tests |
-| 7 | Settings hierarchy | Partial | Persisted settings exist; full global/project/agent/session layering remains open |
+| 7 | Settings hierarchy | Partial | Persistent global/project/agent/session layers and resolution API exist; full user-facing editor for every layer remains open |
 | 8 | Human-in-the-loop dangerous-command approval | Implemented | Policy engine, mission approval, and audit tests |
 | 9 | QR pairing | Implemented | Android pairing validation, expiry, and storage tests |
 | 10 | SSH/Mosh terminal fallback | Partial | SSH foundation plus truthful Mosh client detection/tokenized launch arguments exist; interactive Mosh terminal lifecycle and server-side acceptance remain open |

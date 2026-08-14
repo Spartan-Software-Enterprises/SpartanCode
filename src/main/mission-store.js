@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { createCollaborationStore } = require("./collaboration");
+const { createSettingsHierarchy } = require("./settings-hierarchy");
 
 const emptyState = () => ({
   missions: [],
@@ -20,6 +21,7 @@ const emptyState = () => ({
     personaName: "Leo",
     wakeWord: "Leo",
   },
+  settingsScopes: { global: {}, project: {}, agent: {}, session: {} },
   connections: [],
   auditLog: [],
   chat: [],
@@ -53,6 +55,13 @@ function createMissionStore(filePath) {
     "personaName",
     "wakeWord",
   ]);
+  if (!state.settingsScopes || typeof state.settingsScopes !== "object")
+    state.settingsScopes = { global: {}, project: {}, agent: {}, session: {} };
+  const settingsHierarchy = createSettingsHierarchy({
+    baseSettings: state.settings,
+    layers: state.settingsScopes,
+    allowedKeys: allowedSettings,
+  });
   const createId = (prefix) => `${prefix}-${Date.now()}-${sequence++}`;
   const collaboration = createCollaborationStore({
     initialSessions: Array.isArray(state.collaborationSessions)
@@ -76,7 +85,9 @@ function createMissionStore(filePath) {
 
   return {
     snapshot() {
-      return JSON.parse(JSON.stringify(state));
+      const snapshot = JSON.parse(JSON.stringify(state));
+      snapshot.settingsScopes = settingsHierarchy.snapshot();
+      return snapshot;
     },
     addMission(description) {
       const mission = {
@@ -229,8 +240,18 @@ function createMissionStore(filePath) {
         }
       }
       state.settings = { ...state.settings, ...safeUpdate };
+      settingsHierarchy.set("global", "default", safeUpdate);
       persist();
       return state.settings;
+    },
+    updateScopedSettings(scope, id, update) {
+      const values = settingsHierarchy.set(scope, id, update);
+      state.settingsScopes = settingsHierarchy.snapshot();
+      persist();
+      return values;
+    },
+    resolveSettings(context) {
+      return settingsHierarchy.resolve(context);
     },
     addConnection(connection) {
       const saved = {

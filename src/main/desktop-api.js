@@ -348,8 +348,14 @@ function registerDesktopApi({
     }),
   );
   ipcMain.handle("settings:get", () => store.snapshot().settings);
+  ipcMain.handle("settings:resolve", (_event, context) =>
+    store.resolveSettings(context || {}),
+  );
   ipcMain.handle("settings:update", (_event, update) =>
     store.updateSettings(update),
+  );
+  ipcMain.handle("settings:update-scoped", (_event, scope, id, update) =>
+    store.updateScopedSettings(scope, id, update),
   );
   ipcMain.handle("connections:list", () => store.snapshot().connections);
   ipcMain.handle("remote:providers", () => listServerProviders());
