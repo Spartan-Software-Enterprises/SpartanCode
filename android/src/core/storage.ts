@@ -19,6 +19,7 @@ import { normalizeCollaborationSessions } from "./collaboration";
 import {
   getOfflineCryptoStatus,
   readEncryptedOfflineValue,
+  removeEncryptedOfflineValue,
   writeEncryptedOfflineValue,
 } from "./secure-offline-store";
 import {
@@ -187,8 +188,45 @@ function normalizeMobileSettingsOverride(
   ]);
   return Object.fromEntries(
     Object.keys(source)
-      .filter((key): key is keyof MobileSettings =>
-        allowed.has(key as keyof MobileSettings),
+      .filter(
+        (key): key is keyof MobileSettings =>
+          allowed.has(key as keyof MobileSettings) &&
+          (((key === "model" ||
+            key === "apiProvider" ||
+            key === "personaName" ||
+            key === "wakeWord") &&
+            typeof source[key] === "string" &&
+            source[key].trim() !== "") ||
+            (key === "defaultAgent" &&
+              typeof source[key] === "string" &&
+              [
+                "leo",
+                "researcher",
+                "implementer",
+                "verifier",
+                "sync-guardian",
+              ].includes(source[key] as string)) ||
+            (key === "protocol" &&
+              ["MCP Lite", "MCP Bridge", "Full MCP"].includes(
+                source[key] as string,
+              )) ||
+            (key === "executionMode" &&
+              ["guided", "yolo"].includes(source[key] as string)) ||
+            (key === "quantization" &&
+              ["Q4_K_M", "Q4_0", "Q3_K_S"].includes(source[key] as string)) ||
+            (["memoryEnabled", "voiceEnabled", "autoSync"].includes(key) &&
+              typeof source[key] === "boolean") ||
+            (key === "emotionMode" &&
+              ["off", "explicit"].includes(source[key] as string)) ||
+            (key === "interactionSignal" &&
+              [
+                "calm",
+                "focused",
+                "frustrated",
+                "uncertain",
+                "excited",
+                "tired",
+              ].includes(source[key] as string))),
       )
       .map((key) => [key, normalized[key]]),
   ) as Partial<MobileSettings>;
@@ -276,12 +314,20 @@ async function quarantineCorruptValue(key: string, raw: string | null) {
       key,
       JSON.stringify({
         quarantinedAt: new Date().toISOString(),
-        raw: raw.slice(0, 1_000_000),
+        bytes: raw.length,
+        sha256: await digestValue(raw),
       }),
     );
   } catch {
     // Recovery must never prevent the app from starting offline.
   }
+}
+
+async function digestValue(value: string) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index++)
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  return hash.toString(16).padStart(8, "0");
 }
 
 async function recoverCorruptValue(sourceKey: string, quarantineKey: string) {
@@ -326,6 +372,7 @@ export async function writeSnapshot(snapshot: MobileSnapshot) {
     await AsyncStorage.removeItem(SNAPSHOT_KEY);
   } catch (error) {
     if (getOfflineCryptoStatus().enabled) throw error;
+    await removeEncryptedOfflineValue(ENCRYPTED_SNAPSHOT_KEY).catch(() => {});
     await AsyncStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
   }
 }
@@ -535,15 +582,30 @@ export async function readQueuedOperations(): Promise<QueuedOperation[]> {
 export async function enqueueOperation(
   operation: Omit<QueuedOperation, "attempts" | "queuedAt">,
 ) {
-  const queue = await readQueuedOperations();
-  if (queue.some((item) => item.idempotencyKey === operation.idempotencyKey))
-    return queue;
-  const next = [
-    ...queue,
-    { ...operation, attempts: 0, queuedAt: new Date().toISOString() },
-  ];
-  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(next));
-  return next;
+  return updateQueue((queue) => {
+    if (queue.some((item) => item.idempotencyKey === operation.idempotencyKey))
+      return queue;
+    return [
+      ...queue,
+      { ...operation, attempts: 0, queuedAt: new Date().toISOString() },
+    ];
+  });
+}
+
+let queueWriteChain = Promise.resolve();
+function updateQueue(
+  transform: (queue: QueuedOperation[]) => QueuedOperation[],
+) {
+  const operation = queueWriteChain.then(async () => {
+    const next = transform(await readQueuedOperations());
+    await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(next));
+    return next;
+  });
+  queueWriteChain = operation.then(
+    () => undefined,
+    () => undefined,
+  );
+  return operation;
 }
 
 export async function updateQueuedOperation(
@@ -552,19 +614,17 @@ export async function updateQueuedOperation(
     Pick<QueuedOperation, "attempts" | "lastError" | "acknowledgedAt">
   >,
 ) {
-  const next = (await readQueuedOperations()).map((item) =>
-    item.idempotencyKey === idempotencyKey ? { ...item, ...update } : item,
+  return updateQueue((queue) =>
+    queue.map((item) =>
+      item.idempotencyKey === idempotencyKey ? { ...item, ...update } : item,
+    ),
   );
-  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(next));
-  return next;
 }
 
 export async function removeQueuedOperation(idempotencyKey: string) {
-  const next = (await readQueuedOperations()).filter(
-    (item) => item.idempotencyKey !== idempotencyKey,
+  return updateQueue((queue) =>
+    queue.filter((item) => item.idempotencyKey !== idempotencyKey),
   );
-  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(next));
-  return next;
 }
 
 export async function addConnection(connection: ConnectionProfile) {
@@ -617,7 +677,6 @@ export async function readBridgeToken(endpoint: string) {
   let raw = await SecureStore.getItemAsync(scopedKey);
   if (!raw) {
     raw = await SecureStore.getItemAsync(BRIDGE_TOKEN_KEY);
-    if (raw) await SecureStore.setItemAsync(scopedKey, raw);
   }
   if (!raw) return null;
   try {
@@ -634,15 +693,18 @@ export async function readBridgeToken(endpoint: string) {
       await SecureStore.deleteItemAsync(scopedKey);
       return null;
     }
-    return saved.endpoint === origin && saved.token ? saved.token : null;
+    if (saved.endpoint !== origin || !saved.token) return null;
+    if (!(await SecureStore.getItemAsync(scopedKey)))
+      await SecureStore.setItemAsync(scopedKey, raw);
+    return saved.token;
   } catch {
     return null;
   }
 }
 
 export async function clearBridgeToken(endpoint: string) {
-  await SecureStore.deleteItemAsync(tokenKey(endpoint));
-  await SecureStore.deleteItemAsync(BRIDGE_TOKEN_KEY);
+  await SecureStore.deleteItemAsync(tokenKey(endpoint)).catch(() => {});
+  await SecureStore.deleteItemAsync(BRIDGE_TOKEN_KEY).catch(() => {});
   const origin = new URL(endpoint).origin;
   await AsyncStorage.setItem(
     BRIDGE_TOKEN_INDEX_KEY,
@@ -653,9 +715,8 @@ export async function clearBridgeToken(endpoint: string) {
 }
 
 export async function clearAllBridgeTokens() {
-  for (const origin of await readBridgeTokenOrigins()) {
-    await SecureStore.deleteItemAsync(tokenKey(origin));
-  }
+  for (const origin of await readBridgeTokenOrigins())
+    await SecureStore.deleteItemAsync(tokenKey(origin)).catch(() => {});
   await SecureStore.deleteItemAsync(BRIDGE_TOKEN_KEY);
   await AsyncStorage.removeItem(BRIDGE_TOKEN_INDEX_KEY);
 }

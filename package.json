@@ -6,8 +6,8 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
-    "build": "npm run test && electron-builder --linux --dir && npm run release:manifest && npm run release:verify",
-    "dist": "npm run test && electron-builder --linux && npm run release:manifest && npm run release:verify",
+    "build": "npm run test && electron-builder --linux --dir --publish never && npm run release:manifest && npm run release:verify",
+    "dist": "npm run test && electron-builder --linux --publish never && npm run release:manifest && npm run release:verify",
     "test:visual": "node scripts/electron-visual-smoke.js",
     "test:browser": "node scripts/browser-live-smoke.js",
     "roadmap:audit": "node scripts/roadmap-audit.js",

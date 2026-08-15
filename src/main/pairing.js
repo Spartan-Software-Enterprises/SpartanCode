@@ -4,6 +4,12 @@ function createPairingService({ origin, token, ttlMs = 5 * 60 * 1000 } = {}) {
   if (!origin || !token)
     throw new Error("Pairing origin and token are required");
   const pending = new Map();
+  const sameToken = (left, right) => {
+    if (typeof left !== "string" || typeof right !== "string") return false;
+    const a = Buffer.from(left);
+    const b = Buffer.from(right);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  };
   function pruneExpired() {
     const now = Date.now();
     for (const [nonce, entry] of pending) {
@@ -46,7 +52,7 @@ function createPairingService({ origin, token, ttlMs = 5 * 60 * 1000 } = {}) {
         throw new Error("Pairing payload was already used");
       if (entry.expiresAt <= Date.now())
         throw new Error("Pairing payload expired");
-      if (value.origin !== origin || value.token !== token)
+      if (value.origin !== origin || !sameToken(value.token, token))
         throw new Error("Pairing payload does not match this bridge");
       entry.used = true;
       return {

@@ -41,12 +41,24 @@ function validateBrowserUrl(value, allowedHosts = []) {
 function normalizeRequest(request, environment = process.env) {
   if (!request || typeof request !== "object")
     throw new Error("Browser request must be an object");
-  const allowedHosts = Array.isArray(request.allowedHosts)
-    ? request.allowedHosts
-    : String(environment.SPARTANCODE_BROWSER_ALLOWLIST || "")
-        .split(",")
-        .map((host) => host.trim())
-        .filter(Boolean);
+  const configuredHosts = String(
+    environment.SPARTANCODE_BROWSER_ALLOWLIST || "",
+  )
+    .split(",")
+    .map((host) => normalizeHost(host))
+    .filter(Boolean);
+  if (!configuredHosts.length)
+    throw new Error(
+      "Browser automation requires a configured domain allowlist",
+    );
+  const requestedHosts = Array.isArray(request.allowedHosts)
+    ? request.allowedHosts.map(normalizeHost).filter(Boolean)
+    : configuredHosts;
+  const allowedHosts = requestedHosts.filter((host) =>
+    configuredHosts.some(
+      (configured) => host === configured || host.endsWith(`.${configured}`),
+    ),
+  );
   const url = validateBrowserUrl(request.url, allowedHosts);
   const action = request.action || "extractText";
   if (!["navigate", "extractText"].includes(action))

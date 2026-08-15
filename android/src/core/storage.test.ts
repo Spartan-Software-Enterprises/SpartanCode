@@ -90,7 +90,7 @@ describe("storage recovery", () => {
     ).toBeNull();
     expect(
       await AsyncStorage.getItem("spartancode.mobile.snapshot.quarantine.v1"),
-    ).toContain("broken");
+    ).not.toContain("broken");
   });
 
   it("migrates older snapshots while preserving valid missions", async () => {

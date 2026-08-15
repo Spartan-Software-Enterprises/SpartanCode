@@ -99,10 +99,26 @@ function discoverSkills(roots = []) {
   return results.sort((left, right) => left.id.localeCompare(right.id));
 }
 
-function loadSkill(skill, maxBytes = MAX_SKILL_BYTES) {
+function loadSkill(skill, maxBytes = MAX_SKILL_BYTES, allowedRoots = []) {
   if (!skill || typeof skill.path !== "string")
     throw new Error("Skill metadata is required");
   const resolved = path.resolve(skill.path);
+  const roots = allowedRoots
+    .filter((root) => typeof root === "string" && root)
+    .map((root) => {
+      try {
+        return fs.realpathSync(root);
+      } catch {
+        return path.resolve(root);
+      }
+    });
+  if (
+    roots.length &&
+    !roots.some(
+      (root) => resolved === root || resolved.startsWith(`${root}${path.sep}`),
+    )
+  )
+    throw new Error("Skill is outside configured skill roots");
   if (fs.statSync(resolved).size > maxBytes)
     throw new Error("Skill is too large to load");
   const source = fs.readFileSync(resolved, "utf8");

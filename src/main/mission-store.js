@@ -168,6 +168,7 @@ function createMissionStore(filePath) {
       if (!artifact) return null;
       if (!["accepted", "rejected"].includes(decision))
         throw new Error("Artifact decision must be accepted or rejected");
+      note = String(note).trim().slice(0, 2000);
       artifact.review = {
         decision,
         note,
@@ -179,6 +180,7 @@ function createMissionStore(filePath) {
         note,
         timestamp: artifact.review.reviewedAt,
       });
+      state.auditLog = state.auditLog.slice(0, 100);
       persist();
       return artifact;
     },
@@ -233,6 +235,7 @@ function createMissionStore(filePath) {
         missionId: approval.missionId,
         timestamp: approval.resolvedAt,
       });
+      state.auditLog = state.auditLog.slice(0, 100);
       persist();
       return approval;
     },

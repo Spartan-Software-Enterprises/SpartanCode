@@ -85,17 +85,29 @@ export function createMobileRuntimeRegistry(
           code: "model-incompatible" as const,
           message: "Model is not compatible with this device or quantization",
         };
-      const output = await (
-        modules[request.runtime] as MobileRuntimeModule
-      ).generate({
-        prompt: request.prompt,
-        modelId: request.modelId,
-        quantization: request.quantization,
-        modelPath: request.modelPath,
-        maxTokens: request.maxTokens,
-        temperature: request.temperature,
-      });
-      return { ok: true as const, runtime: request.runtime, output };
+      try {
+        const output = await (
+          modules[request.runtime] as MobileRuntimeModule
+        ).generate({
+          prompt: request.prompt,
+          modelId: request.modelId,
+          quantization: request.quantization,
+          modelPath: request.modelPath,
+          maxTokens: request.maxTokens,
+          temperature: request.temperature,
+        });
+        return { ok: true as const, runtime: request.runtime, output };
+      } catch (error) {
+        return {
+          ok: false as const,
+          runtime: request.runtime,
+          code: "runtime-failed" as const,
+          message: String(error instanceof Error ? error.message : error).slice(
+            0,
+            500,
+          ),
+        };
+      }
     },
   };
 }

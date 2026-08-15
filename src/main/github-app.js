@@ -180,12 +180,18 @@ function createGitHubAppClient({
       { method: "POST", headers: githubHeaders(jwt) },
     );
     const body = await response.json().catch(() => ({}));
-    if (!response.ok || typeof body.token !== "string" || !body.expires_at) {
+    const expiresAt = Date.parse(body.expires_at);
+    if (
+      !response.ok ||
+      typeof body.token !== "string" ||
+      !body.expires_at ||
+      !Number.isFinite(expiresAt)
+    ) {
       throw new Error(
         `GitHub App installation token request failed (${response.status})`,
       );
     }
-    cachedToken = { token: body.token, expiresAt: Date.parse(body.expires_at) };
+    cachedToken = { token: body.token, expiresAt };
     return cachedToken.token;
   }
 

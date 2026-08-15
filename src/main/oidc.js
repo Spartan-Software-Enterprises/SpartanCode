@@ -74,16 +74,21 @@ function createOidcAuthenticator({
     if (!discoveryPromise) {
       discoveryPromise = fetchJson(
         `${issuerValue}/.well-known/openid-configuration`,
-      ).then((metadata) => {
-        if (
-          metadata.issuer &&
-          metadata.issuer.replace(/\/$/, "") !== issuerValue
-        )
-          throw new Error("OIDC discovery issuer mismatch");
-        if (typeof metadata.jwks_uri !== "string" || !metadata.jwks_uri)
-          throw new Error("OIDC discovery did not provide jwks_uri");
-        return metadata.jwks_uri;
-      });
+      )
+        .then((metadata) => {
+          if (
+            metadata.issuer &&
+            metadata.issuer.replace(/\/$/, "") !== issuerValue
+          )
+            throw new Error("OIDC discovery issuer mismatch");
+          if (typeof metadata.jwks_uri !== "string" || !metadata.jwks_uri)
+            throw new Error("OIDC discovery did not provide jwks_uri");
+          return metadata.jwks_uri;
+        })
+        .catch((error) => {
+          discoveryPromise = null;
+          throw error;
+        });
     }
     return discoveryPromise;
   };
@@ -151,6 +156,7 @@ function createOidcAuthenticator({
     clearKeyCache() {
       keyCache = null;
       keyCacheExpires = 0;
+      discoveryPromise = null;
     },
   };
 }

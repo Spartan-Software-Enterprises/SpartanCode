@@ -2,9 +2,13 @@ const crypto = require("crypto");
 
 const MAX_EVENTS = 1000;
 const SECRET_KEY = /(token|password|secret|private.?key|api.?key|credential)/i;
+const SECRET_VALUE =
+  /(bearer\s+[A-Za-z0-9._~-]+|(?:https?:\/\/[^\s/@]+:)[^\s@]+@|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+|-----BEGIN [A-Z ]*PRIVATE KEY-----)/i;
 
 function redact(value) {
   if (Array.isArray(value)) return value.map(redact);
+  if (typeof value === "string")
+    return SECRET_VALUE.test(value) ? "[REDACTED]" : value;
   if (!value || typeof value !== "object") return value;
   return Object.fromEntries(
     Object.entries(value).map(([key, child]) => [

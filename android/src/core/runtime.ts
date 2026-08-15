@@ -29,8 +29,13 @@ export function chooseWorkloadRoute(
   }
   if (kind === "model-download") {
     if ((profile.availableStorageMb ?? 0) < 2048) return "queue";
-    return profile.hasAccelerator ? "on-device" : "queue";
+    return "on-device";
   }
+  if (
+    kind === "chat" &&
+    (profile.thermalState === "critical" || profile.thermalState === "serious")
+  )
+    return "queue";
   return "on-device";
 }
 

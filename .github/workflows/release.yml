@@ -30,13 +30,14 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build Linux AppImage
-        run: npm run dist
+        run: npm run test && npx electron-builder --linux --publish never && npm run release:manifest && npm run release:verify
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: spartancode-linux-release-${{ env.RELEASE_TAG }}
           if-no-files-found: error
           path: |
             dist/*.AppImage
+            dist/*.deb
             dist/release-evidence/**
 
   android:
@@ -103,7 +104,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build Windows NSIS installer
-        run: npx electron-builder --win nsis
+        run: npx electron-builder --win nsis --publish never
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: spartancode-windows-release-${{ env.RELEASE_TAG }}
@@ -127,8 +128,14 @@ jobs:
           set -eu
           mapfile -t assets < <(find release-assets -type f \( -name '*.AppImage' -o -name '*.deb' -o -name '*.exe' -o -name '*.apk' -o -name '*.aab' \) -print)
           test "${#assets[@]}" -ge 5
-          gh release create "$RELEASE_TAG" "${assets[@]}" \
-            --repo "$GITHUB_REPOSITORY" \
-            --verify-tag \
-            --title "SpartanCode $RELEASE_TAG" \
-            --generate-notes
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "${assets[@]}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber
+          else
+            gh release create "$RELEASE_TAG" "${assets[@]}" \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag \
+              --title "SpartanCode $RELEASE_TAG" \
+              --generate-notes
+          fi

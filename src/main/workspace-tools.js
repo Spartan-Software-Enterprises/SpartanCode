@@ -47,7 +47,7 @@ function resolveWritableInsideWorkspace(workspacePath, requestedPath = ".") {
   if (target !== root && !target.startsWith(`${root}${path.sep}`))
     throw new Error("Path escapes the approved workspace");
 
-  let existingParent = path.dirname(target);
+  let existingParent = target === root ? root : path.dirname(target);
   while (!fs.existsSync(existingParent) && existingParent !== root)
     existingParent = path.dirname(existingParent);
   const canonicalParent = fs.realpathSync(existingParent);

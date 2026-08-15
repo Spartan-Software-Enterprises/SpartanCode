@@ -19,13 +19,13 @@ describe("adaptive workload routing", () => {
     expect(workloadLabel("on-device")).toBe("Running on this device");
   });
 
-  it("requires storage and acceleration before downloading models", () => {
+  it("requires storage, but not acceleration, before downloading models", () => {
     expect(
       chooseWorkloadRoute("model-download", false, {
         availableStorageMb: 4096,
         hasAccelerator: false,
       }),
-    ).toBe("queue");
+    ).toBe("on-device");
     expect(
       chooseWorkloadRoute("model-download", false, {
         availableStorageMb: 4096,

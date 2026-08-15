@@ -47,7 +47,12 @@ function createSecureVault({ safeStorage, filePath }) {
         "Secure vault is corrupted and must be recovered before use",
       );
     }
-    if (document?.version !== VERSION || typeof document.records !== "object")
+    if (
+      document?.version !== VERSION ||
+      !document.records ||
+      typeof document.records !== "object" ||
+      Array.isArray(document.records)
+    )
       throw new Error("Unsupported secure vault format");
     return document;
   }

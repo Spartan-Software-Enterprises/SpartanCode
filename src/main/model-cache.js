@@ -6,13 +6,23 @@ const { downloadVerifiedModel } = require("./model-download");
 function createModelCache(filePath) {
   let state = { models: [] };
   try {
-    state = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
+    const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (parsed && typeof parsed === "object" && Array.isArray(parsed.models))
+      state = {
+        models: parsed.models.filter(
+          (item) => item && typeof item === "object",
+        ),
+      };
+  } catch {
+    state = { models: [] };
   }
   const persist = () => {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(state, null, 2));
+    const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+    fs.writeFileSync(temporaryPath, JSON.stringify(state, null, 2), {
+      mode: 0o600,
+    });
+    fs.renameSync(temporaryPath, filePath);
   };
   const resolveSelected = (modelId, quantization, selectedModel) => {
     const model = listAvailableModels({ commercialOnly: false }).find(

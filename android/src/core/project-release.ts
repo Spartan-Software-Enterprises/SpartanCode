@@ -54,6 +54,7 @@ export function normalizeProject(value: unknown): MobileProject | null {
     !projectTargets.includes(item.target as ProjectTarget)
   )
     return null;
+  if (!Number.isFinite(Date.parse(item.createdAt))) return null;
   const checks = item.checks as Partial<ProjectReleaseChecks> | undefined;
   const normalizedChecks = {
     plan: checks?.plan === true,
@@ -81,7 +82,7 @@ export function createMobileProject(
   description: string,
   target: ProjectTarget,
   now = new Date().toISOString(),
-  id = `project:${Date.now()}`,
+  id = `project:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`,
 ): MobileProject {
   const normalizedName = name.trim().slice(0, 120);
   if (!normalizedName) throw new Error("Project name is required");

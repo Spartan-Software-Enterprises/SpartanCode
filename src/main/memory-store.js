@@ -35,7 +35,11 @@ function validateMemory(input) {
     throw new Error(
       `Memory content is required and limited to ${MAX_CONTENT} characters`,
     );
-  if (SECRET_PATTERN.test(content))
+  if (
+    SECRET_PATTERN.test(
+      `${content} ${JSON.stringify(input.tags || [])} ${input.source || ""}`,
+    )
+  )
     throw new Error(
       "Secret-like content is not eligible for local memory indexing",
     );
@@ -89,7 +93,19 @@ function createMemoryStore({ secureVault }) {
     }
     if (!Array.isArray(entries))
       throw new Error("Encrypted local memory format is invalid");
-    return entries;
+    return entries.map((entry) => {
+      if (
+        !entry ||
+        typeof entry !== "object" ||
+        !Array.isArray(entry.vector) ||
+        entry.vector.length !== DIMENSIONS ||
+        entry.vector.some(
+          (value) => typeof value !== "number" || !Number.isFinite(value),
+        )
+      )
+        throw new Error("Encrypted local memory contains an invalid vector");
+      return entry;
+    });
   };
   const write = (entries) => {
     const serialized = JSON.stringify(entries.slice(0, MAX_ENTRIES));

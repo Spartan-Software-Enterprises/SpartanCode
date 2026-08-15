@@ -232,7 +232,7 @@ function registerDesktopApi({
       (item) => item.id === skillId,
     );
     if (!skill) throw new Error("Skill was not found in a configured source");
-    return loadSkill(skill);
+    return loadSkill(skill, undefined, skillRoots());
   });
   ipcMain.handle(
     "memory:status",
