@@ -194,6 +194,9 @@ export default function App() {
   const [settingsScopeId, setSettingsScopeId] = useState("");
   const [settingsScopeMessage, setSettingsScopeMessage] = useState("");
   const [settingsPreviewMessage, setSettingsPreviewMessage] = useState("");
+  const [settingsCategory, setSettingsCategory] = useState<
+    "security" | "runtime" | "voice" | "scope" | "bridge"
+  >("security");
   const [remoteGitStatus, setRemoteGitStatus] = useState("");
   const [remoteGitDiff, setRemoteGitDiff] = useState("");
   const [remoteGitCommitMessage, setRemoteGitCommitMessage] = useState("");
@@ -1527,445 +1530,521 @@ export default function App() {
 
         <Text style={styles.section}>App settings</Text>
         <View style={styles.card}>
-          <Text style={styles.missionText}>Local storage and security</Text>
+          <Text style={styles.missionText}>Settings menu</Text>
           <Text style={styles.message}>
-            Missions, settings, and offline project state stay in app-private
-            storage. GitHub is optional; bridge tokens use Android Keystore
-            storage and can be protected by biometrics above.
+            Choose a category to keep settings focused and easy to navigate.
           </Text>
-          <Text style={styles.missionMeta}>
-            Encrypted offline content:{" "}
-            {offlineCryptoStatus.enabled
-              ? "available"
-              : `unavailable (${offlineCryptoStatus.reason})`}
-          </Text>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>Execution preference</Text>
-              <Text style={styles.missionMeta}>
-                {mobileSettings.executionMode === "guided"
-                  ? "Guided · review risky actions"
-                  : "YOLO · trusted workspace automation"}
+          <View style={styles.settingsMenu}>
+            {(
+              [
+                ["security", "Security"],
+                ["runtime", "Runtime"],
+                ["voice", "Voice & identity"],
+                ["scope", "Scoped settings"],
+                ["bridge", "Bridge & Git"],
+              ] as const
+            ).map(([category, label]) => (
+              <Pressable
+                key={category}
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${label} settings`}
+                style={[
+                  styles.settingsMenuItem,
+                  settingsCategory === category &&
+                    styles.settingsMenuItemActive,
+                ]}
+                onPress={() => setSettingsCategory(category)}
+              >
+                <Text style={styles.settingsMenuLabel}>{label}</Text>
+                <Text style={styles.settingsMenuChevron}>›</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+        <View style={styles.card}>
+          {settingsCategory === "security" ? (
+            <>
+              <Text style={styles.missionText}>Local storage and security</Text>
+              <Text style={styles.message}>
+                Missions, settings, and offline project state stay in
+                app-private storage. GitHub is optional; bridge tokens use
+                Android Keystore storage and can be protected by biometrics
+                above.
               </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Change execution preference"
-              style={styles.smallAction}
-              onPress={() =>
-                void updateMobileSettings({
-                  executionMode:
-                    mobileSettings.executionMode === "guided"
-                      ? "yolo"
-                      : "guided",
-                })
-              }
-            >
-              <Text style={styles.smallActionText}>Change</Text>
-            </Pressable>
-          </View>
-          <Text style={styles.message}>
-            Approval state, audit activity, and validation remain visible in
-            both modes.
-          </Text>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>Default local model</Text>
-              <Text style={styles.missionMeta}>{mobileSettings.model}</Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Change default local model"
-              style={styles.smallAction}
-              onPress={() => {
-                const options = ["Qwen3-1.7B", "Phi-4-mini", "Llama-3.2-3B"];
-                const next =
-                  options[
-                    (options.indexOf(mobileSettings.model) + 1) % options.length
-                  ];
-                void updateMobileSettings({ model: next });
-              }}
-            >
-              <Text style={styles.smallActionText}>Change</Text>
-            </Pressable>
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>Default agent</Text>
               <Text style={styles.missionMeta}>
-                {mobileSettings.defaultAgent}
+                Encrypted offline content:{" "}
+                {offlineCryptoStatus.enabled
+                  ? "available"
+                  : `unavailable (${offlineCryptoStatus.reason})`}
               </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Change default agent"
-              style={styles.smallAction}
-              onPress={() => {
-                const index = bundledAgents.findIndex(
-                  (agent) => agent.name === mobileSettings.defaultAgent,
-                );
-                const next =
-                  bundledAgents[(index + 1) % bundledAgents.length]?.name ||
-                  "leo";
-                void updateMobileSettings({ defaultAgent: next });
-              }}
-            >
-              <Text style={styles.smallActionText}>Change</Text>
-            </Pressable>
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>Agent protocol</Text>
-              <Text style={styles.missionMeta}>{mobileSettings.protocol}</Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Change agent protocol"
-              style={styles.smallAction}
-              onPress={() => {
-                const options: MobileSettings["protocol"][] = [
-                  "MCP Lite",
-                  "MCP Bridge",
-                  "Full MCP",
-                ];
-                const next =
-                  options[
-                    (options.indexOf(mobileSettings.protocol) + 1) %
-                      options.length
-                  ];
-                void updateMobileSettings({ protocol: next });
-              }}
-            >
-              <Text style={styles.smallActionText}>Change</Text>
-            </Pressable>
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>API provider</Text>
-              <Text style={styles.missionMeta}>
-                {mobileSettings.apiProvider}
-              </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Change API provider"
-              style={styles.smallAction}
-              onPress={() => {
-                const options = ["local", "openai", "anthropic", "gemini"];
-                const next =
-                  options[
-                    (options.indexOf(mobileSettings.apiProvider) + 1) %
-                      options.length
-                  ];
-                void updateMobileSettings({ apiProvider: next });
-              }}
-            >
-              <Text style={styles.smallActionText}>Change</Text>
-            </Pressable>
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>Encrypted local memory</Text>
-              <Text style={styles.missionMeta}>
-                {mobileSettings.memoryEnabled ? "Enabled" : "Disabled"}
-              </Text>
-            </View>
-            <Switch
-              accessibilityLabel="Enable encrypted local memory"
-              value={mobileSettings.memoryEnabled}
-              onValueChange={(enabled) =>
-                void updateMobileSettings({ memoryEnabled: enabled })
-              }
-              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
-              thumbColor="#f1f1f2"
-            />
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>Local model quantization</Text>
-              <Text style={styles.missionMeta}>
-                {mobileSettings.quantization}
-              </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Change local model quantization"
-              style={styles.smallAction}
-              onPress={() => {
-                const options: MobileSettings["quantization"][] = [
-                  "Q4_K_M",
-                  "Q4_0",
-                  "Q3_K_S",
-                ];
-                const next =
-                  options[
-                    (options.indexOf(mobileSettings.quantization) + 1) %
-                      options.length
-                  ];
-                void updateMobileSettings({ quantization: next });
-              }}
-            >
-              <Text style={styles.smallActionText}>Change</Text>
-            </Pressable>
-          </View>
-          <View style={styles.toggleRow}>
-            <Text style={styles.message}>Enable voice command input</Text>
-            <Switch
-              accessibilityLabel="Enable voice command input"
-              value={mobileSettings.voiceEnabled}
-              onValueChange={(enabled) =>
-                void updateMobileSettings({ voiceEnabled: enabled })
-              }
-              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
-              thumbColor="#f1f1f2"
-            />
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Test voice output"
-            style={styles.secondary}
-            onPress={() => {
-              const name = mobileSettings.personaName.trim() || "Leo";
-              try {
-                const speechText = normalizeSpeechText(
-                  `Hello from ${name}. SpartanCode voice output is ready.`,
-                );
-                if (!speechText) throw new Error("Speech text is empty");
-                Speech.speak(speechText, { language: "en-US", rate: 0.95 });
-                setMessage("Voice output started");
-              } catch (error) {
-                setMessage(
-                  `Voice output unavailable: ${error instanceof Error ? error.message : String(error)}`,
-                );
-              }
-            }}
-          >
-            <Text style={styles.secondaryText}>Test voice output</Text>
-          </Pressable>
-          <Text style={styles.missionText}>Persona and wake word</Text>
-          <TextInput
-            accessibilityLabel="Assistant name"
-            maxLength={48}
-            onChangeText={(value) =>
-              setMobileSettings((current) => ({
-                ...current,
-                personaName: value,
-              }))
-            }
-            onEndEditing={() =>
-              void updateMobileSettings({
-                personaName: mobileSettings.personaName,
-              })
-            }
-            placeholder="Assistant name"
-            placeholderTextColor="#52617f"
-            style={styles.input}
-            value={mobileSettings.personaName}
-          />
-          <TextInput
-            accessibilityLabel="Wake word"
-            maxLength={48}
-            onChangeText={(value) =>
-              setMobileSettings((current) => ({ ...current, wakeWord: value }))
-            }
-            onEndEditing={() =>
-              void updateMobileSettings({ wakeWord: mobileSettings.wakeWord })
-            }
-            placeholder="Wake word"
-            placeholderTextColor="#52617f"
-            style={styles.input}
-            value={mobileSettings.wakeWord}
-          />
-          <Text style={styles.message}>
-            Identity preferences are stored locally; speech runtime availability
-            is reported separately.
-          </Text>
-          <View style={styles.toggleRow}>
-            <View style={styles.missionBody}>
-              <Text style={styles.missionText}>Adaptive interaction</Text>
-              <Text style={styles.missionMeta}>
-                {mobileSettings.emotionMode === "explicit"
-                  ? `Explicit signal · ${mobileSettings.interactionSignal}`
-                  : "Off"}
-              </Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Change adaptive interaction mode"
-              style={styles.smallAction}
-              onPress={() =>
-                void updateMobileSettings({
-                  emotionMode:
-                    mobileSettings.emotionMode === "explicit"
-                      ? "off"
-                      : "explicit",
-                })
-              }
-            >
-              <Text style={styles.smallActionText}>Change</Text>
-            </Pressable>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Change interaction signal"
-            style={styles.secondary}
-            disabled={mobileSettings.emotionMode === "off"}
-            onPress={() => {
-              const signals: MobileSettings["interactionSignal"][] = [
-                "calm",
-                "focused",
-                "frustrated",
-                "uncertain",
-                "excited",
-                "tired",
-              ];
-              const next =
-                signals[
-                  (signals.indexOf(mobileSettings.interactionSignal) + 1) %
-                    signals.length
-                ];
-              void updateMobileSettings({ interactionSignal: next });
-            }}
-          >
-            <Text style={styles.secondaryText}>Change interaction signal</Text>
-          </Pressable>
-          <Text style={styles.message}>
-            Signals are user-selected. Camera, voice-emotion, and biometric
-            inference are not used.
-          </Text>
-          <Text style={styles.missionText}>Scoped settings</Text>
-          <Text style={styles.missionMeta}>
-            Save or load the current settings for a project, agent, or session.
-          </Text>
-          <View style={styles.toggleRow}>
-            {(["global", "project", "agent", "session"] as const).map(
-              (scope) => (
+            </>
+          ) : null}
+          {settingsCategory === "runtime" ? (
+            <>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>Execution preference</Text>
+                  <Text style={styles.missionMeta}>
+                    {mobileSettings.executionMode === "guided"
+                      ? "Guided · review risky actions"
+                      : "YOLO · trusted workspace automation"}
+                  </Text>
+                </View>
                 <Pressable
-                  key={scope}
                   accessibilityRole="button"
-                  accessibilityLabel={`Select ${scope} settings scope`}
-                  style={[
-                    styles.scopeChip,
-                    settingsScope === scope && styles.scopeChipActive,
-                  ]}
-                  onPress={() => setSettingsScope(scope)}
+                  accessibilityLabel="Change execution preference"
+                  style={styles.smallAction}
+                  onPress={() =>
+                    void updateMobileSettings({
+                      executionMode:
+                        mobileSettings.executionMode === "guided"
+                          ? "yolo"
+                          : "guided",
+                    })
+                  }
                 >
-                  <Text style={styles.smallActionText}>{scope}</Text>
+                  <Text style={styles.smallActionText}>Change</Text>
                 </Pressable>
-              ),
-            )}
-          </View>
-          {settingsScope !== "global" ? (
-            <TextInput
-              accessibilityLabel={`${settingsScope} settings identifier`}
-              maxLength={160}
-              onChangeText={setSettingsScopeId}
-              placeholder={`${settingsScope} identifier`}
-              placeholderTextColor="#52617f"
-              style={styles.input}
-              value={settingsScopeId}
-            />
+              </View>
+              <Text style={styles.message}>
+                Approval state, audit activity, and validation remain visible in
+                both modes.
+              </Text>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>Default local model</Text>
+                  <Text style={styles.missionMeta}>{mobileSettings.model}</Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Change default local model"
+                  style={styles.smallAction}
+                  onPress={() => {
+                    const options = [
+                      "Qwen3-1.7B",
+                      "Phi-4-mini",
+                      "Llama-3.2-3B",
+                    ];
+                    const next =
+                      options[
+                        (options.indexOf(mobileSettings.model) + 1) %
+                          options.length
+                      ];
+                    void updateMobileSettings({ model: next });
+                  }}
+                >
+                  <Text style={styles.smallActionText}>Change</Text>
+                </Pressable>
+              </View>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>Default agent</Text>
+                  <Text style={styles.missionMeta}>
+                    {mobileSettings.defaultAgent}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Change default agent"
+                  style={styles.smallAction}
+                  onPress={() => {
+                    const index = bundledAgents.findIndex(
+                      (agent) => agent.name === mobileSettings.defaultAgent,
+                    );
+                    const next =
+                      bundledAgents[(index + 1) % bundledAgents.length]?.name ||
+                      "leo";
+                    void updateMobileSettings({ defaultAgent: next });
+                  }}
+                >
+                  <Text style={styles.smallActionText}>Change</Text>
+                </Pressable>
+              </View>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>Agent protocol</Text>
+                  <Text style={styles.missionMeta}>
+                    {mobileSettings.protocol}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Change agent protocol"
+                  style={styles.smallAction}
+                  onPress={() => {
+                    const options: MobileSettings["protocol"][] = [
+                      "MCP Lite",
+                      "MCP Bridge",
+                      "Full MCP",
+                    ];
+                    const next =
+                      options[
+                        (options.indexOf(mobileSettings.protocol) + 1) %
+                          options.length
+                      ];
+                    void updateMobileSettings({ protocol: next });
+                  }}
+                >
+                  <Text style={styles.smallActionText}>Change</Text>
+                </Pressable>
+              </View>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>API provider</Text>
+                  <Text style={styles.missionMeta}>
+                    {mobileSettings.apiProvider}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Change API provider"
+                  style={styles.smallAction}
+                  onPress={() => {
+                    const options = ["local", "openai", "anthropic", "gemini"];
+                    const next =
+                      options[
+                        (options.indexOf(mobileSettings.apiProvider) + 1) %
+                          options.length
+                      ];
+                    void updateMobileSettings({ apiProvider: next });
+                  }}
+                >
+                  <Text style={styles.smallActionText}>Change</Text>
+                </Pressable>
+              </View>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>Encrypted local memory</Text>
+                  <Text style={styles.missionMeta}>
+                    {mobileSettings.memoryEnabled ? "Enabled" : "Disabled"}
+                  </Text>
+                </View>
+                <Switch
+                  accessibilityLabel="Enable encrypted local memory"
+                  value={mobileSettings.memoryEnabled}
+                  onValueChange={(enabled) =>
+                    void updateMobileSettings({ memoryEnabled: enabled })
+                  }
+                  trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+                  thumbColor="#f1f1f2"
+                />
+              </View>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>
+                    Local model quantization
+                  </Text>
+                  <Text style={styles.missionMeta}>
+                    {mobileSettings.quantization}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Change local model quantization"
+                  style={styles.smallAction}
+                  onPress={() => {
+                    const options: MobileSettings["quantization"][] = [
+                      "Q4_K_M",
+                      "Q4_0",
+                      "Q3_K_S",
+                    ];
+                    const next =
+                      options[
+                        (options.indexOf(mobileSettings.quantization) + 1) %
+                          options.length
+                      ];
+                    void updateMobileSettings({ quantization: next });
+                  }}
+                >
+                  <Text style={styles.smallActionText}>Change</Text>
+                </Pressable>
+              </View>
+            </>
           ) : null}
-          <View style={styles.toggleRow}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Save scoped settings"
-              style={styles.smallAction}
-              onPress={() => void saveScopedMobileSettings()}
-            >
-              <Text style={styles.smallActionText}>Save scope</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Load scoped settings"
-              style={styles.smallAction}
-              onPress={() => void loadScopedMobileSettings()}
-            >
-              <Text style={styles.smallActionText}>Load scope</Text>
-            </Pressable>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Preview effective scoped settings"
-            style={styles.secondary}
-            onPress={() => void previewScopedMobileSettings()}
-          >
-            <Text style={styles.secondaryText}>Preview effective settings</Text>
-          </Pressable>
-          {settingsPreviewMessage ? (
-            <Text style={styles.message}>{settingsPreviewMessage}</Text>
+          {settingsCategory === "voice" ? (
+            <>
+              <View style={styles.toggleRow}>
+                <Text style={styles.message}>Enable voice command input</Text>
+                <Switch
+                  accessibilityLabel="Enable voice command input"
+                  value={mobileSettings.voiceEnabled}
+                  onValueChange={(enabled) =>
+                    void updateMobileSettings({ voiceEnabled: enabled })
+                  }
+                  trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+                  thumbColor="#f1f1f2"
+                />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Test voice output"
+                style={styles.secondary}
+                onPress={() => {
+                  const name = mobileSettings.personaName.trim() || "Leo";
+                  try {
+                    const speechText = normalizeSpeechText(
+                      `Hello from ${name}. SpartanCode voice output is ready.`,
+                    );
+                    if (!speechText) throw new Error("Speech text is empty");
+                    Speech.speak(speechText, { language: "en-US", rate: 0.95 });
+                    setMessage("Voice output started");
+                  } catch (error) {
+                    setMessage(
+                      `Voice output unavailable: ${error instanceof Error ? error.message : String(error)}`,
+                    );
+                  }
+                }}
+              >
+                <Text style={styles.secondaryText}>Test voice output</Text>
+              </Pressable>
+              <Text style={styles.missionText}>Persona and wake word</Text>
+              <TextInput
+                accessibilityLabel="Assistant name"
+                maxLength={48}
+                onChangeText={(value) =>
+                  setMobileSettings((current) => ({
+                    ...current,
+                    personaName: value,
+                  }))
+                }
+                onEndEditing={() =>
+                  void updateMobileSettings({
+                    personaName: mobileSettings.personaName,
+                  })
+                }
+                placeholder="Assistant name"
+                placeholderTextColor="#52617f"
+                style={styles.input}
+                value={mobileSettings.personaName}
+              />
+              <TextInput
+                accessibilityLabel="Wake word"
+                maxLength={48}
+                onChangeText={(value) =>
+                  setMobileSettings((current) => ({
+                    ...current,
+                    wakeWord: value,
+                  }))
+                }
+                onEndEditing={() =>
+                  void updateMobileSettings({
+                    wakeWord: mobileSettings.wakeWord,
+                  })
+                }
+                placeholder="Wake word"
+                placeholderTextColor="#52617f"
+                style={styles.input}
+                value={mobileSettings.wakeWord}
+              />
+              <Text style={styles.message}>
+                Identity preferences are stored locally; speech runtime
+                availability is reported separately.
+              </Text>
+              <View style={styles.toggleRow}>
+                <View style={styles.missionBody}>
+                  <Text style={styles.missionText}>Adaptive interaction</Text>
+                  <Text style={styles.missionMeta}>
+                    {mobileSettings.emotionMode === "explicit"
+                      ? `Explicit signal · ${mobileSettings.interactionSignal}`
+                      : "Off"}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Change adaptive interaction mode"
+                  style={styles.smallAction}
+                  onPress={() =>
+                    void updateMobileSettings({
+                      emotionMode:
+                        mobileSettings.emotionMode === "explicit"
+                          ? "off"
+                          : "explicit",
+                    })
+                  }
+                >
+                  <Text style={styles.smallActionText}>Change</Text>
+                </Pressable>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Change interaction signal"
+                style={styles.secondary}
+                disabled={mobileSettings.emotionMode === "off"}
+                onPress={() => {
+                  const signals: MobileSettings["interactionSignal"][] = [
+                    "calm",
+                    "focused",
+                    "frustrated",
+                    "uncertain",
+                    "excited",
+                    "tired",
+                  ];
+                  const next =
+                    signals[
+                      (signals.indexOf(mobileSettings.interactionSignal) + 1) %
+                        signals.length
+                    ];
+                  void updateMobileSettings({ interactionSignal: next });
+                }}
+              >
+                <Text style={styles.secondaryText}>
+                  Change interaction signal
+                </Text>
+              </Pressable>
+              <Text style={styles.message}>
+                Signals are user-selected. Camera, voice-emotion, and biometric
+                inference are not used.
+              </Text>
+            </>
           ) : null}
-          <Text style={styles.message}>{settingsScopeMessage}</Text>
-          <Text style={styles.missionText}>Remote Git (optional bridge)</Text>
-          <Text style={styles.message}>
-            Android remains fully standalone. These controls use the
-            authenticated bridge only when you want to inspect or update the
-            connected workspace.
-          </Text>
-          <View style={styles.actionRow}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Refresh remote Git status"
-              style={styles.smallAction}
-              onPress={() => void runRemoteGit("status")}
-            >
-              <Text style={styles.smallActionText}>Refresh status</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="View remote Git diff"
-              style={styles.smallAction}
-              onPress={() => void runRemoteGit("diff")}
-            >
-              <Text style={styles.smallActionText}>View diff</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Stage remote Git changes"
-              style={styles.smallAction}
-              onPress={() => void runRemoteGit("stage")}
-            >
-              <Text style={styles.smallActionText}>Stage changes</Text>
-            </Pressable>
-          </View>
-          <TextInput
-            accessibilityLabel="Remote Git commit message"
-            maxLength={72}
-            onChangeText={setRemoteGitCommitMessage}
-            placeholder="Remote Git commit message"
-            placeholderTextColor="#52617f"
-            style={styles.input}
-            value={remoteGitCommitMessage}
-          />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Commit remote Git changes"
-            style={styles.secondary}
-            onPress={() => void runRemoteGit("commit")}
-          >
-            <Text style={styles.secondaryText}>Commit changes</Text>
-          </Pressable>
-          {remoteGitMessage ? (
-            <Text style={styles.message}>{remoteGitMessage}</Text>
+          {settingsCategory === "scope" ? (
+            <>
+              <Text style={styles.missionText}>Scoped settings</Text>
+              <Text style={styles.missionMeta}>
+                Save or load the current settings for a project, agent, or
+                session.
+              </Text>
+              <View style={styles.toggleRow}>
+                {(["global", "project", "agent", "session"] as const).map(
+                  (scope) => (
+                    <Pressable
+                      key={scope}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Select ${scope} settings scope`}
+                      style={[
+                        styles.scopeChip,
+                        settingsScope === scope && styles.scopeChipActive,
+                      ]}
+                      onPress={() => setSettingsScope(scope)}
+                    >
+                      <Text style={styles.smallActionText}>{scope}</Text>
+                    </Pressable>
+                  ),
+                )}
+              </View>
+              {settingsScope !== "global" ? (
+                <TextInput
+                  accessibilityLabel={`${settingsScope} settings identifier`}
+                  maxLength={160}
+                  onChangeText={setSettingsScopeId}
+                  placeholder={`${settingsScope} identifier`}
+                  placeholderTextColor="#52617f"
+                  style={styles.input}
+                  value={settingsScopeId}
+                />
+              ) : null}
+              <View style={styles.toggleRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Save scoped settings"
+                  style={styles.smallAction}
+                  onPress={() => void saveScopedMobileSettings()}
+                >
+                  <Text style={styles.smallActionText}>Save scope</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Load scoped settings"
+                  style={styles.smallAction}
+                  onPress={() => void loadScopedMobileSettings()}
+                >
+                  <Text style={styles.smallActionText}>Load scope</Text>
+                </Pressable>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Preview effective scoped settings"
+                style={styles.secondary}
+                onPress={() => void previewScopedMobileSettings()}
+              >
+                <Text style={styles.secondaryText}>
+                  Preview effective settings
+                </Text>
+              </Pressable>
+              {settingsPreviewMessage ? (
+                <Text style={styles.message}>{settingsPreviewMessage}</Text>
+              ) : null}
+              <Text style={styles.message}>{settingsScopeMessage}</Text>
+            </>
           ) : null}
-          {remoteGitStatus ? (
-            <Text style={styles.missionMeta}>Status: {remoteGitStatus}</Text>
+          {settingsCategory === "bridge" ? (
+            <>
+              <Text style={styles.missionText}>
+                Remote Git (optional bridge)
+              </Text>
+              <Text style={styles.message}>
+                Android remains fully standalone. These controls use the
+                authenticated bridge only when you want to inspect or update the
+                connected workspace.
+              </Text>
+              <View style={styles.actionRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Refresh remote Git status"
+                  style={styles.smallAction}
+                  onPress={() => void runRemoteGit("status")}
+                >
+                  <Text style={styles.smallActionText}>Refresh status</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="View remote Git diff"
+                  style={styles.smallAction}
+                  onPress={() => void runRemoteGit("diff")}
+                >
+                  <Text style={styles.smallActionText}>View diff</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Stage remote Git changes"
+                  style={styles.smallAction}
+                  onPress={() => void runRemoteGit("stage")}
+                >
+                  <Text style={styles.smallActionText}>Stage changes</Text>
+                </Pressable>
+              </View>
+              <TextInput
+                accessibilityLabel="Remote Git commit message"
+                maxLength={72}
+                onChangeText={setRemoteGitCommitMessage}
+                placeholder="Remote Git commit message"
+                placeholderTextColor="#52617f"
+                style={styles.input}
+                value={remoteGitCommitMessage}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Commit remote Git changes"
+                style={styles.secondary}
+                onPress={() => void runRemoteGit("commit")}
+              >
+                <Text style={styles.secondaryText}>Commit changes</Text>
+              </Pressable>
+              {remoteGitMessage ? (
+                <Text style={styles.message}>{remoteGitMessage}</Text>
+              ) : null}
+              {remoteGitStatus ? (
+                <Text style={styles.missionMeta}>
+                  Status: {remoteGitStatus}
+                </Text>
+              ) : null}
+              {remoteGitDiff ? (
+                <Text style={styles.missionMeta}>Diff: {remoteGitDiff}</Text>
+              ) : null}
+              <View style={styles.toggleRow}>
+                <Text style={styles.message}>Sync automatically on resume</Text>
+                <Switch
+                  accessibilityLabel="Sync automatically on resume"
+                  value={mobileSettings.autoSync}
+                  onValueChange={(enabled) =>
+                    void updateMobileSettings({ autoSync: enabled })
+                  }
+                  trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
+                  thumbColor="#f1f1f2"
+                />
+              </View>
+            </>
           ) : null}
-          {remoteGitDiff ? (
-            <Text style={styles.missionMeta}>Diff: {remoteGitDiff}</Text>
-          ) : null}
-          <View style={styles.toggleRow}>
-            <Text style={styles.message}>Sync automatically on resume</Text>
-            <Switch
-              accessibilityLabel="Sync automatically on resume"
-              value={mobileSettings.autoSync}
-              onValueChange={(enabled) =>
-                void updateMobileSettings({ autoSync: enabled })
-              }
-              trackColor={{ false: "#3a3d42", true: "#8f1e2c" }}
-              thumbColor="#f1f1f2"
-            />
-          </View>
         </View>
 
         <Text style={styles.section}>Remote planning</Text>
@@ -2462,6 +2541,24 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   actionRow: { flexDirection: "row", gap: 8, marginTop: 10 },
+  settingsMenu: { gap: 8, marginTop: 12 },
+  settingsMenuItem: {
+    alignItems: "center",
+    backgroundColor: "#15171b",
+    borderColor: "#3a3d42",
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+  },
+  settingsMenuItemActive: {
+    backgroundColor: "#43151f",
+    borderColor: "#ff3b4f",
+  },
+  settingsMenuLabel: { color: "#f1f1f2", fontSize: 14, fontWeight: "700" },
+  settingsMenuChevron: { color: "#ff3b4f", fontSize: 24, lineHeight: 24 },
   smallAction: {
     borderColor: "#ff3b4f",
     borderRadius: 8,
