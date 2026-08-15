@@ -28,7 +28,10 @@
     "url": "git+https://github.com/Spartan-Software-Enterprises/SpartanCode.git"
   },
   "keywords": [],
-  "author": "",
+  "author": {
+    "name": "Spartan Software Enterprises",
+    "email": "opensource@spartan-gaming.com"
+  },
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
