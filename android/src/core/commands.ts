@@ -51,7 +51,7 @@ export function resolveAndroidSlash(input: string): {
   const trimmed = input.trim();
   if (!trimmed.startsWith("/")) return { matched: false };
   const parts = trimmed.split(/\s+/);
-  const cmd = parts[0].toLowerCase();
+  const cmd = (parts[0] || "").toLowerCase();
   const args = parts.slice(1).join(" ");
 
   const found = ANDROID_SLASH_COMMANDS.find((c) => c.command === cmd);

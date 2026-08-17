@@ -46,9 +46,9 @@ export function spawnAndroidSubagent(
   type: string,
   customName?: string,
 ): SubagentInstance {
+  const fallback = DEFAULT_ANDROID_SUBAGENTS[0]!;
   const template =
-    DEFAULT_ANDROID_SUBAGENTS.find((s) => s.type === type) ||
-    DEFAULT_ANDROID_SUBAGENTS[0];
+    DEFAULT_ANDROID_SUBAGENTS.find((s) => s.type === type) || fallback;
   const conversationId = `sub-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   return {
     conversationId,

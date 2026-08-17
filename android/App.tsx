@@ -854,11 +854,12 @@ export default function App() {
       ];
       next.activity = [
         {
+          id: `act-${Date.now()}`,
           agent: slash.matched ? "Slash command" : evidence.activity.agent,
           message: slash.matched
             ? `Executed command: ${slash.command} ${slash.args || ""}`.trim()
             : evidence.activity.message,
-          timestamp: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
         },
         ...(next.activity ?? []),
       ];
