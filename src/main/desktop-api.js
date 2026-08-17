@@ -86,6 +86,11 @@ const {
   listServerProviders,
   listServerTemplates,
 } = require("./remote-guidance");
+const { createSubagentsManager } = require("./subagents-manager");
+const { createTaskScheduler } = require("./task-scheduler");
+const { createCustomizationsHub } = require("./customizations-hub");
+const { createCommandDispatcher } = require("./command-dispatcher");
+const { computeLineDiff } = require("./diff-engine");
 
 function registerDesktopApi({
   store,
@@ -131,6 +136,90 @@ function registerDesktopApi({
   });
   const privacyNetwork = createPrivacyNetwork();
   const marketplaceTrust = createMarketplaceTrustRegistry();
+  const subagentsManager = createSubagentsManager();
+  const taskScheduler = createTaskScheduler({
+    onNotification: (notification) => {
+      store.addActivity({
+        agent: "Task scheduler",
+        message: `Task ${notification.taskId} fired: ${notification.prompt}`,
+      });
+      window.webContents.send("workspace:changed", store.snapshot());
+    },
+  });
+  const currentWorkspace = store.snapshot().settings.workspacePath;
+  const customizationsHub = createCustomizationsHub(currentWorkspace);
+  const commandDispatcher = createCommandDispatcher({
+    workspacePath: currentWorkspace,
+    subagentsManager,
+    taskScheduler,
+    customizationsHub,
+  });
+
+  ipcMain.handle("subagents:list", () => subagentsManager.listSubagents());
+  ipcMain.handle("subagents:templates", () =>
+    subagentsManager.listAvailableTemplates(),
+  );
+  ipcMain.handle("subagents:spawn", (_event, options) =>
+    subagentsManager.spawnSubagent(options || {}),
+  );
+  ipcMain.handle("subagents:message", (_event, { recipientId, content }) =>
+    subagentsManager.sendMessage(recipientId, content),
+  );
+  ipcMain.handle("subagents:kill", (_event, conversationId) =>
+    subagentsManager.killSubagent(conversationId),
+  );
+  ipcMain.handle("subagents:kill-all", () => subagentsManager.killAll());
+
+  ipcMain.handle("tasks:list", () => taskScheduler.listTasks());
+  ipcMain.handle("tasks:schedule", (_event, options) =>
+    taskScheduler.schedule(options || {}),
+  );
+  ipcMain.handle("tasks:cancel", (_event, taskId) =>
+    taskScheduler.cancelTask(taskId),
+  );
+  ipcMain.handle("tasks:status", (_event, taskId) =>
+    taskScheduler.getTaskStatus(taskId),
+  );
+  ipcMain.handle("tasks:input", (_event, { taskId, input }) =>
+    taskScheduler.sendInput(taskId, input),
+  );
+
+  ipcMain.handle("customizations:get", () =>
+    customizationsHub.getAllCustomizations(),
+  );
+  ipcMain.handle("customizations:rules", () =>
+    customizationsHub.discoverRules(),
+  );
+  ipcMain.handle("customizations:skills", () =>
+    customizationsHub.discoverSkills(),
+  );
+  ipcMain.handle("customizations:hooks", () =>
+    customizationsHub.discoverHooks(),
+  );
+  ipcMain.handle("customizations:mcp", () =>
+    customizationsHub.discoverMcpServers(),
+  );
+  ipcMain.handle("customizations:add-rule", (_event, rule) =>
+    customizationsHub.addCustomRule(rule),
+  );
+  ipcMain.handle("customizations:add-skill", (_event, skill) =>
+    customizationsHub.addCustomSkill(skill),
+  );
+
+  ipcMain.handle("command:slash-list", () =>
+    commandDispatcher.listSlashCommands(),
+  );
+  ipcMain.handle("command:slash-resolve", (_event, input) =>
+    commandDispatcher.resolveSlashCommand(input),
+  );
+  ipcMain.handle("command:mentions-resolve", (_event, input) =>
+    commandDispatcher.resolveMentions(input),
+  );
+
+  ipcMain.handle("diff:compute", (_event, { oldText, newText }) =>
+    computeLineDiff(oldText, newText),
+  );
+
   ipcMain.handle("runtime:status", () => getRuntimeStatus());
   ipcMain.handle("runtime:adapters", () => runtimeRegistry.list());
   ipcMain.handle("browser:status", () => browserAutomation.status());
@@ -635,6 +724,8 @@ function registerDesktopApi({
     const settings = store.updateSettings({
       workspacePath: result.filePaths[0],
     });
+    customizationsHub.setWorkspace(settings.workspacePath);
+    commandDispatcher.setWorkspace(settings.workspacePath);
     window.webContents.send("workspace:changed", store.snapshot());
     return settings.workspacePath;
   });

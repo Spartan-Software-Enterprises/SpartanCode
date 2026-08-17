@@ -121,6 +121,8 @@ import {
   normalizeGitOutput,
   validateGitCommitMessage,
 } from "./src/core/git";
+import { resolveAndroidSlash } from "./src/core/commands";
+import { spawnAndroidSubagent } from "./src/core/subagents";
 
 const initialSnapshot: MobileSnapshot = {
   missions: [],
@@ -835,6 +837,10 @@ export default function App() {
       ],
     };
     const queuedMission = next.missions[0]!;
+    const slash = resolveAndroidSlash(description);
+    if (slash.matched && slash.command === "/subagent") {
+      spawnAndroidSubagent(slash.args || "engineer");
+    }
     if (snapshot.offline) {
       const evidence = createLocalPlanningEvidence(
         queuedMission.id,
@@ -846,7 +852,16 @@ export default function App() {
           (item) => item.id !== evidence.artifact.id,
         ),
       ];
-      next.activity = [evidence.activity, ...(next.activity ?? [])];
+      next.activity = [
+        {
+          agent: slash.matched ? "Slash command" : evidence.activity.agent,
+          message: slash.matched
+            ? `Executed command: ${slash.command} ${slash.args || ""}`.trim()
+            : evidence.activity.message,
+          timestamp: new Date().toISOString(),
+        },
+        ...(next.activity ?? []),
+      ];
       next.auditLog = [evidence.audit, ...(next.auditLog ?? [])];
     }
     try {

@@ -171,7 +171,35 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("mission:start", description),
   resolveApproval: (approvalId, decision) =>
     ipcRenderer.invoke("approval:resolve", { approvalId, decision }),
-  clearMissions: () => ipcRenderer.invoke("missions:clear"),
+  listSubagents: () => ipcRenderer.invoke("subagents:list"),
+  listSubagentTemplates: () => ipcRenderer.invoke("subagents:templates"),
+  spawnSubagent: (options) => ipcRenderer.invoke("subagents:spawn", options),
+  sendSubagentMessage: (recipientId, content) =>
+    ipcRenderer.invoke("subagents:message", { recipientId, content }),
+  killSubagent: (conversationId) =>
+    ipcRenderer.invoke("subagents:kill", conversationId),
+  killAllSubagents: () => ipcRenderer.invoke("subagents:kill-all"),
+  listTasks: () => ipcRenderer.invoke("tasks:list"),
+  scheduleTask: (options) => ipcRenderer.invoke("tasks:schedule", options),
+  cancelTask: (taskId) => ipcRenderer.invoke("tasks:cancel", taskId),
+  getTaskStatus: (taskId) => ipcRenderer.invoke("tasks:status", taskId),
+  sendTaskInput: (taskId, input) =>
+    ipcRenderer.invoke("tasks:input", { taskId, input }),
+  getCustomizations: () => ipcRenderer.invoke("customizations:get"),
+  listCustomRules: () => ipcRenderer.invoke("customizations:rules"),
+  listCustomSkills: () => ipcRenderer.invoke("customizations:skills"),
+  listCustomHooks: () => ipcRenderer.invoke("customizations:hooks"),
+  listCustomMcp: () => ipcRenderer.invoke("customizations:mcp"),
+  addCustomRule: (rule) => ipcRenderer.invoke("customizations:add-rule", rule),
+  addCustomSkill: (skill) =>
+    ipcRenderer.invoke("customizations:add-skill", skill),
+  listSlashCommands: () => ipcRenderer.invoke("command:slash-list"),
+  resolveSlashCommand: (input) =>
+    ipcRenderer.invoke("command:slash-resolve", input),
+  resolveMentions: (input) =>
+    ipcRenderer.invoke("command:mentions-resolve", input),
+  computeDiff: (oldText, newText) =>
+    ipcRenderer.invoke("diff:compute", { oldText, newText }),
   onWorkspaceChanged: (callback) => {
     const listener = (_event, snapshot) => callback(snapshot);
     ipcRenderer.on("workspace:changed", listener);
