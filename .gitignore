@@ -5,3 +5,4 @@ dist/
 out/
 android/android/
 .spartancode/external-skills/
+node_modules/
