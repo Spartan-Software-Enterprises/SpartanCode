@@ -39,4 +39,16 @@ fi
 node ../../scripts/release-manifest.js \
   --output "$native_dir/app/build/release-evidence" \
   --scan "$native_dir/app/build/outputs"
+# Rename APK to project-version-variant format
+version="$(node -p "require('./app.json').expo.version")"
+apk_dir="$native_dir/app/build/outputs/apk"
+if [ -d "$apk_dir/release" ]; then
+  for apk in "$apk_dir"/release/*.apk; do
+    [ -f "$apk" ] || continue
+    dir="$(dirname "$apk")"
+    new_name="SpartanCode-v${version}-release.apk"
+    mv "$apk" "$dir/$new_name"
+    echo "Renamed APK: $dir/$new_name"
+  done
+fi
 echo "Release artifacts are under $native_dir/app/build/outputs/"
