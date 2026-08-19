@@ -1,7 +1,4 @@
-import {
-  ANDROID_SLASH_COMMANDS,
-  resolveAndroidSlash,
-} from "./commands";
+import { ANDROID_SLASH_COMMANDS, resolveAndroidSlash } from "./commands";
 
 describe("Android Slash Commands", () => {
   it("provides available slash commands", () => {

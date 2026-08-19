@@ -1,7 +1,4 @@
-import {
-  DEFAULT_ANDROID_SUBAGENTS,
-  spawnAndroidSubagent,
-} from "./subagents";
+import { DEFAULT_ANDROID_SUBAGENTS, spawnAndroidSubagent } from "./subagents";
 
 describe("Android Subagents", () => {
   it("provides default subagent templates", () => {
