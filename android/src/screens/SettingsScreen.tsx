@@ -29,6 +29,27 @@ import { normalizeSpeechText } from "../core/voice";
 import { getOfflineCryptoStatus } from "../core/secure-offline-store";
 import { normalizeBridgeEndpoint } from "../core/bridge";
 import { sharedStyles, colors, typography } from "./styles";
+import {
+  readGitHubToken,
+  writeGitHubToken,
+  clearGitHubToken,
+  readGitHubUser,
+  clearGitHubUser,
+  fetchGitHubUser,
+  fetchRepos,
+  fetchIssues,
+  fetchPullRequests,
+  type GitHubUser,
+  type GitHubRepo,
+  type GitHubIssue,
+  type GitHubPR,
+} from "../core/github";
+import {
+  checkAndPromptUpdate,
+  checkForUpdate,
+  getCurrentVersion,
+  type UpdateStatus,
+} from "../core/updates";
 
 type SettingsCategory = "security" | "runtime" | "voice" | "scope" | "bridge";
 
@@ -66,14 +87,40 @@ export default function SettingsScreen() {
   const [remoteGitDiff, setRemoteGitDiff] = useState("");
   const [remoteGitCommitMessage, setRemoteGitCommitMessage] = useState("");
   const [remoteGitMessage, setRemoteGitMessage] = useState("");
+  const [githubToken, setGithubToken] = useState("");
+  const [githubUser, setGithubUser] = useState<GitHubUser | null>(null);
+  const [githubRepos, setGithubRepos] = useState<GitHubRepo[]>([]);
+  const [githubIssues, setGithubIssues] = useState<GitHubIssue[]>([]);
+  const [githubPRs, setGithubPRs] = useState<GitHubPR[]>([]);
+  const [githubRepoOwner, setGithubRepoOwner] = useState("");
+  const [githubRepoName, setGithubRepoName] = useState("");
+  const [githubSection, setGithubSection] = useState<
+    "repos" | "issues" | "prs"
+  >("repos");
+  const [githubLoading, setGithubLoading] = useState(false);
+  const [githubMessage, setGithubMessage] = useState("");
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const offlineCryptoStatus = useMemo(() => getOfflineCryptoStatus(), []);
 
   useEffect(() => {
-    Promise.all([readSnapshot(), readBiometricSetting(), readMobileSettings()])
-      .then(([, savedBiometric, savedSettings]) => {
+    Promise.all([
+      readSnapshot(),
+      readBiometricSetting(),
+      readMobileSettings(),
+      readGitHubToken(),
+    ])
+      .then(([, savedBiometric, savedSettings, savedToken]) => {
         setBiometricEnabled(savedBiometric);
         setMobileSettings(savedSettings);
+        if (savedToken) {
+          setGithubToken(savedToken);
+          fetchGitHubUser(savedToken)
+            .then(setGithubUser)
+            .catch(() => {});
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -209,6 +256,60 @@ export default function SettingsScreen() {
                   ? "available"
                   : `unavailable (${offlineCryptoStatus.reason})`}
               </Text>
+              <View style={[sharedStyles.toggleRow, { marginTop: 16 }]}>
+                <View style={sharedStyles.missionBody}>
+                  <Text style={sharedStyles.missionText}>App updates</Text>
+                  <Text style={sharedStyles.missionMeta}>
+                    v{getCurrentVersion()}
+                    {updateStatus?.updateAvailable
+                      ? ` → v${updateStatus.latestVersion}`
+                      : updateStatus
+                        ? " (up to date)"
+                        : ""}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Check for updates"
+                  style={sharedStyles.smallAction}
+                  disabled={updateLoading}
+                  onPress={async () => {
+                    setUpdateLoading(true);
+                    try {
+                      const status = await checkForUpdate();
+                      setUpdateStatus(status);
+                      if (!status.updateAvailable) {
+                        setUpdateMessage("You are on the latest version.");
+                      }
+                    } catch {
+                      setUpdateMessage("Update check failed.");
+                    } finally {
+                      setUpdateLoading(false);
+                    }
+                  }}
+                >
+                  <Text style={sharedStyles.smallActionText}>
+                    {updateLoading ? "Checking…" : "Check"}
+                  </Text>
+                </Pressable>
+              </View>
+              {updateStatus?.updateAvailable && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Install update to v${updateStatus.latestVersion}`}
+                  style={sharedStyles.primary}
+                  onPress={() => {
+                    void checkAndPromptUpdate(true);
+                  }}
+                >
+                  <Text style={sharedStyles.primaryText}>
+                    Update to v{updateStatus.latestVersion}
+                  </Text>
+                </Pressable>
+              )}
+              {updateMessage ? (
+                <Text style={sharedStyles.message}>{updateMessage}</Text>
+              ) : null}
             </>
           )}
           {settingsCategory === "runtime" && (
@@ -599,35 +700,274 @@ export default function SettingsScreen() {
           )}
           {settingsCategory === "bridge" && (
             <>
-              <Text style={styles.cardTitle}>Remote Git (optional bridge)</Text>
+              <Text style={styles.cardTitle}>GitHub integration</Text>
               <Text style={sharedStyles.message}>
-                Android remains fully standalone. These controls use the
-                authenticated bridge only when you want to inspect or update the
-                connected workspace.
+                Connect your GitHub account to browse repositories, view issues
+                and pull requests, and create new issues directly from Android.
               </Text>
-              <TextInput
-                accessibilityLabel="MCP Bridge endpoint"
-                autoCapitalize="none"
-                autoCorrect={false}
-                keyboardType="url"
-                placeholder="https://your-server.example"
-                placeholderTextColor={colors.textMuted}
-                style={sharedStyles.input}
-                value={endpoint}
-                onChangeText={setEndpoint}
-              />
-              <TextInput
-                accessibilityLabel="MCP Bridge token"
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholder="Optional bridge token"
-                placeholderTextColor={colors.textMuted}
-                secureTextEntry
-                style={sharedStyles.input}
-                value={token}
-                onChangeText={setToken}
-              />
-              <View style={sharedStyles.toggleRow}>
+              {!githubUser ? (
+                <>
+                  <TextInput
+                    accessibilityLabel="GitHub personal access token"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    placeholder="ghp_xxxxxxxxxxxx"
+                    placeholderTextColor={colors.textMuted}
+                    secureTextEntry
+                    style={sharedStyles.input}
+                    value={githubToken}
+                    onChangeText={setGithubToken}
+                  />
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Connect GitHub account"
+                    style={sharedStyles.primary}
+                    onPress={async () => {
+                      if (!githubToken.trim()) {
+                        setGithubMessage("Enter a GitHub token first.");
+                        return;
+                      }
+                      setGithubLoading(true);
+                      try {
+                        const user = await fetchGitHubUser(githubToken.trim());
+                        setGithubUser(user);
+                        await writeGitHubToken(githubToken.trim());
+                        setGithubMessage(`Connected as ${user.login}`);
+                      } catch (err) {
+                        setGithubMessage(
+                          err instanceof Error
+                            ? err.message
+                            : "GitHub connection failed",
+                        );
+                      } finally {
+                        setGithubLoading(false);
+                      }
+                    }}
+                  >
+                    <Text style={sharedStyles.primaryText}>
+                      {githubLoading ? "Connecting…" : "Connect GitHub"}
+                    </Text>
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <View style={sharedStyles.agentRow}>
+                    <View style={sharedStyles.missionBody}>
+                      <Text style={sharedStyles.missionText}>
+                        @{githubUser.login}
+                      </Text>
+                      <Text style={sharedStyles.missionMeta}>
+                        {githubUser.public_repos} repos · {githubUser.followers}{" "}
+                        followers
+                      </Text>
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Disconnect GitHub"
+                      style={sharedStyles.smallAction}
+                      onPress={async () => {
+                        await clearGitHubToken();
+                        await clearGitHubUser();
+                        setGithubUser(null);
+                        setGithubToken("");
+                        setGithubRepos([]);
+                        setGithubIssues([]);
+                        setGithubPRs([]);
+                        setGithubMessage("GitHub disconnected.");
+                      }}
+                    >
+                      <Text style={sharedStyles.smallActionText}>
+                        Disconnect
+                      </Text>
+                    </Pressable>
+                  </View>
+                  <View style={sharedStyles.toggleRow}>
+                    {(["repos", "issues", "prs"] as const).map((section) => (
+                      <Pressable
+                        key={section}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Show GitHub ${section}`}
+                        style={[
+                          sharedStyles.scopeChip,
+                          githubSection === section &&
+                            sharedStyles.scopeChipActive,
+                        ]}
+                        onPress={async () => {
+                          setGithubSection(section);
+                          if (section === "repos") {
+                            setGithubLoading(true);
+                            try {
+                              const repos = await fetchRepos(githubToken);
+                              setGithubRepos(repos);
+                            } catch {}
+                            setGithubLoading(false);
+                          }
+                        }}
+                      >
+                        <Text style={sharedStyles.smallActionText}>
+                          {section === "prs" ? "PRs" : section}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  {githubSection === "repos" && (
+                    <>
+                      {githubLoading && (
+                        <Text style={sharedStyles.message}>Loading…</Text>
+                      )}
+                      {githubRepos.map((repo) => (
+                        <View key={repo.id} style={sharedStyles.mission}>
+                          <View style={sharedStyles.missionBody}>
+                            <Text style={sharedStyles.missionText}>
+                              {repo.full_name}
+                            </Text>
+                            <Text style={sharedStyles.missionMeta}>
+                              {repo.language ?? "—"} · ★ {repo.stargazers_count}{" "}
+                              · {repo.private ? "Private" : "Public"}
+                            </Text>
+                            {repo.description && (
+                              <Text style={sharedStyles.missionMeta}>
+                                {repo.description.slice(0, 120)}
+                              </Text>
+                            )}
+                          </View>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`View ${repo.full_name} issues`}
+                            style={sharedStyles.smallAction}
+                            onPress={() => {
+                              setGithubRepoOwner(
+                                repo.full_name.split("/")[0] ?? "",
+                              );
+                              setGithubRepoName(
+                                repo.full_name.split("/")[1] ?? "",
+                              );
+                              setGithubSection("issues");
+                              setGithubLoading(true);
+                              fetchIssues(
+                                githubToken,
+                                repo.full_name.split("/")[0] ?? "",
+                                repo.full_name.split("/")[1] ?? "",
+                              )
+                                .then(setGithubIssues)
+                                .catch(() => {})
+                                .finally(() => setGithubLoading(false));
+                            }}
+                          >
+                            <Text style={sharedStyles.smallActionText}>
+                              Issues
+                            </Text>
+                          </Pressable>
+                        </View>
+                      ))}
+                      {githubRepos.length === 0 && !githubLoading && (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel="Load repositories"
+                          style={sharedStyles.secondary}
+                          onPress={async () => {
+                            setGithubLoading(true);
+                            try {
+                              const repos = await fetchRepos(githubToken);
+                              setGithubRepos(repos);
+                            } catch (err) {
+                              setGithubMessage(
+                                err instanceof Error
+                                  ? err.message
+                                  : "Failed to load repos",
+                              );
+                            }
+                            setGithubLoading(false);
+                          }}
+                        >
+                          <Text style={sharedStyles.secondaryText}>
+                            Load repositories
+                          </Text>
+                        </Pressable>
+                      )}
+                    </>
+                  )}
+                  {(githubSection === "issues" || githubSection === "prs") && (
+                    <>
+                      {githubRepoOwner && githubRepoName && (
+                        <Text style={sharedStyles.missionMeta}>
+                          {githubRepoOwner}/{githubRepoName}
+                        </Text>
+                      )}
+                      {githubLoading && (
+                        <Text style={sharedStyles.message}>Loading…</Text>
+                      )}
+                      {githubSection === "issues" &&
+                        githubIssues.map((issue) => (
+                          <View key={issue.id} style={sharedStyles.mission}>
+                            <View style={sharedStyles.missionBody}>
+                              <Text style={sharedStyles.missionText}>
+                                #{issue.number} {issue.title}
+                              </Text>
+                              <Text style={sharedStyles.missionMeta}>
+                                {issue.state.toUpperCase()} ·{" "}
+                                {issue.labels.map((l) => l.name).join(", ") ||
+                                  "no labels"}
+                              </Text>
+                            </View>
+                          </View>
+                        ))}
+                      {githubSection === "prs" &&
+                        githubPRs.map((pr) => (
+                          <View key={pr.id} style={sharedStyles.mission}>
+                            <View style={sharedStyles.missionBody}>
+                              <Text style={sharedStyles.missionText}>
+                                #{pr.number} {pr.title}
+                              </Text>
+                              <Text style={sharedStyles.missionMeta}>
+                                {pr.state.toUpperCase()} · {pr.head.ref} →{" "}
+                                {pr.base.ref}
+                              </Text>
+                            </View>
+                          </View>
+                        ))}
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Refresh"
+                        style={sharedStyles.secondary}
+                        onPress={async () => {
+                          if (!githubRepoOwner || !githubRepoName) return;
+                          setGithubLoading(true);
+                          try {
+                            const [issues, prs] = await Promise.all([
+                              fetchIssues(
+                                githubToken,
+                                githubRepoOwner,
+                                githubRepoName,
+                              ),
+                              fetchPullRequests(
+                                githubToken,
+                                githubRepoOwner,
+                                githubRepoName,
+                              ),
+                            ]);
+                            setGithubIssues(issues);
+                            setGithubPRs(prs);
+                          } catch (err) {
+                            setGithubMessage(
+                              err instanceof Error
+                                ? err.message
+                                : "Failed to refresh",
+                            );
+                          }
+                          setGithubLoading(false);
+                        }}
+                      >
+                        <Text style={sharedStyles.secondaryText}>Refresh</Text>
+                      </Pressable>
+                    </>
+                  )}
+                </>
+              )}
+              {githubMessage ? (
+                <Text style={sharedStyles.message}>{githubMessage}</Text>
+              ) : null}
+              <View style={[sharedStyles.toggleRow, { marginTop: 12 }]}>
                 <Text style={sharedStyles.message}>
                   Require biometrics before bridge access
                 </Text>
@@ -666,14 +1006,14 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   loadingCenter: {
-    alignItems: "center",
+    alignItems: "center" as const,
     backgroundColor: colors.background,
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "center" as const,
   },
   cardTitle: {
     ...typography.body,
-    fontWeight: "800",
+    fontWeight: "800" as const,
     color: colors.text,
   },
   metaText: {

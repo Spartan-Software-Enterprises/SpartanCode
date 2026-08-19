@@ -22,7 +22,8 @@
           "enableOpenCL": true,
           "forceCxx20": true
         }
-      ]
+      ],
+      "./plugins/withInstallUpdates"
     ],
     "scheme": "spartancode"
   }

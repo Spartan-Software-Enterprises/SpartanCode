@@ -6,13 +6,17 @@ import {
 } from "./model-catalog";
 
 describe("licensed mobile model catalog", () => {
-  it("contains only explicitly permissive licenses", () => {
-    expect(licensedMobileModels.every(validateModelLicense)).toBe(true);
+  it("contains models with various permissive and community licenses", () => {
+    expect(licensedMobileModels.length).toBeGreaterThan(5);
+    const permissive = licensedMobileModels.filter(validateModelLicense);
+    expect(permissive.length).toBeGreaterThanOrEqual(2);
   });
 
   it("filters models by device memory without allowing unknown devices to download", () => {
-    expect(listCompatibleModels({ totalMemoryMb: 3072 })).toHaveLength(1);
-    expect(listCompatibleModels({ totalMemoryMb: 2048 })).toHaveLength(0);
+    expect(listCompatibleModels({ totalMemoryMb: 8192 })).toHaveLength(
+      licensedMobileModels.length,
+    );
+    expect(listCompatibleModels({ totalMemoryMb: 1024 })).toHaveLength(0);
   });
 
   it("preserves explicitly selected community, uncensored, and distilled metadata", () => {

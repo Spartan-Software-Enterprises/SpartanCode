@@ -7,6 +7,8 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -127,70 +129,76 @@ export default function ChatScreen() {
   }
 
   return (
-    <SafeAreaView style={chatStyles.container}>
-      <ScrollView
-        style={chatStyles.messagesContainer}
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
-      >
-        {messages.map((msg) => (
-          <View key={msg.id} style={chatStyles.messageWrapper}>
-            <View
-              style={[
-                chatStyles.messageBubble,
-                msg.role === "user"
-                  ? chatStyles.userBubble
-                  : chatStyles.agentBubble,
-              ]}
-            >
-              <Text style={chatStyles.messageText}>{msg.content}</Text>
-            </View>
-          </View>
-        ))}
-        {isTyping && (
-          <View style={chatStyles.messageWrapper}>
-            <View style={[chatStyles.messageBubble, chatStyles.agentBubble]}>
-              <View style={localStyles.typingIndicator}>
-                <View style={localStyles.typingDot} />
-                <View style={localStyles.typingDot} />
-                <View style={localStyles.typingDot} />
+    <KeyboardAvoidingView
+      style={chatStyles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={0}
+    >
+      <SafeAreaView style={chatStyles.safeArea}>
+        <ScrollView
+          style={chatStyles.messagesContainer}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+        >
+          {messages.map((msg) => (
+            <View key={msg.id} style={chatStyles.messageWrapper}>
+              <View
+                style={[
+                  chatStyles.messageBubble,
+                  msg.role === "user"
+                    ? chatStyles.userBubble
+                    : chatStyles.agentBubble,
+                ]}
+              >
+                <Text style={chatStyles.messageText}>{msg.content}</Text>
               </View>
             </View>
-          </View>
-        )}
-      </ScrollView>
+          ))}
+          {isTyping && (
+            <View style={chatStyles.messageWrapper}>
+              <View style={[chatStyles.messageBubble, chatStyles.agentBubble]}>
+                <View style={localStyles.typingIndicator}>
+                  <View style={localStyles.typingDot} />
+                  <View style={localStyles.typingDot} />
+                  <View style={localStyles.typingDot} />
+                </View>
+              </View>
+            </View>
+          )}
+        </ScrollView>
 
-      <View style={chatStyles.composerContainer}>
-        <View style={chatStyles.composerRow}>
-          <TextInput
-            style={chatStyles.composerInput}
-            value={input}
-            onChangeText={setInput}
-            onSubmitEditing={sendMessage}
-            placeholder="Describe your mission... ( / for commands, @ to mention)"
-            placeholderTextColor={colors.textMuted}
-            multiline
-            maxLength={4000}
-          />
-          <Pressable
-            style={chatStyles.sendButton}
-            onPress={sendMessage}
-            disabled={!input.trim() || isTyping}
-          >
-            <Text
-              style={{
-                color: colors.textInverted,
-                fontSize: 20,
-                fontWeight: "800",
-              }}
+        <View style={chatStyles.composerContainer}>
+          <View style={chatStyles.composerRow}>
+            <TextInput
+              style={chatStyles.composerInput}
+              value={input}
+              onChangeText={setInput}
+              onSubmitEditing={sendMessage}
+              placeholder="Describe your mission... ( / for commands, @ to mention)"
+              placeholderTextColor={colors.textMuted}
+              multiline
+              maxLength={4000}
+            />
+            <Pressable
+              style={chatStyles.sendButton}
+              onPress={sendMessage}
+              disabled={!input.trim() || isTyping}
             >
-              ↑
-            </Text>
-          </Pressable>
+              <Text
+                style={{
+                  color: colors.textInverted,
+                  fontSize: 20,
+                  fontWeight: "800",
+                }}
+              >
+                ↑
+              </Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

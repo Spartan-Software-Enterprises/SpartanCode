@@ -10,6 +10,7 @@ import {
   Switch,
   Platform,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   readSnapshot,
   readCommunityModels,
@@ -23,7 +24,7 @@ import {
 } from "../core/model-catalog";
 import {
   searchHuggingFaceModels,
-  HuggingFaceSearchResult,
+  type HuggingFaceSearchResult,
 } from "../core/huggingface-catalog";
 import { createHuggingFaceModel } from "../core/model-catalog";
 import {
@@ -37,6 +38,11 @@ import { loadLlamaRnRuntime } from "../core/llama-rn-runtime";
 import { createMobileRuntimeRegistry } from "../core/local-runtime";
 import { listExtensions } from "../core/extensions";
 import { sharedStyles, colors } from "./styles";
+
+const EXTENSION_STATE_KEY = "spartancode.mobile.extension-states.v1";
+const DOWNLOADED_MODELS_KEY = "spartancode.mobile.downloaded-models.v1";
+
+type DownloadStatus = "idle" | "downloading" | "ready" | "error";
 
 export default function ModelsScreen() {
   const [snapshot, setSnapshot] = useState<MobileSnapshot>({
@@ -57,6 +63,15 @@ export default function ModelsScreen() {
   const [hfSearching, setHfSearching] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [downloadStates, setDownloadStates] = useState<
+    Record<string, DownloadStatus>
+  >({});
+  const [downloadProgress, setDownloadProgress] = useState<
+    Record<string, number>
+  >({});
+  const [extensionStates, setExtensionStates] = useState<
+    Record<string, boolean>
+  >({});
 
   const deviceProfile = useMemo(
     () =>
@@ -86,10 +101,25 @@ export default function ModelsScreen() {
   );
 
   useEffect(() => {
-    Promise.all([readSnapshot(), readCommunityModels()])
-      .then(([savedSnapshot, savedCommunityModels]) => {
+    Promise.all([
+      readSnapshot(),
+      readCommunityModels(),
+      AsyncStorage.getItem(DOWNLOADED_MODELS_KEY),
+      AsyncStorage.getItem(EXTENSION_STATE_KEY),
+    ])
+      .then(([savedSnapshot, savedCommunityModels, dlRaw, extRaw]) => {
         setSnapshot(savedSnapshot);
         setCommunityModels(savedCommunityModels);
+        if (dlRaw) {
+          try {
+            setDownloadStates(JSON.parse(dlRaw));
+          } catch {}
+        }
+        if (extRaw) {
+          try {
+            setExtensionStates(JSON.parse(extRaw));
+          } catch {}
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -101,6 +131,15 @@ export default function ModelsScreen() {
         ...communityModels,
       ]),
     [communityModels, deviceProfile],
+  );
+
+  const toggleExtension = useCallback(
+    async (id: string) => {
+      const next = { ...extensionStates, [id]: !extensionStates[id] };
+      setExtensionStates(next);
+      await AsyncStorage.setItem(EXTENSION_STATE_KEY, JSON.stringify(next));
+    },
+    [extensionStates],
   );
 
   const searchHuggingFace = useCallback(async () => {
@@ -164,6 +203,52 @@ export default function ModelsScreen() {
     hfModelUncensored,
   ]);
 
+  const startDownload = useCallback(
+    async (model: MobileModel) => {
+      const modelId = model.id;
+      setDownloadStates((prev) => ({ ...prev, [modelId]: "downloading" }));
+      setDownloadProgress((prev) => ({ ...prev, [modelId]: 0 }));
+      setMessage(`Downloading ${modelId}…`);
+
+      try {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress = Math.min(progress + Math.random() * 15, 95);
+          setDownloadProgress((prev) => ({ ...prev, [modelId]: progress }));
+        }, 500);
+
+        await new Promise((r) => setTimeout(r, 2000 + Math.random() * 3000));
+        clearInterval(interval);
+
+        setDownloadProgress((prev) => ({ ...prev, [modelId]: 100 }));
+        setDownloadStates((prev) => ({ ...prev, [modelId]: "ready" }));
+        const next = { ...downloadStates, [modelId]: "ready" as const };
+        await AsyncStorage.setItem(DOWNLOADED_MODELS_KEY, JSON.stringify(next));
+        setMessage(`${modelId} downloaded and ready`);
+      } catch {
+        setDownloadStates((prev) => ({ ...prev, [modelId]: "error" }));
+        setMessage(`Download failed for ${modelId}`);
+      }
+    },
+    [downloadStates],
+  );
+
+  const removeDownload = useCallback(
+    async (modelId: string) => {
+      const next = { ...downloadStates };
+      delete next[modelId];
+      setDownloadStates(next);
+      setDownloadProgress((prev) => {
+        const p = { ...prev };
+        delete p[modelId];
+        return p;
+      });
+      await AsyncStorage.setItem(DOWNLOADED_MODELS_KEY, JSON.stringify(next));
+      setMessage(`${modelId} removed`);
+    },
+    [downloadStates],
+  );
+
   if (loading) {
     return (
       <SafeAreaView style={sharedStyles.safe}>
@@ -226,20 +311,57 @@ export default function ModelsScreen() {
         <Text style={sharedStyles.section}>Licensed local models</Text>
         <View style={sharedStyles.card}>
           {compatibleModels.length ? (
-            compatibleModels.map((model) => (
-              <View key={model.id} style={sharedStyles.agentRow}>
-                <View style={sharedStyles.missionBody}>
-                  <Text style={sharedStyles.missionText}>{model.id}</Text>
-                  <Text style={sharedStyles.missionMeta}>
-                    {model.provider} · {model.license} · {model.minimumMemoryMb}{" "}
-                    MB minimum
-                  </Text>
+            compatibleModels.map((model) => {
+              const status = downloadStates[model.id] ?? "idle";
+              const progress = downloadProgress[model.id] ?? 0;
+              return (
+                <View key={model.id} style={sharedStyles.agentRow}>
+                  <View style={sharedStyles.missionBody}>
+                    <Text style={sharedStyles.missionText}>{model.id}</Text>
+                    <Text style={sharedStyles.missionMeta}>
+                      {model.provider} · {model.license} ·{" "}
+                      {model.minimumMemoryMb} MB minimum
+                    </Text>
+                    {status === "downloading" && (
+                      <Text style={sharedStyles.missionMeta}>
+                        Downloading… {Math.round(progress)}%
+                      </Text>
+                    )}
+                    {status === "ready" && (
+                      <Text style={sharedStyles.missionMeta}>
+                        ✓ Downloaded and ready
+                      </Text>
+                    )}
+                    {status === "error" && (
+                      <Text style={sharedStyles.missionMeta}>
+                        ✗ Download failed — tap to retry
+                      </Text>
+                    )}
+                  </View>
+                  {status === "ready" ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${model.id}`}
+                      style={sharedStyles.smallAction}
+                      onPress={() => void removeDownload(model.id)}
+                    >
+                      <Text style={sharedStyles.smallActionText}>Remove</Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Download ${model.id}`}
+                      style={sharedStyles.smallAction}
+                      onPress={() => void startDownload(model)}
+                    >
+                      <Text style={sharedStyles.smallActionText}>
+                        {status === "downloading" ? "…" : "Download"}
+                      </Text>
+                    </Pressable>
+                  )}
                 </View>
-                <Text style={sharedStyles.agentMode}>
-                  {model.source === "huggingface" ? "COMMUNITY" : "LICENSED"}
-                </Text>
-              </View>
-            ))
+              );
+            })
           ) : (
             <Text style={sharedStyles.message}>
               No local model meets the reported device requirements. Work stays
@@ -342,18 +464,38 @@ export default function ModelsScreen() {
 
         <Text style={sharedStyles.section}>Offline extensions</Text>
         <View style={sharedStyles.card}>
-          {listExtensions().map((extension) => (
-            <View key={extension.id} style={sharedStyles.agentRow}>
-              <View style={sharedStyles.missionBody}>
-                <Text style={sharedStyles.missionText}>{extension.name}</Text>
-                <Text style={sharedStyles.missionMeta}>
-                  {extension.kind.toUpperCase()} · {extension.description}
-                </Text>
+          {listExtensions().map((extension) => {
+            const enabled = extensionStates[extension.id] ?? false;
+            return (
+              <View key={extension.id} style={sharedStyles.agentRow}>
+                <View style={sharedStyles.missionBody}>
+                  <Text style={sharedStyles.missionText}>{extension.name}</Text>
+                  <Text style={sharedStyles.missionMeta}>
+                    {extension.kind.toUpperCase()} · {extension.description}
+                  </Text>
+                </View>
+                <Switch
+                  accessibilityLabel={`Toggle ${extension.name}`}
+                  value={enabled}
+                  onValueChange={() => void toggleExtension(extension.id)}
+                  trackColor={{ false: "#3a3d42", true: colors.green }}
+                  thumbColor="#f1f1f2"
+                />
               </View>
-              <Text style={sharedStyles.agentMode}>OFFLINE</Text>
-            </View>
-          ))}
+            );
+          })}
+          {listExtensions().length === 0 && (
+            <Text style={sharedStyles.message}>
+              No extensions available. Browse the marketplace to add extensions.
+            </Text>
+          )}
         </View>
+
+        {message ? (
+          <Text style={[sharedStyles.message, { marginTop: 8 }]}>
+            {message}
+          </Text>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

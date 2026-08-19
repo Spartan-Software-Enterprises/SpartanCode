@@ -4,22 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import SettingsScreen from "../SettingsScreen";
 import * as storage from "../../core/storage";
 
-const defaultSettings = {
-  model: "Qwen3-1.7B",
-  defaultAgent: "leo",
-  protocol: "MCP Lite",
-  apiProvider: "local",
-  memoryEnabled: true,
-  executionMode: "guided",
-  quantization: "Q4_K_M",
-  voiceEnabled: false,
-  autoSync: true,
-  personaName: "Leo",
-  wakeWord: "Leo",
-  emotionMode: "explicit",
-  interactionSignal: "calm",
-};
-
 jest.mock("../../core/storage", () => ({
   readSnapshot: jest.fn(async () => ({
     missions: [],
@@ -48,7 +32,21 @@ jest.mock("../../core/storage", () => ({
   writeMobileSettings: jest.fn(async () => {}),
   readMobileSettingsLayers: jest.fn(async () => ({})),
   writeMobileSettingsLayers: jest.fn(async () => {}),
-  resolveMobileSettings: jest.fn(() => defaultSettings),
+  resolveMobileSettings: jest.fn(() => ({
+    model: "Qwen3-1.7B",
+    defaultAgent: "leo",
+    protocol: "MCP Lite",
+    apiProvider: "local",
+    memoryEnabled: true,
+    executionMode: "guided",
+    quantization: "Q4_K_M",
+    voiceEnabled: false,
+    autoSync: true,
+    personaName: "Leo",
+    wakeWord: "Leo",
+    emotionMode: "explicit",
+    interactionSignal: "calm",
+  })),
   updateMobileScopedSettings: jest.fn(async () => {}),
   saveBridgeToken: jest.fn(async () => {}),
   readBridgeToken: jest.fn(async () => null),
@@ -62,6 +60,18 @@ jest.mock("../../core/voice", () => ({
 
 jest.mock("../../core/bridge", () => ({
   normalizeBridgeEndpoint: jest.fn((ep: string) => ep),
+}));
+
+jest.mock("../../core/github", () => ({
+  readGitHubToken: jest.fn(async () => ""),
+  writeGitHubToken: jest.fn(async () => {}),
+  clearGitHubToken: jest.fn(async () => {}),
+  readGitHubUser: jest.fn(async () => null),
+  clearGitHubUser: jest.fn(async () => {}),
+  fetchGitHubUser: jest.fn(async () => ({})),
+  fetchRepos: jest.fn(async () => []),
+  fetchIssues: jest.fn(async () => []),
+  fetchPullRequests: jest.fn(async () => []),
 }));
 
 jest.mock("expo-speech", () => ({
@@ -136,7 +146,7 @@ describe("SettingsScreen", () => {
     });
   });
 
-  it("switches to Bridge & Git panel", async () => {
+  it("switches to Bridge & Git panel with GitHub integration", async () => {
     const { getByText } = await render(<SettingsScreen />);
     await waitFor(() => {
       expect(getByText("Bridge & Git")).toBeTruthy();
@@ -147,7 +157,8 @@ describe("SettingsScreen", () => {
     });
 
     await waitFor(() => {
-      expect(getByText("Remote Git (optional bridge)")).toBeTruthy();
+      expect(getByText("GitHub integration")).toBeTruthy();
+      expect(getByText(/Connect your GitHub/)).toBeTruthy();
     });
   });
 
@@ -190,7 +201,7 @@ describe("SettingsScreen", () => {
     expect(storage.writeMobileSettings).toHaveBeenCalled();
   });
 
-  it("renders bridge endpoint and token inputs", async () => {
+  it("renders GitHub token input", async () => {
     const { getByText, getByPlaceholderText } = await render(
       <SettingsScreen />,
     );
@@ -199,8 +210,7 @@ describe("SettingsScreen", () => {
     });
 
     await waitFor(() => {
-      expect(getByPlaceholderText("https://your-server.example")).toBeTruthy();
-      expect(getByPlaceholderText("Optional bridge token")).toBeTruthy();
+      expect(getByPlaceholderText("ghp_xxxxxxxxxxxx")).toBeTruthy();
     });
   });
 });

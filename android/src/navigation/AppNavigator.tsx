@@ -21,6 +21,7 @@ export default function AppNavigator() {
       screenOptions={({ route }) => ({
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarShowLabel: false,
         tabBarStyle: sharedStyles.tabBar,
         tabBarLabelStyle: {
           fontSize: 10,

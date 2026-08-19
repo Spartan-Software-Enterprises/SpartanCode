@@ -246,6 +246,7 @@ export const sharedStyles = StyleSheet.create({
 
 export const chatStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  safeArea: { flex: 1 },
   messagesContainer: { flex: 1, padding: spacing.lg },
   messageWrapper: {
     flexDirection: "row",

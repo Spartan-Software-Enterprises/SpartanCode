@@ -1,10 +1,16 @@
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { ErrorBoundary } from "./src/ErrorBoundary";
 import AppNavigator from "./src/navigation/AppNavigator";
+import { checkAndPromptUpdate } from "./src/core/updates";
 
 export default function App() {
+  useEffect(() => {
+    void checkAndPromptUpdate(false);
+  }, []);
+
   return (
     <ErrorBoundary>
       <NavigationContainer>
