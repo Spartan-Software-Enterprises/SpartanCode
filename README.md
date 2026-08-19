@@ -49,41 +49,7 @@ Spartan-red, and silver visual system.
 
 ## See the workspace in action
 
-Explore the workspace surfaces:
-
-| Command center                                                       | Projects                                                           | Agent manager                                                         |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| ![Command center](docs/assets/desktop-menu-gallery/desktop-home.png) | ![Projects](docs/assets/desktop-menu-gallery/desktop-projects.png) | ![Agent manager](docs/assets/desktop-menu-gallery/desktop-agents.png) |
-
-| Artifact review                                                            | Workspace settings                                                           | Spartan assistant                                                              |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| ![Artifact review](docs/assets/desktop-menu-gallery/desktop-artifacts.png) | ![Workspace settings](docs/assets/desktop-menu-gallery/desktop-settings.png) | ![Assistant menu](docs/assets/desktop-menu-gallery/desktop-menu-assistant.png) |
-
-![Settings governance and extensibility](docs/assets/desktop-menu-gallery/desktop-settings-governance.png)
-
-| Collaboration settings                                                                         | Marketplace settings                                                                       | Preview dialog                                                                 |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| ![Collaboration settings](docs/assets/desktop-menu-gallery/desktop-settings-collaboration.png) | ![Marketplace settings](docs/assets/desktop-menu-gallery/desktop-settings-marketplace.png) | ![Preview dialog](docs/assets/desktop-menu-gallery/desktop-preview-dialog.png) |
-
-| Mission composer                                                                  | Android command center                                            | Android mission queue                                             |
-| --------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
-| ![Mission composer](docs/assets/desktop-menu-gallery/desktop-composer-filled.png) | ![Android command center](android/screenshots/command-center.png) | ![Android mission queued](android/screenshots/mission-queued.png) |
-
-![Android Hugging Face community models](android/screenshots/community-models.png)
-
-The Android command center puts offline mission queueing, optional bridge
-connection, approval visibility, and the mobile SpartanCode experience on one
-screen. A phone-only user can create a complete project for any supported
-device or operating system, run available checks, package it, and prepare
-release evidence; a desktop, server, or bridge is optional. The queued-mission view shows the handoff from idea to tracked work;
-the companion also includes voice input, local collaboration, full Hugging Face
-model metadata controls, device diagnostics, and remote planning controls.
-
-
-## Antigravity 2.0 Desktop UI
-
-The desktop command center follows the Google Antigravity 2.0 agent-first conversational design:
-three-panel layout with sidebar navigation, conversation center, and agents/artifacts panel.
+Explore the new Antigravity 2.0 agent-first conversational desktop UI:
 
 | Desktop (1440x900)                                                                  | Television (1920x1080)                                                                  |
 | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -92,6 +58,10 @@ three-panel layout with sidebar navigation, conversation center, and agents/arti
 | Landscape Phone (915x412)                                                            | Mobile (412x892)                                                            |
 | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | ![Landscape Phone](docs/screenshots/index-landscape-phone-915x412.png)               | ![Mobile](docs/screenshots/index-mobile-412x892.png)                       |
+
+Three-panel layout: sidebar navigation, conversation center with message
+history and floating composer, and agents/artifacts right panel. Responsive
+collapse hides side panels on narrow viewports.
 
 
 ## Why teams use SpartanCode
