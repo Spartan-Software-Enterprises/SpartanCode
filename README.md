@@ -79,6 +79,21 @@ release evidence; a desktop, server, or bridge is optional. The queued-mission v
 the companion also includes voice input, local collaboration, full Hugging Face
 model metadata controls, device diagnostics, and remote planning controls.
 
+
+## Antigravity 2.0 Desktop UI
+
+The desktop command center follows the Google Antigravity 2.0 agent-first conversational design:
+three-panel layout with sidebar navigation, conversation center, and agents/artifacts panel.
+
+| Desktop (1440x900)                                                                  | Television (1920x1080)                                                                  |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| ![Desktop](docs/screenshots/index-desktop-1440x900.png)                             | ![Television](docs/screenshots/index-television-1920x1080.png)                         |
+
+| Landscape Phone (915x412)                                                            | Mobile (412x892)                                                            |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| ![Landscape Phone](docs/screenshots/index-landscape-phone-915x412.png)               | ![Mobile](docs/screenshots/index-mobile-412x892.png)                       |
+
+
 ## Why teams use SpartanCode
 
 - **Mission-driven development:** describe the outcome, follow planning,
