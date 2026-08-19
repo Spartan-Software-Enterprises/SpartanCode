@@ -4,5 +4,23 @@ npm-debug.log*
 dist/
 out/
 android/android/
-.spartancode/external-skills/
-node_modules/
+android/.expo/
+*.apk
+*.aab
+*.jks
+*.hprof
+.spartancode/
+*.blockmap
+*.exe
+*.AppImage
+*.deb
+
+# Internal dev artifacts
+scripts/playwright/baselines/
+scripts/test-*.mjs
+
+# OS files
+Thumbs.db
+*.swp
+*.swo
+*~
