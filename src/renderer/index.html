@@ -4,26 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SpartanCode</title>
-  <link rel="stylesheet" href="./styles/global.css">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
-      --bg-primary:#0d1117;
-      --bg-secondary:#161b22;
-      --bg-tertiary:#1c2128;
-      --bg-panel:#0d1117;
-      --border:#30363d;
-      --text-primary:#e6edf3;
-      --text-secondary:#8b949e;
-      --text-tertiary:#6e7681;
-      --accent:#58a6ff;
-      --accent-hover:#79c0ff;
-      --accent-subtle:rgba(88,166,255,0.1);
-      --green:#3fb950;
-      --green-subtle:rgba(63,185,80,0.1);
-      --red:#f85149;
-      --orange:#d29922;
-      --purple:#bc8cff;
+      --bg-primary:#020101;
+      --bg-secondary:#0e0d0c;
+      --bg-tertiary:#1a1918;
+      --bg-hover:#252322;
+      --border:#42423d;
+      --border-subtle:#2a2928;
+      --text-primary:#dedcd9;
+      --text-secondary:#aaa8a5;
+      --text-tertiary:#6e6d6a;
+      --accent:#ed1913;
+      --accent-hover:#ff2a23;
+      --accent-dark:#a61916;
+      --accent-glow:rgba(237,25,19,0.15);
+      --accent-subtle:rgba(237,25,19,0.08);
+      --highlight:#ec5853;
+      --green:#5a9a3f;
+      --green-subtle:rgba(90,154,63,0.12);
+      --red:#ed1913;
+      --gunmetal:#5a5955;
+      --steel:#42423d;
+      --silver:#aaa8a5;
       --sidebar-w:260px;
       --panel-w:320px;
       --header-h:52px;
@@ -37,85 +41,94 @@
     input,textarea{font-family:inherit;color:inherit;background:none;border:none;outline:none}
     ::-webkit-scrollbar{width:6px}
     ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-    ::-webkit-scrollbar-thumb:hover{background:var(--text-tertiary)}
+    ::-webkit-scrollbar-thumb{background:var(--steel);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--gunmetal)}
 
     .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr var(--panel-w);grid-template-rows:var(--header-h) 1fr;height:100vh;overflow:hidden}
     .app.panel-closed{grid-template-columns:var(--sidebar-w) 1fr 0px}
 
-    .header{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--bg-secondary);z-index:10}
-    .header-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-0.3px;white-space:nowrap}
+    /* Header */
+    .header{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--border-subtle);background:var(--bg-secondary);z-index:10}
+    .header-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-0.3px;white-space:nowrap;color:var(--accent)}
     .header-logo svg{width:22px;height:22px;color:var(--accent)}
-    .header-breadcrumb{color:var(--text-secondary);font-size:13px;display:flex;align-items:center;gap:6px}
-    .header-breadcrumb span{color:var(--text-tertiary)}
+    .header-breadcrumb{color:var(--text-tertiary);font-size:13px;display:flex;align-items:center;gap:6px}
+    .header-breadcrumb span{color:var(--steel)}
     .header-center{flex:1;display:flex;justify-content:center}
-    .model-selector{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border);font-size:13px;color:var(--text-secondary);transition:all .15s}
+    .model-selector{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border-subtle);font-size:13px;color:var(--text-secondary);transition:all .15s}
     .model-selector:hover{border-color:var(--accent);color:var(--text-primary)}
     .model-selector .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
     .header-actions{display:flex;gap:4px}
-    .header-actions button{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-secondary);transition:all .15s}
+    .header-actions button{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-tertiary);transition:all .15s}
     .header-actions button:hover{background:var(--bg-tertiary);color:var(--text-primary)}
     .header-actions button.active{background:var(--accent-subtle);color:var(--accent)}
 
-    .sidebar{grid-row:2;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--bg-secondary);overflow:hidden}
+    /* Sidebar */
+    .sidebar{grid-row:2;display:flex;flex-direction:column;border-right:1px solid var(--border-subtle);background:var(--bg-secondary);overflow:hidden}
     .sidebar-section{padding:12px}
     .sidebar-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-tertiary);margin-bottom:8px;padding:0 8px}
-    .new-chat-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);transition:all .15s;margin-bottom:12px}
-    .new-chat-btn:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .new-chat-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);transition:all .15s;margin-bottom:12px;border:1px solid var(--border-subtle)}
+    .new-chat-btn:hover{border-color:var(--accent);color:var(--text-primary);background:var(--accent-subtle)}
     .new-chat-btn svg{width:16px;height:16px;color:var(--accent)}
     .conversation-list{flex:1;overflow-y:auto;padding:0 12px}
     .conversation-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all .15s;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .conversation-item:hover{background:var(--bg-tertiary);color:var(--text-primary)}
-    .conversation-item.active{background:var(--accent-subtle);color:var(--accent)}
-    .conversation-item svg{width:14px;height:14px;flex-shrink:0;opacity:0.5}
-    .sidebar-footer{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
-    .sidebar-footer button{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);transition:all .15s}
-    .sidebar-footer button:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .conversation-item.active{background:var(--accent-subtle);color:var(--accent);border-left:2px solid var(--accent);padding-left:10px}
+    .conversation-item svg{width:14px;height:14px;flex-shrink:0;opacity:0.4}
+    .sidebar-footer{padding:12px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:4px}
+    .sidebar-footer button{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-tertiary);transition:all .15s}
+    .sidebar-footer button:hover{background:var(--bg-tertiary);color:var(--text-secondary)}
     .sidebar-footer button svg{width:16px;height:16px}
 
+    /* Main */
     .main{grid-row:2;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-primary)}
     .messages{flex:1;overflow-y:auto;padding:24px 0}
     .messages-inner{max-width:720px;margin:0 auto;padding:0 24px}
 
+    /* Welcome */
     .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 24px}
     .welcome-logo{width:48px;height:48px;margin-bottom:20px;color:var(--accent)}
-    .welcome h2{font-size:24px;font-weight:600;margin-bottom:8px;letter-spacing:-0.5px}
+    .welcome h2{font-size:24px;font-weight:600;margin-bottom:8px;letter-spacing:-0.5px;color:var(--text-primary)}
     .welcome p{color:var(--text-secondary);font-size:15px;max-width:480px;line-height:1.5;margin-bottom:32px}
     .welcome-suggestions{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:520px}
-    .suggestion{padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);text-align:left;font-size:13px;color:var(--text-secondary);transition:all .15s}
+    .suggestion{padding:14px 16px;border:1px solid var(--border-subtle);border-radius:var(--radius);text-align:left;font-size:13px;color:var(--text-secondary);transition:all .15s}
     .suggestion:hover{border-color:var(--accent);color:var(--text-primary);background:var(--accent-subtle)}
     .suggestion strong{display:block;color:var(--text-primary);margin-bottom:4px;font-weight:500}
 
+    /* Messages */
     .message{margin-bottom:24px;display:flex;gap:12px}
-    .message-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:600;margin-top:2px}
-    .message-avatar.user{background:var(--accent-subtle);color:var(--accent)}
-    .message-avatar.assistant{background:var(--green-subtle);color:var(--green)}
+    .message-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;margin-top:2px;letter-spacing:-0.3px}
+    .message-avatar.user{background:var(--accent-subtle);color:var(--accent);border:1px solid rgba(237,25,19,0.2)}
+    .message-avatar.assistant{background:var(--bg-tertiary);color:var(--accent);border:1px solid var(--border-subtle)}
     .message-body{flex:1;min-width:0}
     .message-role{font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:8px}
     .message-role .time{font-weight:400;color:var(--text-tertiary);font-size:11px}
     .message-content{font-size:14px;line-height:1.65;color:var(--text-primary)}
     .message-content p{margin-bottom:10px}
     .message-content p:last-child{margin-bottom:0}
-    .message-content code{font-family:var(--font-mono);font-size:13px;background:var(--bg-tertiary);padding:2px 6px;border-radius:4px}
-    .message-content pre{background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;overflow-x:auto;margin:10px 0;font-size:13px;line-height:1.5}
-    .message-content pre code{background:none;padding:0}
+    .message-content code{font-family:var(--font-mono);font-size:13px;background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;color:var(--highlight)}
+    .message-content pre{background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:14px;overflow-x:auto;margin:10px 0;font-size:13px;line-height:1.5}
+    .message-content pre code{background:none;padding:0;color:var(--text-primary)}
     .message-content ul,.message-content ol{padding-left:20px;margin:8px 0}
     .message-content li{margin-bottom:4px}
+    .message-content a{color:var(--accent);text-decoration:none}
+    .message-content a:hover{text-decoration:underline}
     .message-actions{display:flex;gap:4px;margin-top:8px;opacity:0;transition:opacity .15s}
     .message:hover .message-actions{opacity:1}
     .message-actions button{padding:4px 8px;border-radius:var(--radius-sm);font-size:12px;color:var(--text-tertiary);transition:all .15s}
     .message-actions button:hover{background:var(--bg-tertiary);color:var(--text-secondary)}
 
+    /* Typing */
     .typing{display:flex;gap:4px;padding:4px 0}
-    .typing span{width:6px;height:6px;border-radius:50%;background:var(--text-tertiary);animation:bounce 1.4s infinite}
-    .typing span:nth-child(2){animation-delay:0.2s}
-    .typing span:nth-child(3){animation-delay:0.4s}
+    .typing span{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce 1.4s infinite}
+    .typing span:nth-child(2){animation-delay:0.2s;opacity:0.7}
+    .typing span:nth-child(3){animation-delay:0.4s;opacity:0.4}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    .composer-wrap{padding:16px 24px 20px;background:var(--bg-primary);border-top:1px solid var(--border)}
+    /* Composer */
+    .composer-wrap{padding:16px 24px 20px;background:var(--bg-primary);border-top:1px solid var(--border-subtle)}
     .composer{max-width:720px;margin:0 auto;position:relative}
-    .composer-box{border:1px solid var(--border);border-radius:12px;background:var(--bg-secondary);transition:border-color .15s;padding:12px 16px}
-    .composer-box:focus-within{border-color:var(--accent)}
+    .composer-box{border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-secondary);transition:border-color .15s;padding:12px 16px}
+    .composer-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-glow)}
     .composer-input{width:100%;min-height:44px;max-height:200px;resize:none;font-size:14px;line-height:1.5;padding:0;background:transparent;color:var(--text-primary)}
     .composer-input::placeholder{color:var(--text-tertiary)}
     .composer-toolbar{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
@@ -124,39 +137,39 @@
     .composer-tools button:hover{background:var(--bg-tertiary);color:var(--text-secondary)}
     .composer-tools button svg{width:16px;height:16px}
     .send-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--accent);color:#fff;transition:all .15s}
-    .send-btn:hover{background:var(--accent-hover)}
-    .send-btn:disabled{background:var(--bg-tertiary);color:var(--text-tertiary);cursor:not-allowed}
+    .send-btn:hover{background:var(--accent-hover);box-shadow:0 0 12px var(--accent-glow)}
+    .send-btn:disabled{background:var(--bg-tertiary);color:var(--text-tertiary);cursor:not-allowed;box-shadow:none}
     .composer-hint{font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:6px}
 
-    .panel{grid-row:2;border-left:1px solid var(--border);background:var(--bg-secondary);display:flex;flex-direction:column;overflow:hidden}
+    /* Right Panel */
+    .panel{grid-row:2;border-left:1px solid var(--border-subtle);background:var(--bg-secondary);display:flex;flex-direction:column;overflow:hidden}
     .panel.hidden{display:none}
-    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
-    .panel-header h3{font-size:13px;font-weight:600}
-    .panel-header button{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-secondary);transition:all .15s}
-    .panel-header button:hover{background:var(--bg-tertiary)}
-    .panel-tabs{display:flex;border-bottom:1px solid var(--border)}
-    .panel-tab{flex:1;padding:10px;font-size:12px;font-weight:500;color:var(--text-secondary);text-align:center;border-bottom:2px solid transparent;transition:all .15s}
-    .panel-tab:hover{color:var(--text-primary)}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border-subtle)}
+    .panel-header h3{font-size:13px;font-weight:600;color:var(--text-secondary)}
+    .panel-header button{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-tertiary);transition:all .15s}
+    .panel-header button:hover{background:var(--bg-tertiary);color:var(--text-secondary)}
+    .panel-tabs{display:flex;border-bottom:1px solid var(--border-subtle)}
+    .panel-tab{flex:1;padding:10px;font-size:12px;font-weight:500;color:var(--text-tertiary);text-align:center;border-bottom:2px solid transparent;transition:all .15s}
+    .panel-tab:hover{color:var(--text-secondary)}
     .panel-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
     .panel-content{flex:1;overflow-y:auto;padding:16px}
 
-    .agent-card{padding:12px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;transition:all .15s}
-    .agent-card:hover{border-color:var(--accent)}
+    .agent-card{padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius);margin-bottom:10px;transition:all .15s}
+    .agent-card:hover{border-color:var(--steel)}
     .agent-card-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
     .agent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .agent-dot.active{background:var(--green)}
-    .agent-dot.idle{background:var(--text-tertiary)}
-    .agent-card-header span{font-size:13px;font-weight:500}
-    .agent-card p{font-size:12px;color:var(--text-secondary);line-height:1.4}
+    .agent-dot.idle{background:var(--steel)}
+    .agent-card-header span{font-size:13px;font-weight:500;color:var(--text-primary)}
+    .agent-card p{font-size:12px;color:var(--text-tertiary);line-height:1.4}
 
-    .artifact-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .15s}
+    .artifact-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .15s}
     .artifact-item:hover{border-color:var(--accent);background:var(--accent-subtle)}
     .artifact-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
     .artifact-icon.file{background:var(--accent-subtle);color:var(--accent)}
-    .artifact-icon.image{background:var(--green-subtle);color:var(--green)}
-    .artifact-icon.code{background:rgba(188,140,255,0.1);color:var(--purple)}
+    .artifact-icon.code{background:rgba(170,168,165,0.1);color:var(--silver)}
     .artifact-meta{flex:1;min-width:0}
-    .artifact-meta .name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .artifact-meta .name{font-size:13px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .artifact-meta .info{font-size:11px;color:var(--text-tertiary)}
 
     @media(max-width:1100px){
@@ -289,12 +302,12 @@
           </div>
           <div id="artifactsTab" style="display:none">
             <div class="artifact-item">
-              <div class="artifact-icon file">📄</div>
-              <div class="artifact-meta"><div class="name">index.html</div><div class="info">Modified • 2 min ago</div></div>
+              <div class="artifact-icon file">&#128196;</div>
+              <div class="artifact-meta"><div class="name">index.html</div><div class="info">Modified &bull; 2 min ago</div></div>
             </div>
             <div class="artifact-item">
               <div class="artifact-icon code">JS</div>
-              <div class="artifact-meta"><div class="name">app.mjs</div><div class="info">Created • 5 min ago</div></div>
+              <div class="artifact-meta"><div class="name">app.mjs</div><div class="info">Created &bull; 5 min ago</div></div>
             </div>
           </div>
         </div>
@@ -303,23 +316,23 @@
   </div>
 
   <script>
-    const messages = [];
-    const messageList = document.getElementById('messageList');
-    const welcomeScreen = document.getElementById('welcomeScreen');
-    const composerInput = document.getElementById('composerInput');
-    const sendBtn = document.getElementById('sendBtn');
+    var messages = [];
+    var messageList = document.getElementById("messageList");
+    var welcomeScreen = document.getElementById("welcomeScreen");
+    var composerInput = document.getElementById("composerInput");
+    var sendBtn = document.getElementById("sendBtn");
 
-    composerInput.addEventListener('input', function() {
+    composerInput.addEventListener("input", function() {
       sendBtn.disabled = !composerInput.value.trim();
     });
 
     function autoResize(el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 200) + "px";
     }
 
     function handleKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       }
@@ -334,82 +347,82 @@
 
     function newChat() {
       messages.length = 0;
-      messageList.innerHTML = '';
-      welcomeScreen.style.display = 'flex';
+      messageList.innerHTML = "";
+      welcomeScreen.style.display = "flex";
     }
 
     function togglePanel() {
-      var app = document.getElementById('app');
-      var panel = document.getElementById('rightPanel');
-      var btn = document.getElementById('togglePanel');
-      app.classList.toggle('panel-closed');
-      panel.classList.toggle('hidden');
-      btn.classList.toggle('active');
+      var app = document.getElementById("app");
+      var panel = document.getElementById("rightPanel");
+      var btn = document.getElementById("togglePanel");
+      app.classList.toggle("panel-closed");
+      panel.classList.toggle("hidden");
+      btn.classList.toggle("active");
     }
 
     function switchTab(el, tab) {
-      document.querySelectorAll('.panel-tab').forEach(function(t) { t.classList.remove('active'); });
-      el.classList.add('active');
-      document.getElementById('agentsTab').style.display = tab === 'agents' ? 'block' : 'none';
-      document.getElementById('artifactsTab').style.display = tab === 'artifacts' ? 'block' : 'none';
+      document.querySelectorAll(".panel-tab").forEach(function(t) { t.classList.remove("active"); });
+      el.classList.add("active");
+      document.getElementById("agentsTab").style.display = tab === "agents" ? "block" : "none";
+      document.getElementById("artifactsTab").style.display = tab === "artifacts" ? "block" : "none";
     }
 
     function timeStr() {
-      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
     function addMessage(role, content) {
-      welcomeScreen.style.display = 'none';
-      var div = document.createElement('div');
-      div.className = 'message';
-      var avatarClass = role === 'user' ? 'user' : 'assistant';
-      var avatarText = role === 'user' ? 'You' : 'SC';
-      div.innerHTML = '<div class="message-avatar ' + avatarClass + '">' + avatarText + '</div>' +
-        '<div class="message-body">' +
-        '<div class="message-role">' + (role === 'user' ? 'You' : 'SpartanCode') + '<span class="time">' + timeStr() + '</span></div>' +
-        '<div class="message-content">' + content + '</div>' +
-        '<div class="message-actions"><button onclick="copyMessage(this)">Copy</button></div>' +
-        '</div>';
+      welcomeScreen.style.display = "none";
+      var div = document.createElement("div");
+      div.className = "message";
+      var avatarClass = role === "user" ? "user" : "assistant";
+      var avatarText = role === "user" ? "You" : "SC";
+      div.innerHTML = "<div class=\"message-avatar " + avatarClass + "\">" + avatarText + "</div>" +
+        "<div class=\"message-body\">" +
+        "<div class=\"message-role\">" + (role === "user" ? "You" : "SpartanCode") + "<span class=\"time\">" + timeStr() + "</span></div>" +
+        "<div class=\"message-content\">" + content + "</div>" +
+        "<div class=\"message-actions\"><button onclick=\"copyMessage(this)\">Copy</button></div>" +
+        "</div>";
       messageList.appendChild(div);
-      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
     }
 
     function addTyping() {
-      var div = document.createElement('div');
-      div.className = 'message';
-      div.id = 'typingMsg';
-      div.innerHTML = '<div class="message-avatar assistant">SC</div>' +
-        '<div class="message-body">' +
-        '<div class="message-role">SpartanCode<span class="time">' + timeStr() + '</span></div>' +
-        '<div class="message-content"><div class="typing"><span></span><span></span><span></span></div></div>' +
-        '</div>';
+      var div = document.createElement("div");
+      div.className = "message";
+      div.id = "typingMsg";
+      div.innerHTML = "<div class=\"message-avatar assistant\">SC</div>" +
+        "<div class=\"message-body\">" +
+        "<div class=\"message-role\">SpartanCode<span class=\"time\">" + timeStr() + "</span></div>" +
+        "<div class=\"message-content\"><div class=\"typing\"><span></span><span></span><span></span></div></div>" +
+        "</div>";
       messageList.appendChild(div);
-      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
     }
 
     function removeTyping() {
-      var el = document.getElementById('typingMsg');
+      var el = document.getElementById("typingMsg");
       if (el) el.remove();
     }
 
     function copyMessage(btn) {
-      var text = btn.closest('.message-body').querySelector('.message-content').textContent;
+      var text = btn.closest(".message-body").querySelector(".message-content").textContent;
       navigator.clipboard.writeText(text);
-      btn.textContent = 'Copied';
-      setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+      btn.textContent = "Copied";
+      setTimeout(function() { btn.textContent = "Copy"; }, 1500);
     }
 
     function sendMessage() {
       var text = composerInput.value.trim();
       if (!text) return;
-      addMessage('user', '<p>' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>');
-      composerInput.value = '';
-      composerInput.style.height = 'auto';
+      addMessage("user", "<p>" + text.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</p>");
+      composerInput.value = "";
+      composerInput.style.height = "auto";
       sendBtn.disabled = true;
       addTyping();
       setTimeout(function() {
         removeTyping();
-        addMessage('assistant', '<p>I\'ll help you with that. Let me analyze your request and work through it step by step.</p><p>Could you provide more details about what you\'d like me to focus on?</p>');
+        addMessage("assistant", "<p>I will help you with that. Let me analyze your request and work through it step by step.</p><p>Could you provide more details about what you would like me to focus on?</p>");
       }, 1500);
     }
   </script>
