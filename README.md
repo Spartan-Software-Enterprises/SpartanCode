@@ -49,20 +49,30 @@ Spartan-red, and silver visual system.
 
 ## See the workspace in action
 
-Explore the new Antigravity 2.0 agent-first conversational desktop UI:
+Explore the workspace surfaces:
 
-| Desktop (1440x900)                                                                  | Television (1920x1080)                                                                  |
-| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| ![Desktop](docs/screenshots/index-desktop-1440x900.png)                             | ![Television](docs/screenshots/index-television-1920x1080.png)                         |
+| Command center                                                       | Projects                                                           | Agent manager                                                         |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| ![Command center](docs/assets/desktop-menu-gallery/desktop-home.png) | ![Projects](docs/assets/desktop-menu-gallery/desktop-projects.png) | ![Agent manager](docs/assets/desktop-menu-gallery/desktop-agents.png) |
 
-| Landscape Phone (915x412)                                                            | Mobile (412x892)                                                            |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| ![Landscape Phone](docs/screenshots/index-landscape-phone-915x412.png)               | ![Mobile](docs/screenshots/index-mobile-412x892.png)                       |
+| Artifact review                                                            | Workspace settings                                                           | Spartan assistant                                                              |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| ![Artifact review](docs/assets/desktop-menu-gallery/desktop-artifacts.png) | ![Workspace settings](docs/assets/desktop-menu-gallery/desktop-settings.png) | ![Assistant menu](docs/assets/desktop-menu-gallery/desktop-menu-assistant.png) |
 
-Three-panel layout: sidebar navigation, conversation center with message
-history and floating composer, and agents/artifacts right panel. Responsive
-collapse hides side panels on narrow viewports.
+![Settings governance and extensibility](docs/assets/desktop-menu-gallery/desktop-settings-governance.png)
 
+| Collaboration settings                                                                         | Marketplace settings                                                                       | Preview dialog                                                                 |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| ![Collaboration settings](docs/assets/desktop-menu-gallery/desktop-settings-collaboration.png) | ![Marketplace settings](docs/assets/desktop-menu-gallery/desktop-settings-marketplace.png) | ![Preview dialog](docs/assets/desktop-menu-gallery/desktop-preview-dialog.png) |
+
+| Chat | Missions | Models | Settings |
+| ---- | -------- | ------ | -------- |
+| ![Chat](android/screenshots/chat-mobile.png) | ![Missions](android/screenshots/missions-mobile.png) | ![Models](android/screenshots/models-mobile.png) | ![Settings](android/screenshots/settings-mobile.png) |
+
+The rebuilt Android companion uses 4-tab navigation: Chat, Missions, Models, and
+Settings. A phone-only user can create a complete project for any supported
+device or operating system, run available checks, package it, and prepare
+release evidence; a desktop, server, or bridge is optional.
 
 ## Why teams use SpartanCode
 
@@ -187,13 +197,12 @@ contract, acceptance criteria, and test matrix are in
 
 ### Verified Android interface
 
-These screenshots were captured by Playwright against the exported Android
-companion web surface at a 390×844 device viewport. The smoke test asserted the
-command-center shell and queued a mission through the visible controls.
+These screenshots show the rebuilt 4-tab Android UI captured by Playwright at
+mobile, desktop, landscape-phone, and television viewports.
 
-![Android command center](android/screenshots/command-center.png)
-
-![Android mission queued](android/screenshots/mission-queued.png)
+| Chat | Missions | Models | Settings |
+| ---- | -------- | ------ | -------- |
+| ![Chat](android/screenshots/chat-mobile.png) | ![Missions](android/screenshots/missions-mobile.png) | ![Models](android/screenshots/models-mobile.png) | ![Settings](android/screenshots/settings-mobile.png) |
 
 The current Android interface description and verification record are in
 [`android/ABOUT.md`](android/ABOUT.md).
