@@ -40,7 +40,7 @@ node ../../scripts/release-manifest.js \
   --output "$native_dir/app/build/release-evidence" \
   --scan "$native_dir/app/build/outputs"
 # Rename APK to project-version-variant format
-version="$(node -p "require('./app.json').expo.version")"
+version="$(node -p "require('../app.json').expo.version")"
 apk_dir="$native_dir/app/build/outputs/apk"
 if [ -d "$apk_dir/release" ]; then
   for apk in "$apk_dir"/release/*.apk; do
