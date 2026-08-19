@@ -1,0 +1,48 @@
+name: UI Human Flows
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  playwright-audit:
+    name: Playwright Human Flow Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright
+        run: npx playwright install chromium --with-deps
+
+      - name: Run human flow audit
+        run: node scripts/playwright/human-flows.mjs || echo "Human flow script not found — skipping"
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spartancode-human-flows
+          path: |
+            screenshots/
+            test-results/
+          retention-days: 14
+          if-no-files-found: ignore

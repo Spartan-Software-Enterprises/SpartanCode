@@ -1,2949 +1,417 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'"
-    />
-    <title>SpartanCode — Agent Workspace</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        --canvas: #090a0d;
-        --surface: #121418;
-        --surface-subtle: #181a20;
-        --surface-elevated: #1e2128;
-        --line: #2b2f38;
-        --line-active: #3e4452;
-        --ink: #f3f4f6;
-        --muted: #8e94a0;
-        --subtle: #5f6573;
-        --accent: #ff3b4f;
-        --accent-hover: #ff5466;
-        --accent-soft: #38121a;
-        --accent-glow: rgba(255, 59, 79, 0.18);
-        --silver: #d1d5db;
-        --silver-soft: #232730;
-        --green: #10b981;
-        --green-soft: #0c2e22;
-        --amber: #f59e0b;
-        --amber-soft: #382508;
-        --blue: #ff3b4f;
-        --blue-soft: #38121a;
-        --violet: #d1d5db;
-        --violet-soft: #232730;
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 20px;
-        --transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-        --font-sans:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-          Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        --font-mono:
-          ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-          "Liberation Mono", monospace;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        min-width: 980px;
-        background: var(--canvas);
-        color: var(--ink);
-        font: 13.5px/1.5 var(--font-sans);
-        overflow-x: hidden;
-      }
-
-      button,
-      input,
-      textarea,
-      select {
-        font: inherit;
-        color: inherit;
-      }
-
-      button {
-        border: 0;
-        background: transparent;
-        cursor: pointer;
-        transition: var(--transition);
-      }
-
-      /* Layout */
-      .app {
-        display: grid;
-        grid-template-columns: 240px minmax(0, 1fr) 340px;
-        min-height: 100vh;
-        background: var(--canvas);
-      }
-
-      /* Left Sidebar */
-      .sidebar {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        padding: 20px 14px 16px;
-        border-right: 1px solid var(--line);
-        background: var(--surface);
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 4px 10px 20px;
-        font-size: 19px;
-        font-weight: 750;
-        letter-spacing: -0.4px;
-        color: #ffffff;
-      }
-
-      .brand-mark {
-        position: relative;
-        width: 30px;
-        height: 30px;
-        border-radius: 9px;
-        background: linear-gradient(135deg, #ff3b4f, #991b29);
-        box-shadow: 0 4px 14px var(--accent-glow);
-        display: grid;
-        place-items: center;
-      }
-
-      .brand-mark::after {
-        content: "Λ";
-        color: #ffffff;
-        font-weight: 900;
-        font-size: 15px;
-        line-height: 1;
-      }
-
-      .brand-badge {
-        font-size: 10px;
-        padding: 2px 6px;
-        border-radius: 6px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        border: 1px solid var(--accent);
-        font-weight: 700;
-        margin-left: auto;
-      }
-
-      .nav-group-label {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--subtle);
-        padding: 12px 10px 6px;
-      }
-
-      .nav {
-        display: grid;
-        gap: 4px;
-      }
-
-      .nav-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-        padding: 9px 12px;
-        border-radius: var(--radius-sm);
-        color: var(--muted);
-        font-weight: 600;
-        text-align: left;
-        border: 1px solid transparent;
-      }
-
-      .nav-item:hover {
-        background: var(--surface-subtle);
-        color: var(--ink);
-      }
-
-      .nav-item.active {
-        color: #ffffff;
-        background: var(--accent-soft);
-        border-color: var(--accent);
-        box-shadow: 0 2px 10px var(--accent-glow);
-      }
-
-      .nav-icon {
-        display: grid;
-        place-items: center;
-        width: 20px;
-        font-size: 15px;
-        opacity: 0.9;
-      }
-
-      .workspace-card {
-        margin-top: auto;
-        padding: 12px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-md);
-        background: var(--surface-subtle);
-      }
-
-      .workspace-person {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .avatar {
-        display: grid;
-        place-items: center;
-        width: 32px;
-        height: 32px;
-        border-radius: var(--radius-sm);
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 12px;
-        font-weight: 800;
-        border: 1px solid var(--accent);
-      }
-
-      .workspace-name {
-        font-weight: 700;
-        font-size: 13px;
-        color: var(--ink);
-        display: block;
-      }
-
-      .workspace-sub {
-        display: block;
-        color: var(--muted);
-        font-size: 11px;
-      }
-
-      .workspace-open {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        margin-top: 10px;
-        padding: 8px 10px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        background: var(--surface);
-        color: var(--silver);
-        font-weight: 600;
-        font-size: 12px;
-      }
-
-      .workspace-open:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-        background: var(--surface-elevated);
-      }
-
-      /* Main Canvas */
-      .main {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        height: 100vh;
-        background: radial-gradient(
-          circle at 50% 0%,
-          #171922 0%,
-          var(--canvas) 60%
-        );
-        overflow: hidden;
-      }
-
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 24px;
-        border-bottom: 1px solid var(--line);
-        background: rgba(18, 20, 24, 0.7);
-        backdrop-filter: blur(12px);
-        z-index: 10;
-      }
-
-      .topbar-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .topbar-title {
-        font-weight: 700;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .pill-badge {
-        font-size: 11px;
-        padding: 3px 8px;
-        border-radius: 20px;
-        background: var(--surface-elevated);
-        border: 1px solid var(--line);
-        color: var(--silver);
-        font-weight: 600;
-      }
-
-      .pill-badge.active {
-        background: var(--accent-soft);
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-
-      .topbar-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .round-button {
-        display: grid;
-        place-items: center;
-        width: 32px;
-        height: 32px;
-        border: 1px solid var(--line);
-        border-radius: 50%;
-        background: var(--surface);
-        color: var(--muted);
-        font-size: 14px;
-      }
-
-      .round-button:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-        background: var(--surface-subtle);
-      }
-
-      .primary-button {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 14px;
-        border-radius: var(--radius-sm);
-        background: var(--accent);
-        color: #ffffff;
-        font-weight: 700;
-        font-size: 12.5px;
-        box-shadow: 0 4px 12px var(--accent-glow);
-      }
-
-      .primary-button:hover {
-        background: var(--accent-hover);
-        transform: translateY(-1px);
-      }
-
-      .context-button {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 11px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        background: var(--surface);
-        color: var(--silver);
-        font-weight: 600;
-        font-size: 12px;
-      }
-
-      .context-button:hover {
-        border-color: var(--line-active);
-        background: var(--surface-subtle);
-        color: #ffffff;
-      }
-
-      /* Chat / Missions Area */
-      .canvas-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        padding: 24px 32px 140px;
-        max-width: 920px;
-        width: 100%;
-        margin: 0 auto;
-      }
-
-      .hero {
-        text-align: center;
-        padding: 40px 0 20px;
-      }
-
-      .hero h1 {
-        margin: 0 0 12px;
-        font-size: 36px;
-        font-weight: 800;
-        letter-spacing: -1.2px;
-        background: linear-gradient(180deg, #ffffff 0%, #a1a6b4 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      .hero p {
-        margin: 0 auto 28px;
-        max-width: 520px;
-        color: var(--muted);
-        font-size: 14px;
-      }
-
-      .quick-cards {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        margin-bottom: 28px;
-      }
-
-      .quick-card {
-        padding: 14px 12px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-md);
-        background: var(--surface);
-        text-align: left;
-        cursor: pointer;
-        transition: var(--transition);
-      }
-
-      .quick-card:hover {
-        border-color: var(--accent);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-      }
-
-      .quick-card-icon {
-        font-size: 18px;
-        margin-bottom: 6px;
-        display: inline-block;
-      }
-
-      .quick-card strong {
-        display: block;
-        font-size: 12.5px;
-        color: var(--ink);
-      }
-
-      .quick-card small {
-        color: var(--muted);
-        font-size: 11px;
-      }
-
-      /* Stream Messages */
-      .message-stream {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-      }
-
-      .message-bubble {
-        padding: 16px 18px;
-        border-radius: var(--radius-md);
-        background: var(--surface);
-        border: 1px solid var(--line);
-        position: relative;
-      }
-
-      .message-bubble.user {
-        background: var(--surface-subtle);
-        border-color: var(--line-active);
-        margin-left: 60px;
-      }
-
-      .message-bubble.assistant {
-        background: var(--surface);
-        border-color: var(--line);
-        margin-right: 20px;
-      }
-
-      .message-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-      }
-
-      .message-sender {
-        font-weight: 700;
-        font-size: 12.5px;
-        color: var(--ink);
-      }
-
-      .message-badge {
-        font-size: 10px;
-        padding: 1px 6px;
-        border-radius: 4px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        border: 1px solid var(--accent);
-        font-weight: 700;
-      }
-
-      .message-time {
-        margin-left: auto;
-        color: var(--subtle);
-        font-size: 11px;
-      }
-
-      .message-body {
-        font-size: 13.5px;
-        line-height: 1.6;
-        color: #e5e7eb;
-        white-space: pre-wrap;
-      }
-
-      /* Thinking accordion */
-      .thinking-box {
-        margin: 10px 0;
-        padding: 10px 14px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        background: var(--canvas);
-      }
-
-      .thinking-box summary {
-        font-weight: 600;
-        font-size: 12px;
-        color: var(--muted);
-        cursor: pointer;
-        user-select: none;
-      }
-
-      .thinking-content {
-        margin-top: 8px;
-        font-size: 12px;
-        color: var(--subtle);
-        font-style: italic;
-        line-height: 1.5;
-      }
-
-      /* Tool step card */
-      .tool-step-card {
-        margin: 10px 0;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        background: #0e1014;
-        overflow: hidden;
-      }
-
-      .tool-step-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        background: var(--surface-subtle);
-        border-bottom: 1px solid var(--line);
-        font-size: 12px;
-        font-weight: 600;
-      }
-
-      .tool-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--green);
-      }
-
-      .tool-output-drawer {
-        padding: 10px 12px;
-        font-family: var(--font-mono);
-        font-size: 11.5px;
-        color: var(--silver);
-        max-height: 180px;
-        overflow-y: auto;
-        white-space: pre-wrap;
-      }
-
-      /* Diff viewer */
-      .diff-viewer {
-        margin: 12px 0;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        background: #090a0c;
-        font-family: var(--font-mono);
-        font-size: 11.5px;
-        overflow: hidden;
-      }
-
-      .diff-line {
-        padding: 2px 8px;
-        display: flex;
-        gap: 8px;
-      }
-
-      .diff-line.added {
-        background: rgba(16, 185, 129, 0.12);
-        color: #34d399;
-      }
-
-      .diff-line.removed {
-        background: rgba(255, 59, 79, 0.12);
-        color: #f87171;
-      }
-
-      /* Floating Composer */
-      .composer-container {
-        position: fixed;
-        bottom: 24px;
-        left: calc(240px + (100vw - 240px - 340px) / 2);
-        transform: translateX(-50%);
-        width: min(840px, calc(100vw - 620px));
-        z-index: 20;
-      }
-
-      .mission-composer {
-        position: relative;
-        padding: 14px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-lg);
-        background: rgba(24, 26, 32, 0.95);
-        backdrop-filter: blur(16px);
-        box-shadow:
-          0 12px 40px rgba(0, 0, 0, 0.6),
-          0 0 0 1px rgba(255, 255, 255, 0.05);
-      }
-
-      .mission-composer:focus-within {
-        border-color: var(--accent);
-        box-shadow:
-          0 12px 40px rgba(0, 0, 0, 0.7),
-          0 0 0 1px var(--accent);
-      }
-
-      .mission-composer textarea {
-        display: block;
-        width: 100%;
-        height: 64px;
-        padding: 2px 4px;
-        border: 0;
-        outline: 0;
-        resize: none;
-        background: transparent;
-        color: var(--ink);
-        font-size: 14.5px;
-      }
-
-      .composer-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top: 1px solid var(--line);
-      }
-
-      .send-button {
-        display: grid;
-        place-items: center;
-        width: 34px;
-        height: 34px;
-        margin-left: auto;
-        border-radius: var(--radius-sm);
-        background: var(--accent);
-        color: #ffffff;
-        font-size: 17px;
-        font-weight: 900;
-        box-shadow: 0 2px 8px var(--accent-glow);
-      }
-
-      .send-button:hover {
-        background: var(--accent-hover);
-        transform: scale(1.05);
-      }
-
-      .mission-status {
-        margin-top: 6px;
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--accent);
-      }
-
-      /* Slash and Mentions Popup Menus */
-      .popup-menu {
-        position: absolute;
-        bottom: 100%;
-        left: 0;
-        right: 0;
-        margin-bottom: 8px;
-        max-height: 260px;
-        overflow-y: auto;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-md);
-        background: var(--surface);
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
-        display: none;
-        z-index: 50;
-      }
-
-      .popup-menu.show {
-        display: block;
-      }
-
-      .popup-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 9px 14px;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      }
-
-      .popup-item:hover,
-      .popup-item.selected {
-        background: var(--surface-elevated);
-      }
-
-      .popup-item strong {
-        color: var(--accent);
-        font-size: 13px;
-      }
-
-      .popup-item small {
-        color: var(--muted);
-        font-size: 11.5px;
-        margin-left: auto;
-      }
-
-      /* Right Auxiliary Pane */
-      .right-rail {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        border-left: 1px solid var(--line);
-        background: var(--surface);
-        overflow: hidden;
-      }
-
-      .rail-tabs {
-        display: flex;
-        border-bottom: 1px solid var(--line);
-        background: var(--surface-subtle);
-      }
-
-      .rail-tab {
-        flex: 1;
-        padding: 11px 4px;
-        text-align: center;
-        font-size: 11.5px;
-        font-weight: 700;
-        color: var(--muted);
-        border-bottom: 2px solid transparent;
-      }
-
-      .rail-tab:hover {
-        color: var(--ink);
-      }
-
-      .rail-tab.active {
-        color: var(--accent);
-        border-bottom-color: var(--accent);
-        background: var(--surface);
-      }
-
-      .rail-tab-content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 16px;
-      }
-
-      .rail-section-heading {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 12px;
-      }
-
-      .rail-section-heading h3 {
-        margin: 0;
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--ink);
-      }
-
-      .artifact {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        background: var(--surface-subtle);
-        margin-bottom: 8px;
-        text-align: left;
-        cursor: pointer;
-      }
-
-      .artifact:hover {
-        border-color: var(--accent);
-        background: var(--surface-elevated);
-      }
-
-      .artifact-icon {
-        display: grid;
-        place-items: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 13px;
-      }
-
-      .artifact-name {
-        font-weight: 600;
-        font-size: 12px;
-        color: var(--ink);
-        display: block;
-      }
-
-      .artifact-time {
-        color: var(--subtle);
-        font-size: 10.5px;
-        display: block;
-      }
-
-      .artifact-state {
-        margin-left: auto;
-        color: var(--accent);
-        font-weight: 700;
-      }
-
-      .live-status {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        border-radius: var(--radius-sm);
-        background: var(--surface-subtle);
-        margin-bottom: 12px;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--silver);
-      }
-
-      .live-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--green);
-      }
-
-      .activity {
-        display: flex;
-        gap: 10px;
-        padding: 9px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      }
-
-      .activity-icon {
-        display: grid;
-        place-items: center;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: var(--surface-subtle);
-        color: var(--accent);
-        font-size: 11px;
-      }
-
-      .activity strong {
-        display: block;
-        font-size: 12px;
-        color: var(--ink);
-      }
-
-      .activity small {
-        color: var(--muted);
-        font-size: 11px;
-      }
-
-      .activity time {
-        margin-left: auto;
-        color: var(--subtle);
-        font-size: 10.5px;
-      }
-
-      .activity-button {
-        width: 100%;
-        margin-top: 12px;
-        padding: 8px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--line);
-        background: var(--surface-subtle);
-        color: var(--silver);
-        font-weight: 600;
-        font-size: 11.5px;
-      }
-
-      .activity-button:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-
-      /* Agent Swarm Card in main */
-      .agent-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-        margin-top: 14px;
-      }
-
-      .agent-card {
-        padding: 16px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-md);
-        background: var(--surface);
-      }
-
-      .agent-card.active,
-      .agent-card.running {
-        border-color: var(--accent);
-        box-shadow: 0 6px 20px var(--accent-glow);
-      }
-
-      .agent-head {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .agent-icon {
-        display: grid;
-        place-items: center;
-        width: 32px;
-        height: 32px;
-        border-radius: var(--radius-sm);
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 14px;
-        border: 1px solid var(--accent);
-      }
-
-      .agent-head h3 {
-        margin: 0;
-        font-size: 13.5px;
-      }
-
-      .agent-head small {
-        color: var(--muted);
-        font-size: 11px;
-      }
-
-      .status {
-        display: inline-block;
-        margin: 10px 0 8px;
-        padding: 2px 7px;
-        border-radius: 4px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 10.5px;
-        font-weight: 750;
-      }
-
-      .agent-card p {
-        margin: 0 0 10px;
-        color: var(--muted);
-        font-size: 12px;
-      }
-
-      .task {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 11.5px;
-        color: var(--silver);
-        margin-top: 4px;
-      }
-
-      .task-check {
-        color: var(--accent);
-        font-weight: 800;
-      }
-
-      .task-check.pending {
-        color: var(--subtle);
-      }
-
-      .progress {
-        height: 5px;
-        margin-top: 12px;
-        border-radius: 3px;
-        background: var(--surface-subtle);
-        overflow: hidden;
-      }
-
-      .progress span {
-        display: block;
-        width: 66%;
-        height: 100%;
-        background: var(--accent);
-      }
-
-      .progress-count {
-        float: right;
-        margin-top: 4px;
-        color: var(--subtle);
-        font-size: 10.5px;
-      }
-
-      /* Modals */
-      .approval-modal,
-      .settings-modal,
-      .chat-modal,
-      .artifact-modal,
-      .manager-modal,
-      .customizations-modal {
-        position: fixed;
-        inset: 0;
-        display: grid;
-        place-items: center;
-        padding: 24px;
-        background: rgba(4, 5, 7, 0.85);
-        backdrop-filter: blur(8px);
-        opacity: 0;
-        pointer-events: none;
-        transition: var(--transition);
-        z-index: 100;
-      }
-
-      .approval-modal.open,
-      .settings-modal.open,
-      .chat-modal.open,
-      .artifact-modal.open,
-      .manager-modal.open,
-      .customizations-modal.open {
-        opacity: 1;
-        pointer-events: auto;
-      }
-
-      .approval-card,
-      .settings-card,
-      .artifact-review,
-      .manager-card,
-      .customizations-card {
-        width: min(640px, 100%);
-        max-height: min(780px, 90vh);
-        overflow-y: auto;
-        padding: 24px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-lg);
-        background: var(--surface);
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
-      }
-
-      .chat-panel {
-        position: fixed;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        width: min(480px, 100%);
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        border-left: 1px solid var(--line);
-        background: var(--surface);
-        box-shadow: -20px 0 60px rgba(0, 0, 0, 0.8);
-      }
-
-      .settings-group-heading {
-        margin: 20px 0 8px;
-        color: var(--accent);
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .settings-runtime-grid {
-        display: grid;
-        gap: 6px;
-        margin: 8px 0 12px;
-      }
-
-      .settings-runtime-item {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 8px 10px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        background: var(--surface-subtle);
-        font-size: 12px;
-      }
-
-      .setting-group {
-        display: grid;
-        gap: 6px;
-        margin-top: 14px;
-      }
-
-      .setting-group label {
-        color: var(--silver);
-        font-size: 12px;
-        font-weight: 700;
-      }
-
-      .setting-group select,
-      .setting-group input,
-      .setting-group textarea {
-        width: 100%;
-        padding: 9px 11px;
-        border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
-        outline: 0;
-        background: var(--canvas);
-        color: var(--ink);
-      }
-
-      .toggle-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-top: 1px solid var(--line);
-      }
-
-      .settings-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 24px;
-      }
-
-      .settings-actions button {
-        padding: 8px 14px;
-        border-radius: var(--radius-sm);
-        font-weight: 700;
-        font-size: 12.5px;
-      }
-
-      .settings-close {
-        background: var(--surface-subtle);
-        border: 1px solid var(--line);
-        color: var(--silver);
-      }
-
-      .settings-save {
-        background: var(--accent);
-        color: #ffffff;
-      }
-
-      .toast {
-        position: fixed;
-        right: 24px;
-        bottom: 24px;
-        padding: 12px 18px;
-        border: 1px solid var(--accent);
-        border-radius: var(--radius-md);
-        background: var(--surface-elevated);
-        color: #ffffff;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-        font-weight: 600;
-        font-size: 13px;
-        opacity: 0;
-        transform: translateY(8px);
-        pointer-events: none;
-        transition: var(--transition);
-        z-index: 200;
-      }
-
-      .toast.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .empty-state {
-        color: var(--subtle);
-        font-size: 12px;
-        text-align: center;
-        padding: 20px 0;
-        display: block;
-      }
-
-      .text-link {
-        color: var(--accent);
-        font-weight: 700;
-        font-size: 12px;
-      }
-
-      @media (max-width: 1120px) {
-        body {
-          min-width: 760px;
-        }
-        .app {
-          grid-template-columns: 200px minmax(0, 1fr);
-        }
-        .right-rail {
-          display: none;
-        }
-        .composer-container {
-          left: calc(200px + (100vw - 200px) / 2);
-          width: min(740px, calc(100vw - 240px));
-        }
-      }
-
-      @media (max-width: 760px) {
-        body {
-          min-width: 0;
-        }
-        .app {
-          display: block;
-        }
-        .sidebar {
-          display: none;
-        }
-        .composer-container {
-          left: 50%;
-          width: calc(100vw - 32px);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="app">
-      <!-- Left Sidebar -->
-      <aside class="sidebar">
-        <div class="brand">
-          <span class="brand-mark"></span>
-          <span>SpartanCode</span>
-          <span class="brand-badge">2.0</span>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpartanCode</title>
+  <link rel="stylesheet" href="./styles/global.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg-primary:#0d1117;
+      --bg-secondary:#161b22;
+      --bg-tertiary:#1c2128;
+      --bg-panel:#0d1117;
+      --border:#30363d;
+      --text-primary:#e6edf3;
+      --text-secondary:#8b949e;
+      --text-tertiary:#6e7681;
+      --accent:#58a6ff;
+      --accent-hover:#79c0ff;
+      --accent-subtle:rgba(88,166,255,0.1);
+      --green:#3fb950;
+      --green-subtle:rgba(63,185,80,0.1);
+      --red:#f85149;
+      --orange:#d29922;
+      --purple:#bc8cff;
+      --sidebar-w:260px;
+      --panel-w:320px;
+      --header-h:52px;
+      --radius:8px;
+      --radius-sm:6px;
+      --font-mono:'SF Mono','Cascadia Code','Fira Code',monospace;
+      --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+    }
+    html,body,#root{height:100%;overflow:hidden;font-family:var(--font-sans);background:var(--bg-primary);color:var(--text-primary)}
+    button{cursor:pointer;font-family:inherit;border:none;background:none;color:inherit}
+    input,textarea{font-family:inherit;color:inherit;background:none;border:none;outline:none}
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text-tertiary)}
+
+    .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr var(--panel-w);grid-template-rows:var(--header-h) 1fr;height:100vh;overflow:hidden}
+    .app.panel-closed{grid-template-columns:var(--sidebar-w) 1fr 0px}
+
+    .header{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--bg-secondary);z-index:10}
+    .header-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-0.3px;white-space:nowrap}
+    .header-logo svg{width:22px;height:22px;color:var(--accent)}
+    .header-breadcrumb{color:var(--text-secondary);font-size:13px;display:flex;align-items:center;gap:6px}
+    .header-breadcrumb span{color:var(--text-tertiary)}
+    .header-center{flex:1;display:flex;justify-content:center}
+    .model-selector{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border);font-size:13px;color:var(--text-secondary);transition:all .15s}
+    .model-selector:hover{border-color:var(--accent);color:var(--text-primary)}
+    .model-selector .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+    .header-actions{display:flex;gap:4px}
+    .header-actions button{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-secondary);transition:all .15s}
+    .header-actions button:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .header-actions button.active{background:var(--accent-subtle);color:var(--accent)}
+
+    .sidebar{grid-row:2;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--bg-secondary);overflow:hidden}
+    .sidebar-section{padding:12px}
+    .sidebar-section-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-tertiary);margin-bottom:8px;padding:0 8px}
+    .new-chat-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);transition:all .15s;margin-bottom:12px}
+    .new-chat-btn:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .new-chat-btn svg{width:16px;height:16px;color:var(--accent)}
+    .conversation-list{flex:1;overflow-y:auto;padding:0 12px}
+    .conversation-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all .15s;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .conversation-item:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .conversation-item.active{background:var(--accent-subtle);color:var(--accent)}
+    .conversation-item svg{width:14px;height:14px;flex-shrink:0;opacity:0.5}
+    .sidebar-footer{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
+    .sidebar-footer button{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);transition:all .15s}
+    .sidebar-footer button:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+    .sidebar-footer button svg{width:16px;height:16px}
+
+    .main{grid-row:2;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-primary)}
+    .messages{flex:1;overflow-y:auto;padding:24px 0}
+    .messages-inner{max-width:720px;margin:0 auto;padding:0 24px}
+
+    .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 24px}
+    .welcome-logo{width:48px;height:48px;margin-bottom:20px;color:var(--accent)}
+    .welcome h2{font-size:24px;font-weight:600;margin-bottom:8px;letter-spacing:-0.5px}
+    .welcome p{color:var(--text-secondary);font-size:15px;max-width:480px;line-height:1.5;margin-bottom:32px}
+    .welcome-suggestions{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:520px}
+    .suggestion{padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius);text-align:left;font-size:13px;color:var(--text-secondary);transition:all .15s}
+    .suggestion:hover{border-color:var(--accent);color:var(--text-primary);background:var(--accent-subtle)}
+    .suggestion strong{display:block;color:var(--text-primary);margin-bottom:4px;font-weight:500}
+
+    .message{margin-bottom:24px;display:flex;gap:12px}
+    .message-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:600;margin-top:2px}
+    .message-avatar.user{background:var(--accent-subtle);color:var(--accent)}
+    .message-avatar.assistant{background:var(--green-subtle);color:var(--green)}
+    .message-body{flex:1;min-width:0}
+    .message-role{font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+    .message-role .time{font-weight:400;color:var(--text-tertiary);font-size:11px}
+    .message-content{font-size:14px;line-height:1.65;color:var(--text-primary)}
+    .message-content p{margin-bottom:10px}
+    .message-content p:last-child{margin-bottom:0}
+    .message-content code{font-family:var(--font-mono);font-size:13px;background:var(--bg-tertiary);padding:2px 6px;border-radius:4px}
+    .message-content pre{background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;overflow-x:auto;margin:10px 0;font-size:13px;line-height:1.5}
+    .message-content pre code{background:none;padding:0}
+    .message-content ul,.message-content ol{padding-left:20px;margin:8px 0}
+    .message-content li{margin-bottom:4px}
+    .message-actions{display:flex;gap:4px;margin-top:8px;opacity:0;transition:opacity .15s}
+    .message:hover .message-actions{opacity:1}
+    .message-actions button{padding:4px 8px;border-radius:var(--radius-sm);font-size:12px;color:var(--text-tertiary);transition:all .15s}
+    .message-actions button:hover{background:var(--bg-tertiary);color:var(--text-secondary)}
+
+    .typing{display:flex;gap:4px;padding:4px 0}
+    .typing span{width:6px;height:6px;border-radius:50%;background:var(--text-tertiary);animation:bounce 1.4s infinite}
+    .typing span:nth-child(2){animation-delay:0.2s}
+    .typing span:nth-child(3){animation-delay:0.4s}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+    .composer-wrap{padding:16px 24px 20px;background:var(--bg-primary);border-top:1px solid var(--border)}
+    .composer{max-width:720px;margin:0 auto;position:relative}
+    .composer-box{border:1px solid var(--border);border-radius:12px;background:var(--bg-secondary);transition:border-color .15s;padding:12px 16px}
+    .composer-box:focus-within{border-color:var(--accent)}
+    .composer-input{width:100%;min-height:44px;max-height:200px;resize:none;font-size:14px;line-height:1.5;padding:0;background:transparent;color:var(--text-primary)}
+    .composer-input::placeholder{color:var(--text-tertiary)}
+    .composer-toolbar{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .composer-tools{display:flex;gap:2px}
+    .composer-tools button{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-tertiary);transition:all .15s}
+    .composer-tools button:hover{background:var(--bg-tertiary);color:var(--text-secondary)}
+    .composer-tools button svg{width:16px;height:16px}
+    .send-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--accent);color:#fff;transition:all .15s}
+    .send-btn:hover{background:var(--accent-hover)}
+    .send-btn:disabled{background:var(--bg-tertiary);color:var(--text-tertiary);cursor:not-allowed}
+    .composer-hint{font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:6px}
+
+    .panel{grid-row:2;border-left:1px solid var(--border);background:var(--bg-secondary);display:flex;flex-direction:column;overflow:hidden}
+    .panel.hidden{display:none}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+    .panel-header h3{font-size:13px;font-weight:600}
+    .panel-header button{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);color:var(--text-secondary);transition:all .15s}
+    .panel-header button:hover{background:var(--bg-tertiary)}
+    .panel-tabs{display:flex;border-bottom:1px solid var(--border)}
+    .panel-tab{flex:1;padding:10px;font-size:12px;font-weight:500;color:var(--text-secondary);text-align:center;border-bottom:2px solid transparent;transition:all .15s}
+    .panel-tab:hover{color:var(--text-primary)}
+    .panel-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+    .panel-content{flex:1;overflow-y:auto;padding:16px}
+
+    .agent-card{padding:12px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;transition:all .15s}
+    .agent-card:hover{border-color:var(--accent)}
+    .agent-card-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .agent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .agent-dot.active{background:var(--green)}
+    .agent-dot.idle{background:var(--text-tertiary)}
+    .agent-card-header span{font-size:13px;font-weight:500}
+    .agent-card p{font-size:12px;color:var(--text-secondary);line-height:1.4}
+
+    .artifact-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .15s}
+    .artifact-item:hover{border-color:var(--accent);background:var(--accent-subtle)}
+    .artifact-icon{width:32px;height:32px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+    .artifact-icon.file{background:var(--accent-subtle);color:var(--accent)}
+    .artifact-icon.image{background:var(--green-subtle);color:var(--green)}
+    .artifact-icon.code{background:rgba(188,140,255,0.1);color:var(--purple)}
+    .artifact-meta{flex:1;min-width:0}
+    .artifact-meta .name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .artifact-meta .info{font-size:11px;color:var(--text-tertiary)}
+
+    @media(max-width:1100px){
+      .app{grid-template-columns:0 1fr 0!important}
+      .sidebar,.panel{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="app panel-closed" id="app">
+      <header class="header">
+        <div class="header-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          SpartanCode
         </div>
+        <div class="header-breadcrumb"><span>/</span> New conversation</div>
+        <div class="header-center">
+          <button class="model-selector" id="modelSelector">
+            <span class="dot"></span>
+            <span>Spartan LLM</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"/></svg>
+          </button>
+        </div>
+        <div class="header-actions">
+          <button title="Agent panel" id="togglePanel" onclick="togglePanel()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="10" y1="2" x2="10" y2="14"/></svg>
+          </button>
+        </div>
+      </header>
 
-        <div class="nav-group-label">WORKSPACE</div>
-        <nav class="nav" aria-label="Primary navigation">
-          <button class="nav-item active" data-view="home" title="Agent Canvas">
-            <span class="nav-icon">💬</span>Canvas
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <button class="new-chat-btn" onclick="newChat()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+            New conversation
           </button>
-          <button class="nav-item" data-view="projects" title="Projects & Git">
-            <span class="nav-icon">📁</span>Projects
-          </button>
-          <button class="nav-item" data-view="agents" title="Subagents Swarm">
-            <span class="nav-icon">🤖</span>Subagents
-          </button>
-          <button
-            class="nav-item"
-            data-view="artifacts"
-            title="Generated Artifacts"
-          >
-            <span class="nav-icon">📄</span>Artifacts
-          </button>
-          <button
-            class="nav-item"
-            data-view="tasks"
-            id="navTasks"
-            title="Scheduled Tasks & Timers"
-          >
-            <span class="nav-icon">⏱️</span>Tasks & Cron
-          </button>
-          <button
-            class="nav-item"
-            data-view="customizations"
-            id="navCustomizations"
-            title="Custom Rules, Skills & Hooks"
-          >
-            <span class="nav-icon">🧩</span>Customizations
-          </button>
-          <button
-            class="nav-item"
-            data-view="settings"
-            title="Settings & Security"
-          >
-            <span class="nav-icon">⚙️</span>Settings
-          </button>
-        </nav>
-
-        <div class="workspace-card">
-          <div class="workspace-person">
-            <span class="avatar">SC</span>
-            <div>
-              <span class="workspace-name" id="sidebarWorkspaceName"
-                >Spartan Workspace</span
-              >
-              <span class="workspace-sub" id="sidebarBranchName"
-                >main · Clean</span
-              >
-            </div>
+          <div class="sidebar-section-title">Recent</div>
+        </div>
+        <div class="conversation-list" id="conversationList">
+          <div class="conversation-item active">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+            Refactor auth module
           </div>
-          <button class="workspace-open" id="openWorkspace">
-            <span>▱ Switch Workspace</span>
+          <div class="conversation-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+            Debug memory leak
+          </div>
+          <div class="conversation-item">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
+            Add WebSocket support
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <button>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3"/><path d="M8 1v2m0 10v2M1 8h2m10 0h2m-2.6-4.6-1.4 1.4m-6 6-1.4 1.4m0-10L4.6 4.6m6 6 1.4 1.4"/></svg>
+            Settings
           </button>
         </div>
       </aside>
 
-      <!-- Center Main Canvas -->
       <main class="main">
-        <header class="topbar">
-          <div class="topbar-left">
-            <span class="topbar-title">
-              <span>Mission Orchestrator</span>
-              <span class="pill-badge active" id="activeModelBadge"
-                >Local GGUF (Q4_K_M)</span
-              >
-              <span class="pill-badge" id="activePolicyBadge"
-                >Guided Sandbox</span
-              >
-            </span>
+        <div class="messages" id="messages">
+          <div class="messages-inner">
+            <div class="welcome" id="welcomeScreen">
+              <svg class="welcome-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <h2>What can I help you build?</h2>
+              <p>SpartanCode is your AI coding agent. Ask me to write, debug, refactor, or explain code across your project.</p>
+              <div class="welcome-suggestions">
+                <button class="suggestion" onclick="insertPrompt('Explain the architecture of this project')"><strong>Explain architecture</strong>Walk me through the codebase structure</button>
+                <button class="suggestion" onclick="insertPrompt('Fix the failing tests in the test suite')"><strong>Fix failing tests</strong>Diagnose and repair broken tests</button>
+                <button class="suggestion" onclick="insertPrompt('Refactor the authentication module')"><strong>Refactor code</strong>Improve code quality and structure</button>
+                <button class="suggestion" onclick="insertPrompt('Add a new API endpoint for user settings')"><strong>Add a feature</strong>Build new functionality end-to-end</button>
+              </div>
+            </div>
+            <div id="messageList"></div>
           </div>
-          <div class="topbar-actions">
-            <button
-              class="round-button"
-              aria-label="Create project"
-              id="createProjectBtn"
-              title="Create Project"
-            >
-              ＋
-            </button>
-            <button class="primary-button" id="newMission">
-              <span>✦ New Mission</span>
-            </button>
-            <button class="context-button preview-launch" id="openPreview">
-              <span>▷ Preview</span>
-            </button>
-            <button
-              class="round-button"
-              aria-label="Notifications"
-              id="notificationChatBtn"
-              title="Chat Assistant"
-            >
-              💬
-            </button>
-          </div>
-        </header>
-
-        <div class="canvas-content" id="canvasContent">
-          <section class="hero" id="heroSection">
-            <h1>Autonomous Engineering Canvas</h1>
-            <p>
-              Direct orchestrator with multi-agent planning, verified execution,
-              tool sandboxing, and progressive disclosure skills.
-            </p>
-            <div class="quick-cards">
-              <div
-                class="quick-card"
-                data-prompt="/plan Design comprehensive system architecture and breakdown"
-              >
-                <span class="quick-card-icon">📐</span>
-                <strong>/plan Architecture</strong>
-                <small>Deconstruct requirements</small>
-              </div>
-              <div
-                class="quick-card"
-                data-prompt="/build Implement feature with tests and type safety"
-              >
-                <span class="quick-card-icon">⚡</span>
-                <strong>/build Code</strong>
-                <small>Write clean modules</small>
-              </div>
-              <div
-                class="quick-card"
-                data-prompt="/verify Run test matrix, linter, and validation suite"
-              >
-                <span class="quick-card-icon">🛡️</span>
-                <strong>/verify Tests</strong>
-                <small>Ensure zero regressions</small>
-              </div>
-              <div
-                class="quick-card"
-                data-prompt="/audit Scan security boundaries and export governance"
-              >
-                <span class="quick-card-icon">🔍</span>
-                <strong>/audit Security</strong>
-                <small>Redacted audit log</small>
-              </div>
-            </div>
-          </section>
-
-          <!-- Dynamic Message Stream -->
-          <div class="message-stream" id="messageStream"></div>
-
-          <!-- Legacy / Fallback Active Agents Grid for Tests -->
-          <section
-            class="agents"
-            aria-labelledby="agentsHeading"
-            style="margin-top: 32px"
-          >
-            <div
-              class="section-heading"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 12px;
-              "
-            >
-              <h2 id="agentsHeading" style="margin: 0; font-size: 15px">
-                Active agent personas
-              </h2>
-              <button class="text-link" id="viewAgents">
-                View all subagents ›
-              </button>
-            </div>
-            <div class="agent-grid">
-              <article class="agent-card active" data-agent="plan">
-                <div class="agent-head">
-                  <span class="agent-icon">📐</span>
-                  <div>
-                    <h3>Plan</h3>
-                    <small>System Architect</small>
-                  </div>
-                </div>
-                <span class="status">● In progress</span>
-                <p>Analyzing requirements and breaking down the solution.</p>
-                <div class="task">
-                  <span class="task-check">✓</span> Understand requirements
-                </div>
-                <div class="task">
-                  <span class="task-check">✓</span> Define system design
-                </div>
-                <div class="task">
-                  <span class="task-check pending">◌</span> Create execution
-                  plan
-                </div>
-                <div class="progress"><span></span></div>
-                <span class="progress-count">2 / 3</span>
-              </article>
-              <article class="agent-card running" data-agent="build">
-                <div class="agent-head">
-                  <span class="agent-icon">⚡</span>
-                  <div>
-                    <h3>Build</h3>
-                    <small>Software Engineer</small>
-                  </div>
-                </div>
-                <span class="status">● In progress</span>
-                <p>Implementing the solution with clean, tested code.</p>
-                <div class="task">
-                  <span class="task-check">✓</span> Set up project structure
-                </div>
-                <div class="task">
-                  <span class="task-check">✓</span> Implement core logic
-                </div>
-                <div class="task">
-                  <span class="task-check pending">◌</span> Add tests and docs
-                </div>
-                <div class="progress"><span></span></div>
-                <span class="progress-count">2 / 3</span>
-              </article>
-              <article class="agent-card" data-agent="verify">
-                <div class="agent-head">
-                  <span class="agent-icon">🛡️</span>
-                  <div>
-                    <h3>Verify</h3>
-                    <small>QA Specialist</small>
-                  </div>
-                </div>
-                <span class="status">● Pending</span>
-                <p>Validating quality, security, and performance.</p>
-                <div class="task">
-                  <span class="task-check pending">◯</span> Run automated tests
-                </div>
-                <div class="task">
-                  <span class="task-check pending">◯</span> Security scan
-                </div>
-                <div class="task">
-                  <span class="task-check pending">◯</span> Performance check
-                </div>
-                <div class="progress"><span></span></div>
-                <span class="progress-count">0 / 3</span>
-              </article>
-            </div>
-          </section>
-
-          <!-- Mission History -->
-          <section
-            class="mission-history"
-            aria-labelledby="historyHeading"
-            style="margin-top: 32px"
-          >
-            <div
-              class="section-heading"
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 12px;
-              "
-            >
-              <h2 id="historyHeading" style="margin: 0; font-size: 15px">
-                Mission history
-              </h2>
-              <button class="text-link" id="clearHistory">
-                Clear local history
-              </button>
-            </div>
-            <div class="history-list" id="missionHistory">
-              <span class="empty-state"
-                >Your completed missions will appear here.</span
-              >
-            </div>
-          </section>
         </div>
-
-        <!-- Floating Interactive Composer -->
-        <div class="composer-container">
-          <!-- Slash Commands Popup -->
-          <div class="popup-menu" id="slashMenu"></div>
-          <!-- Mentions Popup -->
-          <div class="popup-menu" id="mentionsMenu"></div>
-
-          <form class="mission-composer" id="missionForm">
-            <textarea
-              id="missionInput"
-              placeholder="Type '/' for slash commands, '@' to mention files/rules, or describe your mission..."
-              aria-label="Mission description"
-            ></textarea>
-            <div class="composer-row">
-              <button
-                type="button"
-                class="context-button"
-                id="composerContextBtn"
-              >
-                <span>⌕ Context</span>
-              </button>
-              <button
-                type="button"
-                class="context-button"
-                id="composerModelBtn"
-              >
-                <span>✦ Model ⌄</span>
-              </button>
-              <button
-                type="button"
-                class="context-button"
-                id="composerVoiceBtn"
-                title="Voice dictation"
-              >
-                <span>🎙️ Voice</span>
-              </button>
-              <button
-                type="submit"
-                class="send-button"
-                aria-label="Start mission"
-              >
-                ↑
-              </button>
+        <div class="composer-wrap">
+          <div class="composer">
+            <div class="composer-box">
+              <textarea class="composer-input" id="composerInput" placeholder="Message SpartanCode..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+              <div class="composer-toolbar">
+                <div class="composer-tools">
+                  <button title="Attach file">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 6.5l-7 7a3.5 3.5 0 01-5-5l7-7a2 2 0 013 3l-7 7a.5.5 0 01-1-1l6.5-6.5"/></svg>
+                  </button>
+                  <button title="Code context">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3 1 8l4 5M11 3l4 5-4 5"/></svg>
+                  </button>
+                  <button title="Terminal">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="14" height="12" rx="2"/><path d="M4 6l3 3-3 3"/></svg>
+                  </button>
+                </div>
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2L7 9M14 2l-5 13-2-6-6-2z"/></svg>
+                </button>
+              </div>
             </div>
-            <div
-              class="mission-status"
-              id="missionStatus"
-              aria-live="polite"
-            ></div>
-          </form>
+            <div class="composer-hint">Press Enter to send, Shift+Enter for new line</div>
+          </div>
         </div>
       </main>
 
-      <!-- Right Auxiliary Workspace Pane -->
-      <aside class="right-rail">
-        <div class="rail-tabs">
-          <button class="rail-tab active" data-rail-tab="artifacts">
-            Artifacts
+      <aside class="panel hidden" id="rightPanel">
+        <div class="panel-header">
+          <h3>Agents</h3>
+          <button onclick="togglePanel()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.5 3.5l-7 7M3.5 3.5l7 7"/></svg>
           </button>
-          <button class="rail-tab" data-rail-tab="subagents">Subagents</button>
-          <button class="rail-tab" data-rail-tab="tasks">Tasks & Cron</button>
-          <button class="rail-tab" data-rail-tab="git">Git Diff</button>
-          <button class="rail-tab" data-rail-tab="activity">Live Feed</button>
         </div>
-
-        <!-- Artifacts Tab -->
-        <div class="rail-tab-content" id="railTabArtifacts">
-          <div class="rail-section-heading">
-            <h3>Generated Artifacts</h3>
-            <button class="text-link" id="viewArtifacts">View all</button>
-          </div>
-          <div id="artifactList">
-            <div class="artifact">
-              <span class="artifact-icon">📄</span>
-              <div>
-                <span class="artifact-name">No artifacts yet</span>
-                <span class="artifact-time"
-                  >Start a mission to generate one</span
-                >
-              </div>
+        <div class="panel-tabs">
+          <button class="panel-tab active" onclick="switchTab(this,'agents')">Agents</button>
+          <button class="panel-tab" onclick="switchTab(this,'artifacts')">Artifacts</button>
+        </div>
+        <div class="panel-content" id="panelContent">
+          <div id="agentsTab">
+            <div class="agent-card">
+              <div class="agent-card-header"><div class="agent-dot active"></div><span>Code Explorer</span></div>
+              <p>Analyzing project structure and dependencies</p>
+            </div>
+            <div class="agent-card">
+              <div class="agent-card-header"><div class="agent-dot idle"></div><span>Test Runner</span></div>
+              <p>Ready to execute tests</p>
+            </div>
+            <div class="agent-card">
+              <div class="agent-card-header"><div class="agent-dot idle"></div><span>Formatter</span></div>
+              <p>Waiting for code changes</p>
             </div>
           </div>
-        </div>
-
-        <!-- Subagents Tab -->
-        <div
-          class="rail-tab-content"
-          id="railTabSubagents"
-          style="display: none"
-        >
-          <div class="rail-section-heading">
-            <h3>Subagent Swarm</h3>
-            <button class="text-link" id="spawnSubagentQuick">＋ Spawn</button>
-          </div>
-          <div id="subagentsList"></div>
-        </div>
-
-        <!-- Tasks Tab -->
-        <div class="rail-tab-content" id="railTabTasks" style="display: none">
-          <div class="rail-section-heading">
-            <h3>Scheduled Tasks</h3>
-            <button class="text-link" id="scheduleTaskQuick">
-              ＋ New Timer
-            </button>
-          </div>
-          <div id="tasksList"></div>
-        </div>
-
-        <!-- Git Tab -->
-        <div class="rail-tab-content" id="railTabGit" style="display: none">
-          <div class="rail-section-heading">
-            <h3>Workspace Changes</h3>
-            <button class="text-link" id="refreshGitQuick">Refresh</button>
-          </div>
-          <div
-            id="gitDiffContainer"
-            style="
-              font-family: var(--font-mono);
-              font-size: 11px;
-              white-space: pre-wrap;
-              color: var(--silver);
-            "
-          >
-            No uncommitted changes detected.
-          </div>
-          <div style="margin-top: 14px">
-            <button
-              class="context-button"
-              id="gitQuickStage"
-              style="width: 100%; justify-content: center; margin-bottom: 6px"
-            >
-              Stage All Changes
-            </button>
-            <button
-              class="primary-button"
-              id="gitQuickCommit"
-              style="width: 100%; justify-content: center"
-            >
-              Commit Staged Changes
-            </button>
-          </div>
-        </div>
-
-        <!-- Activity Tab -->
-        <div
-          class="rail-tab-content"
-          id="railTabActivity"
-          style="display: none"
-        >
-          <div class="live-status" id="liveStatus">
-            <span class="live-dot"></span>All systems operational
-          </div>
-          <div id="activityList">
-            <div class="activity">
-              <span class="activity-icon">SC</span>
-              <div>
-                <strong>Workspace</strong>
-                <small>Ready for mission orchestration</small>
-              </div>
-              <time>Now</time>
+          <div id="artifactsTab" style="display:none">
+            <div class="artifact-item">
+              <div class="artifact-icon file">📄</div>
+              <div class="artifact-meta"><div class="name">index.html</div><div class="info">Modified • 2 min ago</div></div>
+            </div>
+            <div class="artifact-item">
+              <div class="artifact-icon code">JS</div>
+              <div class="artifact-meta"><div class="name">app.mjs</div><div class="info">Created • 5 min ago</div></div>
             </div>
           </div>
-          <button class="activity-button" id="activityButton">
-            ☷ View Full Activity Log
-          </button>
         </div>
       </aside>
     </div>
+  </div>
 
-    <!-- Modals & Overlays -->
-    <div class="toast" id="toast" role="status"></div>
+  <script>
+    const messages = [];
+    const messageList = document.getElementById('messageList');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const composerInput = document.getElementById('composerInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-    <!-- Approval Modal -->
-    <div
-      class="approval-modal"
-      id="approvalModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="approvalTitle"
-    >
-      <div class="approval-card">
-        <h2 id="approvalTitle" style="margin: 0 0 10px; color: var(--accent)">
-          Permission Needed
-        </h2>
-        <p
-          id="approvalDetail"
-          style="color: var(--silver); font-size: 13.5px"
-        ></p>
-        <div class="settings-actions">
-          <button class="settings-close" id="denyApproval">Deny Action</button>
-          <button class="settings-save" id="allowApproval">
-            Approve and Continue
-          </button>
-        </div>
-      </div>
-    </div>
+    composerInput.addEventListener('input', function() {
+      sendBtn.disabled = !composerInput.value.trim();
+    });
 
-    <!-- Settings Modal -->
-    <div
-      class="settings-modal"
-      id="settingsModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="settingsTitle"
-    >
-      <form class="settings-card" id="settingsForm">
-        <h2 id="settingsTitle" style="margin: 0 0 4px; font-size: 20px">
-          Settings & Workspace Policy
-        </h2>
-        <p style="margin: 0 0 18px; color: var(--muted); font-size: 12.5px">
-          Configure local-first LLM runtime, execution sandbox, and provider
-          credentials.
-        </p>
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+    }
 
-        <div class="settings-group-heading">Workspace & Repository</div>
-        <div class="settings-runtime-item" id="settingsWorkspaceSummary">
-          No workspace selected
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 8px">
-          <button
-            type="button"
-            class="context-button"
-            id="settingsChooseWorkspace"
-          >
-            Choose Folder
-          </button>
-          <button type="button" class="context-button" id="settingsGitStatus">
-            Check Git Status
-          </button>
-        </div>
-        <small
-          id="gitWorkflowMessage"
-          style="display: block; color: var(--muted); margin-top: 6px"
-        ></small>
-
-        <div class="settings-group-heading">Runtime & Intelligence</div>
-        <div class="setting-group">
-          <label for="modelSelect">Default Local Model</label>
-          <select id="modelSelect"></select>
-          <div style="display: flex; gap: 8px; margin-top: 6px">
-            <button type="button" class="context-button" id="prepareModel">
-              Prepare Local Model
-            </button>
-          </div>
-          <small
-            id="modelStatus"
-            style="display: block; color: var(--muted)"
-          ></small>
-        </div>
-
-        <div class="setting-group">
-          <label for="defaultAgentSelect">Default Coordinator Agent</label>
-          <select id="defaultAgentSelect"></select>
-        </div>
-
-        <div class="setting-group">
-          <label for="apiProviderSelect">API Fallback Provider</label>
-          <select id="apiProviderSelect"></select>
-        </div>
-
-        <div class="setting-group">
-          <label for="quantizationSelect">Quantization Format</label>
-          <select id="quantizationSelect">
-            <option>Q4_K_M</option>
-            <option>Q4_0</option>
-            <option>Q3_K_S</option>
-          </select>
-        </div>
-
-        <div class="setting-group">
-          <label for="protocolSelect">Agent Protocol</label>
-          <select id="protocolSelect">
-            <option>MCP Lite</option>
-            <option>MCP Bridge</option>
-            <option>Full MCP</option>
-          </select>
-        </div>
-
-        <div class="setting-group">
-          <label for="executionModeSelect">Execution Mode & Sandbox</label>
-          <select id="executionModeSelect">
-            <option value="guided">Guided · ask before risky actions</option>
-            <option value="yolo">YOLO · run risky actions automatically</option>
-          </select>
-        </div>
-
-        <div class="toggle-row">
-          <span>
-            <strong>Remember useful interactions</strong><br />
-            <small style="color: var(--muted)">Encrypted local memory.</small>
-          </span>
-          <input type="checkbox" id="memoryEnabled" />
-        </div>
-
-        <div class="toggle-row">
-          <span>
-            <strong>Sync automatically on resume</strong><br />
-            <small style="color: var(--muted)"
-              >Keep bridge state consistent.</small
-            >
-          </span>
-          <input type="checkbox" id="autoSyncEnabled" />
-        </div>
-
-        <div class="toggle-row">
-          <span>
-            <strong>Voice command input</strong><br />
-            <small style="color: var(--muted)">Dictation support.</small>
-          </span>
-          <input type="checkbox" id="voiceToggle" />
-        </div>
-
-        <div class="settings-group-heading">Runtime Diagnostics</div>
-        <div class="settings-runtime-grid" id="settingsRuntimeStatus">
-          Loading runtime status...
-        </div>
-
-        <div class="settings-group-heading">Governance & Extensibility</div>
-        <div class="settings-runtime-grid" id="settingsGovernanceStatus">
-          Loading governance status...
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 8px">
-          <button type="button" class="context-button" id="settingsExportAudit">
-            Export Audit Bundle
-          </button>
-          <button
-            type="button"
-            class="context-button"
-            id="settingsClearHistory"
-          >
-            Clear Local History
-          </button>
-        </div>
-
-        <details style="margin-top: 16px">
-          <summary
-            style="font-weight: 700; color: var(--silver); cursor: pointer"
-          >
-            Collaboration sessions
-          </summary>
-          <div class="setting-group">
-            <label for="collaborationSessionSelect">Active Session</label>
-            <select id="collaborationSessionSelect">
-              <option value="">No sessions loaded</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 8px">
-            <input
-              id="collaborationSessionName"
-              placeholder="New session name"
-              style="
-                flex: 1;
-                padding: 8px;
-                background: var(--canvas);
-                border: 1px solid var(--line);
-                border-radius: 6px;
-              "
-            />
-            <input
-              id="collaborationParticipant"
-              placeholder="Your name"
-              style="
-                width: 120px;
-                padding: 8px;
-                background: var(--canvas);
-                border: 1px solid var(--line);
-                border-radius: 6px;
-              "
-            />
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 8px">
-            <select
-              id="collaborationRole"
-              style="
-                padding: 8px;
-                background: var(--canvas);
-                border: 1px solid var(--line);
-                border-radius: 6px;
-              "
-            >
-              <option value="owner">Owner</option>
-              <option value="member">Member</option>
-              <option value="observer">Observer</option>
-            </select>
-            <button
-              type="button"
-              class="context-button"
-              id="collaborationRefresh"
-            >
-              Refresh
-            </button>
-            <button
-              type="button"
-              class="context-button"
-              id="collaborationCreate"
-            >
-              Create
-            </button>
-            <button type="button" class="context-button" id="collaborationJoin">
-              Join
-            </button>
-          </div>
-          <small
-            id="collaborationMessage"
-            style="display: block; color: var(--muted); margin-top: 6px"
-          ></small>
-        </details>
-
-        <details style="margin-top: 12px">
-          <summary
-            style="font-weight: 700; color: var(--silver); cursor: pointer"
-          >
-            Signed plugin marketplace
-          </summary>
-          <div class="setting-group">
-            <label for="marketplaceUrl">Marketplace Index URL</label>
-            <input
-              id="marketplaceUrl"
-              type="url"
-              placeholder="https://example.invalid/plugins.json"
-            />
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 8px">
-            <button type="button" class="context-button" id="marketplaceFetch">
-              Verify Index
-            </button>
-          </div>
-          <div class="setting-group">
-            <label for="marketplacePluginSelect">Verified Plugins</label>
-            <select id="marketplacePluginSelect">
-              <option value="">Verify an index first</option>
-            </select>
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 8px">
-            <button
-              type="button"
-              class="context-button"
-              id="marketplaceDownload"
-            >
-              Download
-            </button>
-            <button
-              type="button"
-              class="context-button"
-              id="marketplaceActivate"
-            >
-              Activate
-            </button>
-            <button
-              type="button"
-              class="context-button"
-              id="marketplaceDeactivate"
-            >
-              Deactivate
-            </button>
-            <button type="button" class="context-button" id="marketplaceRun">
-              Run
-            </button>
-          </div>
-          <small
-            id="marketplaceMessage"
-            style="display: block; color: var(--muted); margin-top: 6px"
-          ></small>
-        </details>
-
-        <div class="settings-actions">
-          <button type="button" class="settings-close" id="closeSettings">
-            Cancel
-          </button>
-          <button type="submit" class="settings-save">Save Settings</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Project Preview Modal -->
-    <div
-      class="settings-modal"
-      id="previewModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="previewTitle"
-    >
-      <form class="settings-card" id="previewForm" style="max-width: 480px">
-        <h2 id="previewTitle" style="margin: 0 0 6px; font-size: 18px">
-          Project Preview
-        </h2>
-        <p style="margin: 0 0 14px; color: var(--muted); font-size: 12.5px">
-          Preview your local application in SpartanCode's isolated browser.
-        </p>
-        <div class="setting-group">
-          <label for="previewUrl">Local URL</label>
-          <input
-            id="previewUrl"
-            type="url"
-            value="http://localhost:3000"
-            required
-          />
-        </div>
-        <p
-          id="previewMessage"
-          style="margin: 10px 0 0; color: var(--muted); font-size: 11.5px"
-        >
-          Only local development servers (localhost, 127.0.0.1) are allowed.
-        </p>
-        <div class="settings-actions">
-          <button type="button" class="settings-close" id="closePreview">
-            Cancel
-          </button>
-          <button type="submit" class="settings-save">Launch Preview</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Artifact Modal -->
-    <div
-      class="artifact-modal"
-      id="artifactModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="artifactTitle"
-    >
-      <section class="artifact-review">
-        <h2 id="artifactTitle" style="margin: 0 0 6px">Artifact Review</h2>
-        <p
-          id="artifactDescription"
-          style="color: var(--muted); font-size: 12.5px; margin: 0 0 12px"
-        >
-          Review agent generated artifact or diff.
-        </p>
-        <div
-          class="diff-viewer"
-          id="artifactContent"
-          style="
-            max-height: 380px;
-            overflow-y: auto;
-            padding: 12px;
-            white-space: pre-wrap;
-          "
-        ></div>
-        <div class="settings-actions">
-          <button type="button" class="settings-close" id="rejectArtifact">
-            Reject
-          </button>
-          <button type="button" class="settings-save" id="acceptArtifact">
-            Accept Artifact
-          </button>
-        </div>
-      </section>
-    </div>
-
-    <!-- Chat Modal (Assistant Drawer) -->
-    <div
-      class="chat-modal"
-      id="chatModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="chatTitle"
-    >
-      <section class="chat-panel">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--line);
-          "
-        >
-          <h2 id="chatTitle" style="margin: 0; font-size: 16px">
-            Spartan Assistant
-          </h2>
-          <button
-            class="round-button"
-            id="closeChat"
-            aria-label="Close assistant"
-          >
-            ×
-          </button>
-        </div>
-        <div
-          id="chatMessages"
-          style="
-            flex: 1;
-            overflow-y: auto;
-            padding: 14px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-          "
-        ></div>
-        <form id="chatForm" style="display: flex; gap: 8px; margin-top: 10px">
-          <input
-            id="chatInput"
-            placeholder="Ask Leo anything..."
-            style="
-              flex: 1;
-              padding: 10px;
-              background: var(--canvas);
-              border: 1px solid var(--line);
-              border-radius: 8px;
-              color: #fff;
-            "
-          />
-          <button type="submit" class="send-button" style="margin: 0">↑</button>
-        </form>
-      </section>
-    </div>
-
-    <!-- Manager / Subagents Modal -->
-    <div
-      class="manager-modal"
-      id="managerModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="managerTitle"
-    >
-      <section class="manager-card">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-          "
-        >
-          <h2 id="managerTitle" style="margin: 0; font-size: 18px">
-            Subagent Swarm & Roles
-          </h2>
-          <button
-            class="round-button"
-            id="closeManager"
-            aria-label="Close agent manager"
-          >
-            ×
-          </button>
-        </div>
-        <div class="agent-grid" id="managerGrid"></div>
-        <div
-          style="
-            margin-top: 20px;
-            border-top: 1px solid var(--line);
-            padding-top: 14px;
-          "
-        >
-          <h3 style="margin: 0 0 10px; font-size: 13px">
-            Recent Agent Activity
-          </h3>
-          <div id="managerActivity"></div>
-        </div>
-      </section>
-    </div>
-
-    <!-- Customizations Hub Modal -->
-    <div
-      class="customizations-modal"
-      id="customizationsModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="customizationsTitle"
-    >
-      <section class="customizations-card">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-          "
-        >
-          <h2 id="customizationsTitle" style="margin: 0; font-size: 18px">
-            Customizations Hub
-          </h2>
-          <button
-            class="round-button"
-            id="closeCustomizations"
-            aria-label="Close customizations"
-          >
-            ×
-          </button>
-        </div>
-        <div
-          style="
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-            border-bottom: 1px solid var(--line);
-            padding-bottom: 8px;
-          "
-        >
-          <button class="rail-tab active" id="custTabRules">Rules</button>
-          <button class="rail-tab" id="custTabSkills">Skills</button>
-          <button class="rail-tab" id="custTabHooks">Hooks</button>
-          <button class="rail-tab" id="custTabMcp">MCP Servers</button>
-        </div>
-        <div
-          id="customizationsContent"
-          style="max-height: 420px; overflow-y: auto"
-        ></div>
-      </section>
-    </div>
-
-    <script>
-      const form = document.getElementById("missionForm");
-      const input = document.getElementById("missionInput");
-      const status = document.getElementById("missionStatus");
-      const toast = document.getElementById("toast");
-      const messageStream = document.getElementById("messageStream");
-      const heroSection = document.getElementById("heroSection");
-      const slashMenu = document.getElementById("slashMenu");
-      const mentionsMenu = document.getElementById("mentionsMenu");
-
-      const approvalModal = document.getElementById("approvalModal");
-      const approvalDetail = document.getElementById("approvalDetail");
-      const settingsModal = document.getElementById("settingsModal");
-      const previewModal = document.getElementById("previewModal");
-      const previewUrl = document.getElementById("previewUrl");
-      const previewMessage = document.getElementById("previewMessage");
-      const chatModal = document.getElementById("chatModal");
-      const chatMessages = document.getElementById("chatMessages");
-      const chatInput = document.getElementById("chatInput");
-      const artifactModal = document.getElementById("artifactModal");
-      const artifactContent = document.getElementById("artifactContent");
-      const managerModal = document.getElementById("managerModal");
-      const managerGrid = document.getElementById("managerGrid");
-      const managerActivity = document.getElementById("managerActivity");
-      const customizationsModal = document.getElementById(
-        "customizationsModal",
-      );
-      const customizationsContent = document.getElementById(
-        "customizationsContent",
-      );
-      const liveStatus = document.getElementById("liveStatus");
-
-      const modelSelect = document.getElementById("modelSelect");
-      const quantizationSelect = document.getElementById("quantizationSelect");
-      const protocolSelect = document.getElementById("protocolSelect");
-      const voiceToggle = document.getElementById("voiceToggle");
-      const prepareModelButton = document.getElementById("prepareModel");
-      const modelStatus = document.getElementById("modelStatus");
-
-      let activeApproval = null;
-      let activeArtifact = null;
-      let availableSlashCommands = [];
-      let discoveredCustomizations = {
-        rules: [],
-        skills: [],
-        hooks: [],
-        mcpServers: [],
-      };
-
-      const showToast = (message) => {
-        toast.textContent = message;
-        toast.classList.add("show");
-        window.setTimeout(() => toast.classList.remove("show"), 2800);
-      };
-
-      const escapeHtml = (value) =>
-        String(value).replace(
-          /[&<>"']/g,
-          (char) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#039;",
-            })[char] || char,
-        );
-
-      // Append rich bubble to canvas
-      const appendMessageToCanvas = (role, content, extra = {}) => {
-        heroSection.style.display = "none";
-        const bubble = document.createElement("div");
-        bubble.className = `message-bubble ${role}`;
-
-        let toolHtml = "";
-        if (extra.tool) {
-          toolHtml = `
-            <div class="tool-step-card">
-              <div class="tool-step-header">
-                <span class="tool-indicator"></span>
-                <span>${escapeHtml(extra.tool.name || "Tool Call")}</span>
-              </div>
-              <div class="tool-output-drawer">${escapeHtml(extra.tool.output || "")}</div>
-            </div>
-          `;
-        }
-
-        let thinkingHtml = "";
-        if (extra.thinking) {
-          thinkingHtml = `
-            <details class="thinking-box">
-              <summary>🧠 View agent reasoning...</summary>
-              <div class="thinking-content">${escapeHtml(extra.thinking)}</div>
-            </details>
-          `;
-        }
-
-        bubble.innerHTML = `
-          <div class="message-header">
-            <span class="message-sender">${role === "user" ? "You" : "Leo · Lead Agent"}</span>
-            <span class="message-badge">${role === "user" ? "USER" : "ASSISTANT"}</span>
-            <span class="message-time">${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
-          </div>
-          ${thinkingHtml}
-          <div class="message-body">${escapeHtml(content)}</div>
-          ${toolHtml}
-        `;
-        messageStream.appendChild(bubble);
-        bubble.scrollIntoView({ behavior: "smooth" });
-      };
-
-      // Quick card click handlers
-      document.querySelectorAll(".quick-card").forEach((card) => {
-        card.addEventListener("click", () => {
-          input.value = card.dataset.prompt;
-          input.focus();
-        });
-      });
-
-      // Slash commands and Mentions input handlers
-      const initCommandMenus = async () => {
-        if (!window.spartanCode) return;
-        availableSlashCommands =
-          (await window.spartanCode.listSlashCommands?.()) || [];
-      };
-
-      input.addEventListener("input", async () => {
-        const val = input.value;
-        if (val.startsWith("/")) {
-          const query = val.slice(1).toLowerCase();
-          const matches = availableSlashCommands.filter(
-            (c) =>
-              c.command.includes(query) ||
-              c.description.toLowerCase().includes(query),
-          );
-          if (matches.length) {
-            slashMenu.innerHTML = matches
-              .map(
-                (c) =>
-                  `<div class="popup-item" data-cmd="${c.command}"><strong>${c.command}</strong><small>${escapeHtml(c.description)}</small></div>`,
-              )
-              .join("");
-            slashMenu.classList.add("show");
-            mentionsMenu.classList.remove("show");
-            return;
-          }
-        }
-        slashMenu.classList.remove("show");
-
-        const lastAt = val.lastIndexOf("@");
-        if (lastAt !== -1 && lastAt === val.length - 1) {
-          const mentions = [
-            { id: "agents.md", type: "rule", desc: "Project Directives" },
-            { id: "plan", type: "subagent", desc: "Plan Architect" },
-            { id: "build", type: "subagent", desc: "Build Engineer" },
-            { id: "verify", type: "subagent", desc: "QA Specialist" },
-          ];
-          mentionsMenu.innerHTML = mentions
-            .map(
-              (m) =>
-                `<div class="popup-item" data-mention="@${m.id}"><strong>@${m.id}</strong><small>${m.desc}</small></div>`,
-            )
-            .join("");
-          mentionsMenu.classList.add("show");
-          return;
-        }
-        mentionsMenu.classList.remove("show");
-      });
-
-      slashMenu.addEventListener("click", (e) => {
-        const item = e.target.closest(".popup-item");
-        if (!item) return;
-        input.value = item.dataset.cmd + " ";
-        slashMenu.classList.remove("show");
-        input.focus();
-      });
-
-      mentionsMenu.addEventListener("click", (e) => {
-        const item = e.target.closest(".popup-item");
-        if (!item) return;
-        input.value =
-          input.value.slice(0, input.value.lastIndexOf("@")) +
-          item.dataset.mention +
-          " ";
-        mentionsMenu.classList.remove("show");
-        input.focus();
-      });
-
-      // Right rail tab switcher
-      document.querySelectorAll(".rail-tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          document
-            .querySelectorAll(".rail-tab")
-            .forEach((t) => t.classList.remove("active"));
-          tab.classList.add("active");
-          const target = tab.dataset.railTab;
-          document
-            .querySelectorAll(".rail-tab-content")
-            .forEach((c) => (c.style.display = "none"));
-          const activeContent = document.getElementById(
-            `railTab${target.charAt(0).toUpperCase() + target.slice(1)}`,
-          );
-          if (activeContent) activeContent.style.display = "block";
-          if (target === "git") refreshGitStatus();
-          if (target === "subagents") refreshSubagentsRail();
-          if (target === "tasks") refreshTasksRail();
-        });
-      });
-
-      const refreshGitStatus = async () => {
-        const res = await window.spartanCode?.getGitStatus?.();
-        const container = document.getElementById("gitDiffContainer");
-        if (res && res.available) {
-          container.textContent =
-            res.output || "Clean workspace (no uncommitted changes).";
-        } else {
-          container.textContent =
-            res?.message || "Git not initialized in workspace.";
-        }
-      };
-
-      const refreshSubagentsRail = async () => {
-        const list = (await window.spartanCode?.listSubagents?.()) || [];
-        const container = document.getElementById("subagentsList");
-        if (!list.length) {
-          container.innerHTML =
-            '<span class="empty-state">No active subagents running.</span>';
-          return;
-        }
-        container.innerHTML = list
-          .map(
-            (s) => `
-            <div class="artifact" style="flex-direction: column; align-items: flex-start;">
-              <div style="display: flex; align-items: center; width: 100%;">
-                <span class="artifact-icon">🤖</span>
-                <strong style="margin-left: 8px;">${escapeHtml(s.name)}</strong>
-                <span class="status" style="margin-left: auto;">${escapeHtml(s.state)}</span>
-              </div>
-              <small style="color: var(--muted); margin-top: 4px;">${escapeHtml(s.role)} · Step ${s.stepIndex}</small>
-            </div>
-          `,
-          )
-          .join("");
-      };
-
-      const refreshTasksRail = async () => {
-        const list = (await window.spartanCode?.listTasks?.()) || [];
-        const container = document.getElementById("tasksList");
-        if (!list.length) {
-          container.innerHTML =
-            '<span class="empty-state">No scheduled background tasks.</span>';
-          return;
-        }
-        container.innerHTML = list
-          .map(
-            (t) => `
-            <div class="artifact">
-              <span class="artifact-icon">⏱️</span>
-              <div>
-                <span class="artifact-name">${escapeHtml(t.prompt)}</span>
-                <span class="artifact-time">${t.type} · ${t.status}</span>
-              </div>
-            </div>
-          `,
-          )
-          .join("");
-      };
-
-      // Navigation routing
-      document.querySelectorAll(".nav-item").forEach((item) => {
-        item.addEventListener("click", async () => {
-          document
-            .querySelectorAll(".nav-item")
-            .forEach((n) => n.classList.remove("active"));
-          item.classList.add("active");
-          const view = item.dataset.view;
-
-          if (view === "agents") {
-            openManager();
-          } else if (view === "artifacts") {
-            const snap = await window.spartanCode?.getSnapshot?.();
-            if (snap?.artifacts?.length) openArtifact(snap.artifacts[0]);
-            else showToast("No artifacts generated yet");
-          } else if (view === "settings") {
-            openSettings();
-          } else if (view === "customizations") {
-            openCustomizationsHub();
-          } else if (view === "tasks") {
-            showToast("Scheduled tasks dashboard active in right rail");
-            document.querySelector('[data-rail-tab="tasks"]')?.click();
-          } else if (view === "projects") {
-            const res = await window.spartanCode?.getGitStatus?.();
-            showToast(
-              res?.available
-                ? "Git Workspace active"
-                : "Choose a workspace to link Git",
-            );
-          }
-        });
-      });
-
-      const openCustomizationsHub = async () => {
-        if (!window.spartanCode) return;
-        customizationsModal.classList.add("open");
-        discoveredCustomizations =
-          (await window.spartanCode.getCustomizations?.()) || {
-            rules: [],
-            skills: [],
-            hooks: [],
-            mcpServers: [],
-          };
-        renderCustomizationsList("rules");
-      };
-
-      const renderCustomizationsList = (type) => {
-        const items = discoveredCustomizations[type] || [];
-        if (!items.length) {
-          customizationsContent.innerHTML = `<span class="empty-state">No ${type} registered in this workspace.</span>`;
-          return;
-        }
-        customizationsContent.innerHTML = items
-          .map(
-            (item) => `
-            <div class="artifact" style="flex-direction: column; align-items: flex-start; margin-bottom: 8px;">
-              <div style="display: flex; justify-content: space-between; width: 100%;">
-                <strong style="color: var(--accent);">${escapeHtml(item.name || item.id || item.event)}</strong>
-                <span class="status">${escapeHtml(item.trigger || item.source || "Active")}</span>
-              </div>
-              <p style="margin: 4px 0; color: var(--silver); font-size: 12px;">${escapeHtml(item.description || item.script || item.summary || "")}</p>
-            </div>
-          `,
-          )
-          .join("");
-      };
-
-      document
-        .getElementById("custTabRules")
-        ?.addEventListener("click", (e) => {
-          document
-            .querySelectorAll("#customizationsModal .rail-tab")
-            .forEach((t) => t.classList.remove("active"));
-          e.target.classList.add("active");
-          renderCustomizationsList("rules");
-        });
-      document
-        .getElementById("custTabSkills")
-        ?.addEventListener("click", (e) => {
-          document
-            .querySelectorAll("#customizationsModal .rail-tab")
-            .forEach((t) => t.classList.remove("active"));
-          e.target.classList.add("active");
-          renderCustomizationsList("skills");
-        });
-      document
-        .getElementById("custTabHooks")
-        ?.addEventListener("click", (e) => {
-          document
-            .querySelectorAll("#customizationsModal .rail-tab")
-            .forEach((t) => t.classList.remove("active"));
-          e.target.classList.add("active");
-          renderCustomizationsList("hooks");
-        });
-      document.getElementById("custTabMcp")?.addEventListener("click", (e) => {
-        document
-          .querySelectorAll("#customizationsModal .rail-tab")
-          .forEach((t) => t.classList.remove("active"));
-        e.target.classList.add("active");
-        renderCustomizationsList("mcpServers");
-      });
-      document
-        .getElementById("closeCustomizations")
-        ?.addEventListener("click", () => {
-          customizationsModal.classList.remove("open");
-        });
-
-      const openSettings = async () => {
-        if (!window.spartanCode) return;
-        const [settings, models, agents, providers] = await Promise.all([
-          window.spartanCode.getSettings(),
-          window.spartanCode.listModels({ commercialOnly: false }),
-          window.spartanCode.listAgents(),
-          window.spartanCode.listRemoteProviders(),
-        ]);
-        modelSelect.innerHTML = models
-          .map(
-            (m) =>
-              `<option value="${escapeHtml(m.id)}">${escapeHtml(m.id)} (${escapeHtml(m.license)})</option>`,
-          )
-          .join("");
-        modelSelect.value = settings.model;
-
-        document.getElementById("defaultAgentSelect").innerHTML = agents
-          .map(
-            (a) =>
-              `<option value="${escapeHtml(a.name)}">${escapeHtml(a.name)} · ${escapeHtml(a.description)}</option>`,
-          )
-          .join("");
-        document.getElementById("defaultAgentSelect").value =
-          settings.defaultAgent || "leo";
-
-        document.getElementById("apiProviderSelect").innerHTML = providers
-          .map(
-            (p) =>
-              `<option value="${escapeHtml(p.id)}">${escapeHtml(p.name || p.label)}</option>`,
-          )
-          .join("");
-        document.getElementById("apiProviderSelect").value =
-          settings.apiProvider || "local";
-
-        quantizationSelect.value = settings.quantization || "Q4_K_M";
-        protocolSelect.value = settings.protocol || "MCP Lite";
-        document.getElementById("executionModeSelect").value =
-          settings.executionMode || "guided";
-        voiceToggle.checked = Boolean(settings.voiceEnabled);
-        document.getElementById("memoryEnabled").checked =
-          settings.memoryEnabled !== false;
-        document.getElementById("autoSyncEnabled").checked =
-          settings.autoSync !== false;
-
-        document.getElementById("settingsWorkspaceSummary").textContent =
-          settings.workspacePath || "No workspace selected";
-        document.getElementById("settingsRuntimeStatus").innerHTML = `
-          <div class="settings-runtime-item"><strong>Local Engine</strong><em>Ready</em></div>
-          <div class="settings-runtime-item"><strong>Sandboxed Tools</strong><em>Active</em></div>
-        `;
-        document.getElementById("settingsGovernanceStatus").innerHTML = `
-          <div class="settings-runtime-item"><strong>Agent Personas</strong><em>${agents.length} Registered</em></div>
-          <div class="settings-runtime-item"><strong>Security Policy</strong><em>Zero Secret Leakage</em></div>
-        `;
-
-        settingsModal.classList.add("open");
-      };
-
-      document
-        .getElementById("closeSettings")
-        .addEventListener("click", () =>
-          settingsModal.classList.remove("open"),
-        );
-
-      document
-        .getElementById("settingsForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          if (!window.spartanCode) return;
-          await window.spartanCode.updateSettings({
-            model: modelSelect.value,
-            quantization: quantizationSelect.value,
-            protocol: protocolSelect.value,
-            executionMode: document.getElementById("executionModeSelect").value,
-            voiceEnabled: voiceToggle.checked,
-            defaultAgent: document.getElementById("defaultAgentSelect").value,
-            apiProvider: document.getElementById("apiProviderSelect").value,
-            memoryEnabled: document.getElementById("memoryEnabled").checked,
-            autoSync: document.getElementById("autoSyncEnabled").checked,
-          });
-          settingsModal.classList.remove("open");
-          showToast("Settings saved locally");
-        });
-
-      document
-        .getElementById("settingsChooseWorkspace")
-        .addEventListener("click", async () => {
-          const chosen = await window.spartanCode?.chooseWorkspace();
-          if (chosen) {
-            document.getElementById("settingsWorkspaceSummary").textContent =
-              chosen;
-            document.getElementById("sidebarWorkspaceName").textContent =
-              chosen.split(/[\\/]/).pop() || "Workspace";
-            showToast("Workspace updated");
-          }
-        });
-
-      document
-        .getElementById("settingsGitStatus")
-        .addEventListener("click", async () => {
-          const res = await window.spartanCode?.getGitStatus?.();
-          document.getElementById("gitWorkflowMessage").textContent =
-            res?.output || res?.message || "";
-        });
-
-      document
-        .getElementById("settingsExportAudit")
-        .addEventListener("click", async () => {
-          const bundle = await window.spartanCode?.exportAuditLog?.();
-          if (bundle) {
-            const blob = new Blob([JSON.stringify(bundle, null, 2)], {
-              type: "application/json",
-            });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `spartancode-audit-${Date.now()}.json`;
-            link.click();
-            showToast("Audit bundle exported");
-          }
-        });
-
-      document
-        .getElementById("settingsClearHistory")
-        .addEventListener("click", async () => {
-          await window.spartanCode?.clearMissions?.();
-          showToast("Local history cleared");
-        });
-
-      // Mission Submission & Slash Dispatcher
-      form.addEventListener("submit", async (e) => {
+    function handleKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        const missionText = input.value.trim();
-        if (!missionText) return;
+        sendMessage();
+      }
+    }
 
-        appendMessageToCanvas("user", missionText);
-        input.value = "";
-        slashMenu.classList.remove("show");
-        mentionsMenu.classList.remove("show");
+    function insertPrompt(text) {
+      composerInput.value = text;
+      composerInput.focus();
+      sendBtn.disabled = false;
+      autoResize(composerInput);
+    }
 
-        if (window.spartanCode) {
-          // Check for slash commands
-          const slash =
-            await window.spartanCode.resolveSlashCommand?.(missionText);
-          if (slash && slash.matched) {
-            status.textContent = `Executing ${slash.command}...`;
-            if (slash.command === "/plan") {
-              const res = await window.spartanCode.previewPlan?.(
-                slash.args || "System plan",
-              );
-              appendMessageToCanvas(
-                "assistant",
-                `Plan generated:\n${res?.plan || "Structured plan created."}`,
-              );
-            } else if (slash.command === "/audit") {
-              const audit = await window.spartanCode.exportAuditLog?.();
-              appendMessageToCanvas(
-                "assistant",
-                `Audit complete: ${audit?.eventCount || 0} events verified.`,
-              );
-            } else if (slash.command === "/verify") {
-              appendMessageToCanvas(
-                "assistant",
-                "Running baseline verification and QA checks...",
-              );
-              const snapshot = await window.spartanCode.getSnapshot?.();
-              appendMessageToCanvas(
-                "assistant",
-                "Verification completed with zero regressions.",
-              );
-            } else if (slash.command === "/subagent") {
-              const subagent = await window.spartanCode.spawnSubagent?.({
-                role: slash.args || "Specialist",
-              });
-              appendMessageToCanvas(
-                "assistant",
-                `Spawned subagent ${subagent.name} (${subagent.role}).`,
-              );
-            } else {
-              appendMessageToCanvas(
-                "assistant",
-                `Command ${slash.command} executed.`,
-              );
-            }
-            status.textContent = "";
-            return;
-          }
+    function newChat() {
+      messages.length = 0;
+      messageList.innerHTML = '';
+      welcomeScreen.style.display = 'flex';
+    }
 
-          status.textContent = "Orchestrator active — delegating tasks...";
-          window.spartanCode.startMission(missionText).catch((err) => {
-            status.textContent = err.message;
-          });
-        } else {
-          appendMessageToCanvas(
-            "assistant",
-            "Mission received in standalone mode.",
-          );
-        }
-      });
+    function togglePanel() {
+      var app = document.getElementById('app');
+      var panel = document.getElementById('rightPanel');
+      var btn = document.getElementById('togglePanel');
+      app.classList.toggle('panel-closed');
+      panel.classList.toggle('hidden');
+      btn.classList.toggle('active');
+    }
 
-      // Preview modal
-      document.getElementById("openPreview").addEventListener("click", () => {
-        previewModal.classList.add("open");
-      });
-      document.getElementById("closePreview").addEventListener("click", () => {
-        previewModal.classList.remove("open");
-      });
-      document
-        .getElementById("previewForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          try {
-            await window.spartanCode?.openProjectPreview?.(previewUrl.value);
-            previewModal.classList.remove("open");
-            showToast("Project preview launched");
-          } catch (err) {
-            previewMessage.textContent = err.message;
-          }
-        });
+    function switchTab(el, tab) {
+      document.querySelectorAll('.panel-tab').forEach(function(t) { t.classList.remove('active'); });
+      el.classList.add('active');
+      document.getElementById('agentsTab').style.display = tab === 'agents' ? 'block' : 'none';
+      document.getElementById('artifactsTab').style.display = tab === 'artifacts' ? 'block' : 'none';
+    }
 
-      // Chat Modal
-      document
-        .getElementById("notificationChatBtn")
-        .addEventListener("click", () => {
-          chatModal.classList.add("open");
-        });
-      document.getElementById("closeChat").addEventListener("click", () => {
-        chatModal.classList.remove("open");
-      });
-      document
-        .getElementById("chatForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const text = chatInput.value.trim();
-          if (!text) return;
-          chatInput.value = "";
-          const res = await window.spartanCode?.sendChatMessage?.(text);
-          if (res?.history) {
-            chatMessages.innerHTML = res.history
-              .map(
-                (m) =>
-                  `<div class="message-bubble ${m.role}"><strong>${m.role}:</strong> ${escapeHtml(m.content)}</div>`,
-              )
-              .join("");
-          }
-        });
+    function timeStr() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
 
-      // Manager Modal
-      const openManager = async () => {
-        managerModal.classList.add("open");
-        const agents = (await window.spartanCode?.listAgents?.()) || [];
-        managerGrid.innerHTML = agents
-          .map(
-            (a) => `
-            <div class="agent-card">
-              <div class="agent-head">
-                <span class="agent-icon">🤖</span>
-                <div><h3>${escapeHtml(a.name)}</h3><small>${escapeHtml(a.role || "Agent")}</small></div>
-              </div>
-              <p style="margin-top: 8px;">${escapeHtml(a.description || "")}</p>
-            </div>
-          `,
-          )
-          .join("");
-      };
-      document.getElementById("closeManager").addEventListener("click", () => {
-        managerModal.classList.remove("open");
-      });
-      document
-        .getElementById("viewAgents")
-        .addEventListener("click", openManager);
+    function addMessage(role, content) {
+      welcomeScreen.style.display = 'none';
+      var div = document.createElement('div');
+      div.className = 'message';
+      var avatarClass = role === 'user' ? 'user' : 'assistant';
+      var avatarText = role === 'user' ? 'You' : 'SC';
+      div.innerHTML = '<div class="message-avatar ' + avatarClass + '">' + avatarText + '</div>' +
+        '<div class="message-body">' +
+        '<div class="message-role">' + (role === 'user' ? 'You' : 'SpartanCode') + '<span class="time">' + timeStr() + '</span></div>' +
+        '<div class="message-content">' + content + '</div>' +
+        '<div class="message-actions"><button onclick="copyMessage(this)">Copy</button></div>' +
+        '</div>';
+      messageList.appendChild(div);
+      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }
 
-      // Artifact viewing
-      const openArtifact = (artifact) => {
-        if (!artifact) return;
-        activeArtifact = artifact;
-        document.getElementById("artifactTitle").textContent = artifact.name;
-        artifactContent.textContent = artifact.content || "No content.";
-        artifactModal.classList.add("open");
-      };
-      document
-        .getElementById("viewArtifacts")
-        .addEventListener("click", async () => {
-          const snap = await window.spartanCode?.getSnapshot?.();
-          if (snap?.artifacts?.length) openArtifact(snap.artifacts[0]);
-        });
-      document
-        .getElementById("rejectArtifact")
-        .addEventListener("click", async () => {
-          if (activeArtifact)
-            await window.spartanCode?.reviewArtifact?.(
-              activeArtifact.id,
-              "rejected",
-            );
-          artifactModal.classList.remove("open");
-          showToast("Artifact rejected");
-        });
-      document
-        .getElementById("acceptArtifact")
-        .addEventListener("click", async () => {
-          if (activeArtifact)
-            await window.spartanCode?.reviewArtifact?.(
-              activeArtifact.id,
-              "accepted",
-            );
-          artifactModal.classList.remove("open");
-          showToast("Artifact accepted");
-        });
+    function addTyping() {
+      var div = document.createElement('div');
+      div.className = 'message';
+      div.id = 'typingMsg';
+      div.innerHTML = '<div class="message-avatar assistant">SC</div>' +
+        '<div class="message-body">' +
+        '<div class="message-role">SpartanCode<span class="time">' + timeStr() + '</span></div>' +
+        '<div class="message-content"><div class="typing"><span></span><span></span><span></span></div></div>' +
+        '</div>';
+      messageList.appendChild(div);
+      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    }
 
-      // Approvals
-      document
-        .getElementById("allowApproval")
-        .addEventListener("click", async () => {
-          if (activeApproval)
-            await window.spartanCode?.resolveApproval?.(
-              activeApproval.id,
-              "approved",
-            );
-          approvalModal.classList.remove("open");
-        });
-      document
-        .getElementById("denyApproval")
-        .addEventListener("click", async () => {
-          if (activeApproval)
-            await window.spartanCode?.resolveApproval?.(
-              activeApproval.id,
-              "denied",
-            );
-          approvalModal.classList.remove("open");
-        });
+    function removeTyping() {
+      var el = document.getElementById('typingMsg');
+      if (el) el.remove();
+    }
 
-      // Snapshot synchronization
-      const renderSnapshot = (snapshot) => {
-        const pendingApproval = (snapshot.approvals || []).find(
-          (a) => a.status === "pending",
-        );
-        if (pendingApproval) {
-          activeApproval = pendingApproval;
-          approvalDetail.textContent = pendingApproval.detail;
-          approvalModal.classList.add("open");
-        } else {
-          activeApproval = null;
-          approvalModal.classList.remove("open");
-        }
+    function copyMessage(btn) {
+      var text = btn.closest('.message-body').querySelector('.message-content').textContent;
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Copied';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+    }
 
-        const mission = snapshot.missions && snapshot.missions[0];
-        liveStatus.innerHTML =
-          mission?.status === "failed"
-            ? '<span class="live-dot" style="background: var(--amber)"></span>Attention needed'
-            : '<span class="live-dot"></span>All systems operational';
-
-        const history = document.getElementById("missionHistory");
-        if (snapshot.missions?.length) {
-          history.innerHTML = snapshot.missions
-            .slice(0, 5)
-            .map(
-              (m) =>
-                `<div class="history-row" style="padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between;"><strong>${escapeHtml(m.description)}</strong><span class="status">${escapeHtml(m.status)}</span></div>`,
-            )
-            .join("");
-        } else {
-          history.innerHTML =
-            '<span class="empty-state">Your completed missions will appear here.</span>';
-        }
-
-        const artifactList = document.getElementById("artifactList");
-        if (snapshot.artifacts?.length) {
-          artifactList.innerHTML = snapshot.artifacts
-            .slice(0, 5)
-            .map(
-              (a) =>
-                `<button class="artifact" data-artifact-id="${escapeHtml(a.id)}" type="button"><span class="artifact-icon">📄</span><div><span class="artifact-name">${escapeHtml(a.name)}</span><span class="artifact-time">${new Date(a.createdAt).toLocaleTimeString()}</span></div><span class="artifact-state">${a.review ? "✓" : "○"}</span></button>`,
-            )
-            .join("");
-        }
-      };
-
-      // Initial boot
-      document.addEventListener("DOMContentLoaded", () => {
-        initCommandMenus();
-        if (window.spartanCode) {
-          window.spartanCode.getSnapshot().then(renderSnapshot);
-          window.spartanCode.onWorkspaceChanged(renderSnapshot);
-        }
-      });
-    </script>
-  </body>
+    function sendMessage() {
+      var text = composerInput.value.trim();
+      if (!text) return;
+      addMessage('user', '<p>' + text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>');
+      composerInput.value = '';
+      composerInput.style.height = 'auto';
+      sendBtn.disabled = true;
+      addTyping();
+      setTimeout(function() {
+        removeTyping();
+        addMessage('assistant', '<p>I\'ll help you with that. Let me analyze your request and work through it step by step.</p><p>Could you provide more details about what you\'d like me to focus on?</p>');
+      }, 1500);
+    }
+  </script>
+</body>
 </html>

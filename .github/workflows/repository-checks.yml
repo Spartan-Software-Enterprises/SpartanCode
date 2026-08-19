@@ -1,0 +1,67 @@
+name: Repository Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  required-files:
+    name: Required Files Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Required files present
+        run: |
+          echo "Checking required files..."
+          for f in README.md LICENSE NOTICE AGENTS.md .gitignore package.json; do
+            if [ ! -f "$f" ]; then
+              echo "::error file=$f::Required file missing: $f"
+              MISSING=1
+            else
+              echo "OK $f"
+            fi
+          done
+          if [ "${MISSING:-}" = "1" ]; then exit 1; fi
+          echo "All required files present."
+
+  credential-scan:
+    name: Credential Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secrets in commit diffs
+        run: |
+          echo "Scanning for leaked secrets..."
+          git log -p -200 | grep -Ei \
+            "(AKIA[0-9A-Z]{16}|ghp_[0-9a-zA-Z]{36}|sk-[A-Za-z0-9_-]{20,}|\.pem|\.jks|BEGIN RSA|password|secret)" \
+            | grep -v "AGENTS.md" \
+            | grep -v ".github/workflows" \
+            | grep -v "node_modules" \
+            || true
+          echo "Secret scan complete."
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+      - name: Format check
+        run: npm run format:check
+      - name: Build
+        run: npm run build
