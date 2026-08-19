@@ -11,7 +11,15 @@ test("commercial model catalog excludes non-permissive model licenses", () => {
   const models = listLicensedModels({ commercialOnly: true });
   assert.deepEqual(
     models.map((model) => model.id),
-    ["Qwen3-1.7B", "Phi-4-mini"],
+    [
+      "Qwen3-1.7B",
+      "Qwen3-4B",
+      "Phi-4-mini",
+      "Mistral-7B-v0.3",
+      "DeepSeek-R1-Distill-Qwen-1.5B",
+      "SmolLM2-1.7B",
+      "Qwen2.5-Coder-1.5B",
+    ],
   );
 });
 

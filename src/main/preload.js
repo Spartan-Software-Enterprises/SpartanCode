@@ -200,6 +200,9 @@ contextBridge.exposeInMainWorld("spartanCode", {
     ipcRenderer.invoke("command:mentions-resolve", input),
   computeDiff: (oldText, newText) =>
     ipcRenderer.invoke("diff:compute", { oldText, newText }),
+  checkForUpdates: (silent) => ipcRenderer.invoke("updater:check", silent),
+  getVersion: () => ipcRenderer.invoke("updater:version"),
+  getUpdateDownloadUrl: () => ipcRenderer.invoke("updater:download-url"),
   onWorkspaceChanged: (callback) => {
     const listener = (_event, snapshot) => callback(snapshot);
     ipcRenderer.on("workspace:changed", listener);

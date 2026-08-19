@@ -15,6 +15,7 @@ const {
   createRendererRecoveryController,
 } = require("./crash-recovery");
 const { gitStatusAt, gitDiffAt, gitAddAt, gitCommitAt } = require("./git");
+const { createDesktopUpdater } = require("./desktop-updater");
 
 function createWindow(crashReporter) {
   const win = new BrowserWindow({
@@ -141,6 +142,8 @@ function createWindow(crashReporter) {
     bridge.listen(Number(process.env.SPARTANCODE_BRIDGE_PORT), bridgeHost);
     app.once("will-quit", () => bridge.close());
   }
+  const updater = createDesktopUpdater(win);
+  updater.startPeriodicCheck();
   registerDesktopApi({
     store,
     window: win,

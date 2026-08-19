@@ -104,6 +104,7 @@ function registerDesktopApi({
   providerEnvironment = process.env,
   previewWindow = null,
   memoryStore = null,
+  updater = null,
 }) {
   const voiceService = createVoiceService();
   const voiceOutput = createVoiceOutput();
@@ -521,6 +522,19 @@ function registerDesktopApi({
   ipcMain.handle("models:list", (_event, options) =>
     listAvailableModels(options),
   );
+
+  ipcMain.handle("updater:check", async (_event, silent) => {
+    if (!updater) return null;
+    return updater.checkForUpdates(silent !== false);
+  });
+  ipcMain.handle("updater:version", () => {
+    const { app } = require("electron");
+    return app.getVersion();
+  });
+  ipcMain.handle("updater:download-url", () => {
+    return `https://github.com/Spartan-Software-Enterprises/SpartanCode/releases/latest`;
+  });
+
   ipcMain.handle("models:search", (_event, query, options) =>
     searchHuggingFaceModels(typeof query === "string" ? query : "", options),
   );
